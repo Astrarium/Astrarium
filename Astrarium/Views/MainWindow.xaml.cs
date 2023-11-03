@@ -428,28 +428,9 @@ namespace Astrarium
             int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
             SetFPS(this, $"FPS = {fps}");
 
-            /*
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.DstColor, BlendingFactor.SrcColor);
-
-            GL.Color4(Color.Red);
-            GL.Begin(PrimitiveType.Quads);
-            GL.Vertex2(0, 0);
-            GL.Vertex2(0, projection.ScreenHeight);
-            GL.Vertex2(projection.ScreenWidth, projection.ScreenHeight);
-            GL.Vertex2(projection.ScreenWidth, 0);
-            GL.End();
-            
-
-
-            */
-
-
             GL.PopMatrix();
 
             (sender as SkyViewControl).SwapBuffers();
-
-
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

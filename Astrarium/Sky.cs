@@ -31,27 +31,27 @@ namespace Astrarium
         public SkyContext Context { get; private set; }
 
         public event Action Calculated;
-        public event Action DateTimeSyncChanged;
+        public event Action TimeSyncChanged;
 
-        private ManualResetEvent dateTimeSyncResetEvent = new ManualResetEvent(false);
-        private bool dateTimeSync = false;
-        public bool DateTimeSync
+        private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
+        private bool timeSync = false;
+        public bool TimeSync
         {
-            get { return dateTimeSync; }
+            get { return timeSync; }
             set
             {
-                if (dateTimeSync != value)
+                if (timeSync != value)
                 {
-                    dateTimeSync = value;
-                    if (dateTimeSync)
+                    timeSync = value;
+                    if (timeSync)
                     {
-                        dateTimeSyncResetEvent.Set();
+                        timeSyncResetEvent.Set();
                     }
                     else
                     {
-                        dateTimeSyncResetEvent.Reset();
+                        timeSyncResetEvent.Reset();
                     }
-                    DateTimeSyncChanged?.Invoke();
+                    TimeSyncChanged?.Invoke();
                 }
             }
         }
@@ -81,20 +81,19 @@ namespace Astrarium
         public Sky(ISettings settings)
         {
             this.settings = settings;
+            new Thread(TimeSyncWorker) { IsBackground = true }.Start();
+        }
 
-            new Thread(() =>
+        private void TimeSyncWorker()
+        {
+            do
             {
-                do
-                {
-                    dateTimeSyncResetEvent.WaitOne();
-                    Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-                    Calculate();
-                    int period = settings.Get("DateTimeSyncPeriod", 1) * 1000;
-                    Thread.Sleep(period);
-                }
-                while (true);
-            })
-            { IsBackground = true }.Start();
+                timeSyncResetEvent.WaitOne();
+                Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                Calculate();
+                Thread.Sleep(5000);
+            }
+            while (true);
         }
 
         public void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders)
@@ -210,7 +209,7 @@ namespace Astrarium
 
         public void SetDate(double jd)
         {
-            DateTimeSync = false;
+            TimeSync = false;
             Context.JulianDay = jd;
             Calculate();
         }

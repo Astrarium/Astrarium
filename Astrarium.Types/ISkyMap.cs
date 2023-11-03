@@ -56,6 +56,8 @@ namespace Astrarium.Types
 
         Projection SkyProjection { get; }
 
+        bool TimeSync { get; set; }
+
         void Invalidate();
 
         /// <summary>

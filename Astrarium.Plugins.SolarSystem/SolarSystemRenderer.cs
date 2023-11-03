@@ -105,7 +105,7 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(planet, new SphereParameters()
                     {
                         Equatorial = planet.Equatorial,
-                        Color = GetPlanetColor(planet.Number).Tint(schema),
+                        Color = GetPlanetColor(planet.Number),
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
@@ -341,6 +341,7 @@ namespace Astrarium.Plugins.SolarSystem
         private void RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
         {
             var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
 
             // size of object when it's drawn as point (in pixels)
             float size = Math.Max(prj.GetPointSize(body.Magnitude, data.MaximalPointSize), data.MinimalPointSize);
@@ -363,7 +364,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 GL.PointSize(size);
                 GL.Begin(PrimitiveType.Points);
-                GL.Color3(data.Color);
+                GL.Color3(data.Color.Tint(schema));
                 GL.Vertex2(p.X, p.Y);
                 GL.End();
             }

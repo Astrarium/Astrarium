@@ -248,7 +248,7 @@
                 <StackPanel Orientation="Horizontal">
 
                     <!-- Sync Date and Time toggler -->
-                    <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" IsChecked="{Binding DateTimeSync}" Margin="0 0 4 0">
+                    <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" IsChecked="{Binding TimeSync}" Margin="0 0 4 0">
                         <ToggleButton.Style>
                             <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                                 <Setter Property="Template">
@@ -287,7 +287,7 @@
                     </ToggleButton>
 
                     <!-- Date and Time picker button -->
-                    <Button Width="Auto" Command="{Binding SetDateCommand}" IsEnabled="{Binding DateTimeSync, Converter={s:InverseBoolConverter}}" ToolTip="{t:Text StatusBar.DatePicker}">
+                    <Button Width="Auto" Command="{Binding SetDateCommand}" IsEnabled="{Binding TimeSync, Converter={s:InverseBoolConverter}}" ToolTip="{t:Text StatusBar.DatePicker}">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                                 <Setter Property="Template">

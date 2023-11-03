@@ -156,10 +156,17 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public bool DateTimeSync
+        private bool dateTimeSync = false;
+
+        public bool TimeSync
         {
-            get { return sky.DateTimeSync; }
-            set { sky.DateTimeSync = value; }
+            get => dateTimeSync;
+            set
+            {
+                dateTimeSync = value;
+                sky.TimeSync = value;
+                map.TimeSync = value;
+            }
         }
 
         public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, ISettings settings, UIElementsIntegration uiIntegration)
@@ -206,7 +213,7 @@ namespace Astrarium.ViewModels
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += map.Invalidate;
-            sky.DateTimeSyncChanged += () => NotifyPropertyChanged(nameof(DateTimeSync));
+            sky.TimeSyncChanged += () => NotifyPropertyChanged(nameof(TimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
             map.SkyProjection.FovChanged += Map_ViewAngleChanged;

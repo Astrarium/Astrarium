@@ -9,10 +9,10 @@ namespace Astrarium.Types
     {
         SkyContext Context { get; }
         event Action Calculated;
-        event Action DateTimeSyncChanged;
+        event Action TimeSyncChanged;
         void SetDate(double jd);
         void Calculate();
-        bool DateTimeSync { get; set; }
+        bool TimeSync { get; set; }
 
         /// <summary>
         /// Gets ephemerides of specified celestial object

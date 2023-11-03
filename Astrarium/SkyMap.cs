@@ -91,7 +91,29 @@ namespace Astrarium
                 }
 
                 ViewAngleChanged?.Invoke(viewAngle);
+                timeSyncEvent.Set();
                 Invalidate();
+            }
+        }
+
+        private bool dateTimeSync = false;
+        public bool TimeSync
+        {
+            get => dateTimeSync;
+            set
+            {
+                dateTimeSync = value;
+
+                if (value)
+                {
+                    timeSyncEvent.Set();
+                    timeSyncResetEvent.Set();
+                }
+                else
+                {
+                    timeSyncEvent.Set();
+                    timeSyncResetEvent.Reset();
+                }
             }
         }
 
@@ -261,7 +283,7 @@ namespace Astrarium
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
-            Context = skyContext;
+            Context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
             mapContext = new MapContext(this, skyContext);
 
             projection = Types.Projection.Create<StereographicProjection>(Context);
@@ -309,30 +331,31 @@ namespace Astrarium
                 if (name == "IsMirrored")
                 {
                     SkyProjection.FlipHorizontal = settings.Get("IsMirrored");
-                    //Projection.IsMirrored = settings.Get("IsMirrored");
                     Invalidate();
                 }
 
                 if (name == "IsInverted")
                 {
                     SkyProjection.FlipVertical = !settings.Get("IsInverted");
-                    //Projection.IsInverted = settings.Get("IsInverted");
                     Invalidate();
                 }
             };
 
-            //Thread thread = new Thread(TimeSyncWorker) { IsBackground = true };
-            //thread.Start();
+            new Thread(TimeSyncWorker) { IsBackground = true }.Start();
         }
+
+        private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
+        private ManualResetEvent timeSyncEvent = new ManualResetEvent(false);
 
         private void TimeSyncWorker()
         {
             while (true)
             {
+                timeSyncEvent.WaitOne();
+                timeSyncResetEvent.WaitOne();
+                double rate = Math.Min(5000, Math.Max(100, SkyProjection.Fov * 100));
                 Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                 Invalidate();
-
-                double rate = Math.Min(5000, Math.Max(10, SkyProjection.Fov * 100));
                 Thread.Sleep((int)rate);
             }
         }
@@ -389,145 +412,7 @@ namespace Astrarium
 
         public void Render(Graphics g)
         {
-//            try
-//            {
-//                renderStopWatch.Restart();
 
-//                mapContext.Graphics = g;
-
-//                g.Clear(mapContext.GetSkyColor());
-//                g.PageUnit = GraphicsUnit.Display;
-//                g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-//                drawnObjects.Clear();
-//                labels.Clear();
-
-//                bool needDrawSelectedObject = true;
-
-//                if (LockedObject != null)
-//                {
-//                    Center.Altitude = LockedObject.Horizontal.Altitude;
-//                    Center.Azimuth = LockedObject.Horizontal.Azimuth;
-//                }
-
-//                for (int i = 0; i < renderers.Count(); i++)
-//                {
-//                    try
-//                    {
-//                        renderers.ElementAt(i).Render(mapContext);
-//                    }
-//                    catch (Exception ex)
-//                    {
-//                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-//                        {
-//                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
-//                        }
-//                        Log.Debug($"Rendering error: {ex}");
-//                    }
-//                    if (needDrawSelectedObject)
-//                    {
-//                        needDrawSelectedObject = !DrawSelectedObject(g);
-//                    }
-//                }
-
-//                // TODO: this should be refactored and moved to separate "Printing" plugin
-//#if DEBUG
-//                // Map information
-//                if (mapContext.Schema == ColorSchema.White)
-//                {
-//                    float headerHeight = (int)(mapContext.GetPointSize(0) + 35);
-//                    float margin = 10;
-
-//                    g.FillRectangle(Brushes.White, new RectangleF(0, 0, mapContext.Width, headerHeight));
-//                    g.DrawLine(Pens.Black, 0, headerHeight, mapContext.Width, headerHeight);
-
-//                    var location = settings.Get<CrdsGeographical>("ObserverLocation");
-//                    var date = new Date(mapContext.JulianDay, location.UtcOffset);
-//                    double offset = location.UtcOffset;
-//                    string tz = offset != 0 ? $"UTC{(offset < 0 ? "-" : "+")}{TimeSpan.FromHours(offset):h\\:mm}" : "UTC";
-//                    string dateText = $"{Formatters.DateTime.Format(date)} {tz}";
-
-//                    var dateTextSize = g.MeasureString(dateText, fontMapInformationText);
-//                    g.DrawString(dateText, fontMapInformationText, Brushes.Black, margin, (headerHeight - dateTextSize.Height) / 2);
-
-//                    var mapTransformSb = new StringBuilder();
-//                    if (mapContext.IsInverted)
-//                    {
-//                        mapTransformSb.Append(" inverted");
-//                    }
-//                    if (mapContext.IsMirrored)
-//                    {
-//                        mapTransformSb.Append(" mirrored");
-//                    }
-//                    string mapTransformText = mapTransformSb.ToString().Trim();
-//                    if (string.IsNullOrEmpty(mapTransformText))
-//                    {
-//                        mapTransformText = "Direct";
-//                    }
-
-//                    var mapTransformTextSize = g.MeasureString(mapTransformText, fontMapInformationText);
-
-//                    g.DrawString(mapTransformText, fontMapInformationText, Brushes.Black, mapContext.Width - margin - mapTransformTextSize.Width, (headerHeight - mapTransformTextSize.Height) / 2);
-//                    g.DrawRectangle(Pens.Black, new Rectangle(0, 0, mapContext.Width, mapContext.Height));
-
-//                    var magLimit = mapContext.MagLimit;
-//                    float r0 = mapContext.GetPointSize(0);
-//                    float gap = r0 * 1.1f;
-
-//                    float yLabel = headerHeight / 2 - r0 / 2 - fontMag.Height / 2 - 3;
-
-//                    float scaleWidth = ((int)magLimit) * gap;
-
-//                    int magStep = 1;
-//                    if (magLimit >= 14)
-//                    {
-//                        magStep = 2;
-//                        scaleWidth = scaleWidth / 2;
-//                    }
-
-//                    int c = 0;
-//                    for (int m = 0; m <= magLimit + magStep; m += magStep)
-//                    {
-//                        float r = mapContext.GetPointSize(m);
-//                        if ((int)r > 0)
-//                        {
-//                            string label = m.ToString();
-//                            float labelWidth = g.MeasureString(label, fontMag).Width;
-
-//                            float xCircle = mapContext.Width / 2 - scaleWidth / 2 + c * gap - r / 2;
-//                            float xLabel = mapContext.Width / 2 - scaleWidth / 2 + c * gap - labelWidth / 2;
-
-//                            float yCircle = headerHeight / 2 - r / 2 + fontMag.Height / 2 + 3;
-
-//                            g.DrawString(label, fontMag, Brushes.Black, xLabel, yLabel);
-//                            g.FillEllipse(Brushes.Gray, xCircle, yCircle, r, r);
-//                        }
-//                        c++;
-//                    }
-//                }
-//#endif
-
-//                renderStopWatch.Stop();
-//                rendersCount++;
-
-//                int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-
-//                // Calculate mean time of rendering with Cumulative Moving Average formula
-//                meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
-
-//                // Diagnostic info
-//                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-//                {
-//                    g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-//                {
-//                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
-//                }
-//                Log.Error($"Rendering error: {ex}");
-//            }
         }
 
         public void Invalidate()
