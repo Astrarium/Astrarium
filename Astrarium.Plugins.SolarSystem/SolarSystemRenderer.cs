@@ -493,7 +493,7 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                     else if (layer == LAYER_POLAR_CAP)
                     {
-                        texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters);
+                        texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters, alphaChannel: true);
                     }
 
                     if (texture == 0)
@@ -878,7 +878,7 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.SkyProjection;
 
             GL.Disable(EnableCap.Lighting);
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png"), fallbackPath: null, permanent: false, action: null, alphaChannel: true));
 
             if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
             {
