@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.FOV
                             float diam = prj.GetDiskSize(radius);
 
                             // do not draw frame if its size exceeds screen bounds
-                            if (diam < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
+                            if (diam > 10 && diam < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
                             {
                                 var p = new Vec2(prj.ScreenWidth / 2, prj.ScreenHeight / 2);
                                 var pen = new Pen(finderFrame.Color.Night.Tint(schema));
@@ -72,7 +72,7 @@ namespace Astrarium.Plugins.FOV
                     float height = prj.GetDiskSize(cameraFrame.Height * 3600 / 2);
 
                     // do not draw frame if its size exceeds screen bounds
-                    if (Math.Min(width, height) < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
+                    if (width > 5 && height > 5 && Math.Min(width, height) < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
                     {
                         var color = frame.Color.Night.Tint(schema);
 
@@ -147,7 +147,7 @@ namespace Astrarium.Plugins.FOV
             var color = frame.Color.Night.Tint(schema);
 
             // do not draw frame if its size exceeds screen bounds
-            if (size < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
+            if (size > 10 && size < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
             {
                 if (isOuter && shading > 0 && frameSize >= prj.Fov / 2)
                 {
