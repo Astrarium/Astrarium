@@ -99,6 +99,8 @@ namespace Astrarium.Plugins.DeepSky
                 ds.Equatorial = prj.Context.Get(deepSkyCalc.Equatorial, ds);
 
                 var p = prj.Project(ds.Equatorial);
+                if (p == null) continue;
+
                 float sz = prj.GetDiskSize(ds.Semidiameter);
 
                 if (drawImages)
@@ -111,49 +113,52 @@ namespace Astrarium.Plugins.DeepSky
 
                         if (textureId > 0)
                         {
-                            GL.Enable(EnableCap.Texture2D);
-                            GL.Enable(EnableCap.Blend);
-                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-                            GL.BindTexture(TextureTarget.Texture2D, textureId);
-                            GL.Begin(PrimitiveType.TriangleFan);
-
-                            GL.TexCoord2(0.5, 0.5);
-                            GL.Color4(Color.FromArgb(100, 255, 255, 255).Tint(schema));
-                            GL.Vertex2(p.X, p.Y);
-
                             double sd = ds.Semidiameter / 3600 * 2;
                             double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
 
                             Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
-
-                            GL.TexCoord2(0, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p0.X, p0.Y);
-
                             Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
-                            GL.TexCoord2(0, 1);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p1.X, p1.Y);
-
                             Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
-                            GL.TexCoord2(1, 1);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p2.X, p2.Y);
-
                             Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
-                            GL.TexCoord2(1, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p3.X, p3.Y);
 
-                            GL.TexCoord2(0, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p0.X, p0.Y);
+                            if (p0 != null && p1 != null && p2 != null && p3 != null)
+                            {
+                                GL.Enable(EnableCap.Texture2D);
+                                GL.Enable(EnableCap.Blend);
+                                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-                            GL.End();
+                                GL.BindTexture(TextureTarget.Texture2D, textureId);
+                                GL.Begin(PrimitiveType.TriangleFan);
 
-                            GL.Disable(EnableCap.Texture2D);
-                            GL.Disable(EnableCap.Blend);
+                                GL.TexCoord2(0.5, 0.5);
+                                GL.Color4(Color.FromArgb(100, 255, 255, 255).Tint(schema));
+                                GL.Vertex2(p.X, p.Y);
+
+                                GL.TexCoord2(0, 0);
+                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                                GL.Vertex2(p0.X, p0.Y);
+
+                                GL.TexCoord2(0, 1);
+                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                                GL.Vertex2(p1.X, p1.Y);
+
+                                GL.TexCoord2(1, 1);
+                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                                GL.Vertex2(p2.X, p2.Y);
+
+                                GL.TexCoord2(1, 0);
+                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                                GL.Vertex2(p3.X, p3.Y);
+
+                                GL.TexCoord2(0, 0);
+                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                                GL.Vertex2(p0.X, p0.Y);
+
+                                GL.End();
+
+                                GL.Disable(EnableCap.Texture2D);
+                                GL.Disable(EnableCap.Blend);
+                            }
                         }
                     }
                 }
@@ -169,14 +174,21 @@ namespace Astrarium.Plugins.DeepSky
                     foreach (Vec3 ov in ds.Outline)
                     {
                         Vec2 op = prj.Project(ov, mat);
-                        GL.Vertex2(op.X, op.Y);
+                        if (op != null)
+                        {
+                            GL.Vertex2(op.X, op.Y);
+                        }
                     }
 
                     GL.End();
 
                     if (drawLabels && sz > 20)
                     {
-                        map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, prj.Project(ds.Outline.First(), mat), 5);
+                        var p0 = prj.Project(ds.Outline.First(), mat);
+                        if (p0 != null)
+                        {
+                            map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p0, 5);
+                        }
                     }
                 }
                 else

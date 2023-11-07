@@ -350,6 +350,7 @@ namespace Astrarium.Plugins.SolarSystem
             float diam = Math.Min(prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize), data.MaximalDiskSize);
 
             Vec2 p = prj.Project(data.Equatorial);
+            if (p == null) return;
 
             // DRAW AS POINT
             if (size >= diam && size >= data.MinimalPointSize && size > 0)
@@ -630,6 +631,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             float r = diam / 2;
             Vec2 p = prj.Project(sun.Equatorial);
+            if (p == null) return; 
+
             double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
 
             GL.Enable(EnableCap.Blend);
@@ -708,9 +711,11 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 // center of the moon in screen coordinates
                 var pMoon = prj.Project(data.Equatorial);
+                if (pMoon == null) return;
 
                 // center of the shadow
                 var pShadow = prj.Project(data.EarthShadowCoordinates);
+                if (pShadow == null) return;
 
                 // moon semidiameter in seconds of arc
                 double sdMoon = moon.Semidiameter;
@@ -752,7 +757,7 @@ namespace Astrarium.Plugins.SolarSystem
                 Color[] shadowColors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.FromArgb(0, 0, 0, 0) };
 
                 // render shadow
-                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors);
+                RenderEclipseShadow(pMoon, pShadow, Text.Get("EarthShadow.Label"), rMoon, shadowRadii, shadowColors);
 
                 // draw shadow outline
                 if (settings.Get("EarthShadowOutline"))
@@ -931,6 +936,7 @@ namespace Astrarium.Plugins.SolarSystem
             
             {
                 var p = map.SkyProjection.Project(moon.Equatorial);
+                if (p == null) return false;
                 double r = map.SkyProjection.GetDiskSize(moon.Semidiameter) / 2;
                 bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
                 if (needDraw) return true;
@@ -938,6 +944,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             {
                 var p = map.SkyProjection.Project(mars.Equatorial);
+                if (p == null) return false;
                 double r = map.SkyProjection.GetDiskSize(mars.Semidiameter) / 2;
                 bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
                 if (needDraw) return true;
@@ -1014,13 +1021,13 @@ namespace Astrarium.Plugins.SolarSystem
             // Radius of eclipsing moon
             float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
 
-            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
+            RenderEclipseShadow(pMoon, pShadow, Text.Get("EclipsedByJupiter"), sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
 
             // Jupiter shadow outline
             Primitives.DrawEllipse(pShadow, Pens.Red, sd, sd * (1 - jupiter.Flattening), rot);
         }
 
-        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle = 0, double flattening = 0)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, string shadowLabel, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle = 0, double flattening = 0)
         {
             GL.PushMatrix();
             GL.Translate(pBody.X, pBody.Y, 0);
@@ -1116,7 +1123,10 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.StencilTest);
 
+            
             GL.PopMatrix();
+
+            map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
         }
 
         private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
@@ -1140,6 +1150,8 @@ namespace Astrarium.Plugins.SolarSystem
 
                 // Center of eclipsed body
                 Vec2 pBody = prj.Project(eclipsedBody.Horizontal); // TODO: change to Equatorial
+
+                if (pBody == null) return;
 
                 // elipsed body size, in pixels
                 float radiusBody = prj.GetDiskSize(eclipsedBody.Semidiameter) / 2;
@@ -1171,7 +1183,7 @@ namespace Astrarium.Plugins.SolarSystem
                         double[] shadowRadii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
                         Color[] shadowColors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
 
-                        RenderEclipseShadow(pBody, p, radiusBody, shadowRadii, shadowColors);
+                        RenderEclipseShadow(pBody, p, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), radiusBody, shadowRadii, shadowColors);
                     }
                 }
             }

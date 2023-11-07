@@ -94,7 +94,10 @@ namespace Astrarium.Plugins.MeasureTool
                 {
                     CrdsEquatorial eq = Angle.Intermediate(mouse, MeasureOrigin, i / (float)segmentsCount);
                     Vec2 p = prj.Project(eq);
-                    GL.Vertex2(p.X, p.Y);
+                    if (p != null)
+                    {
+                        GL.Vertex2(p.X, p.Y);
+                    }
                 }
 
                 GL.End();

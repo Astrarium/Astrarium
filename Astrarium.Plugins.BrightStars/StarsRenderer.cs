@@ -96,11 +96,13 @@ namespace Astrarium.Plugins.BrightStars
                     {
                         var p1 = prj.Project(c1, mat);
                         var p2 = prj.Project(c2, mat);
-
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Vertex2(p1.X, p1.Y);
-                        GL.Vertex2(p2.X, p2.Y);
-                        GL.End();
+                        if (p1 != null && p2 != null)
+                        {
+                            GL.Begin(PrimitiveType.Lines);
+                            GL.Vertex2(p1.X, p1.Y);
+                            GL.Vertex2(p2.X, p2.Y);
+                            GL.End();
+                        }
                     }
                 }
 

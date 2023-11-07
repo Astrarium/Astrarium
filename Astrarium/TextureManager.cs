@@ -19,6 +19,7 @@ namespace Astrarium
             public int TextureId { get; set; }
             public bool IsPermanent { get; set; }
             public int UsageCounter { get; set; }
+            public bool AlphaChannel { get; set; }
             public Action Action { get; set; }
 
             public static bool operator ==(Texture t1, Texture t2)
@@ -49,7 +50,7 @@ namespace Astrarium
 
         public Action FallbackAction { get; set; }
 
-        public int GetTexture(string path, string fallbackPath = null, bool permanent = false, Action action = null)
+        public int GetTexture(string path, string fallbackPath = null, bool permanent = false, Action action = null, bool alphaChannel = false)
         {
             lock (locker)
             {
@@ -72,7 +73,8 @@ namespace Astrarium
                     {
                         Path = path,
                         IsPermanent = permanent,
-                        Action = action
+                        Action = action,
+                        AlphaChannel = alphaChannel
                     });
                     autoReset.Set();
                 }
@@ -137,7 +139,8 @@ namespace Astrarium
                 {
                     using (Bitmap bmp = (Bitmap)Image.FromFile(texture.Path))
                     {
-                        BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        System.Drawing.Imaging.PixelFormat pixeFormat = texture.AlphaChannel ? System.Drawing.Imaging.PixelFormat.Format32bppArgb : System.Drawing.Imaging.PixelFormat.Format24bppRgb;
+                        BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, pixeFormat);
                         Application.Current.Dispatcher.Invoke(() => BindTexture(texture, data));
                         bmp.UnlockBits(data);
                     }
@@ -148,10 +151,12 @@ namespace Astrarium
         private void BindTexture(Texture texture, BitmapData data)
         {
             texture.TextureId = GL.GenTexture();
+            var internalFormat = texture.AlphaChannel ? PixelInternalFormat.Rgba : PixelInternalFormat.Rgb;
+            var pixelFormat = texture.AlphaChannel ? OpenTK.Graphics.OpenGL.PixelFormat.Bgra : OpenTK.Graphics.OpenGL.PixelFormat.Bgr;
 
             GL.BindTexture(TextureTarget.Texture2D, texture.TextureId);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, internalFormat,
+                data.Width, data.Height, 0, pixelFormat, PixelType.UnsignedByte, data.Scan0);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);

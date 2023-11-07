@@ -116,21 +116,14 @@ namespace Astrarium.Plugins.Constellations
                     }
 
                     var p1 = prj.Project(block[i], mat);
-                    if (p1 == null)
-                    {
-                        continue;
-                    }
-
                     var p2 = prj.Project(block[i + 1], mat);
-                    if (p2 == null)
+                    if (p1 != null && p2 != null)
                     {
-                        continue;
+                        GL.Begin(PrimitiveType.Lines);
+                        GL.Vertex2(p1.X, p1.Y);
+                        GL.Vertex2(p2.X, p2.Y);
+                        GL.End();
                     }
-
-                    GL.Begin(PrimitiveType.Lines);
-                    GL.Vertex2(p1.X, p1.Y);
-                    GL.Vertex2(p2.X, p2.Y);
-                    GL.End();
                 }
             }
         }

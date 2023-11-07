@@ -164,6 +164,7 @@ namespace Astrarium.Types
         {
             Vec2 p = Project(eq + new CrdsEquatorial(0, 1));
             Vec2 p0 = Project(eq);
+            if (p == null || p0 == null) return 0;
             return (FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 
@@ -184,6 +185,7 @@ namespace Astrarium.Types
         {
             Vec2 p = Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(Context.Epsilon));
             Vec2 p0 = Project(ecl.ToEquatorial(Context.Epsilon));
+            if (p == null || p0 == null) return 0;
             return 90 - Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 

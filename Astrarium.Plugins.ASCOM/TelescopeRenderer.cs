@@ -56,6 +56,7 @@ namespace Astrarium.Plugins.ASCOM
                     Pen marker = new Pen(color, 2);
 
                     Vec2 p = prj.Project(ascom.Position);
+                    if (p == null) return;
 
                     float r = 16;
                     float a0 = (float)(Math.PI / 4);

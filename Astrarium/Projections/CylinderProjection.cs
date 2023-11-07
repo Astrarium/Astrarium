@@ -21,6 +21,7 @@ namespace Astrarium.Projections
             double r = Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
             bool rval = (-r < v[1] && v[1] < r);
 
+            if (v[2] > 0.5) return null;
             if (!rval) return null;
 
             double alpha = Math.Atan2(v[0], -v[2]);

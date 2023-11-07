@@ -59,18 +59,23 @@ namespace Astrarium.Plugins.Horizon
             GL.LineWidth(5);
 
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            GL.Begin(PrimitiveType.LineLoop);
+            GL.Begin(PrimitiveType.LineStrip);
             GL.Color4(settings.Get<SkyColor>("ColorHorizon").Night.Tint(schema));
 
             const int steps = 64;
             var hor = new CrdsHorizontal();
-            for (int i = 0; i < steps; i++)
+            for (int i = 0; i <= steps; i++)
             {
                 hor.Azimuth = (double)i / steps * 360;
                 var p = prj.Project(hor);
                 if (p != null)
                 {
                     GL.Vertex2(p.X, p.Y);
+                }
+                else
+                {
+                    GL.End();
+                    GL.Begin(PrimitiveType.LineStrip);
                 }
             }
 
@@ -100,7 +105,7 @@ namespace Astrarium.Plugins.Horizon
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            int textureId = textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true);
+            int textureId = textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true, action: null, alphaChannel: true);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
 
             int steps = prj.Fov < 90 ? 32 : 128;
