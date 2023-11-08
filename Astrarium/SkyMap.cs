@@ -173,11 +173,6 @@ namespace Astrarium
         private ICollection<Tuple<CelestialObject, PointF, float>> celestialObjects = new List<Tuple<CelestialObject, PointF, float>>();
 
         /// <summary>
-        /// <see cref="MapContext"/> instance
-        /// </summary>
-        private MapContext mapContext = null;
-
-        /// <summary>
         /// Application settings
         /// </summary>
         private ISettings settings = null;
@@ -207,12 +202,11 @@ namespace Astrarium
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
             context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
-            mapContext = new MapContext(this, skyContext);
 
             // Keep current context synchronized with global instance
             skyContext.ContextChanged += () => context.Set(skyContext.JulianDay, skyContext.GeoLocation);
 
-            projection = Types.Projection.Create<PerspectiveProjection>(context);
+            projection = Projection.Create<PerspectiveProjection>(context);
             projection.Fov = 90;
             projection.SetVision(new CrdsHorizontal(0, 0));
             projection.FlipVertical = !settings.Get("IsInverted");
@@ -483,106 +477,6 @@ namespace Astrarium
                         return;
                     }
                 }
-            }
-        }
-
-        private class MapContext : IMapContext
-        {
-            private readonly SkyMap map;
-            private readonly SkyContext skyContext;
-
-            public MapContext(SkyMap map, SkyContext skyContext)
-            {
-                this.map = map;
-                this.skyContext = skyContext;
-            }
-
-            public Graphics Graphics { get; set; }
-
-            public CrdsHorizontal Center => map.Center;
-            public double JulianDay => skyContext.JulianDay;
-            public double Epsilon => skyContext.Epsilon;
-            public CrdsGeographical GeoLocation => skyContext.GeoLocation;
-            public double SiderealTime => skyContext.SiderealTime;
-            public float DayLightFactor => skyContext.DayLightFactor;
-            public ColorSchema Schema => map.Schema;
-            public CrdsHorizontal MousePosition => map.MousePosition;
-            public MouseButton MouseButton => map.MouseButton;
-            public CelestialObject LockedObject => map.LockedObject;
-            public CelestialObject SelectedObject => map.SelectedObject;
-            
-            public void AddDrawnObject(CelestialObject obj)
-            {
-                map.AddDrawnObject(obj);
-            }
-
-            public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size, StringFormat format = null)
-            {
-                if (format != null)
-                {
-                    SizeF b = Graphics.MeasureString(caption, font, p, format);
-                    RectangleF r = new RectangleF(p.X, p.Y, b.Width, b.Height);
-
-                    if (format.Alignment == StringAlignment.Center)
-                        r.X = p.X - b.Width / 2;
-                    if (format.Alignment == StringAlignment.Far)
-                        r.X = p.X - b.Width / 2;
-
-                    if (format.LineAlignment == StringAlignment.Center)
-                        r.Y = p.Y - b.Height / 2;
-                    if (format.LineAlignment == StringAlignment.Far)
-                        r.Y = p.Y - b.Height / 2;
-
-                    Graphics.DrawString(caption, font, brush, p, format);
-                    map.labels.Add(r);
-                }
-                else
-                {
-                    SizeF b = Graphics.MeasureString(caption, font);
-                    float s = size > 5 ? (size / 2.8284f + 2) : 1;
-                    for (int x = 0; x < 2; x++)
-                    {
-                        for (int y = 0; y < 2; y++)
-                        {
-                            float dx = x == 0 ? s : -s - b.Width;
-                            float dy = y == 0 ? s : -s - b.Height;
-                            RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                            if (!map.labels.Any(l => l.IntersectsWith(r)))
-                            {
-                                Graphics.DrawString(caption, font, brush, r.Location);
-                                map.labels.Add(r);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            public Color GetColor(string colorName)
-            {
-                return map.settings.Get<SkyColor>(colorName).GetColor(Schema, DayLightFactor);
-            }
-
-            public Color GetColor(Color colorNight)
-            {
-                return SkyColor.GetColor(Schema, colorNight, DayLightFactor);
-            }
-
-            public Color GetColor(Color colorNight, Color colorDay)
-            {
-                return SkyColor.GetColor(Schema, colorNight, colorDay, DayLightFactor);
-            }
-
-            public Color GetSkyColor()
-            {
-                // TODO: move to settings
-                return GetColor(Color.Black);
-            }
-
-            public void Redraw()
-            {
-                map.Invalidate();
-                map.OnRedraw();
             }
         }
     }
