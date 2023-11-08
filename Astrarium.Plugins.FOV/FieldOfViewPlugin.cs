@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.FOV
             }
             else
             {
-                double scale = Math.Min(map.Width, map.Height) / (Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / 2);
+                double scale = Math.Min(map.Projection.ScreenWidth, map.Projection.ScreenHeight) / (Math.Sqrt(map.Projection.ScreenWidth * map.Projection.ScreenWidth + map.Projection.ScreenHeight * map.Projection.ScreenHeight) / 2);
                 if (param.Frame is CircularFovFrame circularFovFrame)
                 {
                     fov = circularFovFrame.Size / scale;

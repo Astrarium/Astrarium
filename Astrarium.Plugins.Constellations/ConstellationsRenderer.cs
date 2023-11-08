@@ -41,7 +41,7 @@ namespace Astrarium.Plugins.Constellations
 
         private void RenderLabels(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             var schema = settings.Get<ColorSchema>("Schema");
             Font defFont = settings.Get<Font>("ConstLabelsFont");
@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.Constellations
 
         private void RenderBorders(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
 
             GL.Enable(EnableCap.Blend);

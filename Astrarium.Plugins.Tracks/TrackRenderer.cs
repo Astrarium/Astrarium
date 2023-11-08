@@ -29,7 +29,7 @@ namespace Astrarium.Plugins.Tracks
 
         public override void Render(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             var tracks = trackCalc.Tracks;
 

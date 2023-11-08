@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.Grids
 
         public override void Render(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
 
             Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night.Tint(schema);

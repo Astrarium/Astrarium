@@ -354,7 +354,7 @@ namespace Astrarium
 
         private void SkyViewControl_MouseWheel(object sender, WF.MouseEventArgs e)
         {
-            map.SkyProjection.Fov *= Math.Pow(1.1, -e.Delta / 120);
+            map.Projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
             skyViewControl.Invalidate();
         }
 
@@ -374,20 +374,20 @@ namespace Astrarium
             }
             else
             {
-                var hor = map.SkyProjection.UnprojectHorizontal(e.X, map.SkyProjection.ScreenHeight - e.Y);
-                var eq = map.SkyProjection.UnprojectEquatorial(e.X, map.SkyProjection.ScreenHeight - e.Y);
+                var hor = map.Projection.UnprojectHorizontal(e.X, map.Projection.ScreenHeight - e.Y);
+                var eq = map.Projection.UnprojectEquatorial(e.X, map.Projection.ScreenHeight - e.Y);
 
                 SetMouseEquatorialPosition(this, eq);
                 SetMouseHorizontalPosition(this, hor);
-                SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.SkyProjection.Context.JulianDay) : null);
+                SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
 
-                map.MouseCoordinates = new PointF(e.X, map.SkyProjection.ScreenHeight - e.Y);
+                map.MouseCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
 
                 if (e.Button == WF.MouseButtons.Left)
                 {
                     if (pOld != System.Drawing.Point.Empty)
                     {
-                        map.SkyProjection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
+                        map.Projection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
                         skyViewControl.Invalidate();
                         pOld = new System.Drawing.Point(e.X, e.Y);
                     }
@@ -399,7 +399,7 @@ namespace Astrarium
 
         private void SkyView_Resize(object sender, EventArgs e)
         {
-            map.SkyProjection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
+            map.Projection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
             GL.Viewport(0, 0, skyViewControl.Width, skyViewControl.Height);
             skyViewControl.Invalidate();
         }
@@ -417,8 +417,8 @@ namespace Astrarium
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(0, map.SkyProjection.ScreenWidth,
-                     0, map.SkyProjection.ScreenHeight, -1, 1);
+            GL.Ortho(0, map.Projection.ScreenWidth,
+                     0, map.Projection.ScreenHeight, -1, 1);
 
             renderStopWatch.Restart();
 

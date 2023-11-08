@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.MilkyWay
         public override void Render(ISkyMap map)
         {
             if (!settings.Get("MilkyWay")) return;
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             // nautical twilight: suppose Milky Way is not visible
             if (milkyWayCalc.SunAltitude > -12) return;

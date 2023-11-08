@@ -71,7 +71,7 @@ namespace Astrarium.Plugins.MeasureTool
         {
             if (IsMeasureToolOn)
             {
-                var prj = map.SkyProjection;
+                var prj = map.Projection;
                 var schema = settings.Get<ColorSchema>("Schema");
                 var m = map.MouseCoordinates;
                 var mouse = prj.UnprojectEquatorial(m.X, m.Y);

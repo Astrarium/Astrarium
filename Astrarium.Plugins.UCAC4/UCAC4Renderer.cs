@@ -34,7 +34,7 @@ namespace Astrarium.Plugins.UCAC4
 
         public override void Render(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
@@ -59,7 +59,7 @@ namespace Astrarium.Plugins.UCAC4
 
                 float magLimit = prj.MagLimit;
 
-                magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.SkyProjection.Fov));
+                magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.Projection.Fov));
 
                 PrecessionalElements pe = Precession.ElementsFK5(prj.Context.JulianDay, Date.EPOCH_J2000);
 

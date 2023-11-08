@@ -13,25 +13,9 @@ namespace Astrarium.Plugins.DeepSky
 {
     public class DeepSkyRenderer : BaseRenderer
     {
-        private int limitLabels = 20;
-        private double minAlpha = 10;
-        private double maxAlpha = 255;
-        private double minZoom = 50;
-        private double maxZoom = 0.1;
-
-        private double k;
-        private double b;
-
-        private Pen penOutlineDashed;
-        private Pen penOutlineSolid;
-
-        private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
-
         private readonly DeepSkyCalc deepSkyCalc;
         private readonly ISettings settings;
         private readonly ITextureManager textureManager;
-
-        private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
@@ -40,23 +24,6 @@ namespace Astrarium.Plugins.DeepSky
             this.deepSkyCalc = deepSkyCalc;
             this.textureManager = textureManager;
             this.settings = settings;
-
-            k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
-            b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
-
-            drawingHandlers = new Dictionary<DeepSkyStatus, IDrawingStrategy>()
-            {
-                { DeepSkyStatus.Galaxy, new GalaxyDrawingStrategy(this) },
-                { DeepSkyStatus.GalacticNebula, new GalacticNebulaDrawingStrategy(this) },
-                { DeepSkyStatus.PlanetaryNebula, new PlanetaryNebulaDrawingStrategy(this) },
-                { DeepSkyStatus.OpenCluster, new ClusterDrawingStrategy(this) },
-                { DeepSkyStatus.GlobularCluster, new ClusterDrawingStrategy(this) },
-                { DeepSkyStatus.PartOfOther, new EmptyDrawingStrategy(this) },
-                { DeepSkyStatus.Duplicate, new EmptyDrawingStrategy(this) },
-                { DeepSkyStatus.DuplicateIC, new EmptyDrawingStrategy(this) },
-                { DeepSkyStatus.Star, new EmptyDrawingStrategy(this) },
-                { DeepSkyStatus.NotFound, new EmptyDrawingStrategy(this) }
-            };
         }
 
         public override void Render(ISkyMap map)
@@ -72,7 +39,7 @@ namespace Astrarium.Plugins.DeepSky
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
             bool drawImages = settings.Get("DeepSkyImages") && Directory.Exists(imagesPath);
             Brush brushLabel = new SolidBrush(colorLabel);
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             // J2000 equatorial coordinates of screen center
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
@@ -220,269 +187,7 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Render(IMapContext map)
         {
-            if (!settings.Get<bool>("DeepSky"))
-            {
-                return;
-            }
-
-            var allDeepSkies = deepSkyCalc.deepSkies;
-            bool isGround = settings.Get<bool>("Ground");
-            //brushCaption = new SolidBrush(map.GetColor("ColorDeepSkyLabel"));
-
-            int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
             
-            Color colorOutline = map.GetColor("ColorDeepSkyOutline");
-            penOutlineSolid = new Pen(Color.FromArgb(alpha, colorOutline));
-            penOutlineDashed = new Pen(Color.FromArgb(alpha, colorOutline));
-            penOutlineDashed.DashStyle = DashStyle.Dash;
-            
-            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle);
-            if (isGround)
-            {
-                deepSkies = deepSkies.Where(ds => ds.Horizontal.Altitude + ds.Semidiameter / 3600 > 0);
-            }
-
-            foreach (var ds in deepSkies)
-            {
-                drawingHandlers[ds.Status].Draw(map, settings, ds);
-            }
-        }
-
-        private interface IDrawingStrategy
-        {
-            void Draw(IMapContext map, ISettings settings, DeepSky ds);
-        }
-
-        private class GalaxyDrawingStrategy : BaseDrawingStrategy
-        {
-            public GalaxyDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
-
-            protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
-            {
-                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB);
-            }
-
-            protected override void DrawPointObject(Graphics g, float size)
-            {
-                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, - size / 2, size, size);
-            }
-
-            protected override void DrawRoundObject(Graphics g, float diamA)
-            {
-                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA);
-            }
-        }
-
-        private class GalacticNebulaDrawingStrategy : BaseDrawingStrategy
-        {
-            public GalacticNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
-
-            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
-            {
-                if (map.ViewAngle <= Renderer.minZoom)
-                {
-                    base.Draw(map, settings, ds);
-                }
-            }
-
-            protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
-            {
-                g.DrawRoundedRectangle(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB, Math.Min(diamA, diamB) / 3);
-            }
-
-            protected override void DrawPointObject(Graphics g, float size)
-            {
-                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
-            }
-
-            protected override void DrawRoundObject(Graphics g, float diamA)
-            {
-                diamA /= 1.15f;
-                g.DrawRoundedRectangle(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA, diamA / 3);
-            }
-        }
-
-        private class PlanetaryNebulaDrawingStrategy : BaseDrawingStrategy
-        {
-            public PlanetaryNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
-
-            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
-            {
-                if (map.ViewAngle <= Renderer.minZoom)
-                {
-                    base.Draw(map, settings, ds);
-                }
-            }
-
-            protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
-            {
-                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB);
-            }
-
-            protected override void DrawPointObject(Graphics g, float size)
-            {
-                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
-            }
-
-            protected override void DrawRoundObject(Graphics g, float diamA)
-            {
-                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA);
-            }
-        }
-
-        private class ClusterDrawingStrategy : BaseDrawingStrategy
-        {
-            public ClusterDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
-
-            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
-            {
-                if (map.ViewAngle <= Renderer.minZoom)
-                {
-                    base.Draw(map, settings, ds);
-                }
-            }
-
-            protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
-            {
-                g.DrawEllipse(Renderer.penOutlineDashed, -diamA / 2, -diamB / 2, diamA, diamB);
-            }
-
-            protected override void DrawPointObject(Graphics g, float size)
-            {
-                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
-            }
-
-            protected override void DrawRoundObject(Graphics g, float diamA)
-            {
-                g.DrawEllipse(Renderer.penOutlineDashed, -diamA / 2, -diamA / 2, diamA, diamA);
-            }
-        }
-
-        private class EmptyDrawingStrategy : IDrawingStrategy
-        {
-            protected DeepSkyRenderer Renderer { get; private set; }
-
-            public EmptyDrawingStrategy(DeepSkyRenderer renderer)
-            {
-                Renderer = renderer;
-            }
-
-            public void Draw(IMapContext map, ISettings settings, DeepSky ds)
-            {
-                // Do nothing
-            }
-        }
-
-        private abstract class BaseDrawingStrategy : IDrawingStrategy
-        {
-            protected DeepSkyRenderer Renderer { get; private set; }
-
-            protected abstract void DrawEllipticObject(Graphics g, float diamA, float diamB);
-            protected abstract void DrawRoundObject(Graphics g, float diamA);
-            protected abstract void DrawPointObject(Graphics g, float size);
-
-            public BaseDrawingStrategy(DeepSkyRenderer renderer)
-            {
-                Renderer = renderer;
-            }
-
-            public virtual void Draw(IMapContext map, ISettings settings, DeepSky ds)
-            {
-                PointF p = map.Project(ds.Horizontal);
-
-                float sizeA = GetDiameter(map, ds.LargeDiameter);
-                float sizeB = GetDiameter(map, ds.SmallDiameter);
-
-                // elliptic object with known size
-                if (sizeB > 0 && sizeB != sizeA)
-                {
-                    float diamA = GetDiameter(map, ds.LargeDiameter);
-                    if (diamA > 10)
-                    {
-                        float diamB = GetDiameter(map, ds.SmallDiameter);
-                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
-                        {
-                            //DrawOutline(map, ds.Outline);
-                        }
-                        else
-                        {
-                            map.Rotate(p, ds.Equatorial, ds.PA ?? 0 + 90);
-                            DrawEllipticObject(map.Graphics, diamA, diamB);
-                            map.Graphics.ResetTransform();
-                        }
-                        map.AddDrawnObject(ds);
-
-                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
-                        {
-                            var font = settings.Get<Font>("DeepSkyLabelsFont");
-                            //map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
-                        }
-                    }
-                }
-                // round object
-                else if (sizeA > 0)
-                {
-                    float diamA = GetDiameter(map, ds.LargeDiameter);
-                    if (diamA > 10)
-                    {
-                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
-                        {
-                            //DrawOutline(map, ds.Outline);
-                        }
-                        else
-                        {
-                            map.Rotate(p, ds.Equatorial, ds.PA ?? 0 + 90);
-                            DrawRoundObject(map.Graphics, diamA);
-                            map.Graphics.ResetTransform();
-                        }
-                        map.AddDrawnObject(ds);
-
-                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
-                        {
-                            var font = settings.Get<Font>("DeepSkyLabelsFont");
-                            //map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, diamA);
-                        }
-                    }
-                }
-                // point object
-                else
-                {
-                    float size = map.GetPointSize(ds.Magnitude == float.NaN ? 20 : ds.Magnitude);
-                    if ((int)size > 0)
-                    {
-                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
-                        {
-                            //DrawOutline(map, ds.Outline);
-                        }
-                        else
-                        {
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            DrawPointObject(map.Graphics, size);
-                            map.Graphics.ResetTransform();
-                        }
-                        map.AddDrawnObject(ds);
-
-                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
-                        {
-                            var font = settings.Get<Font>("DeepSkyLabelsFont");
-                           // map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, 0);
-                        }
-                    }
-                }
-            }
-
-            private float GetDiameter(IMapContext map, double? diam)
-            {
-                if (diam == null)
-                {
-                    return 0;
-                }
-                else
-                {
-                    double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
-                    return (float)(diam / 60 / map.ViewAngle * r / 2);
-                }
-            }
         }
 
         public override RendererOrder Order => RendererOrder.DeepSpace;

@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.SolarSystem
         public override void Render(ISkyMap map)
         {
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorSolarSystemLabel").Night.Tint(schema));
 
@@ -340,7 +340,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
 
             // size of object when it's drawn as point (in pixels)
@@ -621,7 +621,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderSun()
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
 
@@ -702,7 +702,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderEarthShadow(SphereParameters data)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             // moon radius in pixels (1 extra pixel added for better rendering)
             float rMoon = prj.GetDiskSize(moon.Semidiameter) / 2 + 1;
@@ -768,7 +768,7 @@ namespace Astrarium.Plugins.SolarSystem
                     Primitives.DrawEllipse(pShadow, pen, sdPenumbraPixels);
                     Primitives.DrawEllipse(pShadow, pen, sdUmbraPixels);
 
-                    if (map.SkyProjection.Fov <= 10)
+                    if (map.Projection.Fov <= 10)
                     {
                         var brush = new SolidBrush(clrShadowOutline);
                         textRenderer.Value.DrawString(Text.Get("EarthShadow.Label"), fontShadowLabel, brush, new Vec2(sdPenumbraPixels * 0.71, -sdPenumbraPixels * 0.71));
@@ -779,7 +779,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderPlanetFeatures(SizeableCelestialObject body, SphereParameters data)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             // radius of celestial body disk, in pixels
             float r = prj.GetDiskSize(body.Semidiameter) / 2;
@@ -875,7 +875,7 @@ namespace Astrarium.Plugins.SolarSystem
             // radius of outer ring relative to Saturn equatorial radius
             const double ringsRatio = 2.320;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             GL.Disable(EnableCap.Lighting);
             GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png"), fallbackPath: null, permanent: false, action: null, alphaChannel: true));
@@ -935,17 +935,17 @@ namespace Astrarium.Plugins.SolarSystem
             if (mouseButton != MouseButton.None) return false;
             
             {
-                var p = map.SkyProjection.Project(moon.Equatorial);
+                var p = map.Projection.Project(moon.Equatorial);
                 if (p == null) return false;
-                double r = map.SkyProjection.GetDiskSize(moon.Semidiameter) / 2;
+                double r = map.Projection.GetDiskSize(moon.Semidiameter) / 2;
                 bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
                 if (needDraw) return true;
             }
 
             {
-                var p = map.SkyProjection.Project(mars.Equatorial);
+                var p = map.Projection.Project(mars.Equatorial);
                 if (p == null) return false;
-                double r = map.SkyProjection.GetDiskSize(mars.Semidiameter) / 2;
+                double r = map.Projection.GetDiskSize(mars.Semidiameter) / 2;
                 bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
                 if (needDraw) return true;
             }
@@ -1000,7 +1000,7 @@ namespace Astrarium.Plugins.SolarSystem
         {
             if (!moon.IsEclipsedByPlanet) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
             // Jupiter radius, in pixels, and also radius of its shadow
@@ -1130,7 +1130,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
         {
-            Projection prj = map.SkyProjection;
+            Projection prj = map.Projection;
 
             if (rect == null)
             {

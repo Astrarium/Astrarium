@@ -11,23 +11,6 @@ namespace Astrarium.Types
     public interface ISkyMap : INotifyPropertyChanged
     {
         /// <summary>
-        /// Gets or sets width of the canvas, in pixels
-        /// </summary>
-        int Width { get; set; }
-
-        /// <summary>
-        /// Gets or sets height of the canvas, in pixels
-        /// </summary>
-        int Height { get; set; }
-
-        float MagLimit { get; }
-
-        /// <summary>
-        /// Gets or sets current field of view, in degrees
-        /// </summary>
-        double ViewAngle { get; set; }
-
-        /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
         /// </summary>
         CrdsHorizontal Center { get; }
@@ -48,13 +31,7 @@ namespace Astrarium.Types
 
         PointF MouseCoordinates { get; }
 
-        /// <summary>
-        /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
-        /// </summary>
-        [Obsolete]
-        IProjection Projection { get; }
-
-        Projection SkyProjection { get; }
+        Projection Projection { get; }
 
         bool TimeSync { get; set; }
 
@@ -84,11 +61,6 @@ namespace Astrarium.Types
         void AddDrawnObject(PointF p, CelestialObject obj, float size);
 
         void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF point, float size);
-
-        /// <summary>
-        /// Occurs when map's View Angle is changed.
-        /// </summary>
-        event Action<double> ViewAngleChanged;
 
         /// <summary>
         /// Occurs when selected celestial object is changed

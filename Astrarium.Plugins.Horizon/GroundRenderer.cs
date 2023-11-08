@@ -50,7 +50,7 @@ namespace Astrarium.Plugins.Horizon
         {
             if (!settings.Get<bool>("HorizonLine") || settings.Get("Ground")) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
 
             GL.Enable(EnableCap.Blend);
@@ -87,7 +87,7 @@ namespace Astrarium.Plugins.Horizon
 
         private void RenderGround()
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             if (!settings.Get<bool>("Ground")) return;
 
             GL.Enable(EnableCap.Texture2D);
@@ -172,7 +172,7 @@ namespace Astrarium.Plugins.Horizon
         {
             if (!settings.Get("LabelCardinalDirections")) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             var schema = settings.Get<ColorSchema>("Schema");
             var fontMajor = settings.Get<Font>("CardinalDirectionsFont");

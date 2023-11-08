@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.Novae
 
         public override void Render(IMapContext map)
         {
+            /*
             Graphics g = map.Graphics;
             bool isGround = settings.Get<bool>("Ground");
             bool showNovae = settings.Get("Stars") && settings.Get<bool>("Novae");
@@ -47,7 +48,7 @@ namespace Astrarium.Plugins.Novae
                 float size = map.GetPointSize(star.Magnitude);
                 if (size > 0)
                 {
-                    PointF p = map.Project(star.Horizontal);
+                    PointF p = new PointF();// map.Project(star.Horizontal);
                     if (!map.IsOutOfScreen(p))
                     {
                         if (map.Schema == ColorSchema.White)
@@ -71,7 +72,7 @@ namespace Astrarium.Plugins.Novae
                     float diam = map.GetPointSize(nova.Magnitude);
                     if ((int)diam > 0)
                     {
-                        PointF p = map.Project(nova.Horizontal);
+                        PointF p = new Point();// map.Project(nova.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
                             DrawStarName(map, p, nova, diam);
@@ -79,21 +80,22 @@ namespace Astrarium.Plugins.Novae
                     }
                 }
             }
+            */
         }
 
-        /// <summary>
-        /// Draws nova name
-        /// </summary>
-        private void DrawStarName(IMapContext map, PointF point, Nova nova, float diam)
-        {
-            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
+        ///// <summary>
+        ///// Draws nova name
+        ///// </summary>
+        //private void DrawStarName(IMapContext map, PointF point, Nova nova, float diam)
+        //{
+        //    var fontStarNames = settings.Get<Font>("StarsLabelsFont");
 
-            // Star has proper name
-            if (map.ViewAngle < limitAllNames && settings.Get<bool>("StarsProperNames") && nova.ProperName != null)
-            {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, nova.ProperName, point, diam);
-                return;
-            }
-        }
+        //    // Star has proper name
+        //    if (map.ViewAngle < limitAllNames && settings.Get<bool>("StarsProperNames") && nova.ProperName != null)
+        //    {
+        //        map.DrawObjectCaption(fontStarNames, brushStarNames, nova.ProperName, point, diam);
+        //        return;
+        //    }
+        //}
     }
 }

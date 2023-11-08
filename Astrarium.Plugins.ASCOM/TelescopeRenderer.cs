@@ -50,7 +50,7 @@ namespace Astrarium.Plugins.ASCOM
             {
                 try
                 {
-                    var prj = map.SkyProjection;
+                    var prj = map.Projection;
                     ColorSchema schema = settings.Get<ColorSchema>("Schema");
                     var color = settings.Get<SkyColor>("TelescopeMarkerColor").Night.Tint(schema);
                     Pen marker = new Pen(color, 2);

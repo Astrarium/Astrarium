@@ -142,20 +142,6 @@ namespace Astrarium.ViewModels
             get => GetValue<CrdsHorizontal>(nameof(MouseHorizontalCoordinates));
         }
 
-        public PointF SkyMousePosition
-        {
-            set
-            {
-                var hor = map.Projection.Invert(value);
-                var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-                
-                MapViewAngleString = Formatters.Angle.Format(map.ViewAngle);
-
-                NotifyPropertyChanged(
-                    nameof(MapViewAngleString));
-            }
-        }
-
         private bool dateTimeSync = false;
 
         public bool TimeSync
@@ -215,8 +201,7 @@ namespace Astrarium.ViewModels
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += () => NotifyPropertyChanged(nameof(TimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
-            map.ViewAngleChanged += Map_ViewAngleChanged;
-            map.SkyProjection.FovChanged += Map_ViewAngleChanged;
+            map.Projection.FovChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
 
             AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
@@ -225,7 +210,6 @@ namespace Astrarium.ViewModels
 
             Sky_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
-            Map_ViewAngleChanged(map.ViewAngle);
 
             // Toolbar initialization
 
@@ -302,14 +286,14 @@ namespace Astrarium.ViewModels
             menuMountModeHorizontal.Command = new Command(() => {
                 menuMountModeHorizontal.IsChecked = true;
                 menuMountModeEquatorial.IsChecked = false;
-                map.SkyProjection.ViewMode = ProjectionViewType.Horizontal;
+                map.Projection.ViewMode = ProjectionViewType.Horizontal;
                 map.Invalidate();
             });
             
             menuMountModeEquatorial.Command = new Command(() => {
                 menuMountModeEquatorial.IsChecked = true;
                 menuMountModeHorizontal.IsChecked = false;
-                map.SkyProjection.ViewMode = ProjectionViewType.Equatorial;
+                map.Projection.ViewMode = ProjectionViewType.Equatorial;
                 map.Invalidate();
             });
 
@@ -591,7 +575,7 @@ namespace Astrarium.ViewModels
 
         private void Zoom(int delta)
         {
-            map.SkyProjection.Fov *= Math.Pow(1.1, -delta / 120);
+            map.Projection.Fov *= Math.Pow(1.1, -delta / 120);
             map.Invalidate();
         }
        
@@ -769,25 +753,25 @@ namespace Astrarium.ViewModels
 
         private void SaveAsImage()
         {
-            var formats = new Dictionary<string, ImageFormat>()
-            {
-                ["Bitmap (*.bmp)|*.bmp"] = ImageFormat.Bmp,
-                ["Portable Network Graphics (*.png)|*.png"] = ImageFormat.Png,
-                ["Graphics Interchange Format (*.gif)|*.gif"] = ImageFormat.Gif,
-                ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
-            };
+            //var formats = new Dictionary<string, ImageFormat>()
+            //{
+            //    ["Bitmap (*.bmp)|*.bmp"] = ImageFormat.Bmp,
+            //    ["Portable Network Graphics (*.png)|*.png"] = ImageFormat.Png,
+            //    ["Graphics Interchange Format (*.gif)|*.gif"] = ImageFormat.Gif,
+            //    ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
+            //};
 
-            string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys), out int selectedFilterIndex);
-            if (fileName != null)
-            {
-                using (Image img = new Bitmap(map.Width, map.Height))
-                using (Graphics g = Graphics.FromImage(img))
-                {
-                    map.Render(g);
-                    string key = formats.Keys.FirstOrDefault(k => k.Split('|')[1].Substring(1).Equals(Path.GetExtension(fileName))) ?? formats.Keys.First();
-                    img.Save(fileName, formats[key]);
-                }
-            }
+            //string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys), out int selectedFilterIndex);
+            //if (fileName != null)
+            //{
+            //    using (Image img = new Bitmap(map.Width, map.Height))
+            //    using (Graphics g = Graphics.FromImage(img))
+            //    {
+            //        map.Render(g);
+            //        string key = formats.Keys.FirstOrDefault(k => k.Split('|')[1].Substring(1).Equals(Path.GetExtension(fileName))) ?? formats.Keys.First();
+            //        img.Save(fileName, formats[key]);
+            //    }
+            //}
         }
 
         private PrintDocument CreatePrintDocument()
@@ -806,13 +790,13 @@ namespace Astrarium.ViewModels
 
         private void PrintHandler(object sender, PrintPageEventArgs e)
         {
-            int oldWidth = map.Width;
-            int oldHeight = map.Height;
-            map.Width = e.PageSettings.Bounds.Width - 1;
-            map.Height = e.PageSettings.Bounds.Height - 1;           
-            map.Render(e.Graphics);
-            map.Width = oldWidth;
-            map.Height = oldHeight;
+            //int oldWidth = map.Width;
+            //int oldHeight = map.Height;
+            //map.Width = e.PageSettings.Bounds.Width - 1;
+            //map.Height = e.PageSettings.Bounds.Height - 1;           
+            //map.Render(e.Graphics);
+            //map.Width = oldWidth;
+            //map.Height = oldHeight;
         }
 
         private void Print()

@@ -30,7 +30,7 @@ namespace Astrarium.Plugins.Tycho2
 
         public override void Render(ISkyMap map)
         {
-            Projection prj = map.SkyProjection;
+            Projection prj = map.Projection;
             if (prj.MagLimit > 8 && settings.Get("Stars") && settings.Get("Tycho2"))
             {
                 float daylightFactor = map.DaylightFactor;

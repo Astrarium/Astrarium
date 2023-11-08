@@ -24,6 +24,7 @@ namespace Astrarium.Plugins.Meteors
 
         public override void Render(IMapContext map)
         {
+            /*
             Graphics g = map.Graphics;
             bool isGround = settings.Get<bool>("Ground");
             bool showMeteors = settings.Get("Meteors");
@@ -53,7 +54,7 @@ namespace Astrarium.Plugins.Meteors
 
             foreach (var meteor in meteors)
             {
-                PointF p = map.Project(meteor.Horizontal);
+                PointF p = new PointF();// map.Project(meteor.Horizontal);
                 if (!map.IsOutOfScreen(p))
                 {
                     g.DrawXCross(pen, p, 5);
@@ -65,6 +66,7 @@ namespace Astrarium.Plugins.Meteors
                     }
                 }
             }
+            */
         }
     }
 }

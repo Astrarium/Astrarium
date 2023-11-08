@@ -34,7 +34,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             if (!settings.Get("Comets")) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             var colorNames = settings.Get<SkyColor>("ColorCometsLabels").Night.Tint(schema);
             Brush brushNames = new SolidBrush(colorNames);

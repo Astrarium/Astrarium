@@ -17,16 +17,6 @@ namespace Astrarium
     public class SkyMap : ISkyMap
     {
         /// <summary>
-        /// Minimal allowed field of view, in degrees
-        /// </summary>
-        private const double MIN_VIEW_ANGLE = 1.0 / 1024;
-
-        /// <summary>
-        /// Max allowed field of view, in degrees
-        /// </summary>
-        private const double MAX_VIEW_ANGLE = 90;
-
-        /// <summary>
         /// Stopwatch to measure rendering time
         /// </summary>
         private Stopwatch renderStopWatch = new Stopwatch();
@@ -61,41 +51,6 @@ namespace Astrarium
 
         private Font fontMag = new Font("Arial", 8);
 
-        public int Width { get; set; }
-        public int Height { get; set; }
-
-        /// <summary>
-        /// Backing field for <see cref="ViewAngle"/> property
-        /// </summary>
-        private double viewAngle = 90;
-
-        /// <summary>
-        /// Gets or sets current FOV of the map
-        /// </summary>
-        public double ViewAngle
-        {
-            get
-            {
-                return viewAngle;
-            }
-            set
-            {
-                viewAngle = value;
-                if (value >= MAX_VIEW_ANGLE)
-                {
-                    viewAngle = MAX_VIEW_ANGLE;
-                }
-                if (value < MIN_VIEW_ANGLE)
-                {
-                    viewAngle = MIN_VIEW_ANGLE;
-                }
-
-                ViewAngleChanged?.Invoke(viewAngle);
-                timeSyncEvent.Set();
-                Invalidate();
-            }
-        }
-
         private bool dateTimeSync = false;
         public bool TimeSync
         {
@@ -116,35 +71,6 @@ namespace Astrarium
                 }
             }
         }
-
-        /// <summary>
-        /// Gets magnitude limit depending on current field of view (zoom level).
-        /// </summary>
-        /// <param name="map">IMapContext instance</param>
-        /// <returns>Magnitude limit</returns>
-        /// <remarks>
-        /// This method based on empiric formula, coefficients found with https://www.wolframalpha.com
-        /// </remarks>
-        public float MagLimit
-        {
-            get
-            {
-                // no limit
-                float limitMag = float.MaxValue;
-
-                // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
-                return Math.Min(limitMag, (float)(-1.73494 * Math.Log(0.000462398 * ViewAngle)));
-
-                // OLD formula:
-                // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
-                // return (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
-            }
-        }
-
-        /// <summary>
-        /// Occurs when map's View Angle is changed.
-        /// </summary>
-        public event Action<double> ViewAngleChanged;
 
         public float DaylightFactor { get; set; }
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
@@ -229,13 +155,7 @@ namespace Astrarium
 
         private Projection projection;
 
-        public Projection SkyProjection => projection;
-
-        [Obsolete]
-        /// <summary>
-        /// Projection used to render the map
-        /// </summary>
-        public IProjection Projection { get; set; } = null;
+        public Projection Projection => projection;
 
         public event Action OnInvalidate;
 
@@ -298,10 +218,6 @@ namespace Astrarium
             projection.FlipVertical = !settings.Get("IsInverted");
             projection.FlipHorizontal = settings.Get("IsMirrored");
 
-            Projection = new ArcProjection(mapContext);
-            Projection.IsInverted = settings.Get("IsInverted");
-            Projection.IsMirrored = settings.Get("IsMirrored");
-
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
 
@@ -336,13 +252,13 @@ namespace Astrarium
 
                 if (name == "IsMirrored")
                 {
-                    SkyProjection.FlipHorizontal = settings.Get("IsMirrored");
+                    Projection.FlipHorizontal = settings.Get("IsMirrored");
                     Invalidate();
                 }
 
                 if (name == "IsInverted")
                 {
-                    SkyProjection.FlipVertical = !settings.Get("IsInverted");
+                    Projection.FlipVertical = !settings.Get("IsInverted");
                     Invalidate();
                 }
             };
@@ -359,7 +275,7 @@ namespace Astrarium
             {
                 timeSyncEvent.WaitOne();
                 timeSyncResetEvent.WaitOne();
-                double rate = Math.Min(5000, Math.Max(100, SkyProjection.Fov * 100));
+                double rate = Math.Min(5000, Math.Max(100, Projection.Fov * 100));
                 context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                 Invalidate();
                 Thread.Sleep((int)rate);
@@ -471,7 +387,7 @@ namespace Astrarium
             double sd = (body is SizeableCelestialObject) ?
                         (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
-            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MIN_VIEW_ANGLE);
+            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);
 
             GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
         }
@@ -488,7 +404,7 @@ namespace Astrarium
 
         public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
         {
-            GoToPoint(hor, animationDuration, Math.Min(viewAngle, 90));
+            GoToPoint(hor, animationDuration, Math.Min(Projection.Fov, 90));
         }
 
         public void GoToPoint(CrdsHorizontal hor, double viewAngleTarget)
@@ -500,13 +416,13 @@ namespace Astrarium
         {
             if (viewAngleTarget == 0)
             {
-                viewAngleTarget = ViewAngle;
+                viewAngleTarget = Projection.Fov;
             }
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {
                 Center.Set(hor);
-                ViewAngle = viewAngleTarget;
+                Projection.Fov = viewAngleTarget;
             }
             else
             {
@@ -514,16 +430,16 @@ namespace Astrarium
                 double ad = Angle.Separation(hor, centerOriginal);
                 double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
                 double[] x = new double[] { 0, steps / 2, steps };
-                double[] y = (ad < ViewAngle) ?
+                double[] y = (ad < Projection.Fov) ?
                     // linear zooming if body is already on the screen:
-                    new double[] { ViewAngle, (ViewAngle + viewAngleTarget) / 2, viewAngleTarget } :
+                    new double[] { Projection.Fov, (Projection.Fov + viewAngleTarget) / 2, viewAngleTarget } :
                     // parabolic zooming with jumping to 90 degrees view angle at the middle of path:
-                    new double[] { ViewAngle, 90, viewAngleTarget };
+                    new double[] { Projection.Fov, 90, viewAngleTarget };
 
                 for (int i = 0; i <= steps; i++)
                 {
                     Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
-                    ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
+                    Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
                 }
             }
         }
@@ -583,10 +499,6 @@ namespace Astrarium
 
             public Graphics Graphics { get; set; }
 
-            public int Width => map.Width;
-            public int Height => map.Height;
-            public double ViewAngle => map.ViewAngle;
-            public float MagLimit => map.MagLimit;
             public CrdsHorizontal Center => map.Center;
             public double JulianDay => skyContext.JulianDay;
             public double Epsilon => skyContext.Epsilon;
@@ -598,23 +510,7 @@ namespace Astrarium
             public MouseButton MouseButton => map.MouseButton;
             public CelestialObject LockedObject => map.LockedObject;
             public CelestialObject SelectedObject => map.SelectedObject;
-            public bool IsMirrored
-            {
-                get => map.Projection.IsMirrored;
-                set => map.Projection.IsMirrored = value;
-            }
-
-            public bool IsInverted
-            {
-                get => map.Projection.IsInverted;
-                set => map.Projection.IsInverted = value;
-            }
-
-            public PointF Project(CrdsHorizontal hor)
-            {
-                return map.Projection.Project(hor);
-            }
-
+            
             public void AddDrawnObject(CelestialObject obj)
             {
                 map.AddDrawnObject(obj);

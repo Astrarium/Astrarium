@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.Atmosphere
             if (!settings.Get("Ground")) return;
             if (!settings.Get("Atmosphere")) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);

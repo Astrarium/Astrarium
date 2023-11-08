@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             if (!settings.Get("Asteroids")) return;
 
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             var colorNames = settings.Get<SkyColor>("ColorAsteroidsLabels").Night.Tint(schema);
             Brush brushNames = new SolidBrush(colorNames);
@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.MinorBodies
             var font = settings.Get<Font>("AsteroidsLabelsFont");
 
             // TODO: replace with Equatorial
-            var asteroids = asteroidsCalc.Asteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle);
+            var asteroids = asteroidsCalc.Asteroids.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < prj.Fov);
 
             foreach (var a in asteroids)
             {
@@ -62,7 +62,6 @@ namespace Astrarium.Plugins.MinorBodies
                     if ((int)diam > 0 && diam > size)
                     {
                         Vec2 p = prj.Project(a.Horizontal);
-
 
                         GL.Enable(EnableCap.Blend);
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

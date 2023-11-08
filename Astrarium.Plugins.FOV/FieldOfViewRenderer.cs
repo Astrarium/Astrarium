@@ -25,7 +25,7 @@ namespace Astrarium.Plugins.FOV
 
         public override void Render(ISkyMap map)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             var frames = settings.Get<List<FovFrame>>("FovFrames").Where(f => f.Enabled);
             foreach (var frame in frames)
@@ -140,7 +140,7 @@ namespace Astrarium.Plugins.FOV
 
         private void DrawFovCircle(float frameSize, short shading, FovFrame frame, bool isOuter)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             float radius = frameSize * 3600 / 2;
             float size = prj.GetDiskSize(radius);
@@ -172,7 +172,7 @@ namespace Astrarium.Plugins.FOV
 
         private void DrawShading(short shading, float size)
         {
-            var prj = map.SkyProjection;
+            var prj = map.Projection;
             int w = prj.ScreenWidth;
             int h = prj.ScreenHeight;
             const int gap = 5;
