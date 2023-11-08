@@ -292,7 +292,7 @@ namespace Astrarium
             // Keep current context synchronized with global instance
             skyContext.ContextChanged += () => context.Set(skyContext.JulianDay, skyContext.GeoLocation);
 
-            projection = Types.Projection.Create<CylinderProjection>(context);
+            projection = Types.Projection.Create<PerspectiveProjection>(context);
             projection.Fov = 90;
             projection.SetVision(new CrdsHorizontal(0, 0));
             projection.FlipVertical = !settings.Get("IsInverted");
