@@ -38,6 +38,23 @@ namespace Astrarium.Types
                 };
         }
 
+        public void Set(double jd, CrdsGeographical geoLocation)
+        {
+            _JulianDay = jd;
+            _GeoLocation = geoLocation;
+            UpdateContextVariables();
+            ClearCache();
+            ContextChanged?.Invoke();
+        }
+
+        private void UpdateContextVariables()
+        {
+            NutationElements = Nutation.NutationElements(_JulianDay);
+            AberrationElements = Aberration.AberrationElements(_JulianDay);
+            Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
+            SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+        }
+
         private double _JulianDay;
 
         /// <summary>
@@ -49,10 +66,7 @@ namespace Astrarium.Types
             set
             {
                 _JulianDay = value;
-                NutationElements = Nutation.NutationElements(_JulianDay);
-                AberrationElements = Aberration.AberrationElements(_JulianDay);
-                Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
-                SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+                UpdateContextVariables();
                 ClearCache();
                 ContextChanged?.Invoke();
             }

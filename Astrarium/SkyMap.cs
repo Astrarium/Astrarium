@@ -279,14 +279,20 @@ namespace Astrarium
             this.commandLineArgs = commandLineArgs;
         }
 
-        public SkyContext Context { get; private set; }
+        /// <summary>
+        /// Skt context instance used for rendering purposes
+        /// </summary>
+        private SkyContext context;
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
-            Context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
+            context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
             mapContext = new MapContext(this, skyContext);
 
-            projection = Types.Projection.Create<StereographicProjection>(Context);
+            // Keep current context synchronized with global instance
+            skyContext.ContextChanged += () => context.Set(skyContext.JulianDay, skyContext.GeoLocation);
+
+            projection = Types.Projection.Create<CylinderProjection>(context);
             projection.Fov = 90;
             projection.SetVision(new CrdsHorizontal(0, 0));
             projection.FlipVertical = !settings.Get("IsInverted");
@@ -354,7 +360,7 @@ namespace Astrarium
                 timeSyncEvent.WaitOne();
                 timeSyncResetEvent.WaitOne();
                 double rate = Math.Min(5000, Math.Max(100, SkyProjection.Fov * 100));
-                Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                 Invalidate();
                 Thread.Sleep((int)rate);
             }

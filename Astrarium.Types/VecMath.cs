@@ -288,6 +288,13 @@ namespace Astrarium.Types
             set => v[index] = value;
         }
 
+        public double Distance(Vec2 other)
+        {
+            double dx = X - other.X;
+            double dy = Y - other.Y;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
         public double Dot(Vec2 b)
         {
             return v[0] * b.v[0] + v[1] * b.v[1];

@@ -15,6 +15,7 @@ namespace Astrarium.Plugins.MinorBodies
 {
     public class CometsRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
@@ -22,8 +23,9 @@ namespace Astrarium.Plugins.MinorBodies
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
 
-        public CometsRenderer(CometsCalc cometsCalc, ISettings settings)
+        public CometsRenderer(ISkyMap map, CometsCalc cometsCalc, ISettings settings)
         {
+            this.map = map;
             this.cometsCalc = cometsCalc;
             this.settings = settings;
         }
@@ -45,7 +47,7 @@ namespace Astrarium.Plugins.MinorBodies
             var font = settings.Get<Font>("CometsLabelsFont");
 
             // TODO: replace with Equatorial
-            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < /*prj.Fov*/90);
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < prj.Fov + Angle.Separation(a.Horizontal, a.TailHorizontal));
 
             foreach (var c in comets)
             {
@@ -58,130 +60,94 @@ namespace Astrarium.Plugins.MinorBodies
                     size = 1;
                 }
 
-                string label = drawLabelMag ? $"{c.Name} {Formatters.Magnitude.Format(c.Magnitude)}" : c.Name;
+                // comet center
+                Vec2 p = prj.Project(c.Horizontal);
 
-                if (diam > 5)
+                // comet tail end
+                Vec2 t = prj.Project(c.TailHorizontal);
+
+                if (p == null || t == null) continue;
+
+                double tail = p.Distance(t);
+
+                if (diam > 5 || tail > 10)
                 {
-                    double ad = Angle.Separation(c.Horizontal, map.Center);
-
-                    Vec2 p = prj.Project(c.Horizontal);
-                    Vec2 t = prj.Project(c.TailHorizontal);
-
-                    //continue;
-
-                    if (p == null || t == null) continue;
-
                     if (!IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight)) continue;
 
-                    //double tail = prj.DistanceBetweenPoints(p, t);
-                    double tail = diam;
+                    GL.Enable(EnableCap.Blend);
+                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-                    if (diam > 5 || tail > 10)
-                    {
-                        
+                    GL.Begin(PrimitiveType.TriangleFan);
 
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                    // center
+                    GL.Color4(colorComet.Tint(schema));
+                    GL.Vertex2(p.X, p.Y);
 
-                        GL.Begin(PrimitiveType.TriangleFan);
-
-                        GL.Color4(colorComet.Tint(schema));
-                        GL.Vertex2(p.X, p.Y);
-                        GL.Color4(Color.Transparent);
-                        GL.Vertex2(t.X, t.Y);
-
-                        double r = diam / 2;
-                        double rotAxis = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
-                        for (int i = 0; i <= 32; i++)
-                        {
-                            double ang0 = Angle.ToRadians(i / 32.0 * 180);
-                            double ang = ang0 + rotAxis;
-                            Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
-                            GL.Color4(Color.Transparent);
-                            GL.Vertex2(v.X, v.Y);
-                        }
-
-                        GL.Color4(Color.Transparent);
-                        GL.Vertex2(t.X, t.Y);
-
-                        GL.End();
-
-
-                        //using (var gpComet = new GraphicsPath())
-                        //{
-                        //    double rotation = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
-                        //    gpComet.StartFigure();
-
-                        //    // tail is long enough
-                        //    if (tail > diam)
-                        //    {
-                        //        gpComet.AddArc(p.X - diam / 2, p.Y - diam / 2, diam, diam, (float)Angle.ToDegrees(rotation), 180);
-                        //        gpComet.AddLines(new PointF[] { gpComet.PathPoints[gpComet.PathPoints.Length - 1], t, gpComet.PathPoints[0] });
-                        //    }
-                        //    // draw coma only
-                        //    else
-                        //    {
-                        //        gpComet.AddEllipse(p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                        //    }
-
-                        //    gpComet.CloseAllFigures();
-                        //    using (var brushComet = new PathGradientBrush(gpComet))
-                        //    {
-                        //        brushComet.CenterPoint = p;
-                        //        int alpha = 100;
-                        //        if (c.Magnitude >= map.MagLimit)
-                        //        {
-                        //            alpha -= (int)(100 * (c.Magnitude - map.MagLimit) / c.Magnitude);
-                        //        }
-                        //        brushComet.CenterColor = map.GetColor(Color.FromArgb(alpha, colorComet));
-                        //        brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
-                        //        g.FillPath(brushComet, gpComet);
-                        //    }
-                        //}
-
-                        if (drawLabels)
-                        {
-                            map.DrawObjectLabel(textRenderer.Value, label, font, brushNames, p, diam);
-
-                            //map.DrawObjectCaption(font, brushNames, label, p, diam);
-                        }
-
-
-
-                        map.AddDrawnObject(p, c, diam);
-                    }
+                    bool drawTail = tail > 2 * diam;
+                    double steps = drawTail ? 32 : 64;
+                    double arc = drawTail ? 180 : 360;
                     
-                }
-                else if ((int)size > 0)
-                {
-                    // TODO: equatorial
-                    Vec2 p = prj.Project(c.Horizontal);
-
-                    if (prj.IsInsideScreen(p))
+                    if (drawTail)
                     {
-                        GL.Enable(EnableCap.PointSmooth);
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
-
-                        GL.PointSize(size);
-                        GL.Begin(PrimitiveType.Points);
-                        GL.Color3(Color.White.Tint(schema));
-                        GL.Vertex2(p.X, p.Y);
-                        GL.End();
-
-                        //g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
-
-                        if (drawLabels)
-                        {
-                            map.DrawObjectLabel(textRenderer.Value, label, font, brushNames, p, size);
-                        }
-
-                        map.AddDrawnObject(p, c, size);
-                        continue;
+                        GL.Color4(Color.Transparent);
+                        GL.Vertex2(t.X, t.Y);
                     }
+
+                    double r = diam / 2;
+                    double rotAxis = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
+                    for (int i = 0; i <= steps; i++)
+                    {
+                        double ang0 = Angle.ToRadians(i / steps * arc);
+                        double ang = ang0 + rotAxis;
+                        Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
+                        GL.Color4(Color.Transparent);
+                        GL.Vertex2(v.X, v.Y);
+                    }
+
+                    if (drawTail)
+                    {
+                        GL.Color4(Color.Transparent);
+                        GL.Vertex2(t.X, t.Y);
+                    }
+
+                    GL.End();
+
+                    if (drawLabels)
+                    {
+                        DrawLabel(c, font, brushNames, p, diam, drawLabelMag);
+                    }
+
+                    map.AddDrawnObject(p, c, diam);
+                }
+                else if ((int)size > 0 && prj.IsInsideScreen(p))
+                {
+                    GL.Enable(EnableCap.PointSmooth);
+                    GL.Enable(EnableCap.Blend);
+                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                    GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                    GL.PointSize(size);
+                    GL.Begin(PrimitiveType.Points);
+                    GL.Color3(colorComet.Tint(schema));
+                    GL.Vertex2(p.X, p.Y);
+                    GL.End();
+
+                    if (drawLabels)
+                    {
+                        DrawLabel(c, font, brushNames, p, size, drawLabelMag);
+                    }
+
+                    map.AddDrawnObject(p, c, size);
                 }
             }
+        }
+
+        private void DrawLabel<T>(T body, Font font, Brush brush, Vec2 p, float size, bool drawMagInLabel) where T : CelestialObject, IMagnitudeObject
+        {
+            string name = body.Names.First();
+            string label = drawMagInLabel ? $"{name} {Formatters.Magnitude.Format(body.Magnitude)}" : name;
+            map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, size);
+
         }
 
         public override void Render(IMapContext map)
