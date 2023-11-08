@@ -19,7 +19,7 @@ namespace Astrarium.Projections
             double r = vec.Length;
             double h = 0.5 * (r - vec[2]);
 
-            if (h <= 0.0)
+            if (h < 1e-3)
                 return null;
 
             double f = ScreenScalingFactor / h;

@@ -103,7 +103,7 @@ namespace Astrarium.Plugins.FOV
 
                         GL.PushMatrix();
                         GL.Translate(p.X, p.Y, 0);
-                        GL.Rotate(rotAngle, 0, 0, 1);
+                        GL.Rotate(-rotAngle, 0, 0, 1);
 
                         GL.Enable(EnableCap.Blend);
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

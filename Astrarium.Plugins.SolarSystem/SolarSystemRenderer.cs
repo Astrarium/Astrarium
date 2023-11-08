@@ -1123,10 +1123,9 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.StencilTest);
 
-            
             GL.PopMatrix();
 
-            map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
+            //map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
         }
 
         private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)

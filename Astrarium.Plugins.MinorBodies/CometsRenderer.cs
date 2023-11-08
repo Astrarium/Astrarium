@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,8 +17,10 @@ namespace Astrarium.Plugins.MinorBodies
     {
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
+        private readonly Color colorComet = Color.FromArgb(120, 28, 255, 186);
 
-        private readonly Color colorComet = Color.FromArgb(100, 191, 209, 255);
+        public override RendererOrder Order => RendererOrder.SolarSystem;
 
         public CometsRenderer(CometsCalc cometsCalc, ISettings settings)
         {
@@ -25,12 +28,167 @@ namespace Astrarium.Plugins.MinorBodies
             this.settings = settings;
         }
 
+        public override void Render(ISkyMap map)
+        {
+            if (!settings.Get("Comets")) return;
+
+            var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
+
+            var colorNames = settings.Get<SkyColor>("ColorCometsLabels").Night.Tint(schema);
+            Brush brushNames = new SolidBrush(colorNames);
+            
+            bool drawLabels = settings.Get("CometsLabels");
+            bool drawAll = settings.Get<bool>("CometsDrawAll");
+            decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
+            bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
+            var font = settings.Get<Font>("CometsLabelsFont");
+
+            // TODO: replace with Equatorial
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < /*prj.Fov*/90);
+
+            foreach (var c in comets)
+            {
+                float diam = prj.GetDiskSize(c.Semidiameter);
+                float size = prj.GetPointSize(c.Magnitude);
+
+                // if "draw all" setting is enabled, draw comets brighter than limit
+                if (drawAll && size < 1 && c.Magnitude <= (float)drawAllMagLimit)
+                {
+                    size = 1;
+                }
+
+                string label = drawLabelMag ? $"{c.Name} {Formatters.Magnitude.Format(c.Magnitude)}" : c.Name;
+
+                if (diam > 5)
+                {
+                    double ad = Angle.Separation(c.Horizontal, map.Center);
+
+                    Vec2 p = prj.Project(c.Horizontal);
+                    Vec2 t = prj.Project(c.TailHorizontal);
+
+                    //continue;
+
+                    if (p == null || t == null) continue;
+
+                    if (!IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight)) continue;
+
+                    //double tail = prj.DistanceBetweenPoints(p, t);
+                    double tail = diam;
+
+                    if (diam > 5 || tail > 10)
+                    {
+                        
+
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                        GL.Begin(PrimitiveType.TriangleFan);
+
+                        GL.Color4(colorComet.Tint(schema));
+                        GL.Vertex2(p.X, p.Y);
+                        GL.Color4(Color.Transparent);
+                        GL.Vertex2(t.X, t.Y);
+
+                        double r = diam / 2;
+                        double rotAxis = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
+                        for (int i = 0; i <= 32; i++)
+                        {
+                            double ang0 = Angle.ToRadians(i / 32.0 * 180);
+                            double ang = ang0 + rotAxis;
+                            Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
+                            GL.Color4(Color.Transparent);
+                            GL.Vertex2(v.X, v.Y);
+                        }
+
+                        GL.Color4(Color.Transparent);
+                        GL.Vertex2(t.X, t.Y);
+
+                        GL.End();
+
+
+                        //using (var gpComet = new GraphicsPath())
+                        //{
+                        //    double rotation = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
+                        //    gpComet.StartFigure();
+
+                        //    // tail is long enough
+                        //    if (tail > diam)
+                        //    {
+                        //        gpComet.AddArc(p.X - diam / 2, p.Y - diam / 2, diam, diam, (float)Angle.ToDegrees(rotation), 180);
+                        //        gpComet.AddLines(new PointF[] { gpComet.PathPoints[gpComet.PathPoints.Length - 1], t, gpComet.PathPoints[0] });
+                        //    }
+                        //    // draw coma only
+                        //    else
+                        //    {
+                        //        gpComet.AddEllipse(p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                        //    }
+
+                        //    gpComet.CloseAllFigures();
+                        //    using (var brushComet = new PathGradientBrush(gpComet))
+                        //    {
+                        //        brushComet.CenterPoint = p;
+                        //        int alpha = 100;
+                        //        if (c.Magnitude >= map.MagLimit)
+                        //        {
+                        //            alpha -= (int)(100 * (c.Magnitude - map.MagLimit) / c.Magnitude);
+                        //        }
+                        //        brushComet.CenterColor = map.GetColor(Color.FromArgb(alpha, colorComet));
+                        //        brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
+                        //        g.FillPath(brushComet, gpComet);
+                        //    }
+                        //}
+
+                        if (drawLabels)
+                        {
+                            map.DrawObjectLabel(textRenderer.Value, label, font, brushNames, p, diam);
+
+                            //map.DrawObjectCaption(font, brushNames, label, p, diam);
+                        }
+
+
+
+                        map.AddDrawnObject(p, c, diam);
+                    }
+                    
+                }
+                else if ((int)size > 0)
+                {
+                    // TODO: equatorial
+                    Vec2 p = prj.Project(c.Horizontal);
+
+                    if (prj.IsInsideScreen(p))
+                    {
+                        GL.Enable(EnableCap.PointSmooth);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                        GL.PointSize(size);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Color3(Color.White.Tint(schema));
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        //g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
+
+                        if (drawLabels)
+                        {
+                            map.DrawObjectLabel(textRenderer.Value, label, font, brushNames, p, size);
+                        }
+
+                        map.AddDrawnObject(p, c, size);
+                        continue;
+                    }
+                }
+            }
+        }
+
         public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
             var allComets = cometsCalc.Comets;
             bool isGround = settings.Get("Ground");
-            bool useTextures = settings.Get("PlanetsTextures");
             bool drawComets = settings.Get("Comets");
             bool drawLabels = settings.Get("CometsLabels");
             bool drawAll = settings.Get<bool>("CometsDrawAll");
@@ -131,6 +289,68 @@ namespace Astrarium.Plugins.MinorBodies
             }
         }
 
-        public override RendererOrder Order => RendererOrder.SolarSystem;
+        private bool IsSegmentIntersectScreen(Vec2 p1, Vec2 p2, double width, double height)
+        {
+            double minX = p1.X;
+            double maxX = p2.X;
+
+            if (p1.X > p2.X)
+            {
+                minX = p2.X;
+                maxX = p1.X;
+            }
+
+            if (maxX > width)
+            {
+                maxX = width;
+            }
+
+            if (minX < 0)
+            {
+                minX = 0;
+            }
+
+            if (minX > maxX)
+            {
+                return false;
+            }
+
+            double minY = p1.Y;
+            double maxY = p2.Y;
+
+            double dx = p2.X - p1.X;
+
+            if (Math.Abs(dx) > 0.0000001)
+            {
+                double a = (p2.Y - p1.Y) / dx;
+                double b = p1.Y - a * p1.X;
+                minY = a * minX + b;
+                maxY = a * maxX + b;
+            }
+
+            if (minY > maxY)
+            {
+                double tmp = maxY;
+                maxY = minY;
+                minY = tmp;
+            }
+
+            if (maxY > height)
+            {
+                maxY = height;
+            }
+
+            if (minY < 0)
+            {
+                minY = 0;
+            }
+
+            if (minY > maxY)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
