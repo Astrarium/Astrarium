@@ -47,7 +47,7 @@ namespace Astrarium.Projections
         }
 
         // https://www.cyberforum.ru/opengl/thread1347461.html
-        // https://doxygen.reactos.org/d2/d0d/project_8c_source.html p.234
+        // https://doxygen.reactos.org/d2/d0d/project_8c_source.html line 234
         protected bool gluProject(Vec3 obj, Mat4 modelview, Mat4 projection, ref Vec3 windowCoordinate)
         {
             Vec4 vec = projection * (modelview * new Vec4(obj[0], obj[1], obj[2], 1));

@@ -10,6 +10,8 @@ namespace Astrarium.Types
     /// </summary>
     public interface ISkyMap : INotifyPropertyChanged
     {
+        event Action<double> FovChanged;
+
         /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
         /// </summary>
@@ -32,6 +34,8 @@ namespace Astrarium.Types
         PointF MouseCoordinates { get; }
 
         Projection Projection { get; }
+
+        void SetProjection(Type type);
 
         bool TimeSync { get; set; }
 

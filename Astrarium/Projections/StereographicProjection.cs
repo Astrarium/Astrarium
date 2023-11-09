@@ -36,7 +36,7 @@ namespace Astrarium.Projections
             double lq = x * x + y * y;
 
             Vec3 v = new Vec3(2 * x, 2 * y, lq - 1);
-            v *= (1.0 / (lq + 1.0));
+            v *= 1.0 / (lq + 1.0);
 
             var vv = m * v;
             v[0] = vv[0];

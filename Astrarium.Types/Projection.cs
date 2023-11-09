@@ -1,9 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -26,7 +23,7 @@ namespace Astrarium.Types
             set
             {
                 flipHorizontal = value;
-                SkyContextChanged();
+                UpdateMatrices();
             }
         }
 
@@ -37,7 +34,7 @@ namespace Astrarium.Types
             set
             {
                 flipVertical = value;
-                SkyContextChanged();
+                UpdateMatrices();
             }
         }
 
@@ -101,7 +98,7 @@ namespace Astrarium.Types
             set
             {
                 viewMode = value;
-                SkyContextChanged();
+                UpdateMatrices();
             }
         }
 
@@ -128,6 +125,7 @@ namespace Astrarium.Types
         public float GetDiskSize(double semidiameter, double minSize = 0)
         {
             // TODO: check it!
+
             return (float)Math.Max(minSize, (float)(Math.Min(ScreenWidth, ScreenHeight) / Fov * (2 * semidiameter / 3600)));
         }
 
@@ -204,7 +202,7 @@ namespace Astrarium.Types
         public Projection(SkyContext context)
         {
             Context = context;
-            Context.ContextChanged += SkyContextChanged;
+            Context.ContextChanged += UpdateMatrices;
 
             ScreenWidth = 1024;
             ScreenHeight = 768;
@@ -212,13 +210,18 @@ namespace Astrarium.Types
             fov = 90;
         }
 
+        public static Type[] ProjectionTypes => System.Reflection.Assembly.GetAssembly(typeof(Projection))
+            .GetTypes()
+             .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
+
         public static Projection Create<TProjection>(SkyContext context) where TProjection : Projection
         {
             return (Projection)Activator.CreateInstance(typeof(TProjection), context);
         }
 
-        private void SkyContextChanged()
+        private void UpdateMatrices()
         {
+            UpdateProjectionMatrix();
             UpdateTransformationMatrices();
 
             // keep the horizontal position the same and recalculate the eq. position
@@ -276,12 +279,8 @@ namespace Astrarium.Types
 
                 UpdateScreenScalingFactor();
                 UpdateProjectionMatrix();
-
-                FovChanged?.Invoke(fov);
             }
         }
-
-        public event Action<double> FovChanged;
 
         public Vec2 Project(CrdsEquatorial eq)
         {
@@ -357,7 +356,6 @@ namespace Astrarium.Types
                 Mat4.YRotation(Angle.ToRadians(90 - Context.GeoLocation.Latitude));
 
             // inverse transformation is a transposed matrix
-            // TODO: may be .Inverse() ?
             MatEquatorialToHorizontal = MatHorizontalToEquatorial.Transpose();
         }
 
@@ -383,7 +381,6 @@ namespace Astrarium.Types
                 }
                 else
                 {
-
                     deltaLon = Angle.ToRadians(p0.Azimuth - p1.Azimuth);
                     deltaLat = Angle.ToRadians(p0.Altitude - p1.Altitude);
                 }

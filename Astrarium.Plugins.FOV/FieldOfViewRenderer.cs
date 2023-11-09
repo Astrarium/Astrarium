@@ -82,28 +82,28 @@ namespace Astrarium.Plugins.FOV
                         {
                             if (prj.ViewMode == ProjectionViewType.Horizontal)
                             {
-                                rotAngle = prj.GetAxisRotation(prj.CenterEquatorial, cameraFrame.Rotation);
+                                rotAngle = prj.GetAxisRotation(prj.CenterEquatorial, -cameraFrame.Rotation);
                             }
                             else if (prj.ViewMode == ProjectionViewType.Equatorial)
                             {
-                                rotAngle = cameraFrame.Rotation;
+                                rotAngle = -cameraFrame.Rotation;
                             }
                         }
                         else if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Horizontal)
                         {
                             if (prj.ViewMode == ProjectionViewType.Horizontal)
                             {
-                                rotAngle = cameraFrame.Rotation;
+                                rotAngle = -cameraFrame.Rotation;
                             }
                             else if (prj.ViewMode == ProjectionViewType.Equatorial)
                             {
-                                rotAngle = prj.GetAxisRotation(prj.CenterHorizontal, cameraFrame.Rotation);
+                                rotAngle = prj.GetAxisRotation(prj.CenterHorizontal, -cameraFrame.Rotation);
                             }
                         }
 
                         GL.PushMatrix();
                         GL.Translate(p.X, p.Y, 0);
-                        GL.Rotate(-rotAngle, 0, 0, 1);
+                        GL.Rotate(rotAngle, 0, 0, 1);
 
                         GL.Enable(EnableCap.Blend);
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

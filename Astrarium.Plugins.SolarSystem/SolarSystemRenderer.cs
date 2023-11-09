@@ -1014,6 +1014,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             // Center of Moon
             var pMoon = prj.Project(moon.Horizontal); // TODO: change to equatorial
+            if (pMoon == null) return;
 
             // Center of Jupiter shadow
             pShadow = Mat4.ZRotation(Angle.ToRadians(rot)) * pShadow + pMoon;

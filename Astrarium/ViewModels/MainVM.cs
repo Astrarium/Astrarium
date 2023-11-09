@@ -201,7 +201,7 @@ namespace Astrarium.ViewModels
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += () => NotifyPropertyChanged(nameof(TimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
-            map.Projection.FovChanged += Map_ViewAngleChanged;
+            map.FovChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
 
             AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
@@ -278,7 +278,6 @@ namespace Astrarium.ViewModels
                 settings.SetAndSave("IsInverted", menuMapTransformInvert.IsChecked);
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
-
             
             var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IsChecked = true };
             var menuMountModeEquatorial = new MenuItem("Equatorial") { IsCheckable = true };
@@ -303,6 +302,16 @@ namespace Astrarium.ViewModels
                     menuMountModeHorizontal,
                     menuMountModeEquatorial
                 })
+            };
+
+            var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
+
+            var projectionMenuItems = projectionTypes.Select(t => new MenuItem(t.Name, new Command(() => map.SetProjection(t))));
+
+            var menuMapProjection = new MenuItem("Projection")
+            {
+                SubItems = new ObservableCollection<MenuItem>(projectionMenuItems)
             };
 
             var menuMapTransform = new MenuItem("$Menu.MapTransform")
@@ -333,6 +342,7 @@ namespace Astrarium.ViewModels
                     }))
             };
 
+            menuView.SubItems.Add(menuMapProjection);
             menuView.SubItems.Add(menuMapTransform);
             menuView.SubItems.Add(menuMapMountMode);
             menuView.SubItems.Add(null);

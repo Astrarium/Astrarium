@@ -16,6 +16,8 @@ namespace Astrarium
 {
     public class SkyMap : ISkyMap
     {
+        public event Action<double> FovChanged;
+
         /// <summary>
         /// Stopwatch to measure rendering time
         /// </summary>
@@ -152,7 +154,6 @@ namespace Astrarium
         /// </summary>
         public event Action<CelestialObject> SelectedObjectChanged;
 
-
         private Projection projection;
 
         public Projection Projection => projection;
@@ -195,9 +196,28 @@ namespace Astrarium
         }
 
         /// <summary>
-        /// Skt context instance used for rendering purposes
+        /// Sky context instance used for rendering purposes
         /// </summary>
         private SkyContext context;
+
+        public void SetProjection(Type type)
+        {
+            var fov = projection?.Fov ?? 90;
+            var vision = projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
+            int w = projection?.ScreenWidth ?? 1;
+            int h = projection?.ScreenHeight ?? 1;
+            var mode = projection?.ViewMode ?? ProjectionViewType.Horizontal;
+
+            projection = (Projection)Activator.CreateInstance(type, context);
+            projection.Fov = fov;
+            projection.SetVision(vision);
+            projection.FlipVertical = !settings.Get("IsInverted");
+            projection.FlipHorizontal = settings.Get("IsMirrored");
+            projection.ViewMode = mode;
+            projection.SetScreenSize(w, h);
+            FovChanged?.Invoke(fov);
+            Invalidate();
+        }
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
@@ -206,11 +226,7 @@ namespace Astrarium
             // Keep current context synchronized with global instance
             skyContext.ContextChanged += () => context.Set(skyContext.JulianDay, skyContext.GeoLocation);
 
-            projection = Projection.Create<PerspectiveProjection>(context);
-            projection.Fov = 90;
-            projection.SetVision(new CrdsHorizontal(0, 0));
-            projection.FlipVertical = !settings.Get("IsInverted");
-            projection.FlipHorizontal = settings.Get("IsMirrored");
+            SetProjection(typeof(StereographicProjection));
 
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
@@ -417,6 +433,7 @@ namespace Astrarium
             {
                 Center.Set(hor);
                 Projection.Fov = viewAngleTarget;
+                FovChanged?.Invoke(viewAngleTarget);
             }
             else
             {
@@ -434,6 +451,7 @@ namespace Astrarium
                 {
                     Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
                     Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
+                    FovChanged?.Invoke(Projection.Fov);
                 }
             }
         }

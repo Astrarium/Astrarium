@@ -1,16 +1,11 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
+﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Projections
 {
     public class CylinderProjection : Projection
     {
-        public override double MaxFov => 180;
+        public override double MaxFov => 90;
 
         public CylinderProjection(SkyContext context) : base(context) { }
 
@@ -32,16 +27,16 @@ namespace Astrarium.Projections
    
             // common part
             return new Vec2(
-                ScreenWidth / 2 + (FlipHorizontal ? -1: 1) * v[0] * (ScreenScalingFactor * 2),
-                ScreenHeight / 2 - (FlipVertical ? -1 : 1) * v[1] * (ScreenScalingFactor * 2)
+                ScreenWidth / 2 + (FlipHorizontal ? -1: 1) * v[0] * (ScreenScalingFactor),
+                ScreenHeight / 2 - (FlipVertical ? -1 : 1) * v[1] * (ScreenScalingFactor)
                 );
         }
 
         public override Vec3 Unproject(Vec2 s, Mat4 m)
         {
             Vec2 v = new Vec2(
-                (FlipHorizontal ? -1 : 1) * (s[0] - ScreenWidth / 2) / (ScreenScalingFactor * 2),
-                -(FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor * 2)
+                (FlipHorizontal ? -1 : 1) * (s[0] - ScreenWidth / 2) / (ScreenScalingFactor),
+                -(FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor)
             );
 
             if (!(v[1] < Math.PI / 2 && v[1] > -Math.PI / 2 && v[0] > -Math.PI && v[0] < Math.PI)) return null;
