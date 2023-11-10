@@ -163,7 +163,7 @@ namespace Astrarium.Plugins.Meteors
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
             SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
-            var phase = Calculator.LunarPhaseAtMax(cMax, m);
+            var phase = Calculator.LunarPhaseAtMax(cMax);
 
             var sb = new StringBuilder();
             sb.AppendLine($"**{Text.Get("MeteorShowersInfoDialog.Names")}**  ");

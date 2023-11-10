@@ -83,7 +83,7 @@ namespace Astrarium.Plugins.Meteors
             return Visibility.RiseTransitSet(eq, ctx.GeoLocation, theta0);
         }
 
-        public double LunarPhaseAtMax(SkyContext ctx, Meteor m)
+        public double LunarPhaseAtMax(SkyContext ctx)
         {
             if (Moon == null)
             {
@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.Meteors
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
             SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
-            var phase = LunarPhaseAtMax(cMax, m);
+            var phase = LunarPhaseAtMax(cMax);
 
             info
             .SetTitle(string.Join(", ", info.Body.Names))
