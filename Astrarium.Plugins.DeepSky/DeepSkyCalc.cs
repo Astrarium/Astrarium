@@ -97,9 +97,7 @@ namespace Astrarium.Plugins.DeepSky
             PrecessionalElements p = c.Get(GetPrecessionalElements);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
-
-            return eq;
+            return Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
         }
 
         /// <summary>

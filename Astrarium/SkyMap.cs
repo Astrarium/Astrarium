@@ -29,12 +29,6 @@ namespace Astrarium
         private double meanRenderTime = 0;
 
         /// <summary>
-        /// Total count of calls of <see cref="Render(Graphics)"/> method.
-        /// Needed for calculating mean rendering time.
-        /// </summary>
-        private long rendersCount = 0;
-
-        /// <summary>
         /// Collection of bounding rectangles of labels displayed on the map
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
@@ -43,15 +37,6 @@ namespace Astrarium
         /// Collection of renderers
         /// </summary>
         private readonly RenderersCollection renderers = new RenderersCollection();
-
-        /// <summary>
-        /// Font used to display diagnostic info
-        /// </summary>
-        private Font fontDiagnosticText = new Font("Monospace", 8);
-
-        private Font fontMapInformationText = new Font("Arial", 14);
-
-        private Font fontMag = new Font("Arial", 8);
 
         private bool dateTimeSync = false;
         public bool TimeSync

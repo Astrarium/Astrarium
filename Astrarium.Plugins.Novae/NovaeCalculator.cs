@@ -15,6 +15,21 @@ namespace Astrarium.Plugins.Novae
         /// <inheritdoc />
         public IEnumerable<Nova> GetCelestialObjects() => Novae;
 
+        /// <summary>
+        /// Precession matrix for current epoch
+        /// </summary>
+        public Mat4 MatPrecession { get; private set; }
+
+        /// <summary>
+        /// Gets J2000.0 precession matrix
+        /// </summary>
+        public Mat4 MatPrecession0 { get; private set; }
+
+        /// <summary>
+        /// Precessional elements for J2000.0 epoch
+        /// </summary>
+        public PrecessionalElements PrecessionalElements0 { get; private set; }
+
         /// <inheritdoc />
         public override void Initialize()
         {
@@ -25,9 +40,26 @@ namespace Astrarium.Plugins.Novae
         /// <inheritdoc />
         public override void Calculate(SkyContext ctx)
         {
+            // precessional elements from J2000 to current epoch
+            PrecessionalElements p = ctx.Get(GetPrecessionalElements);
+
+            // precessional elements from current epoch to J2000
+            var p0 = Precession.ElementsFK5(ctx.JulianDay, Date.EPOCH_J2000);
+
+            MatPrecession =
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
+
+            MatPrecession0 =
+                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
+
+            PrecessionalElements0 = p0;
+
             foreach (var nova in Novae)
             {
-                nova.Horizontal = ctx.Get(Horizontal, nova);
                 nova.Magnitude = ctx.Get(Magnitude, nova);
             }
         }
@@ -46,32 +78,11 @@ namespace Astrarium.Plugins.Novae
         public CrdsEquatorial Equatorial(SkyContext c, Nova n)
         {
             PrecessionalElements p = c.Get(GetPrecessionalElements);
-            double years = c.Get(YearsSince2000);
-
-            // Initial coodinates for J2000 epoch
-            CrdsEquatorial eq0 = new CrdsEquatorial(n.Equatorial0);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
-
-            // Nutation effect
-            var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
-
-            // Aberration effect
-            var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
-
-            // Apparent coordinates of the star
-            eq += eq1 + eq2;
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(n.Equatorial0, p);
 
             return eq;
-        }
-
-        /// <summary>
-        /// Gets number of years (with fractions) since J2000.0 epoch
-        /// </summary>
-        private double YearsSince2000(SkyContext c)
-        {
-            return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }
 
         /// <summary>

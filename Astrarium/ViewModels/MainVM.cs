@@ -47,9 +47,6 @@ namespace Astrarium.ViewModels
         public Command ChangeSettingsCommand { get; private set; }
         public Command ShowAboutCommand { get; private set; }
         public Command CheckForUpdatesCommand { get; private set; }
-        public Command SaveAsImageCommand { get; private set; }
-        public Command PrintCommand { get; private set; }
-        public Command PrintPreviewCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
 
@@ -191,9 +188,6 @@ namespace Astrarium.ViewModels
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
             CheckForUpdatesCommand = new Command(CheckForUpdates);
-            SaveAsImageCommand = new Command(SaveAsImage);
-            PrintCommand = new Command(Print);
-            PrintPreviewCommand = new Command(PrintPreview);
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
@@ -226,44 +220,11 @@ namespace Astrarium.ViewModels
 
             // Main window menu
 
-            MenuItem menuOpen = new MenuItem("$Menu.Open");
-            menuOpen.SubItems = new ObservableCollection<MenuItem>();
-            
-            // "Open" menu items from plugins
-            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuOpen])
+            // MAP
+            var menuMap = new MenuItem("$Menu.Map")
             {
-                menuOpen.SubItems.Add(menuItem);
-            }
-
-            MenuItem menuSave = new MenuItem("$Menu.Save");
-            menuSave.SubItems = new ObservableCollection<MenuItem>();
-            menuSave.SubItems.Add(new MenuItem("$Menu.SaveAsImage", SaveAsImageCommand));
-            // "Save" menu items from plugins
-            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuSave])
-            {
-                menuSave.SubItems.Add(menuItem);
-            }
-
-            ObservableCollection<MenuItem> mapItems = new ObservableCollection<MenuItem>();
-
-            menuOpen.IsEnabled = menuOpen.SubItems.Any();
-            menuSave.IsEnabled = menuSave.SubItems.Any();
-
-            mapItems.Add(menuOpen);
-            mapItems.Add(menuSave);
-            mapItems.Add(null);
-            mapItems.Add(new MenuItem("$Menu.Print", PrintCommand));
-            mapItems.Add(new MenuItem("$Menu.PrintPreview", PrintPreviewCommand));
-            mapItems.Add(null);
-            mapItems.Add(new MenuItem("$Menu.Exit", ExitAppCommand));
-
-            MainMenuItems.Add(new MenuItem("$Menu.Map")
-            {
-                SubItems = mapItems
-            });
-
-            var menuView = new MenuItem("$Menu.View");
-            menuView.SubItems = new ObservableCollection<MenuItem>();
+                SubItems = new ObservableCollection<MenuItem>()
+            };
 
             var menuMapTransformMirror = new MenuItem("$Menu.MapTransform.Mirror") { IsCheckable = true };
             menuMapTransformMirror.Command = new Command(() => {
@@ -279,7 +240,7 @@ namespace Astrarium.ViewModels
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
             
-            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IsChecked = true };
+            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IconKey = "IconSettings", IsChecked = true };
             var menuMountModeEquatorial = new MenuItem("Equatorial") { IsCheckable = true };
             
             menuMountModeHorizontal.Command = new Command(() => {
@@ -342,12 +303,12 @@ namespace Astrarium.ViewModels
                     }))
             };
 
-            menuView.SubItems.Add(menuMapProjection);
-            menuView.SubItems.Add(menuMapTransform);
-            menuView.SubItems.Add(menuMapMountMode);
-            menuView.SubItems.Add(null);
-            menuView.SubItems.Add(menuColorSchema);
-            menuView.SubItems.Add(null);
+            menuMap.SubItems.Add(menuMapProjection);
+            menuMap.SubItems.Add(menuMapTransform);
+            menuMap.SubItems.Add(menuMapMountMode);
+            menuMap.SubItems.Add(null);
+            menuMap.SubItems.Add(menuColorSchema);
+            menuMap.SubItems.Add(null);
 
             string[] groups = new string[] { "Objects", "Constellations", "Grids" };
             foreach (var group in groups)
@@ -379,9 +340,22 @@ namespace Astrarium.ViewModels
                             }
                         });
                     }
-                    menuView.SubItems.Add(menuGroup);
+                    menuMap.SubItems.Add(menuGroup);
                 }
             }
+
+            menuMap.SubItems.Add(null);
+            menuMap.SubItems.Add(new MenuItem("$Menu.Exit") { Command = ExitAppCommand, HotKey = new KeyGesture(Key.None, ModifierKeys.None, "Alt+F4") });
+
+            MainMenuItems.Add(menuMap);
+            
+
+            // VIEW
+
+            var menuView = new MenuItem("$Menu.View")
+            {
+                SubItems = new ObservableCollection<MenuItem>()
+            };
 
             menuView.SubItems.Add(null);
 
@@ -759,69 +733,6 @@ namespace Astrarium.ViewModels
         private async void CheckForUpdates()
         {
             await Task.Run(() => appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x)));
-        }
-
-        private void SaveAsImage()
-        {
-            //var formats = new Dictionary<string, ImageFormat>()
-            //{
-            //    ["Bitmap (*.bmp)|*.bmp"] = ImageFormat.Bmp,
-            //    ["Portable Network Graphics (*.png)|*.png"] = ImageFormat.Png,
-            //    ["Graphics Interchange Format (*.gif)|*.gif"] = ImageFormat.Gif,
-            //    ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
-            //};
-
-            //string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys), out int selectedFilterIndex);
-            //if (fileName != null)
-            //{
-            //    using (Image img = new Bitmap(map.Width, map.Height))
-            //    using (Graphics g = Graphics.FromImage(img))
-            //    {
-            //        map.Render(g);
-            //        string key = formats.Keys.FirstOrDefault(k => k.Split('|')[1].Substring(1).Equals(Path.GetExtension(fileName))) ?? formats.Keys.First();
-            //        img.Save(fileName, formats[key]);
-            //    }
-            //}
-        }
-
-        private PrintDocument CreatePrintDocument()
-        {
-            var document = new PrintDocument()
-            {
-                DocumentName = "Map",
-                DefaultPageSettings = new PageSettings() 
-                { 
-                    Landscape = true 
-                }
-            };
-            document.PrintPage += new PrintPageEventHandler(PrintHandler);
-            return document;
-        }
-
-        private void PrintHandler(object sender, PrintPageEventArgs e)
-        {
-            //int oldWidth = map.Width;
-            //int oldHeight = map.Height;
-            //map.Width = e.PageSettings.Bounds.Width - 1;
-            //map.Height = e.PageSettings.Bounds.Height - 1;           
-            //map.Render(e.Graphics);
-            //map.Width = oldWidth;
-            //map.Height = oldHeight;
-        }
-
-        private void Print()
-        {
-            var document = CreatePrintDocument();
-            if (ViewManager.ShowPrintDialog(document))
-            {
-                document.Print();
-            }
-        }
-
-        private void PrintPreview()
-        {
-            var document = CreatePrintDocument();
-            ViewManager.ShowPrintPreviewDialog(document);
         }
 
         private void GoToObject(CelestialObject body)

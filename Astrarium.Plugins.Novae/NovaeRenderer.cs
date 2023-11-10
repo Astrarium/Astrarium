@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,89 +14,82 @@ namespace Astrarium.Plugins.Novae
     {
         public override RendererOrder Order => RendererOrder.Stars;
 
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
         private NovaeCalculator calc;
         private ISettings settings;
+        private ISky sky;
 
         private const int limitAllNames = 40;
-        private Brush brushStarNames;
-
-        public NovaeRenderer(NovaeCalculator calc, ISettings settings)
+       
+        public NovaeRenderer(NovaeCalculator calc, ISky sky, ISettings settings)
         {
             this.calc = calc;
+            this.sky = sky;
             this.settings = settings;
+        }
+
+        public override void Render(ISkyMap map)
+        {
+            if (!settings.Get("Stars") || !settings.Get<bool>("Novae")) return;
+
+            var prj = map.Projection;
+            var schema = settings.Get<ColorSchema>("Schema");
+            bool drawLabels = settings.Get<bool>("StarsLabels") && settings.Get<bool>("NovaeLabels") && prj.Fov <= limitAllNames;
+            Color labelColor = settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema);
+            Brush brushLabel = new SolidBrush(labelColor);
+            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
+
+            // J2000 equatorial coordinates of screen center
+            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, calc.PrecessionalElements0);
+
+            // matrix for projection, with respect of precession
+            var mat = prj.MatEquatorialToVision * calc.MatPrecession;
+
+            // real circular FOV with respect of screen borders
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+
+            // filter novae by magnitude and FOV
+            var novae = calc.Novae.Where(n => n.Magnitude < prj.MagLimit && Angle.Separation(eq0, n.Equatorial0) < fov);
+
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+            foreach (var star in novae)
+            {
+                float size = prj.GetPointSize(star.Magnitude);
+                if (size > 0)
+                {
+                    if ((int)size == 0) size = 1;
+
+                    // cartesian coordinates of a nova for J2000 epoch
+                    Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(star.Equatorial0.Alpha), Angle.ToRadians(star.Equatorial0.Delta));
+
+                    // screen coordinates, for current epoch
+                    Vec2 p = prj.Project(v, mat);
+
+                    if (prj.IsInsideScreen(p))
+                    {
+                        GL.PointSize(size);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Color3(Color.White.Tint(schema));
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        if (drawLabels)
+                        {
+                            map.DrawObjectLabel(textRenderer.Value, star.ProperName, fontStarNames, brushLabel, p, size);
+                        }
+
+                        map.AddDrawnObject(p, star, size);
+                    }
+                }
+            }
         }
 
         public override void Render(IMapContext map)
         {
-            /*
-            Graphics g = map.Graphics;
-            bool isGround = settings.Get<bool>("Ground");
-            bool showNovae = settings.Get("Stars") && settings.Get<bool>("Novae");
-
-            if (!showNovae) return;
-
-            var novae = calc.Novae.Where(m => Angle.Separation(map.Center, m.Horizontal) < map.ViewAngle);
-            if (isGround)
-            {
-                novae = novae.Where(m => m.Horizontal.Altitude >= 0);
-            }
-
-            var font = SystemFonts.DefaultFont;
-            var brush = new SolidBrush(map.Schema == ColorSchema.White ? Color.Black : Color.White);
-
-            foreach (var star in novae)
-            {
-                float size = map.GetPointSize(star.Magnitude);
-                if (size > 0)
-                {
-                    PointF p = new PointF();// map.Project(star.Horizontal);
-                    if (!map.IsOutOfScreen(p))
-                    {
-                        if (map.Schema == ColorSchema.White)
-                        {
-                            g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
-                        }
-
-                        g.FillEllipse(brush, p.X - size / 2, p.Y - size / 2, size, size);
-
-                        map.AddDrawnObject(star);
-                    }
-                }
-            }
-
-            if (settings.Get<bool>("StarsLabels") && settings.Get<bool>("NovaeLabels") && map.ViewAngle <= limitAllNames)
-            {
-                brushStarNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
-
-                foreach (var nova in novae)
-                {
-                    float diam = map.GetPointSize(nova.Magnitude);
-                    if ((int)diam > 0)
-                    {
-                        PointF p = new Point();// map.Project(nova.Horizontal);
-                        if (!map.IsOutOfScreen(p))
-                        {
-                            DrawStarName(map, p, nova, diam);
-                        }
-                    }
-                }
-            }
-            */
         }
-
-        ///// <summary>
-        ///// Draws nova name
-        ///// </summary>
-        //private void DrawStarName(IMapContext map, PointF point, Nova nova, float diam)
-        //{
-        //    var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-
-        //    // Star has proper name
-        //    if (map.ViewAngle < limitAllNames && settings.Get<bool>("StarsProperNames") && nova.ProperName != null)
-        //    {
-        //        map.DrawObjectCaption(fontStarNames, brushStarNames, nova.ProperName, point, diam);
-        //        return;
-        //    }
-        //}
     }
 }

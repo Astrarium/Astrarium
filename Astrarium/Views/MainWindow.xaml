@@ -69,6 +69,7 @@
                         <Setter Property="Command" Value="{Binding Command}" />
                         <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                         <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                        <Setter Property="Icon" Value="{Binding IconKey, Converter={s:ImageKeyToImageConverter}}" />
                     </Style>
                 </Menu.ItemContainerStyle>
             </Menu>

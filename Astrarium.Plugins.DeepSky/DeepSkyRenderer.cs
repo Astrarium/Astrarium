@@ -34,6 +34,7 @@ namespace Astrarium.Plugins.DeepSky
             bool drawOutlines = settings.Get("DeepSkyOutlines");
             var schema = settings.Get<ColorSchema>("Schema");
             Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(schema);
+            Pen penOutline = new Pen(colorOutline);
             Color colorLabel = settings.Get<Color>("ColorDeepSkyLabel").Tint(schema);
             Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
@@ -165,14 +166,12 @@ namespace Astrarium.Plugins.DeepSky
                         float rx = ds.LargeDiameter.HasValue ? prj.GetDiskSize(ds.LargeDiameter.Value / 2 * 60) / 2 : 0;
                         float ry = ds.SmallDiameter.HasValue ? prj.GetDiskSize(ds.SmallDiameter.Value / 2 * 60) / 2 : 0;
                         double rot = ds.PA.HasValue ? prj.GetAxisRotation(ds.Equatorial, 90 + ds.PA.Value) : 0;
-                        Pen pen = new Pen(colorOutline);
-                        Primitives.DrawEllipse(p, pen, rx, ry, rot);
+                        Primitives.DrawEllipse(p, penOutline, rx, ry, rot);
                     }
                     else
                     {
-                        Pen pen = new Pen(colorOutline);
                         float r = prj.GetDiskSize(ds.Semidiameter, 4) / 2;
-                        Primitives.DrawEllipse(p, pen, r);
+                        Primitives.DrawEllipse(p, penOutline, r);
                     }
 
                     if (drawLabels && sz > 20)

@@ -118,8 +118,6 @@ namespace Astrarium.Types
     {
         ContextMenu = 0,
         MainMenuTools = 1,
-        MainMenuTop = 2,
-        MainMenuOpen = 3,
-        MainMenuSave = 4
+        MainMenuTop = 2
     }
 }

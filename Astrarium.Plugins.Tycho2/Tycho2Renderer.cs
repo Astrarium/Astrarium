@@ -91,8 +91,6 @@ namespace Astrarium.Plugins.Tycho2
                     }
                 }
             }
-
-
         }
 
         [Obsolete]
