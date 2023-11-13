@@ -13,6 +13,11 @@ namespace Astrarium.Types
     public abstract class CelestialObject
     {
         /// <summary>
+        /// Equatorial coordinates of the object
+        /// </summary>
+        public CrdsEquatorial Equatorial { get; set; }
+
+        /// <summary>
         /// Local horizontal coordinates of the object
         /// </summary>
         public CrdsHorizontal Horizontal { get; set; }

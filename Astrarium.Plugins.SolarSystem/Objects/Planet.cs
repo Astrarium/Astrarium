@@ -40,11 +40,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
         /// <summary>
-        /// Apparent topocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Ecliptical coordinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }

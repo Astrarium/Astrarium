@@ -7,12 +7,33 @@
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+    xmlns:p="clr-namespace:Astrarium.Plugins.Meteors;assembly=Astrarium.Plugins.Meteors"
     Title="{t:Text Section.Meteors}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
+    <c:SettingsSection.Resources>
+        <ObjectDataProvider x:Key="EnumMeteorActivityClass" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="p:MeteorActivityClass" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </c:SettingsSection.Resources>
+    
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Meteors}" IsChecked="{Binding Settings.Meteors}" Margin="2" />
+
+        <StackPanel Margin="-2" Orientation="Horizontal" IsEnabled="{Binding Settings.Meteors}">
+            <Label Margin="0" Content="{t:Text Settings.MeteorsActivityClassLimit}" />
+            <ComboBox SelectedValue="{Binding Settings.MeteorsActivityClassLimit}" ItemsSource="{Binding Source={StaticResource EnumMeteorActivityClass}}" MinWidth="80">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
         <CheckBox Content="{t:Text Settings.MeteorsOnlyActive}" IsChecked="{Binding Settings.MeteorsOnlyActive}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MeteorsLabels}" IsChecked="{Binding Settings.MeteorsLabels}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
     </StackPanel>

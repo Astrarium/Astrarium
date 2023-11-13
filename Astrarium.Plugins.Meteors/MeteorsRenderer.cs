@@ -15,6 +15,7 @@ namespace Astrarium.Plugins.Meteors
 
         private MeteorsCalculator calc;
         private ISettings settings;
+        private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public MeteorsRenderer(MeteorsCalculator calc, ISettings settings)
         {
@@ -22,24 +23,18 @@ namespace Astrarium.Plugins.Meteors
             this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            /*
-            Graphics g = map.Graphics;
-            bool isGround = settings.Get<bool>("Ground");
-            bool showMeteors = settings.Get("Meteors");
+            if (!settings.Get("Meteors")) return;
+
+            var prj = map.Projection;
+            var schema = settings.Get<ColorSchema>("Schema");
+
             bool onlyActive = settings.Get("MeteorsOnlyActive");
             bool showLabels = settings.Get("MeteorsLabels");
-            int activityClassLimit = 4;
+            int activityClassLimit = (int)settings.Get("MeteorsActivityClassLimit", MeteorActivityClass.IV);
 
-            if (!showMeteors) return;
-
-            var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(map.Center, m.Horizontal) < map.ViewAngle);
-            if (isGround)
-            {
-                meteors = meteors.Where(m => m.Horizontal.Altitude >= 0);
-            }
-
+            var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(prj.CenterEquatorial, m.Equatorial) < prj.Fov);
             if (onlyActive)
             {
                 meteors = meteors.Where(m => m.IsActive);
@@ -47,26 +42,39 @@ namespace Astrarium.Plugins.Meteors
 
             meteors = meteors.Where(m => m.ActivityClass <= activityClassLimit);
 
-            var color = map.GetColor("ColorMeteors");
+            var color = settings.Get<SkyColor>("ColorMeteors").Night.Tint(schema);
             var pen = new Pen(color);
             var brush = new SolidBrush(color);
             var font = settings.Get<Font>("MeteorsLabelsFont");
 
             foreach (var meteor in meteors)
             {
-                PointF p = new PointF();// map.Project(meteor.Horizontal);
-                if (!map.IsOutOfScreen(p))
+                var p = prj.Project(meteor.Equatorial);
+
+                if (prj.IsInsideScreen(p))
                 {
-                    g.DrawXCross(pen, p, 5);
-                    map.AddDrawnObject(meteor);
+                    var p1 = new Vec2(p.X - 5, p.Y - 5);
+                    var p3 = new Vec2(p.X + 5, p.Y + 5);
+
+                    var p2 = new Vec2(p.X - 5, p.Y + 5);
+                    var p4 = new Vec2(p.X + 5, p.Y - 5);
+
+                    Primitives.DrawLine(p1, p3, pen);
+                    Primitives.DrawLine(p2, p4, pen);
 
                     if (showLabels)
                     {
-                        map.DrawObjectCaption(font, brush, meteor.Name, p, 10);
+                        map.DrawObjectLabel(textRenderer.Value, meteor.Name, font, brush, p, 10);
                     }
+
+                    map.AddDrawnObject(p, meteor, 1);
                 }
             }
-            */
+        }
+
+        public override void Render(IMapContext map)
+        {
+
         }
     }
 }

@@ -25,11 +25,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string CommonName => CommonNames[Number - 1];
 
         /// <summary>
-        /// Apparent equatorial coordinates of the Galilean moon
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; internal set; }
-
-        /// <summary>
         /// Planetocentric rectangular coordinates of the Galilean moon
         /// </summary>
         public CrdsRectangular Rectangular { get; internal set; }

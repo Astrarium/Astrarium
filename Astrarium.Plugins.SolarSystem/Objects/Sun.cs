@@ -12,11 +12,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string CommonName => "Sun";
 
         /// <summary>
-        /// Apparent topocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Ecliptical coordinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }

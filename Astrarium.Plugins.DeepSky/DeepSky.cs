@@ -40,11 +40,6 @@ namespace Astrarium.Plugins.DeepSky
         public CrdsEquatorial Equatorial0 { get; set; }
 
         /// <summary>
-        /// Equatorial coordinates for current epoch
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Status of deep sky object
         /// </summary>
         public DeepSkyStatus Status { get; set; }

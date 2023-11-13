@@ -32,11 +32,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public int Id => Data.planet * 100 + Data.satellite;
 
         /// <summary>
-        /// Apparent equatorial coordinates of the moon
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Planetocentric rectangular coordinates of the moon
         /// </summary>
         public CrdsRectangular Rectangular { get; set; }

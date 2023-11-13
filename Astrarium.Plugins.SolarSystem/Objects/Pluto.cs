@@ -20,11 +20,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string CommonName => "Pluto";
 
         /// <summary>
-        /// Apparent topocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Magnitude of planet
         /// </summary>
         public float Magnitude { get; set; }

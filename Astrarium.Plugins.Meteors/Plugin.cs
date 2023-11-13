@@ -10,6 +10,7 @@ namespace Astrarium.Plugins.Meteors
         public Plugin(ISettings settings)
         {
             DefineSetting("Meteors", true);
+            DefineSetting("MeteorsActivityClassLimit", MeteorActivityClass.IV);
             DefineSetting("MeteorsOnlyActive", true);
             DefineSetting("MeteorsLabels", true);
             DefineSetting("ColorMeteors", new SkyColor(140, 16, 53));

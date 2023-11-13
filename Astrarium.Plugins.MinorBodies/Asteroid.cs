@@ -67,6 +67,7 @@ namespace Astrarium.Plugins.MinorBodies
         public Asteroid()
         {
             Horizontal = new CrdsHorizontal();
+            Equatorial = new CrdsEquatorial();
         }
     }
 }

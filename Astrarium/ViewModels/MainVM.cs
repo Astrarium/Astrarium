@@ -240,7 +240,7 @@ namespace Astrarium.ViewModels
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
             
-            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IconKey = "IconSettings", IsChecked = true };
+            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IsChecked = true };
             var menuMountModeEquatorial = new MenuItem("Equatorial") { IsCheckable = true };
             
             menuMountModeHorizontal.Command = new Command(() => {

@@ -61,6 +61,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             Horizontal = new CrdsHorizontal();
             TailHorizontal = new CrdsHorizontal();
+            Equatorial = new CrdsEquatorial();
         }
     }
 }

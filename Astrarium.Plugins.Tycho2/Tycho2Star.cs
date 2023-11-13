@@ -15,12 +15,6 @@ namespace Astrarium.Plugins.Tycho2
         public override string CommonName => ToString();
 
         /// <summary>
-        /// Equatorial coordinates of the at J2000.0 epoch
-        /// </summary>
-        //public CrdsEquatorial Equatorial0 { get; set; }
-
-
-        /// <summary>
         /// Right ascension at J2000.0 epoch, in degrees
         /// </summary>
         public double Alpha0 { get; set; }

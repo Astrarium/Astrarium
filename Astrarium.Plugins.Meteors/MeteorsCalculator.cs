@@ -35,7 +35,7 @@ namespace Astrarium.Plugins.Meteors
             foreach (var meteor in Meteors)
             {
                 meteor.IsActive = ctx.Get(IsActive, meteor);
-                meteor.Horizontal = ctx.Get(Horizontal, meteor);
+                meteor.Equatorial = ctx.Get(Equatorial, meteor);
             }
         }
 
@@ -113,6 +113,7 @@ namespace Astrarium.Plugins.Meteors
             int year = c.GetDate(c.JulianDay).Year;
             var offset = c.GeoLocation.UtcOffset;
             var jd0 = Date.DeltaT(c.JulianDay) / 86400.0 + Date.JulianDay0(year) - offset / 24;
+
             var begin = new Date(jd0 + m.Begin, offset);
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
