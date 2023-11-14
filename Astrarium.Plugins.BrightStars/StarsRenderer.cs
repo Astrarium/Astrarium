@@ -58,9 +58,6 @@ namespace Astrarium.Plugins.BrightStars
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            // Color of const. lines
-            GL.Color3(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night).Tint(schema));
-
             var allStars = starsCalc.Stars;
 
             double maxFov = Angle.ToRadians(prj.MaxFov * 0.7);
@@ -79,8 +76,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get("ConstLines"))
             {
-                GL.Enable(EnableCap.LineStipple);
-                GL.LineStipple(1, 0xAAAA);
+                var linePen = new Pen(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night).Tint(schema), 1) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
@@ -98,15 +94,10 @@ namespace Astrarium.Plugins.BrightStars
                         var p2 = prj.Project(c2, mat);
                         if (p1 != null && p2 != null)
                         {
-                            GL.Begin(PrimitiveType.Lines);
-                            GL.Vertex2(p1.X, p1.Y);
-                            GL.Vertex2(p2.X, p2.Y);
-                            GL.End();
+                            Primitives.DrawLine(p1, p2, linePen);
                         }
                     }
                 }
-
-                GL.Disable(EnableCap.LineStipple);
             }
 
             if (settings.Get("Stars"))

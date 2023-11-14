@@ -13,6 +13,7 @@ namespace Astrarium.Plugins.Meteors
             DefineSetting("MeteorsActivityClassLimit", MeteorActivityClass.IV);
             DefineSetting("MeteorsOnlyActive", true);
             DefineSetting("MeteorsLabels", true);
+            DefineSetting("MeteorsLabelsType", MeteorLabelType.Name);
             DefineSetting("ColorMeteors", new SkyColor(140, 16, 53));
 
             DefineSetting("MeteorsLabelsFont", new Font("Arial", 8));

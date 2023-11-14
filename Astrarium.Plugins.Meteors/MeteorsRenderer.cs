@@ -13,9 +13,9 @@ namespace Astrarium.Plugins.Meteors
     {
         public override RendererOrder Order => RendererOrder.DeepSpace;
 
-        private MeteorsCalculator calc;
-        private ISettings settings;
-        private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
+        private readonly MeteorsCalculator calc;
+        private readonly ISettings settings;
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public MeteorsRenderer(MeteorsCalculator calc, ISettings settings)
         {
@@ -33,6 +33,7 @@ namespace Astrarium.Plugins.Meteors
             bool onlyActive = settings.Get("MeteorsOnlyActive");
             bool showLabels = settings.Get("MeteorsLabels");
             int activityClassLimit = (int)settings.Get("MeteorsActivityClassLimit", MeteorActivityClass.IV);
+            var labelsType = settings.Get<MeteorLabelType>("MeteorsLabelsType");
 
             var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(prj.CenterEquatorial, m.Equatorial) < prj.Fov);
             if (onlyActive)
@@ -64,7 +65,8 @@ namespace Astrarium.Plugins.Meteors
 
                     if (showLabels)
                     {
-                        map.DrawObjectLabel(textRenderer.Value, meteor.Name, font, brush, p, 10);
+                        string label = labelsType == MeteorLabelType.Name ? meteor.Name : meteor.Code;
+                        map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, 10);
                     }
 
                     map.AddDrawnObject(p, meteor, 1);

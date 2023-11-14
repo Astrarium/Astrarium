@@ -19,8 +19,13 @@
                 <x:Type TypeName="p:MeteorActivityClass" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="EnumMeteorLabelType" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="p:MeteorLabelType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </c:SettingsSection.Resources>
-    
+
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Meteors}" IsChecked="{Binding Settings.Meteors}" Margin="2" />
 
@@ -33,8 +38,23 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <Label Margin="0" Content="{t:Text Settings.MeteorsActivityClassLimitAndHigher}" />
         </StackPanel>
+        
         <CheckBox Content="{t:Text Settings.MeteorsOnlyActive}" IsChecked="{Binding Settings.MeteorsOnlyActive}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MeteorsLabels}" IsChecked="{Binding Settings.MeteorsLabels}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
+
+        <StackPanel IsEnabled="{Binding Settings.Meteors}">
+        <StackPanel Margin="-2" Orientation="Horizontal" IsEnabled="{Binding Settings.MeteorsLabels}">
+            <Label Margin="0" Content="{t:Text Settings.MeteorsLabelsType}" />
+                <ComboBox SelectedValue="{Binding Settings.MeteorsLabelsType}" ItemsSource="{Binding Source={StaticResource EnumMeteorLabelType}}" MinWidth="80">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
     </StackPanel>
 </c:SettingsSection>

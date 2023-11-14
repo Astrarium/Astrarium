@@ -44,8 +44,12 @@ namespace Astrarium.Types
             GL.Vertex2(p2.X, p2.Y);
 
             GL.End();
-        }
 
+            if (pen.DashStyle != DashStyle.Solid)
+            {
+                GL.Disable(EnableCap.LineStipple);
+            }
+        }
         public static void DrawEllipse(Vec2 center, Pen pen, double radius)
         {
             DrawEllipse(center, pen, radius, radius, 0);
