@@ -126,8 +126,6 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public override void Render(IMapContext map) { }
-
         private void DrawFrameLabel(FovFrame frame, Color color, float width, float height)
         {
             var labelSize = WF.TextRenderer.MeasureText(frame.Label, font, Size.Empty);

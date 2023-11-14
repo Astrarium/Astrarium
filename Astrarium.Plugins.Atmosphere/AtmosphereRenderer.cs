@@ -22,11 +22,6 @@ namespace Astrarium.Plugins.Atmosphere
             this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Render(ISkyMap map)
         {
             if (!settings.Get("Ground")) return;

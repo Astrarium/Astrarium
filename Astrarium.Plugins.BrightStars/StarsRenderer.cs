@@ -2,14 +2,9 @@
 using Astrarium.Types;
 using OpenTK.Graphics.OpenGL;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.BrightStars
 {
@@ -22,7 +17,6 @@ namespace Astrarium.Plugins.BrightStars
 
         private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
-        private const int limitAllNames = 20;
         private const int limitBayerNames = 20;
         private const int limitProperNames = 20;
         private const int limitFlamsteedNames = 10;
@@ -108,7 +102,6 @@ namespace Astrarium.Plugins.BrightStars
                 if (daylightFactor == 1) return;
 
                 float starDimming = 1 - daylightFactor;
-
                 float minStarSize = daylightFactor * 3; // empiric
 
                 var fontStarNames = settings.Get<Font>("StarsLabelsFont");
@@ -180,9 +173,6 @@ namespace Astrarium.Plugins.BrightStars
                 Mat4.YRotation(-Math.PI / 2 + s.Delta0) *
                 Mat4.ZRotation(-s.Alpha0);
         }
-
-        [Obsolete]
-        public override void Render(IMapContext map) { }
 
         private Color GetColor(char spClass)
         {

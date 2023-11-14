@@ -106,9 +106,6 @@ namespace Astrarium.Plugins.UCAC4
             }
         }
 
-        [Obsolete]
-        public override void Render(IMapContext map) { }
-
         public override RendererOrder Order => RendererOrder.Stars;
 
         private Color GetColor(char spClass)

@@ -110,8 +110,5 @@ namespace Astrarium.Plugins.MeasureTool
 
             }
         }
-
-        [Obsolete]
-        public override void Render(IMapContext map) { }
     }
 }

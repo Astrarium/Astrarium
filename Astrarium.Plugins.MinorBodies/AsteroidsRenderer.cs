@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.MinorBodies
         public override void Render(ISkyMap map)
         {
             if (!settings.Get("Asteroids")) return;
+            if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
@@ -127,11 +128,6 @@ namespace Astrarium.Plugins.MinorBodies
             string name = body.Names.First();
             string label = drawMagInLabel ? $"{name} {Formatters.Magnitude.Format(body.Magnitude)}" : name;
             map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, size);
-        }
-
-        public override void Render(IMapContext map)
-        {
-            
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;

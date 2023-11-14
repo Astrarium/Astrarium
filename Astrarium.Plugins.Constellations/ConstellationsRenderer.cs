@@ -36,13 +36,9 @@ namespace Astrarium.Plugins.Constellations
             }
         }
 
-        [Obsolete]
-        public override void Render(IMapContext map) { }
-
         private void RenderLabels(ISkyMap map)
         {
             var prj = map.Projection;
-
             var schema = settings.Get<ColorSchema>("Schema");
             Font defFont = settings.Get<Font>("ConstLabelsFont");
             float fontSize = Math.Max(8, (float)Math.Min((int)(800 / prj.Fov), defFont.Size));
@@ -78,7 +74,6 @@ namespace Astrarium.Plugins.Constellations
 
                     var size = WF.TextRenderer.MeasureText(label, font, Size.Empty, formatFlags);
                     textRenderer.Value.DrawString(label, font, brushLabel, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
-                    continue;
                 }
             }
         }

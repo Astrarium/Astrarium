@@ -217,12 +217,6 @@ namespace Astrarium.Plugins.Grids
                 }
             }
         }
-        
-        [Obsolete]
-        public override void Render(IMapContext map)
-        {
-
-        }
 
         public override RendererOrder Order => RendererOrder.Grids;
     }

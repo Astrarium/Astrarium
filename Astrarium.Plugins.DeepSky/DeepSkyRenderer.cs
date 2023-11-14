@@ -51,9 +51,9 @@ namespace Astrarium.Plugins.DeepSky
             // filter deep skies by:
             var deepSkies =
                 // take existing objects only (obviously, do not draw objects that are catalog errors)
-                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&                
+                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&
                 // do not draw small objects for current FOV
-                prj.GetDiskSize(ds.Semidiameter) > 10 &&
+                prj.GetDiskSize(ds.Semidiameter) > 20 &&
                 // do not draw dim objects (exceeding mag limit for current FOV)
                 ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
@@ -182,11 +182,6 @@ namespace Astrarium.Plugins.DeepSky
 
                 map.AddDrawnObject(p, ds, sz);
             }
-        }
-
-        public override void Render(IMapContext map)
-        {
-            
         }
 
         public override RendererOrder Order => RendererOrder.DeepSpace;

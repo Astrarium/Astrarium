@@ -529,7 +529,6 @@ namespace Astrarium
 
         private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
-            
             if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
             {
                 string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));

@@ -85,7 +85,7 @@ namespace Astrarium.Types
             System.Drawing.Imaging.BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size),
                 System.Drawing.Imaging.ImageLockMode.ReadOnly,
                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            
+
             GL.BindTexture(TextureTarget.Texture2D, texture);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0,

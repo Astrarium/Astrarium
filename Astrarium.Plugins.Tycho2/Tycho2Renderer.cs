@@ -93,9 +93,6 @@ namespace Astrarium.Plugins.Tycho2
             }
         }
 
-        [Obsolete]
-        public override void Render(IMapContext map) { }
-
         private Color GetColor(char spClass)
         {
             Color starColor;

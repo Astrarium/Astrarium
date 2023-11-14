@@ -10,12 +10,10 @@ namespace Astrarium.Types
     public abstract class BaseRenderer : PropertyChangedBase
     {
         /// <summary>
-        /// Does rendering logic.
+        /// Does the rendering logic
         /// </summary>
-        /// <param name="map"><see cref="IMapContext"/> instance.</param>
-        public abstract void Render(IMapContext map);
-
-        public virtual void Render(ISkyMap map) { }
+        /// <param name="map"></param>
+        public abstract void Render(ISkyMap map);
 
         /// <summary>
         /// Intitialization logic should be placed here.

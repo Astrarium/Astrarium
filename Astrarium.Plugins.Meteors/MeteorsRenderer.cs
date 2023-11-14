@@ -26,6 +26,7 @@ namespace Astrarium.Plugins.Meteors
         public override void Render(ISkyMap map)
         {
             if (!settings.Get("Meteors")) return;
+            if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
@@ -72,11 +73,6 @@ namespace Astrarium.Plugins.Meteors
                     map.AddDrawnObject(p, meteor, 1);
                 }
             }
-        }
-
-        public override void Render(IMapContext map)
-        {
-
         }
     }
 }

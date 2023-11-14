@@ -34,11 +34,6 @@ namespace Astrarium.Plugins.Horizon
 
         public override RendererOrder Order => RendererOrder.Terrestrial;
 
-        public override void Render(IMapContext map)
-        {
-            
-        }
-
         public override void Render(ISkyMap map)
         {
             RenderHorizonLine();

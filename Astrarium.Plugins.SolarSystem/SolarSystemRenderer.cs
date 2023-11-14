@@ -349,11 +349,15 @@ namespace Astrarium.Plugins.SolarSystem
             // size of object when it's drawn as sphere (in pixels)
             float diam = Math.Min(prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize), data.MaximalDiskSize);
 
+            // take into account dimming during twilight
+            float starDimming = 1 - map.DaylightFactor;
+            size *= starDimming;
+
             Vec2 p = prj.Project(data.Equatorial);
             if (p == null) return;
 
             // DRAW AS POINT
-            if (size >= diam && size >= data.MinimalPointSize && size > 0)
+            if (size >= diam && size >= data.MinimalPointSize && size > 0 && map.DaylightFactor < 1)
             {
                 // out of screen
                 if (!prj.IsInsideScreen(p)) return;
@@ -925,8 +929,6 @@ namespace Astrarium.Plugins.SolarSystem
             double a = color1.A + percent * (color2.A - color1.A);
             return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
         }
-
-        public override void Render(IMapContext map) { }
 
         public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
         {

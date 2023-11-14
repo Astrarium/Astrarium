@@ -122,8 +122,5 @@ namespace Astrarium.Plugins.MilkyWay
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
         }
-
-        [Obsolete]
-        public override void Render(IMapContext map) { }
     }
 }

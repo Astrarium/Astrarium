@@ -31,6 +31,7 @@ namespace Astrarium.Plugins.Novae
         public override void Render(ISkyMap map)
         {
             if (!settings.Get("Stars") || !settings.Get<bool>("Novae")) return;
+            if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
@@ -86,10 +87,6 @@ namespace Astrarium.Plugins.Novae
                     }
                 }
             }
-        }
-
-        public override void Render(IMapContext map)
-        {
         }
     }
 }

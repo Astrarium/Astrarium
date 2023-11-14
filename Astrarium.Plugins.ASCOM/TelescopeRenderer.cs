@@ -86,7 +86,5 @@ namespace Astrarium.Plugins.ASCOM
                 }
             }
         }
-
-        public override void Render(IMapContext map) { }
     }
 }
