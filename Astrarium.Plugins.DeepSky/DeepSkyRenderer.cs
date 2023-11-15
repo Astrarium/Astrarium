@@ -46,7 +46,10 @@ namespace Astrarium.Plugins.DeepSky
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
 
             // real circular FOV with respect of screen borders
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+
+            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
 
             // filter deep skies by:
             var deepSkies =

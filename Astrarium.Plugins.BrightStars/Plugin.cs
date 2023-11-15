@@ -9,6 +9,7 @@ namespace Astrarium.Plugins.BrightStars
         public Plugin(ISettings settings)
         {
             DefineSetting("Stars", true);
+            DefineSetting("StarsScalingFactor", 1m);
             DefineSetting("StarsLabels", true);
             DefineSetting("StarsProperNames", true);
             DefineSetting("StarsColors", true);

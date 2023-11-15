@@ -342,6 +342,7 @@ namespace Astrarium.Plugins.SolarSystem
         {
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
+            float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
             // size of object when it's drawn as point (in pixels)
             float size = Math.Max(prj.GetPointSize(body.Magnitude, data.MaximalPointSize), data.MinimalPointSize);
@@ -367,7 +368,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-                GL.PointSize(size);
+                GL.PointSize(size * starsScalingFactor);
                 GL.Begin(PrimitiveType.Points);
                 GL.Color3(data.Color.Tint(schema));
                 GL.Vertex2(p.X, p.Y);

@@ -51,7 +51,8 @@ namespace Astrarium.Plugins.UCAC4
                 ColorSchema schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
                 Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema));
-               
+                float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
+
                 GL.Enable(EnableCap.PointSmooth);
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -87,7 +88,7 @@ namespace Astrarium.Plugins.UCAC4
 
                         if (prj.IsInsideScreen(p))
                         {
-                            GL.PointSize(size);
+                            GL.PointSize(size * starsScalingFactor);
                             GL.Color3(GetColor(star.SpectralClass).Tint(schema));
 
                             GL.Begin(PrimitiveType.Points);

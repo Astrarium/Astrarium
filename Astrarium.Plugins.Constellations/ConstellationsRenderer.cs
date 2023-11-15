@@ -93,9 +93,13 @@ namespace Astrarium.Plugins.Constellations
             // matrix for projection
             var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
 
+            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = Angle.ToRadians(prj.Fov * Math.Sqrt(h * h + w * w) / 2);
+
             // max angular distance from current vision vector
             // 0.7 coeff is an empyrical
-            double fov = Angle.ToRadians(prj.Fov + 1);
+            //fov = Angle.ToRadians(prj.Fov + 1);
 
             var color = settings.Get<SkyColor>("ColorConstBorders").GetColor(ColorSchema.Night).Tint(schema);
 

@@ -108,6 +108,7 @@ namespace Astrarium.Plugins.BrightStars
                 var color = settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema);
                 var brushStarNames = new SolidBrush(color);
                 bool properNames = settings.Get("StarsProperNames");
+                float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
                 var stars = allStars.Where(s => s != null && eqVision0.Angle(CartesianWithProperMotion(s, t)) < fov);
 
@@ -122,7 +123,7 @@ namespace Astrarium.Plugins.BrightStars
 
                         if (prj.IsInsideScreen(p))
                         {
-                            GL.PointSize(size);
+                            GL.PointSize(size * starsScalingFactor);
                             GL.Color3(GetColor(star.Color).Tint(schema));
 
                             GL.Begin(PrimitiveType.Points);
