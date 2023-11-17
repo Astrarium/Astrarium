@@ -24,7 +24,6 @@ namespace Astrarium.Plugins.Atmosphere
 
         public override void Render(ISkyMap map)
         {
-            if (!settings.Get("Ground")) return;
             if (!settings.Get("Atmosphere")) return;
 
             var prj = map.Projection;
@@ -47,7 +46,7 @@ namespace Astrarium.Plugins.Atmosphere
             double stepAlt = 10;
             double stepAzi = 10;
 
-            for (double alt = 0; alt <= 90; alt += stepAlt)
+            for (double alt = -80; alt <= 90; alt += stepAlt)
             {
                 GL.Begin(PrimitiveType.QuadStrip);
 
@@ -61,8 +60,15 @@ namespace Astrarium.Plugins.Atmosphere
 
                         if (p != null)
                         {
-                            hor.Altitude = Math.Abs(hor.Altitude);
-                            GL.Color3(calc.GetColor(hor));
+                            if (hor.Altitude < 0)
+                            {
+                                GL.Color3(calc.GetColor(new CrdsHorizontal(hor.Azimuth, 90)));
+                            }
+                            else
+                            {
+                                GL.Color3(calc.GetColor(hor));
+                            }
+
                             GL.Vertex2(p.X, p.Y);
                         }
                         else

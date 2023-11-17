@@ -1,0 +1,16 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DrawingImage x:Key="IconAtmosphere">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
+                <GeometryDrawing Brush="White" Geometry="F1 M100,125z M0,0z M50,33.1C71.7,33.1,89.4,50.7,89.4,72.5L95,72.5C95,47.6 74.9,27.5 50,27.5 25.1,27.5 5,47.6 5,72.5L10.6,72.5C10.6,50.8,28.3,33.1,50,33.1z" />
+                <GeometryDrawing Brush="White" Geometry="F1 M100,125z M0,0z M50,44.4C65.5,44.4,78.1,57,78.1,72.5L83.7,72.5C83.7,53.9 68.6,38.7 49.9,38.7 31.2,38.7 16.2,53.9 16.2,72.5L21.8,72.5C21.9,57,34.5,44.4,50,44.4z" />
+                <GeometryDrawing Brush="White" Geometry="F1 M100,125z M0,0z M50,55.6C59.3,55.6,66.9,63.2,66.9,72.5L72.5,72.5C72.5,60.1 62.4,50 50,50 37.6,50 27.5,60.1 27.5,72.5L33.1,72.5C33.1,63.2,40.7,55.6,50,55.6z" />
+                <GeometryDrawing Brush="White" Geometry="F1 M100,125z M0,0z M50,66.9C53.1,66.9,55.6,69.4,55.6,72.5L61.2,72.5C61.2,66.3 56.2,61.3 50,61.3 43.8,61.3 38.8,66.3 38.8,72.5L44.4,72.5C44.4,69.4,46.9,66.9,50,66.9z" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+</ResourceDictionary>

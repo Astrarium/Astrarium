@@ -8,6 +8,10 @@ namespace Astrarium.Plugins.Atmosphere
         public Plugin(ISettings settings)
         {
             DefineSetting("Atmosphere", true);
+
+            ExportResourceDictionaries("Images.xaml");
+
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconAtmosphere", "$Settings.Atmosphere", new SimpleBinding(settings, "Atmosphere", "IsChecked")));
         }
     }
 }

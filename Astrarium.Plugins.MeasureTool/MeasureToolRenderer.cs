@@ -98,6 +98,11 @@ namespace Astrarium.Plugins.MeasureTool
                     {
                         GL.Vertex2(p.X, p.Y);
                     }
+                    else
+                    {
+                        GL.End();
+                        GL.Begin(PrimitiveType.LineStrip);
+                    }
                 }
 
                 GL.End();
@@ -107,7 +112,6 @@ namespace Astrarium.Plugins.MeasureTool
                 // draw text with angle separation value
                 double angle = Angle.Separation(mouse, MeasureOrigin);
                 textRenderer.Value.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, m);
-
             }
         }
     }

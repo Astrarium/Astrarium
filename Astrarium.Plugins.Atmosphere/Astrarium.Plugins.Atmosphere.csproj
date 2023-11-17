@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
 	<PropertyGroup>
 		<TargetFrameworks>net451</TargetFrameworks>
@@ -6,6 +6,7 @@
 		<Product>Atmosphere</Product>
 		<Description>Renders realistic atmosphere</Description>
 		<Authors>Alexander Krutov</Authors>
+		<UseWpf>true</UseWpf>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>
 
@@ -18,6 +19,10 @@
 	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
 		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
 	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="OpenTK" Version="3.3.3" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="Text.ini" />

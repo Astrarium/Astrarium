@@ -51,7 +51,15 @@ namespace Astrarium.Plugins.Tracks
                     for (int i = 0; i < track.Points.Count; i++)
                     {
                         Vec2 p = prj.Project(track.Points[i]);
-                        GL.Vertex2(p.X, p.Y);
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
                     }
 
                     GL.End();

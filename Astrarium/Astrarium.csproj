@@ -10,6 +10,7 @@
     <Description>Open-source .Net planetarium</Description>
     <RootNamespace>Astrarium</RootNamespace>
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
+	<Codename>test</Codename>
   </PropertyGroup>
 
   <PropertyGroup> 

@@ -162,7 +162,6 @@ namespace Astrarium.Plugins.Grids
         private void DrawGridLines(Projection prj, Mat4 mat, Vec3 vision, Color color)
         {
             int segments = prj.Fov < 45 ? 128 : 64;
-            double maxAngle = Angle.ToRadians(180 * 0.7);
 
             GL.Color3(color);
             GL.LineStipple(1, 0xAAAA);
@@ -179,7 +178,7 @@ namespace Astrarium.Plugins.Grids
                         Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), Angle.ToRadians(alt));
                         var p = prj.Project(v, mat);
 
-                        if (p != null && vision.Angle(v) < maxAngle)
+                        if (p != null)
                         {
                             GL.Vertex2(p.X, p.Y);
                         }
@@ -202,7 +201,7 @@ namespace Astrarium.Plugins.Grids
                     {
                         Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / 24.0 * 360), Angle.ToRadians(alt));
                         var p = prj.Project(v, mat);
-                        if (p != null && vision.Angle(v) < maxAngle)
+                        if (p != null)
                         {
                             GL.Vertex2(p.X, p.Y);
                         }

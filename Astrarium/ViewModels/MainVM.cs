@@ -207,7 +207,10 @@ namespace Astrarium.ViewModels
 
             // Toolbar initialization
 
-            foreach (var group in uiIntegration.ToolbarButtons.Groups)
+            // predefined toolbar groups
+            List<string> groups = new List<string> { "Objects", "Constellations", "Grids", "Ground" };
+
+            foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
                 foreach (var button in uiIntegration.ToolbarButtons[group])
                 {
@@ -310,10 +313,9 @@ namespace Astrarium.ViewModels
             menuMap.SubItems.Add(menuColorSchema);
             menuMap.SubItems.Add(null);
 
-            string[] groups = new string[] { "Objects", "Constellations", "Grids" };
             foreach (var group in groups)
             {
-                if (uiIntegration.ToolbarButtons.Groups.Any(g => g == group)) 
+                if (uiIntegration.ToolbarButtons.Groups.Any(g => g == group))
                 {
                     var menuGroup = new MenuItem($"$Menu.{group}");
                     foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
