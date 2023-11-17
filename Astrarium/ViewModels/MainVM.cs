@@ -770,13 +770,16 @@ namespace Astrarium.ViewModels
             {
                 var hor = body.Equatorial.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
 
-                if (hor.Altitude <= 0 && ViewManager.ShowMessageBox("$ObjectUnderHorizon.Title", "$ObjectUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (hor.Altitude <= 0)
                 {
-                    settings.Set("Ground", false);
-                }
-                else
-                {
-                    return true;
+                    if (ViewManager.ShowMessageBox("$ObjectUnderHorizon.Title", "$ObjectUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        settings.Set("Ground", false);
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
             }
 

@@ -278,7 +278,7 @@ namespace Astrarium
 
         public void Render()
         {
-            renderStopWatch.Start();
+            renderStopWatch.Restart();
 
             textureManager.Cleanup();
             celestialObjects.Clear();
@@ -425,9 +425,9 @@ namespace Astrarium
             {
                 CrdsEquatorial centerOriginal = new CrdsEquatorial(Projection.CenterEquatorial);
                 double ad = Angle.Separation(eq, centerOriginal);
-                
+
                 // TODO: calculate steps by more suitable formula
-                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
+                double steps = 100 * Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
                 
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < Projection.Fov) ?
