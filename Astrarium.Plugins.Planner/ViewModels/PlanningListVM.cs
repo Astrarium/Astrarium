@@ -338,8 +338,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             if (body != null)
             {
                 mainWindow.CenterOnObject(body);
-                var eq = body.Horizontal.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-                telescopeManager.SlewToCoordinates(eq);
+                telescopeManager.SlewToCoordinates(body.Equatorial);
             }
             else
             {

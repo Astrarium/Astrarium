@@ -11,6 +11,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium
 {
@@ -22,11 +23,6 @@ namespace Astrarium
         /// Stopwatch to measure rendering time
         /// </summary>
         private Stopwatch renderStopWatch = new Stopwatch();
-
-        /// <summary>
-        /// Mean rendering time, in milliseconds
-        /// </summary>
-        private double meanRenderTime = 0;
 
         /// <summary>
         /// Collection of bounding rectangles of labels displayed on the map
@@ -60,7 +56,6 @@ namespace Astrarium
         }
 
         public float DaylightFactor { get; set; }
-        public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
 
         private CelestialObject selectedObject;
@@ -89,7 +84,7 @@ namespace Astrarium
         /// <summary>
         /// Backing field for <see cref="MousePosition"/> property.
         /// </summary>
-        private CrdsHorizontal mousePosition = new CrdsHorizontal(0, 0);
+        private CrdsEquatorial mousePosition = new CrdsEquatorial(0, 0);
 
         /// <summary>
         /// Last result of needRedraw flag
@@ -100,7 +95,7 @@ namespace Astrarium
         /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
         /// Setting new value can raise redraw of map
         /// </summary>
-        public CrdsHorizontal MousePosition
+        public CrdsEquatorial MousePosition
         {
             get { return mousePosition; }
             set
@@ -145,7 +140,6 @@ namespace Astrarium
 
         public event Action OnInvalidate;
 
-        public event Action OnRedraw;
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
@@ -279,8 +273,13 @@ namespace Astrarium
 
         public ColorSchema Schema { get; private set; } = ColorSchema.Night;
 
+        private long rendersCount = 0;
+        private long meanRenderTime = 0;
+
         public void Render()
         {
+            renderStopWatch.Start();
+
             textureManager.Cleanup();
             celestialObjects.Clear();
             labels.Clear();
@@ -298,6 +297,12 @@ namespace Astrarium
             }
 
             DrawSelectedObject();
+
+            renderStopWatch.Stop();
+            rendersCount++;
+
+            // Calculate mean time of rendering with Cumulative Moving Average formula
+            meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
         }
 
         private void DrawSelectedObject()
@@ -325,11 +330,6 @@ namespace Astrarium
                     Primitives.DrawEllipse(p, Pens.Red, (size + 8) / 2);
                 }
             }
-        }
-
-        public void Render(Graphics g)
-        {
-
         }
 
         public void Invalidate()
@@ -384,30 +384,30 @@ namespace Astrarium
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);
 
-            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+            GoToPoint(body.Equatorial, animationDuration, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, double viewAngleTarget)
         {
-            GoToPoint(body.Horizontal, TimeSpan.Zero, viewAngleTarget);
+            GoToPoint(body.Equatorial, TimeSpan.Zero, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget)
         {
-            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+            GoToPoint(body.Equatorial, animationDuration, viewAngleTarget);
         }
 
-        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
+        public void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration)
         {
-            GoToPoint(hor, animationDuration, Math.Min(Projection.Fov, 90));
+            GoToPoint(eq, animationDuration, Math.Min(Projection.Fov, 90));
         }
 
-        public void GoToPoint(CrdsHorizontal hor, double viewAngleTarget)
+        public void GoToPoint(CrdsEquatorial eq, double viewAngleTarget)
         {
-            GoToPoint(hor, TimeSpan.Zero, viewAngleTarget);
+            GoToPoint(eq, TimeSpan.Zero, viewAngleTarget);
         }
 
-        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
+        public void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration, double viewAngleTarget)
         {
             if (viewAngleTarget == 0)
             {
@@ -416,15 +416,19 @@ namespace Astrarium
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {
-                Center.Set(hor);
+                Projection.SetVision(eq);
                 Projection.Fov = viewAngleTarget;
                 FovChanged?.Invoke(viewAngleTarget);
+                Invalidate();
             }
             else
             {
-                CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
-                double ad = Angle.Separation(hor, centerOriginal);
+                CrdsEquatorial centerOriginal = new CrdsEquatorial(Projection.CenterEquatorial);
+                double ad = Angle.Separation(eq, centerOriginal);
+                
+                // TODO: calculate steps by more suitable formula
                 double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
+                
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < Projection.Fov) ?
                     // linear zooming if body is already on the screen:
@@ -432,12 +436,18 @@ namespace Astrarium
                     // parabolic zooming with jumping to 90 degrees view angle at the middle of path:
                     new double[] { Projection.Fov, 90, viewAngleTarget };
 
-                for (int i = 0; i <= steps; i++)
+                Task.Run(() =>
                 {
-                    Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
-                    Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
-                    FovChanged?.Invoke(Projection.Fov);
-                }
+                    for (int i = 0; i <= steps; i++)
+                    {
+                        Projection.SetVision(Angle.Intermediate(centerOriginal, eq, i / steps));
+                        Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
+                        Invalidate();
+                        //System.Windows.Forms.Application.DoEvents();
+                        Thread.Sleep(1);
+                        FovChanged?.Invoke(Projection.Fov);
+                    }
+                });
             }
         }
 

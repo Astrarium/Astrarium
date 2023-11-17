@@ -39,12 +39,11 @@ namespace Astrarium.Plugins.MinorBodies
             bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");
             var font = settings.Get<Font>("AsteroidsLabelsFont");
 
-            // TODO: replace with Equatorial
-            var asteroids = asteroidsCalc.Asteroids.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < prj.Fov);
+            var asteroids = asteroidsCalc.Asteroids.Where(a => Angle.Separation(prj.CenterEquatorial, a.Equatorial) < prj.Fov);
 
             foreach (var a in asteroids)
             {
-                double ad = Angle.Separation(a.Horizontal, prj.CenterHorizontal);
+                double ad = Angle.Separation(a.Equatorial, prj.CenterEquatorial);
 
                 if (ad < prj.Fov + a.Semidiameter / 3600)
                 {
@@ -62,7 +61,7 @@ namespace Astrarium.Plugins.MinorBodies
                     // asteroid should be rendered as disk
                     if ((int)diam > 0 && diam > size)
                     {
-                        Vec2 p = prj.Project(a.Horizontal);
+                        Vec2 p = prj.Project(a.Equatorial);
 
                         GL.Enable(EnableCap.Blend);
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -95,7 +94,7 @@ namespace Astrarium.Plugins.MinorBodies
                     {
                         if ((int)size == 0) size = 1;
 
-                        Vec2 p = prj.Project(a.Horizontal);
+                        Vec2 p = prj.Project(a.Equatorial);
 
                         if (prj.IsInsideScreen(p))
                         {

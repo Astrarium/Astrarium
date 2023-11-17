@@ -45,8 +45,7 @@ namespace Astrarium.Plugins.MinorBodies
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             var font = settings.Get<Font>("CometsLabelsFont");
 
-            // TODO: replace with Equatorial
-            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterHorizontal, a.Horizontal) < prj.Fov + Angle.Separation(a.Horizontal, a.TailHorizontal));
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterEquatorial, a.Equatorial) < prj.Fov + Angle.Separation(a.Equatorial, a.TailEquatorial));
 
             foreach (var c in comets)
             {
@@ -60,10 +59,10 @@ namespace Astrarium.Plugins.MinorBodies
                 }
 
                 // comet center
-                Vec2 p = prj.Project(c.Horizontal);
+                Vec2 p = prj.Project(c.Equatorial);
 
                 // comet tail end
-                Vec2 t = prj.Project(c.TailHorizontal);
+                Vec2 t = prj.Project(c.TailEquatorial);
 
                 if (p == null || t == null) continue;
 

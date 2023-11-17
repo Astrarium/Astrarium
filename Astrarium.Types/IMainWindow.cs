@@ -22,9 +22,9 @@ namespace Astrarium.Types
         /// <summary>
         /// Centers sky map on the specified point
         /// </summary>
-        /// <param name="hor">Horizontal coordinates of the target point</param>
+        /// <param name="hor">Equatorial coordinates of the target point</param>
         /// <param name="targetViewAngle">Target view angle to be set.</param>
-        void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle);
+        void CenterOnPoint(CrdsEquatorial eq, double targetViewAngle);
 
         void Focus();
     }

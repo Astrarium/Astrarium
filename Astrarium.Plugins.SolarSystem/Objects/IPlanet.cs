@@ -8,12 +8,10 @@ using System.Threading.Tasks;
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
     public interface IPlanet
-    { 
+    {
         int Number { get; }
 
         string Name { get; }
-
-        CrdsHorizontal Horizontal { get; }
 
         CrdsEquatorial Equatorial { get; }
 

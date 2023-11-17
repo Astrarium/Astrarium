@@ -12,11 +12,6 @@ namespace Astrarium.Types
     {
         event Action<double> FovChanged;
 
-        /// <summary>
-        /// Gets or sets horizontal coordinates of the central point of the canvas.
-        /// </summary>
-        CrdsHorizontal Center { get; }
-
         float DaylightFactor { get; set; }
 
         /// <summary>
@@ -29,7 +24,7 @@ namespace Astrarium.Types
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
-        CrdsHorizontal MousePosition { get; }
+        CrdsEquatorial MousePosition { get; }
 
         PointF MouseCoordinates { get; }
 
@@ -41,13 +36,6 @@ namespace Astrarium.Types
 
         void Invalidate();
 
-        /// <summary>
-        /// Renders the celestial map on provided Graphics object
-        /// </summary>
-        /// <param name="g">Graphics to render the map.</param>
-        [Obsolete]
-        void Render(Graphics g);
-
         void Render();
 
         CelestialObject FindObject(PointF point);
@@ -55,12 +43,9 @@ namespace Astrarium.Types
         void GoToObject(CelestialObject body, double viewAngleTarget);
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
         void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget);
-        void GoToPoint(CrdsHorizontal hor, double viewAngleTarget);
-        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration);
-        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget);
-
-        [Obsolete]
-        void AddDrawnObject(CelestialObject obj);
+        void GoToPoint(CrdsEquatorial eq, double viewAngleTarget);
+        void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration);
+        void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration, double viewAngleTarget);
 
         void AddDrawnObject(PointF p, CelestialObject obj, float size);
 

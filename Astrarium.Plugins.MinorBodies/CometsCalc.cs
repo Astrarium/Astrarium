@@ -81,10 +81,10 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 foreach (Comet c in comets)
                 {
-                    c.Horizontal = ctx.Get(Horizontal, c);
+                    c.Equatorial = ctx.Get(EquatorialT, c);
                     c.Magnitude = ctx.Get(Magnitude, c);
                     c.Semidiameter = ctx.Get(Appearance, c).Coma;
-                    c.TailHorizontal = ctx.Get(TailHorizontal, c);
+                    c.TailEquatorial = ctx.Get(TailEquatorial, c);
                 }
             }
         }
@@ -140,15 +140,6 @@ namespace Astrarium.Plugins.MinorBodies
             // Equatorial coordinates for the mean equinox and epoch of the target date
             // No nutation an aberration corrections here, because we do not need high precision
             return Precession.GetEquatorialCoordinates(eq0, pe);
-        }
-
-        /// <summary>
-        /// Calculates horizontal coordinates of comet tail end
-        /// </summary>
-        private CrdsHorizontal TailHorizontal(SkyContext ctx, Comet c)
-        {
-            var eq = ctx.Get(TailEquatorial, c);
-            return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
         }
 
         /// <summary>

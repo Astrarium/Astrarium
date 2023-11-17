@@ -949,8 +949,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (details.RA != null && details.Dec != null)
             {
                 var eq = new CrdsEquatorial(details.RA.Value, details.Dec.Value);
-                var hor = eq.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
-                mainWindow.CenterOnPoint(hor, 1);
+                mainWindow.CenterOnPoint(eq, 1);
                 mainWindow.Focus();
             }
             else if (body != null)

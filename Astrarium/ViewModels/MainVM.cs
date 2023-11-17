@@ -691,9 +691,9 @@ namespace Astrarium.ViewModels
             {
                 if (ev.SecondaryBody != null)
                 {
-                    var hor = Angle.Intermediate(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal, 0.5);
+                    var eq = Angle.Intermediate(ev.PrimaryBody.Equatorial, ev.SecondaryBody.Equatorial, 0.5);
 
-                    var targetViewAngle = Angle.Separation(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal) * 3;
+                    var targetViewAngle = Angle.Separation(ev.PrimaryBody.Equatorial, ev.SecondaryBody.Equatorial) * 3;
 
                     if (ev.PrimaryBody is SizeableCelestialObject pb && ev.SecondaryBody is SizeableCelestialObject sb)
                     {
@@ -704,7 +704,7 @@ namespace Astrarium.ViewModels
                         }
                     }
 
-                    CenterOnPoint(hor, targetViewAngle);
+                    CenterOnPoint(eq, targetViewAngle);
                 }
                 else
                 {
@@ -766,9 +766,11 @@ namespace Astrarium.ViewModels
                 }
             }
 
-            if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+            if (settings.Get<bool>("Ground"))
             {
-                if (ViewManager.ShowMessageBox("$ObjectUnderHorizon.Title", "$ObjectUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                var hor = body.Equatorial.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
+
+                if (hor.Altitude <= 0 && ViewManager.ShowMessageBox("$ObjectUnderHorizon.Title", "$ObjectUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     settings.Set("Ground", false);
                 }
@@ -797,12 +799,13 @@ namespace Astrarium.ViewModels
 
         private void CenterOnPoint()
         {
-            map.Center.Set(map.MousePosition);
-            map.Invalidate();
+            
         }
 
-        public void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle)
+        public void CenterOnPoint(CrdsEquatorial eq, double targetViewAngle)
         {
+            var hor = eq.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
+
             if (settings.Get<bool>("Ground") && hor.Altitude <= 0)
             {
                 if (ViewManager.ShowMessageBox("$PointUnderHorizon.Title", "$PointUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -827,7 +830,7 @@ namespace Astrarium.ViewModels
                 }
             }
 
-            map.GoToPoint(hor, TimeSpan.FromSeconds(1), targetViewAngle);
+            map.GoToPoint(eq, TimeSpan.FromSeconds(1), targetViewAngle);
         }
 
         public void Focus()

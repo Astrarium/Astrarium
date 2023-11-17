@@ -1016,7 +1016,7 @@ namespace Astrarium.Plugins.SolarSystem
             double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
 
             // Center of Moon
-            var pMoon = prj.Project(moon.Horizontal); // TODO: change to equatorial
+            var pMoon = prj.Project(moon.Equatorial);
             if (pMoon == null) return;
 
             // Center of Jupiter shadow
@@ -1152,7 +1152,7 @@ namespace Astrarium.Plugins.SolarSystem
                 float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
 
                 // Center of eclipsed body
-                Vec2 pBody = prj.Project(eclipsedBody.Horizontal); // TODO: change to Equatorial
+                Vec2 pBody = prj.Project(eclipsedBody.Equatorial);
 
                 if (pBody == null) return;
 

@@ -254,7 +254,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private void FindCurrentPoint()
         {
-            map.GoToPoint(ascom.Position.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime), TimeSpan.FromSeconds(1));
+            map.GoToPoint(ascom.Position, TimeSpan.FromSeconds(1));
         }
 
         private void AbortSlew()
@@ -328,9 +328,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private CrdsEquatorial GetMouseCoordinates()
         {
-            var hor = map.SelectedObject?.Horizontal ?? map.MousePosition;
-            var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-            return eq;
+            return map.SelectedObject?.Equatorial ?? map.MousePosition;
         }
 
         private void SyncToPosition()

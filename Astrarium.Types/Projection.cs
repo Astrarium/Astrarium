@@ -398,16 +398,16 @@ namespace Astrarium.Types
 
         private void Move(double deltaLon, double deltaLat)
         {
-            double longtiude = 0;
+            double longitude = 0;
             double latitude = 0;
 
             if (ViewMode == ProjectionViewType.Horizontal)
-                CartesianToSpherical(ref longtiude, ref latitude, VecHorizontalVision);
+                CartesianToSpherical(ref longitude, ref latitude, VecHorizontalVision);
             else
-                CartesianToSpherical(ref longtiude, ref latitude, VecEquatorialVision);
+                CartesianToSpherical(ref longitude, ref latitude, VecEquatorialVision);
 
             // moving in longitude (left/right)
-            if (deltaLon != 0) longtiude -= deltaLon;
+            if (deltaLon != 0) longitude -= deltaLon;
 
             // moving in latitude (up/down)
             if (deltaLat != 0)
@@ -421,12 +421,12 @@ namespace Astrarium.Types
             {
                 if (ViewMode == ProjectionViewType.Horizontal)
                 {
-                    VecHorizontalVision = SphericalToCartesian(longtiude, latitude);
+                    VecHorizontalVision = SphericalToCartesian(longitude, latitude);
                     VecEquatorialVision = MatHorizontalToEquatorial * VecHorizontalVision;
                 }
                 else
                 {
-                    VecEquatorialVision = SphericalToCartesian(longtiude, latitude);
+                    VecEquatorialVision = SphericalToCartesian(longitude, latitude);
                     VecHorizontalVision = MatEquatorialToHorizontal * VecEquatorialVision;
                 }
             }

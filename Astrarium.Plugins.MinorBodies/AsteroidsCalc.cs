@@ -83,7 +83,7 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 foreach (Asteroid a in asteroids)
                 {
-                    a.Horizontal = c.Get(Horizontal, a);
+                    a.Equatorial = c.Get(EquatorialT, a);
                     a.Magnitude = c.Get(Magnitude, a);
                     a.Semidiameter = c.Get(Semidiameter, a);
                 }

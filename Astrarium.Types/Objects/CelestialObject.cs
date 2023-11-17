@@ -18,11 +18,6 @@ namespace Astrarium.Types
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
-        /// Local horizontal coordinates of the object
-        /// </summary>
-        public CrdsHorizontal Horizontal { get; set; }
-
-        /// <summary>
         /// Gets array of celestial object names
         /// </summary>
         public abstract string[] Names { get; }

@@ -33,7 +33,7 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="mouse">Current mouse position on sky map</param>
         /// <returns>True if repaint of map is required, otherwise false.</returns>
-        public virtual bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton) { return false; }
+        public virtual bool OnMouseMove(CrdsEquatorial mouse, MouseButton mouseButton) { return false; }
 
         public virtual bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton) { return false; }
     }

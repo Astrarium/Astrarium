@@ -30,7 +30,6 @@ namespace Astrarium.Plugins.SolarSystem
         public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);
-            Sun.Horizontal = c.Get(Horizontal);
             Sun.Ecliptical = c.Get(Ecliptical);
             Sun.Semidiameter = c.Get(Semidiameter);
         }

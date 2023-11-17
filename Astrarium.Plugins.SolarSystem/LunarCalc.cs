@@ -26,7 +26,6 @@ namespace Astrarium.Plugins.SolarSystem
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
-            Moon.Horizontal = c.Get(Horizontal);
             Moon.PAaxis = c.Get(PAaxis);
             Moon.Phase = c.Get(Phase);
             Moon.PhaseAngle = Math.Sign(c.Get(Elongation)) * c.Get(PhaseAngle);
