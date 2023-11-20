@@ -7,9 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -134,18 +132,11 @@ namespace Astrarium
         /// </summary>
         public event Action<CelestialObject> SelectedObjectChanged;
 
-        private Projection projection;
-
-        public Projection Projection => projection;
+        public Projection Projection { get; private set; }
 
         public event Action OnInvalidate;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Collection of celestial objects drawn on the map
-        /// </summary>
-        private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
 
         /// <summary>
         /// Collection of celestial objects drawn on the map
@@ -158,20 +149,14 @@ namespace Astrarium
         private ISettings settings = null;
 
         /// <summary>
-        /// Command line args
-        /// </summary>
-        private ICommandLineArgs commandLineArgs = null;
-
-        /// <summary>
         /// Texture manager instance
         /// </summary>
         private ITextureManager textureManager = null;
 
-        public SkyMap(ITextureManager textureManager, ISettings settings, ICommandLineArgs commandLineArgs)
+        public SkyMap(ITextureManager textureManager, ISettings settings)
         {
             this.textureManager = textureManager;
             this.settings = settings;
-            this.commandLineArgs = commandLineArgs;
         }
 
         /// <summary>
@@ -181,19 +166,19 @@ namespace Astrarium
 
         public void SetProjection(Type type)
         {
-            var fov = projection?.Fov ?? 90;
-            var vision = projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
-            int w = projection?.ScreenWidth ?? 1;
-            int h = projection?.ScreenHeight ?? 1;
-            var mode = projection?.ViewMode ?? ProjectionViewType.Horizontal;
+            var fov = Projection?.Fov ?? 90;
+            var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
+            int w = Projection?.ScreenWidth ?? 1;
+            int h = Projection?.ScreenHeight ?? 1;
+            var mode = Projection?.ViewMode ?? ProjectionViewType.Horizontal;
 
-            projection = (Projection)Activator.CreateInstance(type, context);
-            projection.Fov = fov;
-            projection.SetVision(vision);
-            projection.FlipVertical = !settings.Get("IsInverted");
-            projection.FlipHorizontal = settings.Get("IsMirrored");
-            projection.ViewMode = mode;
-            projection.SetScreenSize(w, h);
+            Projection = (Projection)Activator.CreateInstance(type, context);
+            Projection.Fov = fov;
+            Projection.SetVision(vision);
+            Projection.FlipVertical = !settings.Get("IsInverted");
+            Projection.FlipHorizontal = settings.Get("IsMirrored");
+            Projection.ViewMode = mode;
+            Projection.SetScreenSize(w, h);
             FovChanged?.Invoke(fov);
             Invalidate();
         }
@@ -288,7 +273,7 @@ namespace Astrarium
             GL.PushMatrix();
             GL.LoadIdentity();
             GL.Ortho(0, Projection.ScreenWidth,
-                     0, Projection.ScreenHeight, -1, 1);
+                        0, Projection.ScreenHeight, -1, 1);
 
             textureManager.Cleanup();
             celestialObjects.Clear();
@@ -308,16 +293,17 @@ namespace Astrarium
 
             DrawSelectedObject();
 
-            GL.PopMatrix();            
+            GL.PopMatrix();
+
 
             renderStopWatch.Stop();
+
+            rendersCount++;
 
             // Calculate mean time of rendering with Cumulative Moving Average formula
             meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
-            rendersCount++;
-
-            Debug.WriteLine("Mean render time: " + renderStopWatch.ElapsedMilliseconds);
+            //Debug.WriteLine("Mean render time: " + meanRenderTime);
         }
 
         private void DrawSelectedObject()
@@ -333,10 +319,10 @@ namespace Astrarium
 
                     double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
 
-                    float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : projection.MagLimit;
+                    float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
 
-                    double diskSize = projection.GetDiskSize(sd, 10);
-                    double pointSize = projection.GetPointSize(double.IsNaN(mag) ? projection.MagLimit : mag);
+                    double diskSize = Projection.GetDiskSize(sd, 10);
+                    double pointSize = Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag);
 
                     double size = Math.Max(diskSize, pointSize);
 
@@ -376,14 +362,14 @@ namespace Astrarium
             }
             */
 
-            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (projection.ScreenHeight - point.Y - c.Item2.Y) * (projection.ScreenHeight - point.Y - c.Item2.Y)))
+            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (Projection.ScreenHeight - point.Y - c.Item2.Y) * (Projection.ScreenHeight - point.Y - c.Item2.Y)))
             {
                 double sd = (x.Item1 is SizeableCelestialObject) ?
                     (x.Item1 as SizeableCelestialObject).Semidiameter : 0;
 
-                double size = projection.GetDiskSize(sd, 10);
+                double size = Projection.GetDiskSize(sd, 10);
 
-                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (projection.ScreenHeight - x.Item2.Y - point.Y) * (projection.ScreenHeight - x.Item2.Y - point.Y)) < size / 2)
+                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (Projection.ScreenHeight - x.Item2.Y - point.Y) * (Projection.ScreenHeight - x.Item2.Y - point.Y)) < size / 2)
                 {
                     return x.Item1;
                 }
@@ -442,7 +428,7 @@ namespace Astrarium
                 double ad = Angle.Separation(eq, centerOriginal);
 
                 // TODO: calculate steps by more suitable formula
-                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
+                double steps = animationDuration.TotalMilliseconds;
                 
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < Projection.Fov) ?
@@ -457,19 +443,12 @@ namespace Astrarium
                     {
                         Projection.SetVision(Angle.Intermediate(centerOriginal, eq, i / steps));
                         Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
-                        Invalidate();
-                        //System.Windows.Forms.Application.DoEvents();
                         Thread.Sleep(1);
+                        Invalidate();                        
                         FovChanged?.Invoke(Projection.Fov);
                     }
                 });
             }
-        }
-
-        [Obsolete]
-        public void AddDrawnObject(CelestialObject obj)
-        {
-            drawnObjects.Add(obj);
         }
 
         public void AddDrawnObject(PointF p, CelestialObject obj, float size)

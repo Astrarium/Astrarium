@@ -21,21 +21,13 @@ namespace Astrarium
     public partial class App : Application
     {
         private IKernel kernel = new StandardKernel();
-        private ICommandLineArgs commandLineArgs = null;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            commandLineArgs = new CommandLineArgs(e.Args);
-
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
             Log.SetImplementation((DefaultLogger)LogManager.GetLogger("", typeof(DefaultLogger)));
-            if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-            {
-                Log.Level = "Debug";
-            }
-
             Log.Info($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
 
             var splashVM = new SplashScreenVM();
@@ -107,7 +99,6 @@ namespace Astrarium
 
         private void ConfigureContainer(IProgress<string> progress)
         {
-            kernel.Bind<ICommandLineArgs>().ToConstant(commandLineArgs).InSingletonScope();
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
             kernel.Bind<IAppUpdater>().To<AppUpdater>().InSingletonScope();
             kernel.Bind<ITextureManager, TextureManager>().To<TextureManager>().InSingletonScope();
