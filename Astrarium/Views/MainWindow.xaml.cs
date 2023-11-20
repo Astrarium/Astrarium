@@ -376,14 +376,38 @@ namespace Astrarium
 
                     pOld = new System.Drawing.Point(e.X, e.Y);
                 }
+
+                if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
+                {
+                    var body = map.FindObject(new PointF(e.X, e.Y));
+                    if (body != null)
+                    {
+                        if (body is IMagnitudeObject mo)
+                        {
+                            skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
+                        }
+                        else
+                        {
+                            skyToolTip.Content = body.Names.First();
+                        }
+                        skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
+                        skyToolTip.IsOpen = true;
+                    }
+                    else
+                    {
+                        skyToolTip.IsOpen = false;
+                    }
+                }
+                else
+                {
+                    skyToolTip.IsOpen = false;
+                }
             }
         }
 
         private void SkyView_Resize(object sender, EventArgs e)
         {
             map.Projection.SetScreenSize(skyView.Width, skyView.Height);
-            
-            skyView.Invalidate();
         }
 
         private System.Diagnostics.Stopwatch renderStopWatch = new System.Diagnostics.Stopwatch();

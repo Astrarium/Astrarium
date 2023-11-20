@@ -248,6 +248,7 @@ namespace Astrarium.Plugins.SolarSystem
                         TextureName = Path.Combine(dataPath, textureName),
                         FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
                         MinimalDiskSize = 10,
+                        MaximalPointSize = 0,
                         PhaseAngle = moon.PhaseAngle,
                         LatitudeShift = -moon.Libration.b,
                         LongitudeShift = -moon.Libration.l,
@@ -358,7 +359,7 @@ namespace Astrarium.Plugins.SolarSystem
             if (p == null) return;
 
             // DRAW AS POINT
-            if (size >= diam && size >= data.MinimalPointSize && size > 0 && map.DaylightFactor < 1)
+            if (size >= diam && size >= data.MinimalPointSize && size > 0 && data.MaximalPointSize > 0 && map.DaylightFactor < 1)
             {
                 // out of screen
                 if (!prj.IsInsideScreen(p)) return;

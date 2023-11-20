@@ -36,6 +36,7 @@ namespace Astrarium.Plugins.SolarSystem
             Moon.AscendingNode = c.Get(AscendingNode);
             Moon.EarthShadow = c.Get(EarthShadow);
             Moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
+            Moon.Magnitude = c.Get(Magnitude);
         }
 
         /// <summary>
