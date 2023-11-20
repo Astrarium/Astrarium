@@ -280,6 +280,16 @@ namespace Astrarium
         {
             renderStopWatch.Restart();
 
+            GL.ClearColor(Color.Black);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.StencilBufferBit);
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(0, Projection.ScreenWidth,
+                     0, Projection.ScreenHeight, -1, 1);
+
             textureManager.Cleanup();
             celestialObjects.Clear();
             labels.Clear();
@@ -298,11 +308,16 @@ namespace Astrarium
 
             DrawSelectedObject();
 
+            GL.PopMatrix();            
+
             renderStopWatch.Stop();
-            rendersCount++;
 
             // Calculate mean time of rendering with Cumulative Moving Average formula
             meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
+
+            rendersCount++;
+
+            Debug.WriteLine("Mean render time: " + renderStopWatch.ElapsedMilliseconds);
         }
 
         private void DrawSelectedObject()
@@ -427,7 +442,7 @@ namespace Astrarium
                 double ad = Angle.Separation(eq, centerOriginal);
 
                 // TODO: calculate steps by more suitable formula
-                double steps = 100 * Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
+                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
                 
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < Projection.Fov) ?

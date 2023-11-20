@@ -10,8 +10,6 @@ using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System.Linq;
-using System.Threading.Tasks;
-using OpenTK.Graphics.OpenGL;
 using Astrarium.Algorithms;
 
 namespace Astrarium
@@ -208,8 +206,8 @@ namespace Astrarium
 
         private System.Drawing.Point LocationFromLParam(IntPtr lParam)
         {
-            short x = (short)((((long)lParam) >> 0) & 0xffff); 
-            short y = (short)((((long)lParam) >> 16) & 0xffff); 
+            short x = (short)((((long)lParam) >> 0) & 0xffff);
+            short y = (short)((((long)lParam) >> 16) & 0xffff);
             return new System.Drawing.Point(x, y);
         }
 
@@ -298,7 +296,7 @@ namespace Astrarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
-        private readonly SkyViewControl skyViewControl;
+        private readonly SkyView skyView;
         private readonly SkyMap map;
 
         public MainWindow(ISettings settings, SkyMap map)
@@ -308,35 +306,19 @@ namespace Astrarium
             this.map = map;
             this.StateChanged += MainWindow_StateChanged;
 
-            
-
-            /*
-            var skyView = new SkyView();
-            skyView.SkyMap = map;
-            skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
+            skyView = new SkyView();
+            skyView.Paint += SkyView_Paint;
+            skyView.Resize += SkyView_Resize;
+            skyView.MouseMove += SkyView_MouseMove1;
+            skyView.MouseUp += SkyViewControl_MouseUp;
+            skyView.MouseWheel += SkyViewControl_MouseWheel;
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseMove += SkyView_MouseMove;
-            skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);            
+            skyView.MouseDoubleClick += SkyViewControl_MouseDoubleClick;
+            map.OnInvalidate += skyView.Invalidate;
+
+            settings.SettingValueChanged += (s, v) => skyView.Invalidate();
+
             Host.Child = skyView;
-            */
-
-            skyViewControl = new SkyViewControl();
-            //skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
-            //skyView.MouseClick += SkyView_MouseClick;
-            //skyView.MouseMove += SkyView_MouseMove;
-            //skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
-            skyViewControl.Paint += SkyView_Paint;
-            skyViewControl.Resize += SkyView_Resize;
-            skyViewControl.MouseMove += SkyView_MouseMove1;
-            skyViewControl.MouseUp += SkyViewControl_MouseUp;
-            skyViewControl.MouseWheel += SkyViewControl_MouseWheel;
-            skyViewControl.MouseClick += SkyView_MouseClick;
-            skyViewControl.MouseDoubleClick += SkyViewControl_MouseDoubleClick;
-            map.OnInvalidate += skyViewControl.Invalidate;
-
-            settings.SettingValueChanged += (s, v) => skyViewControl.Invalidate();
-
-            Host.Child = skyViewControl;
 
             Host.Loaded += (o, e) => WF.Application.AddMessageFilter(this);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
@@ -355,7 +337,7 @@ namespace Astrarium
         private void SkyViewControl_MouseWheel(object sender, WF.MouseEventArgs e)
         {
             map.Projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
-            skyViewControl.Invalidate();
+            skyView.Invalidate();
         }
 
         private void SkyViewControl_MouseUp(object sender, WF.MouseEventArgs e)
@@ -387,8 +369,8 @@ namespace Astrarium
                 {
                     if (pOld != System.Drawing.Point.Empty)
                     {
-                        map.Projection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
-                        skyViewControl.Invalidate();
+                        map.Projection.Move(new Vec2(pOld.X, skyView.Height - pOld.Y), new Vec2(e.X, skyView.Height - e.Y));
+                        skyView.Invalidate();
                         pOld = new System.Drawing.Point(e.X, e.Y);
                     }
 
@@ -399,38 +381,23 @@ namespace Astrarium
 
         private void SkyView_Resize(object sender, EventArgs e)
         {
-            map.Projection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
-            GL.Viewport(0, 0, skyViewControl.Width, skyViewControl.Height);
-            skyViewControl.Invalidate();
+            map.Projection.SetScreenSize(skyView.Width, skyView.Height);
+            
+            skyView.Invalidate();
         }
 
         private System.Diagnostics.Stopwatch renderStopWatch = new System.Diagnostics.Stopwatch();
 
         private void SkyView_Paint(object sender, WF.PaintEventArgs e)
         {
-            Color color = Color.Black;
-
-            GL.ClearColor(color);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.Clear(ClearBufferMask.StencilBufferBit);
-
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.PushMatrix();
-            GL.LoadIdentity();
-            GL.Ortho(0, map.Projection.ScreenWidth,
-                     0, map.Projection.ScreenHeight, -1, 1);
-
             renderStopWatch.Restart();
 
             map.Render();
 
             renderStopWatch.Stop();
+
             int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
             SetFPS(this, $"FPS = {fps}");
-
-            GL.PopMatrix();
-
-            (sender as SkyViewControl).SwapBuffers();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
