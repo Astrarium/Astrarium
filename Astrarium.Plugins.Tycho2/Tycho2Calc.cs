@@ -684,8 +684,12 @@ namespace Astrarium.Plugins.Tycho2
                 if (tyc1 > 0 && tyc1 <= 9537)
                 {
                     Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
-                    var stars = GetStarsInRegion(region, t, tyc2, tyc3);
-                    return stars.Where(filterFunc).Take(maxCount).ToArray();
+                    var stars = GetStarsInRegion(region, t, tyc2, tyc3).Where(filterFunc).Take(maxCount);
+                    foreach (var s in stars)
+                    {
+                        s.Equatorial = c.Get(Equatorial, s as Tycho2Star);
+                    }
+                    return stars.ToArray();
                 }
             }
             return new CelestialObject[0];

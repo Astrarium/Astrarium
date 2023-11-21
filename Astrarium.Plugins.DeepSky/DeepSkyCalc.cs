@@ -243,11 +243,18 @@ namespace Astrarium.Plugins.DeepSky
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return deepSkies
+            var result = deepSkies
                 .Where(ds => ds.CommonName.Equals(searchString) || ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
-                .ToArray();
+                .ToList();
+
+            foreach (var ds in result)
+            {
+                ds.Equatorial = context.Get(Equatorial, ds as DeepSky);
+            }
+
+            return result;
         }
 
         public override void Initialize()

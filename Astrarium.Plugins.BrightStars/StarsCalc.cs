@@ -242,12 +242,19 @@ namespace Astrarium.Plugins.BrightStars
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 
-            return Stars.Where(s => s != null &&
+            var result = Stars.Where(s => s != null &&
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
-                .ToArray();
+                .ToList();
+
+            foreach (var s in result)
+            {
+                s.Equatorial = context.Get(Equatorial, (s as Star).Number);
+            }
+
+            return result;
         }
 
         private ICollection<string> GetStarNamesForSearch(Star s)

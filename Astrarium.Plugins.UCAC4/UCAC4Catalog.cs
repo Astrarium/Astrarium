@@ -578,13 +578,13 @@ namespace Astrarium.Plugins.UCAC4
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
 
             // Nutation effect
-            var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
+            //var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
 
             // Aberration effect
-            var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+            //var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
 
             // Apparent coordinates of the star
-            eq += eqN + eqA;
+            //eq += eqN + eqA;
 
             return eq;
         }
@@ -733,6 +733,12 @@ namespace Astrarium.Plugins.UCAC4
                     }
                 }
             }
+
+            foreach (var s in stars)
+            {
+                s.Equatorial = context.Get(Equatorial, s as UCAC4Star);
+            }
+
             return stars;
         }
 

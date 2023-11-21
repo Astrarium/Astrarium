@@ -75,7 +75,7 @@ namespace Astrarium.Plugins.Novae
         /// <summary>
         /// Gets equatorial coordinates of a star for current epoch
         /// </summary>
-        public CrdsEquatorial Equatorial(SkyContext c, Nova n)
+        private CrdsEquatorial Equatorial(SkyContext c, Nova n)
         {
             PrecessionalElements p = c.Get(GetPrecessionalElements);
 
@@ -291,11 +291,18 @@ namespace Astrarium.Plugins.Novae
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return Novae
+            var result = Novae
                 .Where(m => m.Names.Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
+
+            foreach (var n in result)
+            {
+                n.Equatorial = context.Get(Equatorial, n as Nova);
+            }
+
+            return result;
         }
     }
 }
