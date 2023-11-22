@@ -31,7 +31,6 @@ namespace Astrarium
                 GL.Viewport(0, 0, Width, Height);
                 Invalidate();
             }
-            
         }
     }
 }

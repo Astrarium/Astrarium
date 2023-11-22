@@ -57,9 +57,6 @@ namespace Astrarium.Plugins.Tycho2
                 // years since initial catalogue epoch
                 double t = prj.Context.Get(tycho2.YearsSince2000);
 
-                // matrix for projection, with respect of precession
-                var mat = prj.MatEquatorialToVision * tycho2.MatPrecession;
-
                 float magLimit = prj.MagLimit;
                 magLimit = (float)(-1.44995 * Math.Log(0.000230685 * prj.Fov));
 
@@ -71,7 +68,7 @@ namespace Astrarium.Plugins.Tycho2
 
                     if (size >= minStarSize)
                     {
-                        var p = prj.Project(star.Cartesian, mat);
+                        var p = prj.Project(star.Equatorial);
 
                         if (prj.IsInsideScreen(p))
                         {

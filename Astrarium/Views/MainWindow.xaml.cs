@@ -309,11 +309,11 @@ namespace Astrarium
             skyView = new SkyView();
             skyView.Paint += SkyView_Paint;
             skyView.Resize += SkyView_Resize;
-            skyView.MouseMove += SkyView_MouseMove1;
-            skyView.MouseUp += SkyViewControl_MouseUp;
-            skyView.MouseWheel += SkyViewControl_MouseWheel;
+            skyView.MouseUp += SkyView_MouseUp;
+            skyView.MouseMove += SkyView_MouseMove;
+            skyView.MouseWheel += SkyView_MouseWheel;
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseDoubleClick += SkyViewControl_MouseDoubleClick;
+            skyView.MouseDoubleClick += SkyView_MouseDoubleClick;
             map.OnInvalidate += skyView.Invalidate;
 
             settings.SettingValueChanged += (s, v) => skyView.Invalidate();
@@ -329,79 +329,69 @@ namespace Astrarium
         }
 
 
-        private void SkyViewControl_MouseDoubleClick(object sender, WF.MouseEventArgs e)
+        private void SkyView_MouseDoubleClick(object sender, WF.MouseEventArgs e)
         {
             GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
         }
 
-        private void SkyViewControl_MouseWheel(object sender, WF.MouseEventArgs e)
+        private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
         {
             map.Projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
-            skyView.Invalidate();
+            map.Invalidate();
         }
 
-        private void SkyViewControl_MouseUp(object sender, WF.MouseEventArgs e)
+        private void SkyView_MouseUp(object sender, WF.MouseEventArgs e)
         {
             pOld = System.Drawing.Point.Empty;
         }
 
-        System.Drawing.Point pOld = new System.Drawing.Point();
+        private System.Drawing.Point pOld = new System.Drawing.Point();
 
-        private void SkyView_MouseMove1(object sender, WF.MouseEventArgs e)
+        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
-            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
+            var hor = map.Projection.UnprojectHorizontal(e.X, map.Projection.ScreenHeight - e.Y);
+            var eq = map.Projection.UnprojectEquatorial(e.X, map.Projection.ScreenHeight - e.Y);
+
+            SetMouseEquatorialPosition(this, eq);
+            SetMouseHorizontalPosition(this, hor);
+            SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
+
+            map.MouseCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
+
+            if (e.Button == WF.MouseButtons.Left)
             {
-                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
-                ViewManager.ShowPopupMessage(text);
-            }
-            else
-            {
-                var hor = map.Projection.UnprojectHorizontal(e.X, map.Projection.ScreenHeight - e.Y);
-                var eq = map.Projection.UnprojectEquatorial(e.X, map.Projection.ScreenHeight - e.Y);
-
-                SetMouseEquatorialPosition(this, eq);
-                SetMouseHorizontalPosition(this, hor);
-                SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
-
-                map.MouseCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
-
-                if (e.Button == WF.MouseButtons.Left)
+                if (pOld != System.Drawing.Point.Empty)
                 {
-                    if (pOld != System.Drawing.Point.Empty)
-                    {
-                        map.Projection.Move(new Vec2(pOld.X, skyView.Height - pOld.Y), new Vec2(e.X, skyView.Height - e.Y));
-                        skyView.Invalidate();
-                        pOld = new System.Drawing.Point(e.X, e.Y);
-                    }
-
-                    pOld = new System.Drawing.Point(e.X, e.Y);
+                    map.Move(new Vec2(pOld.X, map.Projection.ScreenHeight - pOld.Y), new Vec2(e.X, map.Projection.ScreenHeight - e.Y));
                 }
 
-                if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
+                pOld = new System.Drawing.Point(e.X, e.Y);
+            }
+
+            if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
+            {
+                var body = map.FindObject(new PointF(e.X, e.Y));
+                if (body != null)
                 {
-                    var body = map.FindObject(new PointF(e.X, e.Y));
-                    if (body != null)
+                    if (body is IMagnitudeObject mo)
                     {
-                        if (body is IMagnitudeObject mo)
-                        {
-                            skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
-                        }
-                        else
-                        {
-                            skyToolTip.Content = body.Names.First();
-                        }
-                        skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
-                        skyToolTip.IsOpen = true;
+                        skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
                     }
                     else
                     {
-                        skyToolTip.IsOpen = false;
+                        skyToolTip.Content = body.Names.First();
                     }
+                    skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
+                    skyToolTip.IsOpen = true;
                 }
                 else
                 {
                     skyToolTip.IsOpen = false;
                 }
+            }
+            else
+            {
+                skyToolTip.IsOpen = false;
             }
         }
 
@@ -515,41 +505,6 @@ namespace Astrarium
                 // see https://github.com/MahApps/MahApps.Metro/issues/2244
                 Host.ContextMenu.PlacementTarget = Host;
                 Host.ContextMenu.IsOpen = true;
-            }
-        }
-
-        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
-        {
-            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
-            {
-                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
-                ViewManager.ShowPopupMessage(text);
-            }
-
-            if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
-            {
-                var body = map.FindObject(new PointF(e.X, e.Y));
-                if (body != null)
-                {
-                    if (body is IMagnitudeObject mo)
-                    {
-                        skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
-                    }
-                    else
-                    {
-                        skyToolTip.Content = body.Names.First();
-                    }
-                    skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
-                    skyToolTip.IsOpen = true;
-                }
-                else
-                {
-                    skyToolTip.IsOpen = false;
-                }
-            }
-            else
-            {
-                skyToolTip.IsOpen = false;
             }
         }
 

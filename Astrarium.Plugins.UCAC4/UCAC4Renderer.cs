@@ -62,19 +62,11 @@ namespace Astrarium.Plugins.UCAC4
 
                 magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.Projection.Fov));
 
-                PrecessionalElements pe = Precession.ElementsFK5(prj.Context.JulianDay, Date.EPOCH_J2000);
+                // J2000 equatorial coordinates of screen center
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, catalog.PrecessionalElements0);
 
-                var eq0 = prj.CenterEquatorial;
-
-                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
-
+                // years since initial catalogue epoch
                 double t = prj.Context.Get(catalog.YearsSince2000);
-
-                // matrix for projection, with respect of precession
-                var mat = prj.MatEquatorialToVision * catalog.MatPrecession;
-
-                // equatorial vision vector in J2000 coords
-                var eqVision0 = catalog.MatPrecession0 * prj.VecEquatorialVision;
 
                 var stars = catalog.GetStars(t, eq, prj.Fov, m => m <= magLimit);
 
@@ -84,7 +76,7 @@ namespace Astrarium.Plugins.UCAC4
 
                     if (size >= minStarSize)
                     {
-                        var p = prj.Project(star.Cartesian, mat);
+                        var p = prj.Project(star.Equatorial);
 
                         if (prj.IsInsideScreen(p))
                         {

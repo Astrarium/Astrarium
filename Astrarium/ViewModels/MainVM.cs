@@ -681,7 +681,7 @@ namespace Astrarium.ViewModels
                     vm.OnEventSelected += OnPhenomenaSelected;
                     ViewManager.ShowWindow(vm);
                 }
-            }    
+            }
         }
 
         private void OnPhenomenaSelected(AstroEvent ev)

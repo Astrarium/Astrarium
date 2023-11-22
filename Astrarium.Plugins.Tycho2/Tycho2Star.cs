@@ -27,7 +27,7 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Cartesian coordinates of the star
         /// </summary>
-        public Vec3 Cartesian { get; set; }
+        //public Vec3 Cartesian { get; set; }
 
         /// <summary>
         /// Proper motion in RA

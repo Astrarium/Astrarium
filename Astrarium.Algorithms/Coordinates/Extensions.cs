@@ -32,7 +32,7 @@ namespace Astrarium.Algorithms
         public static CrdsHorizontal ToHorizontal(this CrdsEquatorial eq, CrdsGeographical geo, double theta0)
         {
             double H = Angle.ToRadians(HourAngle(theta0, geo.Longitude, eq.Alpha));
-            double phi = Angle.ToRadians(geo.Latitude);        
+            double phi = Angle.ToRadians(geo.Latitude);
             double delta = Angle.ToRadians(eq.Delta);
 
             CrdsHorizontal hor = new CrdsHorizontal();

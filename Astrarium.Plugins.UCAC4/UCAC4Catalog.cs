@@ -27,9 +27,9 @@ namespace Astrarium.Plugins.UCAC4
         private readonly bool[] zoneAvailable = new bool[ZONES_COUNT];
         private readonly List<UCAC4HPMStarData> hpmStars = new List<UCAC4HPMStarData>();
         private bool isInitialized = false;
+        private PrecessionalElements precessionalElements;
 
-        public Mat4 MatPrecession { get; private set; }
-        public Mat4 MatPrecession0 { get; private set; }
+        public PrecessionalElements PrecessionalElements0 { get; private set; }
 
         /// <summary>
         /// Flag indicating the catalog data has been found and loaded
@@ -404,14 +404,18 @@ namespace Astrarium.Plugins.UCAC4
                 float bmag = BitConverter.ToInt16(starsData, 46 + offset) / 1000.0f;
                 float vmag = BitConverter.ToInt16(starsData, 48 + offset) / 1000.0f;
                 var posData = ParsePositionData(starsData, offset, zn, starIndex);
+
+                double alpha = posData.RA2000 + posData.PmRA * t;
+                double delta = posData.Dec2000 + posData.PmDec * t;
+                var eq0 = new CrdsEquatorial(alpha, delta);
+
                 UCAC4Star star = new UCAC4Star()
                 {
                     ZoneNumber = (ushort)zn,
                     RunningNumber = (uint)(starIndex + 1),
                     Magnitude = mag,
                     SpectralClass = SpectralClass(bmag, vmag),
-                    Cartesian = CartesianWithProperMotion(posData, t)
-                    //Horizontal = Equatorial(context, posData).ToHorizontal(context.GeoLocation, context.SiderealTime)
+                    Equatorial = Precession.GetEquatorialCoordinates(eq0, precessionalElements)
                 };
 
                 star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
@@ -548,17 +552,6 @@ namespace Astrarium.Plugins.UCAC4
         private string FindConstellation(SkyContext context, UCAC4Star star)
         {
             return Constellations.FindConstellation(context.Get(Equatorial, star), context.JulianDay);
-        }
-
-        private Vec3 CartesianWithProperMotion(UCAC4StarPosData s, double years)
-        {
-            double alpha = s.PmRA * years;
-            double delta = s.PmDec * years;
-
-            alpha = Angle.ToRadians(s.RA2000 + alpha);
-            delta = Angle.ToRadians(s.Dec2000 + delta);
-
-            return Projection.SphericalToCartesian(alpha, delta);
         }
 
         private CrdsEquatorial Equatorial(SkyContext context, UCAC4StarPosData pos)
@@ -734,11 +727,6 @@ namespace Astrarium.Plugins.UCAC4
                 }
             }
 
-            foreach (var s in stars)
-            {
-                s.Equatorial = context.Get(Equatorial, s as UCAC4Star);
-            }
-
             return stars;
         }
 
@@ -748,20 +736,10 @@ namespace Astrarium.Plugins.UCAC4
         public override void Calculate(SkyContext context)
         {
             // precessional elements from J2000 to current epoch
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            precessionalElements = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             // precessional elements from current epoch to J2000
-            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
-
-            MatPrecession =
-                Mat4.ZRotation(Angle.ToRadians(p.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p.zeta));
-
-            MatPrecession0 =
-                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
+            PrecessionalElements0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
         }
     }
 }

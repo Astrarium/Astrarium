@@ -74,10 +74,44 @@ namespace Astrarium
             }
         }
 
+        private CelestialObject lockedObject;
+        
         /// <summary>
-        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// Locked Object 
         /// </summary>
-        public CelestialObject LockedObject { get; set; }
+        public CelestialObject LockedObject
+        {
+            get => lockedObject;
+            set
+            {
+                lockedObject = value;
+                if (lockedObject != null)
+                {
+                    var prj = Projection;
+                    var ctx = prj.Context;
+                    var h = lockedObject.Equatorial.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
+                    LockedObjectDeltaLongitude = prj.CenterHorizontal.Azimuth - h.Azimuth;
+                    LockedObjectDeltaLatitude = prj.CenterHorizontal.Altitude - h.Altitude;
+                }
+            }
+        }
+
+        public void Move(Vec2 pOld, Vec2 pNew)
+        {
+            Projection.Move(pOld, pNew);
+
+            if (LockedObject != null)
+            {
+                var horBody = LockedObject.Equatorial.ToHorizontal(Projection.Context.GeoLocation, Projection.Context.SiderealTime);
+                LockedObjectDeltaLongitude = Projection.CenterHorizontal.Azimuth - horBody.Azimuth;
+                LockedObjectDeltaLatitude = Projection.CenterHorizontal.Altitude - horBody.Altitude;
+            }
+
+            Invalidate();
+        }
+
+        public double LockedObjectDeltaLongitude { get; set; }
+        public double LockedObjectDeltaLatitude { get; set; }
 
         /// <summary>
         /// Backing field for <see cref="MousePosition"/> property.
@@ -188,7 +222,21 @@ namespace Astrarium
             context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
 
             // Keep current context synchronized with global instance
-            skyContext.ContextChanged += () => context.Set(skyContext.JulianDay, skyContext.GeoLocation);
+            skyContext.ContextChanged += () =>
+            {
+                
+
+                context.Set(skyContext.JulianDay, skyContext.GeoLocation);
+
+                if (LockedObject != null)
+                {
+                    var horBody = LockedObject.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                    var hor = new CrdsHorizontal(
+                        horBody.Azimuth + LockedObjectDeltaLongitude,
+                        horBody.Altitude + LockedObjectDeltaLatitude);
+                    Projection.SetVision(hor);
+                }
+            };
 
             SetProjection(typeof(StereographicProjection));
 
@@ -250,8 +298,20 @@ namespace Astrarium
                 timeSyncEvent.WaitOne();
                 timeSyncResetEvent.WaitOne();
                 double rate = Math.Min(5000, Math.Max(100, Projection.Fov * 100));
+                
                 context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+
+                if (LockedObject != null)
+                {
+                    var horBody = LockedObject.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                    var hor = new CrdsHorizontal(
+                        horBody.Azimuth + LockedObjectDeltaLongitude,
+                        horBody.Altitude + LockedObjectDeltaLatitude);
+                    Projection.SetVision(hor);
+                }
+
                 Invalidate();
+
                 Thread.Sleep((int)rate);
             }
         }

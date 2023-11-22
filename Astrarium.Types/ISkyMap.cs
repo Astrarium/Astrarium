@@ -24,6 +24,11 @@ namespace Astrarium.Types
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
+        void Move(Vec2 screenPosOld, Vec2 screenPosNew);
+
+        double LockedObjectDeltaLongitude { get; set; }
+        double LockedObjectDeltaLatitude { get; set; }
+
         CrdsEquatorial MousePosition { get; }
 
         PointF MouseCoordinates { get; }
