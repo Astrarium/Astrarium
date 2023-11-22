@@ -54,18 +54,18 @@ namespace Astrarium.Plugins.BrightStars
 
             var allStars = starsCalc.Stars;
 
-            double maxFov = Angle.ToRadians(prj.MaxFov * 0.7);
+            double maxFov = prj.MaxFov * 0.7;
 
-            // fov in radians
-            double fov = Angle.ToRadians(prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+            // fov
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
-            // matrix for projection, with respect of precession
-            var mat = prj.MatEquatorialToVision * starsCalc.MatPrecession;
+            // equatorial coordinates of screen center for current epoch
+            CrdsEquatorial eq = prj.CenterEquatorial;
 
-            // equatorial vision vector in J2000 coords
-            var eqVision0 = starsCalc.MatPrecession0 * prj.VecEquatorialVision;
+            // J2000 equatorial coordinates of screen center
+            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, starsCalc.PrecessionalElements0);
 
-            // years since 2000.0
+            // years since initial catalogue epoch (J2000)
             double t = prj.Context.Get(starsCalc.YearsSince2000);
 
             if (settings.Get("ConstLines"))
@@ -74,18 +74,14 @@ namespace Astrarium.Plugins.BrightStars
 
                 foreach (var line in sky.ConstellationLines)
                 {
-                    var s1 = allStars.ElementAt(line.Item1);
-                    var s2 = allStars.ElementAt(line.Item2);
+                    var s1 = starsCalc.GetStarWithActualPosition(allStars.ElementAt(line.Item1), t);
+                    var s2 = starsCalc.GetStarWithActualPosition(allStars.ElementAt(line.Item2), t);
 
-                    // cartesian coordinates of stars with respect of proper motion,
-                    // but for initial catalogue epoch
-                    var c1 = CartesianWithProperMotion(s1, t);
-                    var c2 = CartesianWithProperMotion(s2, t);
-
-                    if (eqVision0.Angle(c1) < maxFov && eqVision0.Angle(c2) < maxFov)
+                    if (Angle.Separation(eq, new CrdsEquatorial(s1.Alpha0, s1.Delta0)) < maxFov &&
+                        Angle.Separation(eq, new CrdsEquatorial(s2.Alpha0, s2.Delta0)) < maxFov)
                     {
-                        var p1 = prj.Project(c1, mat);
-                        var p2 = prj.Project(c2, mat);
+                        var p1 = prj.Project(s1.Equatorial);
+                        var p2 = prj.Project(s2.Equatorial);
                         if (p1 != null && p2 != null)
                         {
                             Primitives.DrawLine(p1, p2, linePen);
@@ -110,16 +106,15 @@ namespace Astrarium.Plugins.BrightStars
                 bool properNames = settings.Get("StarsProperNames");
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
-                var stars = allStars.Where(s => s != null && eqVision0.Angle(CartesianWithProperMotion(s, t)) < fov);
+                float magLimit = prj.MagLimit;
+                var stars = starsCalc.GetStars(t, eq0, fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
                     if (size > minStarSize)
                     {
-                        var c = CartesianWithProperMotion(star, t);
-
-                        var p = prj.Project(c, mat);
+                        var p = prj.Project(star.Equatorial);
 
                         if (prj.IsInsideScreen(p))
                         {
@@ -152,27 +147,6 @@ namespace Astrarium.Plugins.BrightStars
             delta = s.Delta0 + Angle.ToRadians(delta);
 
             return Projection.SphericalToCartesian(alpha, delta);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="s">Star</param>
-        /// <param name="t">Number of years since initial epoch</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// See Abalakin, page 125. Signs of rotation angles are inverted.
-        /// </remarks>
-        private Mat4 GetProperMotion(Star s, double t)
-        {
-            return
-                Mat4.ZRotation(s.Alpha0) *
-                Mat4.YRotation(-s.Delta0 + Math.PI / 2) *
-                Mat4.ZRotation(-s.PmPhi0) *
-                Mat4.YRotation(-s.PmMu * t) *
-                Mat4.ZRotation(s.PmPhi0) *
-                Mat4.YRotation(-Math.PI / 2 + s.Delta0) *
-                Mat4.ZRotation(-s.Alpha0);
         }
 
         private Color GetColor(char spClass)

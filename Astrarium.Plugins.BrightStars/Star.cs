@@ -101,29 +101,14 @@ namespace Astrarium.Plugins.BrightStars
         public ushort FK5Number { get; set; }
 
         /// <summary>
-        /// Equatorial coordinates for the catalogue epoch
-        /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
-
-        /// <summary>
-        /// RA for the catalogue epoch, in radians 
+        /// RA for the catalogue epoch, in degrees 
         /// </summary>
         public float Alpha0 { get; set; }
 
         /// <summary>
-        /// Dec for the catalogue epoch, in radians 
+        /// Dec for the catalogue epoch, in degrees 
         /// </summary>
         public float Delta0 { get; set; }
-
-        /// <summary>
-        /// Phi0 angle of proper motion, in radians (see Abalakin, p. 125)
-        /// </summary>
-        public float PmPhi0 { get; set; }
-
-        /// <summary>
-        /// Mu angle of proper motion, in radians (see Abalakin, p. 125)
-        /// </summary>
-        public float PmMu { get; set; }
 
         /// <summary>
         /// Annual proper motion in RA J2000, FK5 system, arcsec/yr

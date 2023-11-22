@@ -88,20 +88,17 @@ namespace Astrarium.Plugins.BrightStars
                             star.VariableName = varName;
                         }
 
-                        star.Equatorial0.Alpha = new HMS(
-                                                    Convert.ToUInt32(line.Substring(75, 2)),
-                                                    Convert.ToUInt32(line.Substring(77, 2)),
-                                                    Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
-                                                ).ToDecimalAngle();
+                        star.Alpha0 = (float)new HMS(
+                                            Convert.ToUInt32(line.Substring(75, 2)),
+                                            Convert.ToUInt32(line.Substring(77, 2)),
+                                            Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
+                                        ).ToDecimalAngle();
 
-                        star.Equatorial0.Delta = (line[83] == '-' ? -1 : 1) * new DMS(
+                        star.Delta0 = (line[83] == '-' ? -1 : 1) * (float)new DMS(
                                                     Convert.ToUInt32(line.Substring(84, 2)),
                                                     Convert.ToUInt32(line.Substring(86, 2)),
                                                     Convert.ToUInt32(line.Substring(88, 2))
                                                 ).ToDecimalAngle();
-
-                        star.Alpha0 = (float)Angle.ToRadians(star.Equatorial0.Alpha);
-                        star.Delta0 = (float)Angle.ToRadians(star.Equatorial0.Delta);
 
                         if (line[148] != ' ')
                         {
@@ -111,21 +108,6 @@ namespace Astrarium.Plugins.BrightStars
                         {
                             star.PmDelta = Convert.ToSingle(line.Substring(154, 6), CultureInfo.InvariantCulture);
                         }
-
-                        double muAlpha = Angle.ToRadians(star.PmAlpha / 3600);
-                        double muDelta = Angle.ToRadians(star.PmDelta / 3600);
-                        double cosDelta0 = Math.Cos(star.Delta0);
-                        double muAlphaCosDelta = muAlpha * cosDelta0;
-                        double mu = Math.Sqrt(muAlphaCosDelta * muAlphaCosDelta + muDelta * muDelta);
-
-                        double sinPhi0 = muAlpha * cosDelta0 / mu;
-                        double cosPhi0 = muDelta / mu;
-
-                        star.PmPhi0 = (float)Math.Atan2(sinPhi0, cosPhi0);
-                        star.PmMu = (float)mu;
-
-                        //double sinPhi0 = 
-                        //star.PmPhi0 = Math.Atan2(0, 0)
 
                         star.Magnitude = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
                         star.Color = line[129];
