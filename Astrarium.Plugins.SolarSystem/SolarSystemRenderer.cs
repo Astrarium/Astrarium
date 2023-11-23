@@ -1029,7 +1029,8 @@ namespace Astrarium.Plugins.SolarSystem
             RenderEclipseShadow(pMoon, pShadow, Text.Get("EclipsedByJupiter"), sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
 
             // Jupiter shadow outline
-            Primitives.DrawEllipse(pShadow, Pens.Red, sd, sd * (1 - jupiter.Flattening), rot);
+            // TODO: change color!
+            Primitives.DrawEllipse(pShadow, Pens.Brown, sd, sd * (1 - jupiter.Flattening), rot);
         }
 
         private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, string shadowLabel, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle = 0, double flattening = 0)
