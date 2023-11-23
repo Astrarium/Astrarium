@@ -60,7 +60,7 @@ namespace Astrarium.Plugins.Tycho2
                 float magLimit = prj.MagLimit;
                 magLimit = (float)(-1.44995 * Math.Log(0.000230685 * prj.Fov));
 
-                var stars = tycho2.GetStars(t, eq, prj.Fov, m => m <= magLimit);
+                var stars = tycho2.GetStars(prj.Context, eq, prj.Fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
