@@ -40,21 +40,6 @@ namespace Astrarium.Plugins.DeepSky
         private readonly IEphemFormatter surfaceBrightnessFormatter = new DeepSkySurfaceBrightnessFormatter();
         private readonly IEphemFormatter posAngleFormatter = new DeepSkyPositionAngleFormatter();
 
-        /// <summary>
-        /// Precession matrix for current epoch
-        /// </summary>
-        public Mat4 MatPrecession { get; private set; }
-
-        /// <summary>
-        /// Gets J2000.0 precession matrix
-        /// </summary>
-        public Mat4 MatPrecession0 { get; private set; }
-
-        /// <summary>
-        /// Precessional elements for J2000.0 epoch
-        /// </summary>
-        public PrecessionalElements PrecessionalElements0 { get; private set; }
-
         public DeepSkyCalc(ISky sky)
         {
             this.sky = sky;
@@ -62,9 +47,6 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Calculate(SkyContext context)
         {
-            // precessional elements from current epoch to J2000
-            PrecessionalElements0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
-
             foreach (var ds in deepSkies)
             {
                 ds.Equatorial = Equatorial(context, ds);
@@ -248,7 +230,7 @@ namespace Astrarium.Plugins.DeepSky
                     }
 
                     DeepSkyStatus status = (DeepSkyStatus)(Convert.ToInt32(strStatus) % 10);
-                    if (status == DeepSkyStatus.Duplicate || 
+                    if (status == DeepSkyStatus.Duplicate ||
                         status == DeepSkyStatus.DuplicateIC)
                     {
                         continue;

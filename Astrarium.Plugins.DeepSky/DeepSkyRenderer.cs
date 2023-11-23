@@ -42,9 +42,6 @@ namespace Astrarium.Plugins.DeepSky
             Brush brushLabel = new SolidBrush(colorLabel);
             var prj = map.Projection;
 
-            // J2000 equatorial coordinates of screen center
-            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
-
             // real circular FOV with respect of screen borders
 
             double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
@@ -60,7 +57,7 @@ namespace Astrarium.Plugins.DeepSky
                 // do not draw dim objects (exceeding mag limit for current FOV)
                 ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
-                Angle.Separation(eq0, ds.Equatorial0) < fov + ds.Semidiameter / 3600 * 2).ToList();
+                Angle.Separation(prj.CenterEquatorial, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
             foreach (var ds in deepSkies)
             {

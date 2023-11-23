@@ -17,14 +17,12 @@ namespace Astrarium.Plugins.Novae
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
         private NovaeCalculator calc;
         private ISettings settings;
-        private ISky sky;
 
         private const int limitAllNames = 40;
        
-        public NovaeRenderer(NovaeCalculator calc, ISky sky, ISettings settings)
+        public NovaeRenderer(NovaeCalculator calc, ISettings settings)
         {
             this.calc = calc;
-            this.sky = sky;
             this.settings = settings;
         }
 
@@ -40,17 +38,11 @@ namespace Astrarium.Plugins.Novae
             Brush brushLabel = new SolidBrush(labelColor);
             var fontStarNames = settings.Get<Font>("StarsLabelsFont");
 
-            // J2000 equatorial coordinates of screen center
-            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, calc.PrecessionalElements0);
-
-            // matrix for projection, with respect of precession
-            var mat = prj.MatEquatorialToVision * calc.MatPrecession;
-
             // real circular FOV with respect of screen borders
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
             // filter novae by magnitude and FOV
-            var novae = calc.Novae.Where(n => n.Magnitude < prj.MagLimit && Angle.Separation(eq0, n.Equatorial0) < fov);
+            var novae = calc.Novae.Where(n => n.Magnitude < prj.MagLimit && Angle.Separation(prj.CenterEquatorial, n.Equatorial) < fov);
 
             GL.Enable(EnableCap.PointSmooth);
             GL.Enable(EnableCap.Blend);
@@ -68,7 +60,7 @@ namespace Astrarium.Plugins.Novae
                     Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(star.Equatorial0.Alpha), Angle.ToRadians(star.Equatorial0.Delta));
 
                     // screen coordinates, for current epoch
-                    Vec2 p = prj.Project(v, mat);
+                    Vec2 p = prj.Project(star.Equatorial);
 
                     if (prj.IsInsideScreen(p))
                     {

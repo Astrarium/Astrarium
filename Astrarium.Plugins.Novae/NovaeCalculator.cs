@@ -15,21 +15,6 @@ namespace Astrarium.Plugins.Novae
         /// <inheritdoc />
         public IEnumerable<Nova> GetCelestialObjects() => Novae;
 
-        /// <summary>
-        /// Precession matrix for current epoch
-        /// </summary>
-        public Mat4 MatPrecession { get; private set; }
-
-        /// <summary>
-        /// Gets J2000.0 precession matrix
-        /// </summary>
-        public Mat4 MatPrecession0 { get; private set; }
-
-        /// <summary>
-        /// Precessional elements for J2000.0 epoch
-        /// </summary>
-        public PrecessionalElements PrecessionalElements0 { get; private set; }
-
         /// <inheritdoc />
         public override void Initialize()
         {
@@ -40,36 +25,11 @@ namespace Astrarium.Plugins.Novae
         /// <inheritdoc />
         public override void Calculate(SkyContext ctx)
         {
-            // precessional elements from J2000 to current epoch
-            PrecessionalElements p = ctx.Get(GetPrecessionalElements);
-
-            // precessional elements from current epoch to J2000
-            var p0 = Precession.ElementsFK5(ctx.JulianDay, Date.EPOCH_J2000);
-
-            MatPrecession =
-                Mat4.ZRotation(Angle.ToRadians(p.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p.zeta));
-
-            MatPrecession0 =
-                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
-
-            PrecessionalElements0 = p0;
-
             foreach (var nova in Novae)
             {
-                nova.Magnitude = ctx.Get(Magnitude, nova);
+                nova.Equatorial = Equatorial(ctx, nova);
+                nova.Magnitude = Magnitude(ctx, nova);
             }
-        }
-
-        /// <summary>
-        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
-        /// </summary>
-        private PrecessionalElements GetPrecessionalElements(SkyContext c)
-        {
-            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }
 
         /// <summary>
@@ -77,11 +37,9 @@ namespace Astrarium.Plugins.Novae
         /// </summary>
         private CrdsEquatorial Equatorial(SkyContext c, Nova n)
         {
-            PrecessionalElements p = c.Get(GetPrecessionalElements);
-
-            // Equatorial coordinates for the mean equinox and epoch of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(n.Equatorial0, p);
-
+            var eq = Precession.GetEquatorialCoordinates(n.Equatorial0, c.PrecessionElements);
+            eq += Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
+            eq += Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
             return eq;
         }
 
@@ -114,7 +72,7 @@ namespace Astrarium.Plugins.Novae
                     t2 = 10;
 
                 if (n.NovaType.Contains("NB"))
-                    t2 = 80; 
+                    t2 = 80;
 
                 if (n.NovaType.Contains("NC"))
                     t2 = 200;
@@ -291,18 +249,11 @@ namespace Astrarium.Plugins.Novae
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            var result = Novae
+            return Novae
                 .Where(m => m.Names.Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
-
-            foreach (var n in result)
-            {
-                n.Equatorial = context.Get(Equatorial, n as Nova);
-            }
-
-            return result;
         }
     }
 }
