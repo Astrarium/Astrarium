@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.DeepSky
             var prj = map.Projection;
 
             // J2000 equatorial coordinates of screen center
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
+            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
 
             // real circular FOV with respect of screen borders
 
@@ -60,15 +60,10 @@ namespace Astrarium.Plugins.DeepSky
                 // do not draw dim objects (exceeding mag limit for current FOV)
                 ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
-                Angle.Separation(eq, ds.Equatorial0) < fov + ds.Semidiameter / 3600 * 2).ToList();
-
-            // matrix for projection, with respect of precession
-            var mat = prj.MatEquatorialToVision * deepSkyCalc.MatPrecession;
+                Angle.Separation(eq0, ds.Equatorial0) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
             foreach (var ds in deepSkies)
             {
-                ds.Equatorial = prj.Context.Get(deepSkyCalc.Equatorial, ds);
-
                 var p = prj.Project(ds.Equatorial);
                 if (p == null) continue;
 
@@ -142,9 +137,9 @@ namespace Astrarium.Plugins.DeepSky
                     GL.Color4(colorOutline);
                     GL.Begin(PrimitiveType.LineLoop);
 
-                    foreach (Vec3 ov in ds.Outline)
+                    foreach (var oc in ds.Outline)
                     {
-                        Vec2 op = prj.Project(ov, mat);
+                        Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(oc, prj.Context.PrecessionElements));
                         if (op != null)
                         {
                             GL.Vertex2(op.X, op.Y);
@@ -155,7 +150,7 @@ namespace Astrarium.Plugins.DeepSky
 
                     if (drawLabels && sz > 20)
                     {
-                        var p0 = prj.Project(ds.Outline.First(), mat);
+                        var p0 = prj.Project(Precession.GetEquatorialCoordinates(ds.Outline.First(), prj.Context.PrecessionElements));
                         if (p0 != null)
                         {
                             map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p0, 5);

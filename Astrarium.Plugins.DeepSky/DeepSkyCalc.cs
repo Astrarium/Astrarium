@@ -62,42 +62,21 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Calculate(SkyContext context)
         {
-            // precessional elements from J2000 to current epoch
-            PrecessionalElements p = context.Get(GetPrecessionalElements);
-
             // precessional elements from current epoch to J2000
-            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+            PrecessionalElements0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
 
-            MatPrecession =
-                Mat4.ZRotation(Angle.ToRadians(p.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p.zeta));
-
-            MatPrecession0 =
-                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
-
-            PrecessionalElements0 = p0;
-        }
-
-        /// <summary>
-        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
-        /// </summary>
-        private PrecessionalElements GetPrecessionalElements(SkyContext c)
-        {
-            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
+            foreach (var ds in deepSkies)
+            {
+                ds.Equatorial = Equatorial(context, ds);
+            }
         }
 
         /// <summary>
         /// Gets equatorial coordinates of deep sky object for current epoch
         /// </summary>
-        public CrdsEquatorial Equatorial(SkyContext c, DeepSky ds)
+        private CrdsEquatorial Equatorial(SkyContext c, DeepSky ds)
         {
-            PrecessionalElements p = c.Get(GetPrecessionalElements);
-
-            // Equatorial coordinates for the mean equinox and epoch of the target date
-            return Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
+            return Precession.GetEquatorialCoordinates(ds.Equatorial0, c.PrecessionElements);
         }
 
         /// <summary>
@@ -243,18 +222,11 @@ namespace Astrarium.Plugins.DeepSky
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            var result = deepSkies
+           return deepSkies
                 .Where(ds => ds.CommonName.Equals(searchString) || ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
-                .ToList();
-
-            foreach (var ds in result)
-            {
-                ds.Equatorial = context.Get(Equatorial, ds as DeepSky);
-            }
-
-            return result;
+                .ToArray();
         }
 
         public override void Initialize()
@@ -344,7 +316,7 @@ namespace Astrarium.Plugins.DeepSky
             // Load deep sky object outlines
             using (var reader = new StreamReader(OUTLINES_FILE))
             {
-                List<Vec3> outline = new List<Vec3>();
+                List<CrdsEquatorial> outline = new List<CrdsEquatorial>();
 
                 while (!reader.EndOfStream)
                 {
@@ -354,7 +326,7 @@ namespace Astrarium.Plugins.DeepSky
                     // End previos outline and begin a new one
                     if (line.StartsWith("//"))
                     {
-                        outline = new List<Vec3>();
+                        outline = new List<CrdsEquatorial>();
 
                         string name = line.Substring(2).Trim().ToUpper();
                         var ds = deepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
@@ -374,11 +346,10 @@ namespace Astrarium.Plugins.DeepSky
                     uint decM = Convert.ToUInt32(line.Substring(18, 2).Trim());
                     double decS = Convert.ToDouble(line.Substring(21).Trim(), CultureInfo.InvariantCulture);
 
-                    double alpha = Angle.ToRadians(new HMS(raH, raM, raS).ToDecimalAngle());
-                    double delta = Angle.ToRadians(new DMS(decD, decM, decS).ToDecimalAngle() * (line[14] == '-' ? -1 : 1));
+                    double alpha = new HMS(raH, raM, raS).ToDecimalAngle();
+                    double delta = new DMS(decD, decM, decS).ToDecimalAngle() * (line[14] == '-' ? -1 : 1);
 
-                    var op = Projection.SphericalToCartesian(alpha, delta);
-                    outline.Add(op);
+                    outline.Add(new CrdsEquatorial(alpha, delta));
                 }
             }
         }

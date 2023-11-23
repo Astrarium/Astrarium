@@ -114,7 +114,7 @@ namespace Astrarium.Plugins.DeepSky
 
         public override double Semidiameter { get => Math.Max(LargeDiameter ?? 0, SmallDiameter ?? 0) * 30; }
 
-        public ICollection<Vec3> Outline { get; set; }
+        public ICollection<CrdsEquatorial> Outline { get; set; }
 
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object

@@ -65,12 +65,16 @@ namespace Astrarium.Algorithms
         {
             CrdsEquatorial eq = new CrdsEquatorial();
 
-            double sinDelta0 = Math.Sin(Angle.ToRadians(eq0.Delta));
-            double cosDelta0 = Math.Cos(Angle.ToRadians(eq0.Delta));
-            double sinTheta = Math.Sin(Angle.ToRadians(p.theta));
-            double cosTheta = Math.Cos(Angle.ToRadians(p.theta));
-            double sinAlpha0Zeta = Math.Sin(Angle.ToRadians(eq0.Alpha + p.zeta));
-            double cosAlpha0Zeta = Math.Cos(Angle.ToRadians(eq0.Alpha + p.zeta));
+            double delta0 = Angle.ToRadians(eq0.Delta);
+            double theta = Angle.ToRadians(p.theta);
+            double alpha0zeta = Angle.ToRadians(eq0.Alpha + p.zeta);
+
+            double sinDelta0 = Math.Sin(delta0);
+            double cosDelta0 = Math.Cos(delta0);
+            double sinTheta = Math.Sin(theta);
+            double cosTheta = Math.Cos(theta);
+            double sinAlpha0Zeta = Math.Sin(alpha0zeta);
+            double cosAlpha0Zeta = Math.Cos(alpha0zeta);
 
             double A = cosDelta0 * sinAlpha0Zeta;
             double B = cosTheta * cosDelta0 * cosAlpha0Zeta - sinTheta * sinDelta0;
