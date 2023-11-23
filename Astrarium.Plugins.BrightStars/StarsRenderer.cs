@@ -62,23 +62,17 @@ namespace Astrarium.Plugins.BrightStars
             // equatorial coordinates of screen center for current epoch
             CrdsEquatorial eq = prj.CenterEquatorial;
 
-            // J2000 equatorial coordinates of screen center
-            CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, starsCalc.PrecessionalElements0);
-
-            // years since initial catalogue epoch (J2000)
-            double t = prj.Context.Get(starsCalc.YearsSince2000);
-
             if (settings.Get("ConstLines"))
             {
                 var linePen = new Pen(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night).Tint(schema), 1) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
-                    var s1 = starsCalc.GetStarWithActualPosition(allStars.ElementAt(line.Item1), t);
-                    var s2 = starsCalc.GetStarWithActualPosition(allStars.ElementAt(line.Item2), t);
+                    var s1 = allStars.ElementAt(line.Item1);
+                    var s2 = allStars.ElementAt(line.Item2);
 
-                    if (Angle.Separation(eq, new CrdsEquatorial(s1.Alpha0, s1.Delta0)) < maxFov &&
-                        Angle.Separation(eq, new CrdsEquatorial(s2.Alpha0, s2.Delta0)) < maxFov)
+                    if (Angle.Separation(eq, s1.Equatorial) < maxFov &&
+                        Angle.Separation(eq, s2.Equatorial) < maxFov)
                     {
                         var p1 = prj.Project(s1.Equatorial);
                         var p2 = prj.Project(s2.Equatorial);
@@ -107,7 +101,7 @@ namespace Astrarium.Plugins.BrightStars
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
                 float magLimit = prj.MagLimit;
-                var stars = starsCalc.GetStars(t, eq0, fov, m => m <= magLimit);
+                var stars = starsCalc.GetStars(eq, fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
@@ -136,18 +130,7 @@ namespace Astrarium.Plugins.BrightStars
             GL.Disable(EnableCap.PointSmooth);
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.CullFace);
-        }
-
-        private Vec3 CartesianWithProperMotion(Star s, double t)
-        {
-            double alpha = s.PmAlpha * t / 3600.0;
-            double delta = s.PmDelta * t / 3600.0;
-
-            alpha = s.Alpha0 + Angle.ToRadians(alpha);
-            delta = s.Delta0 + Angle.ToRadians(delta);
-
-            return Projection.SphericalToCartesian(alpha, delta);
-        }
+        }        
 
         private Color GetColor(char spClass)
         {

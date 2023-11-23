@@ -36,16 +36,6 @@ namespace Astrarium.Plugins.BrightStars
         /// </summary>
         private readonly IStarsReader dataReader;
 
-        /// <summary>
-        /// Precessional elements for current epoch
-        /// </summary>
-        private PrecessionalElements precessionalElements;
-
-        /// <summary>
-        /// Precessional elements for J2000.0 epoch
-        /// </summary>
-        public PrecessionalElements PrecessionalElements0 { get; private set; }
-
         public StarsCalc(ISky sky, IStarsReader dataReader)
         {
             this.sky = sky;
@@ -55,28 +45,18 @@ namespace Astrarium.Plugins.BrightStars
 
         public override void Calculate(SkyContext context)
         {
-            // precessional elements from J2000 to current epoch
-            precessionalElements = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-
-            // precessional elements from current epoch to J2000
-            PrecessionalElements0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
-        }
-
-        public IEnumerable<Star> GetStars(double t, CrdsEquatorial eq0, double angle, Func<float, bool> magFilter)
-        {
-            var stars = Stars.Where(s => s != null && magFilter(s.Magnitude) && Angle.Separation(eq0, new CrdsEquatorial(s.Alpha0 + t * s.PmAlpha / 3600, s.Delta0 + t * s.PmDelta / 3600)) < angle);
-            foreach (var star in stars)
+            foreach (var star in Stars)
             {
-                yield return GetStarWithActualPosition(star, t);
+                if (star != null)
+                {
+                    star.Equatorial = context.Get(Equatorial, star.Number);
+                }
             }
         }
 
-        internal Star GetStarWithActualPosition(Star s, double t)
+        public IEnumerable<Star> GetStars(CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
-            double alpha = s.Alpha0 + t * s.PmAlpha / 3600;
-            double delta = s.Delta0 + t * s.PmDelta / 3600;
-            s.Equatorial = Precession.GetEquatorialCoordinates(new CrdsEquatorial(alpha, delta), precessionalElements);
-            return s;
+            return Stars.Where(s => s != null && magFilter(s.Magnitude) && Angle.Separation(eq, s.Equatorial) < angle);
         }
 
         public override void Initialize()
@@ -216,8 +196,8 @@ namespace Astrarium.Plugins.BrightStars
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s.Number).Delta)
 
             .AddHeader(Text.Get("Star.Equatorial0"))
-            .AddRow("Equatorial0.Alpha", s.Alpha0)
-            .AddRow("Equatorial0.Delta", s.Delta0)
+            .AddRow("Equatorial0.Alpha", (double)s.Alpha0)
+            .AddRow("Equatorial0.Delta", (double)s.Delta0)
 
             .AddHeader(Text.Get("Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
@@ -261,7 +241,6 @@ namespace Astrarium.Plugins.BrightStars
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
-                .Select(s => GetStarWithActualPosition(s as Star, t))
                 .ToArray();
         }
 

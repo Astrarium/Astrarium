@@ -123,6 +123,15 @@ namespace Astrarium.Plugins.Tycho2
         private PrecessionalElements precessionalElements;
 
         /// <summary>
+        /// Nutation elements for current epoch
+        /// </summary>
+        private NutationElements nutationElements;
+
+        private AberrationElements aberrationElements;
+
+        private double epsilon;
+
+        /// <summary>
         /// Precessional elements for J2000.0 epoch
         /// </summary>
         public PrecessionalElements PrecessionalElements0 { get; private set; }
@@ -509,7 +518,8 @@ namespace Astrarium.Plugins.Tycho2
                 alpha += pmRa * t;
                 delta += pmDec * t;
                 var eq0 = new CrdsEquatorial(alpha, delta);
-                star.Equatorial = Precession.GetEquatorialCoordinates(eq0, precessionalElements);
+                var eq = Precession.GetEquatorialCoordinates(eq0, precessionalElements);
+                star.Equatorial = eq + Nutation.NutationEffect(eq, nutationElements, epsilon) + Aberration.AberrationEffect(eq, aberrationElements, epsilon);
                 return star;
             }
         }
@@ -550,6 +560,10 @@ namespace Astrarium.Plugins.Tycho2
 
         public override void Calculate(SkyContext context)
         {
+            epsilon = context.Epsilon;
+            nutationElements = context.NutationElements;
+            aberrationElements = context.AberrationElements;
+
             // precessional elements from J2000 to current epoch
             precessionalElements = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 

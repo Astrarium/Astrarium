@@ -66,9 +66,9 @@ namespace Astrarium.Plugins.UCAC4
                 CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, catalog.PrecessionalElements0);
 
                 // years since initial catalogue epoch
-                double t = prj.Context.Get(catalog.YearsSince2000);
+                //double t = prj.Context.Get(catalog.YearsSince2000);
 
-                var stars = catalog.GetStars(t, eq, prj.Fov, m => m <= magLimit);
+                var stars = catalog.GetStars(prj.Context, eq, prj.Fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {

@@ -50,6 +50,40 @@ namespace Astrarium.Types
                 GL.Disable(EnableCap.LineStipple);
             }
         }
+
+
+        public static void DrawString(string text, Font font, Brush brush, PointF point, StringAlignment horizontalAlign = StringAlignment.Near, StringAlignment verticalAlign = StringAlignment.Near)
+        {
+            var formatFlags = System.Windows.Forms.TextFormatFlags.Default;
+
+            if (horizontalAlign == StringAlignment.Center)
+            {
+                formatFlags |= System.Windows.Forms.TextFormatFlags.HorizontalCenter;
+            }
+            if (verticalAlign == StringAlignment.Center)
+            {
+                formatFlags |= System.Windows.Forms.TextFormatFlags.VerticalCenter;
+            }
+
+            var size = System.Windows.Forms.TextRenderer.MeasureText(text, font, Size.Empty, formatFlags);
+     
+            using (TextRenderer textRenderer = new TextRenderer(size.Width, size.Height))
+            {
+                float x = point.X;
+                float y = point.Y;
+                if (formatFlags.HasFlag(System.Windows.Forms.TextFormatFlags.HorizontalCenter))
+                {
+                    x -= size.Width / 2;
+                }
+                if (formatFlags.HasFlag(System.Windows.Forms.TextFormatFlags.VerticalCenter))
+                {
+                    y += size.Height / 2;
+                }
+
+                textRenderer.DrawString(text, font, brush, new Vec2(x, y));
+            }
+        }
+
         public static void DrawEllipse(Vec2 center, Pen pen, double radius)
         {
             DrawEllipse(center, pen, radius, radius, 0);
