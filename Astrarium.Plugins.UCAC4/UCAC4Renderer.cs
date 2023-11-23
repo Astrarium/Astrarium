@@ -63,12 +63,9 @@ namespace Astrarium.Plugins.UCAC4
                 magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.Projection.Fov));
 
                 // J2000 equatorial coordinates of screen center
-                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, catalog.PrecessionalElements0);
+                CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, catalog.PrecessionElements0);
 
-                // years since initial catalogue epoch
-                //double t = prj.Context.Get(catalog.YearsSince2000);
-
-                var stars = catalog.GetStars(prj.Context, eq, prj.Fov, m => m <= magLimit);
+                var stars = catalog.GetStars(prj.Context, eq0, prj.Fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {

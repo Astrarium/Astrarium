@@ -53,6 +53,7 @@ namespace Astrarium.Types
             AberrationElements = Aberration.AberrationElements(_JulianDay);
             Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
             SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+            PrecessionElements = Precession.ElementsFK5(Date.EPOCH_J2000, _JulianDay);
         }
 
         private double _JulianDay;
@@ -131,6 +132,11 @@ namespace Astrarium.Types
         /// Elements to calculate aberration effect
         /// </summary>
         public AberrationElements AberrationElements { get; private set; }
+
+        /// <summary>
+        /// Precession elements for converting coordinates of J2000 epoch to current epoch.
+        /// </summary>
+        public PrecessionalElements PrecessionElements { get; private set; }
 
         /// <summary>
         /// True obliquity of the ecliptic, in degrees
