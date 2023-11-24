@@ -30,6 +30,7 @@ namespace Astrarium.Plugins.DeepSky
         {
             if (!settings.Get<bool>("DeepSky")) return;
             if (map.DaylightFactor == 1) return;
+
             bool drawLabels = settings.Get("DeepSkyLabels");
             bool drawOutlines = settings.Get("DeepSkyOutlines");
             var schema = settings.Get<ColorSchema>("Schema");
@@ -94,7 +95,7 @@ namespace Astrarium.Plugins.DeepSky
                                 GL.Begin(PrimitiveType.TriangleFan);
 
                                 GL.TexCoord2(0.5, 0.5);
-                                GL.Color4(Color.FromArgb(100, 255, 255, 255).Tint(schema));
+                                GL.Color4(Color.FromArgb((int)(100 * (1 - map.DaylightFactor)), 255, 255, 255).Tint(schema));
                                 GL.Vertex2(p.X, p.Y);
 
                                 GL.TexCoord2(0, 0);

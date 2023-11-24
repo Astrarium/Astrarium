@@ -403,29 +403,17 @@ namespace Astrarium.Plugins.UCAC4
                 float bmag = BitConverter.ToInt16(starsData, 46 + offset) / 1000.0f;
                 float vmag = BitConverter.ToInt16(starsData, 48 + offset) / 1000.0f;
                 var posData = ParsePositionData(starsData, offset, zn, starIndex);
+                string catName = $"UCAC4 {zn:000}-{starIndex + 1:000000}";
 
-
-
-                //double t = (context.JulianDay - Date.EPOCH_J2000) / 365.25;
-                //double alpha = posData.RA2000 + posData.PmRA * t;
-                //double delta = posData.Dec2000 + posData.PmDec * t;
-                //var eq0 = new CrdsEquatorial(alpha, delta);
-                //var eq = Precession.GetEquatorialCoordinates(eq0, context.PrecessionElements);
-                //eq += Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
-                //eq += Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
-
-                UCAC4Star star = new UCAC4Star()
+                return new UCAC4Star()
                 {
                     ZoneNumber = (ushort)zn,
                     RunningNumber = (uint)(starIndex + 1),
                     Magnitude = mag,
                     SpectralClass = SpectralClass(bmag, vmag),
-                    Equatorial = Equatorial(context, posData)
+                    Equatorial = Equatorial(context, posData),
+                    ProperName = properNames.ContainsKey(catName) ? properNames[catName] : null
                 };
-
-                star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
-
-                return star;
             }
             else
             {
