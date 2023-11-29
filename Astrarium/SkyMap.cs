@@ -87,11 +87,9 @@ namespace Astrarium
                 lockedObject = value;
                 if (lockedObject != null)
                 {
-                    var prj = Projection;
-                    var ctx = prj.Context;
-                    var h = lockedObject.Equatorial.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
-                    LockedObjectDeltaLongitude = prj.CenterHorizontal.Azimuth - h.Azimuth;
-                    LockedObjectDeltaLatitude = prj.CenterHorizontal.Altitude - h.Altitude;
+                    var eq = lockedObject.Equatorial;
+                    LockedObjectDeltaLongitude = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                    LockedObjectDeltaLatitude = Projection.CenterEquatorial.Delta - eq.Delta;
                 }
             }
         }
@@ -102,9 +100,9 @@ namespace Astrarium
 
             if (LockedObject != null)
             {
-                var horBody = LockedObject.Equatorial.ToHorizontal(Projection.Context.GeoLocation, Projection.Context.SiderealTime);
-                LockedObjectDeltaLongitude = Projection.CenterHorizontal.Azimuth - horBody.Azimuth;
-                LockedObjectDeltaLatitude = Projection.CenterHorizontal.Altitude - horBody.Altitude;
+                var eq = LockedObject.Equatorial;
+                LockedObjectDeltaLongitude = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                LockedObjectDeltaLatitude = Projection.CenterEquatorial.Delta - eq.Delta;
             }
 
             Invalidate();
@@ -224,17 +222,13 @@ namespace Astrarium
             // Keep current context synchronized with global instance
             skyContext.ContextChanged += () =>
             {
-                
-
                 context.Set(skyContext.JulianDay, skyContext.GeoLocation);
 
                 if (LockedObject != null)
                 {
-                    var horBody = LockedObject.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                    var hor = new CrdsHorizontal(
-                        horBody.Azimuth + LockedObjectDeltaLongitude,
-                        horBody.Altitude + LockedObjectDeltaLatitude);
-                    Projection.SetVision(hor);
+                    Projection.SetVision(new CrdsEquatorial(
+                        LockedObject.Equatorial.Alpha + LockedObjectDeltaLongitude,
+                        LockedObject.Equatorial.Delta + LockedObjectDeltaLatitude));
                 }
             };
 
@@ -303,11 +297,9 @@ namespace Astrarium
 
                 if (LockedObject != null)
                 {
-                    var horBody = LockedObject.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                    var hor = new CrdsHorizontal(
-                        horBody.Azimuth + LockedObjectDeltaLongitude,
-                        horBody.Altitude + LockedObjectDeltaLatitude);
-                    Projection.SetVision(hor);
+                    Projection.SetVision(new CrdsEquatorial(
+                        LockedObject.Equatorial.Alpha + LockedObjectDeltaLongitude,
+                        LockedObject.Equatorial.Delta + LockedObjectDeltaLatitude));
                 }
 
                 Invalidate();

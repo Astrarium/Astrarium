@@ -146,6 +146,7 @@ namespace Astrarium.Plugins.Atmosphere
         {
             //if (!settings.Get("Ground")) return 0;
             if (!settings.Get("Atmosphere", true)) return 0;
+            if (sun == null || moon == null) return 0;
 
             double alt = sun.Altitude;
 
