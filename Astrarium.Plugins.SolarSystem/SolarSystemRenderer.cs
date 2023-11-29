@@ -9,7 +9,6 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using static Astrarium.Plugins.SolarSystem.Plugin;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -259,6 +258,7 @@ namespace Astrarium.Plugins.SolarSystem
                         EarthShadowApperance = moon.EarthShadow,
                         EarthShadowCoordinates = moon.EarthShadowCoordinates,
                         DrawLabel = settings.Get("MoonLabel"),
+                        Color = Color.Gray
                     });
                 }
             }
@@ -502,16 +502,19 @@ namespace Astrarium.Plugins.SolarSystem
                         texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters, alphaChannel: true);
                     }
 
-                    if (texture == 0)
+                    if (texture > 0)
+                    {
+                        GL.Enable(EnableCap.Texture2D);
+                        GL.BindTexture(TextureTarget.Texture2D, texture);
+                    }
+                    else
                     {
                         float r = data.Color.R / 255f;
                         float g = data.Color.G / 255f;
                         float b = data.Color.B / 255f;
-                        GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r, g, b, 1f });
-                    }
-                    else
-                    {
-                        GL.BindTexture(TextureTarget.Texture2D, texture);
+                        GL.Disable(EnableCap.Texture2D);
+                        GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { r, g, b, 0.5f });
+                        GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
                     }
 
                     GL.ShadeModel(ShadingModel.Smooth);
@@ -884,7 +887,22 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.Projection;
 
             GL.Disable(EnableCap.Lighting);
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png"), fallbackPath: null, permanent: false, action: null, alphaChannel: true));
+            int textureId = textureManager.GetTexture(Path.Combine(dataPath, "Rings.png"), fallbackPath: null, permanent: false, action: null, alphaChannel: true);
+            if (textureId > 0)
+            {
+                GL.Enable(EnableCap.Texture2D);
+                GL.BindTexture(TextureTarget.Texture2D, textureId);
+            }
+            else
+            {
+                float r = data.Color.R / 255f;
+                float g = data.Color.G / 255f;
+                float b = data.Color.B / 255f;
+                GL.Disable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Lighting);
+                GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { r, g, b, 0.5f });
+                GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
+            }
 
             if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
             {
@@ -894,14 +912,14 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 GL.Color3(Color.White);
             }
-
+            
             GL.Begin(PrimitiveType.TriangleFan);
 
             GL.TexCoord2(1, 0);
             GL.Vertex3(0, 0, 0);
 
             // radius of outer ring, in pixels
-            double r = prj.GetDiskSize(saturn.Semidiameter, data.MinimalDiskSize) / 2 * ringsRatio;
+            double sd = prj.GetDiskSize(saturn.Semidiameter, data.MinimalDiskSize) / 2 * ringsRatio;
 
             // rotation of axis
             double rotAxis = Angle.ToRadians(data.RotationAxis);
@@ -916,7 +934,7 @@ namespace Astrarium.Plugins.SolarSystem
                 y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
                 Vec3 vecVision = matRings * new Vec3(x, y, 0);
                 GL.TexCoord2(0, 0);
-                GL.Vertex3(r * vecVision.X, r * vecVision.Y, 0);
+                GL.Vertex3(sd * vecVision.X, sd * vecVision.Y, 0);
             }
             GL.End();
 
