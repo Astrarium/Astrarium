@@ -62,7 +62,7 @@ namespace Astrarium.Plugins.MeasureTool
         ///// <summary>
         ///// Map should be renderered on MouseMove only if measure tool is on
         ///// </summary>
-        public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
+        public override bool OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
             return IsMeasureToolOn;
         }
@@ -73,7 +73,7 @@ namespace Astrarium.Plugins.MeasureTool
             {
                 var prj = map.Projection;
                 var schema = settings.Get<ColorSchema>("Schema");
-                var m = map.MouseCoordinates;
+                var m = map.MouseScreenCoordinates;
                 var mouse = prj.UnprojectEquatorial(m.X, m.Y);
                 const int segmentsCount = 32;
                 var color = Color.White.Tint(schema);

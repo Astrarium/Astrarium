@@ -24,14 +24,6 @@ namespace Astrarium.Plugins.UCAC4
             fontNames = new Font("Arial", 7);
         }
 
-        private bool isDrag = false;
-
-        public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
-        {
-            isDrag = mouseButton == MouseButton.Left;
-            return base.OnMouseMove(map, mouse, mouseButton);
-        }
-
         public override void Render(ISkyMap map)
         {
             var prj = map.Projection;

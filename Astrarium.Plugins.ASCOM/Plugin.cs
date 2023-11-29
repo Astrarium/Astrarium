@@ -328,7 +328,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private CrdsEquatorial GetMouseCoordinates()
         {
-            return map.SelectedObject?.Equatorial ?? map.MousePosition;
+            return map.SelectedObject?.Equatorial ?? map.MouseEquatorialCoordinates;
         }
 
         private void SyncToPosition()

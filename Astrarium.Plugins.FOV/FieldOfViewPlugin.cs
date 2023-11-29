@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.FOV
             }
             else
             {
-                map.GoToPoint(map.MousePosition, TimeSpan.FromSeconds(1), fov);
+                map.GoToPoint(map.MouseEquatorialCoordinates, TimeSpan.FromSeconds(1), fov);
             }
         }
 

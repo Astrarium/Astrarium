@@ -53,7 +53,7 @@ namespace Astrarium.Plugins.MeasureTool
             //    new CrdsHorizontal(map.SelectedObject.Horizontal) :
             //    new CrdsHorizontal(map.MousePosition);
             
-            var m = map.MouseCoordinates;
+            var m = map.MouseScreenCoordinates;
             renderer.MeasureOrigin = map.Projection.UnprojectEquatorial(m.X, m.Y);
 
             map.Invalidate();

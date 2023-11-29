@@ -26,12 +26,15 @@ namespace Astrarium.Types
 
         void Move(Vec2 screenPosOld, Vec2 screenPosNew);
 
-        double LockedObjectDeltaLongitude { get; set; }
-        double LockedObjectDeltaLatitude { get; set; }
+        /// <summary>
+        /// Gets mouse position in equatorial coordinates
+        /// </summary>
+        CrdsEquatorial MouseEquatorialCoordinates { get; }
 
-        CrdsEquatorial MousePosition { get; }
-
-        PointF MouseCoordinates { get; }
+        /// <summary>
+        /// Gets mouse position in screen coordinates (x, y)
+        /// </summary>
+        PointF MouseScreenCoordinates { get; }
 
         Projection Projection { get; }
 

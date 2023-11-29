@@ -839,7 +839,7 @@ namespace Astrarium.Plugins.SolarSystem
                             double fr = (feature.Diameter > 0 ? feature.Diameter : data.BodyPhysicalDiameter / 6) / data.BodyPhysicalDiameter * r;
 
                             // distance, in pixels, between center of the feature and current mouse position
-                            double d = Math.Sqrt(Math.Pow(map.MouseCoordinates.X - pFeature.X - p.X, 2) + Math.Pow(map.MouseCoordinates.Y - pFeature.Y - p.Y, 2));
+                            double d = Math.Sqrt(Math.Pow(map.MouseScreenCoordinates.X - pFeature.X - p.X, 2) + Math.Pow(map.MouseScreenCoordinates.Y - pFeature.Y - p.Y, 2));
 
                             if (fr > 100 || d < fr)
                             {
@@ -950,12 +950,14 @@ namespace Astrarium.Plugins.SolarSystem
             return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
-        public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
+        public override bool OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
             // TODO: use CelestialObject.Equatorial for this
 
             if (mouseButton != MouseButton.None) return false;
-            
+
+            PointF mouse = map.MouseScreenCoordinates;
+
             {
                 var p = map.Projection.Project(moon.Equatorial);
                 if (p == null) return false;

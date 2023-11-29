@@ -356,7 +356,7 @@ namespace Astrarium
             SetMouseHorizontalPosition(this, hor);
             SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
 
-            map.MouseCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
+            map.MouseScreenCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
             map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
 
             if (e.Button == WF.MouseButtons.Left)

@@ -88,8 +88,8 @@ namespace Astrarium
                 if (lockedObject != null)
                 {
                     var eq = lockedObject.Equatorial;
-                    LockedObjectDeltaLongitude = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                    LockedObjectDeltaLatitude = Projection.CenterEquatorial.Delta - eq.Delta;
+                    lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                    lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
                 }
             }
         }
@@ -101,54 +101,43 @@ namespace Astrarium
             if (LockedObject != null)
             {
                 var eq = LockedObject.Equatorial;
-                LockedObjectDeltaLongitude = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                LockedObjectDeltaLatitude = Projection.CenterEquatorial.Delta - eq.Delta;
+                lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
             }
 
             Invalidate();
         }
 
-        public double LockedObjectDeltaLongitude { get; set; }
-        public double LockedObjectDeltaLatitude { get; set; }
+        /// <summary>
+        /// Shift between screen center and locked object by Right Ascention, in degrees
+        /// </summary>
+        private double lockedObjectShiftAlpha;
 
         /// <summary>
-        /// Backing field for <see cref="MousePosition"/> property.
-        /// </summary>
-        private CrdsEquatorial mousePosition = new CrdsEquatorial(0, 0);
+        /// Shift between screen center and locked object by Declination, in degrees
+        /// </summary
+        private double lockedObjectShiftDelta;
 
         /// <summary>
         /// Last result of needRedraw flag
         /// </summary>
         private bool lastNeedRedraw = false;
 
-        /// <summary>
-        /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
-        /// Setting new value can raise redraw of map
-        /// </summary>
-        public CrdsEquatorial MousePosition
+        /// <inheritdoc/>
+        public CrdsEquatorial MouseEquatorialCoordinates => Projection.UnprojectEquatorial(mouseScreenCoordinates.X, mouseScreenCoordinates.Y);
+
+        /// <inheritdoc/>
+        public CrdsHorizontal MouseHorizontalCoordinates => Projection.UnprojectHorizontal(mouseScreenCoordinates.X, mouseScreenCoordinates.Y);
+
+        private PointF mouseScreenCoordinates;
+
+        public PointF MouseScreenCoordinates
         {
-            get { return mousePosition; }
+            get => mouseScreenCoordinates;
             set
             {
-                mousePosition = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition, MouseButton));
-                if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
-                {
-                    lastNeedRedraw = needRedraw;
-                    Invalidate();
-                }
-            }
-        }
-
-        private PointF mouseCoordinates;
-
-        public PointF MouseCoordinates
-        {
-            get => mouseCoordinates;
-            set
-            {
-                mouseCoordinates = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(this, mouseCoordinates, MouseButton));
+                mouseScreenCoordinates = value;
+                bool needRedraw = renderers.Any(r => r.OnMouseMove(this, MouseButton));
                 if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
                 {
                     lastNeedRedraw = needRedraw;
@@ -227,8 +216,8 @@ namespace Astrarium
                 if (LockedObject != null)
                 {
                     Projection.SetVision(new CrdsEquatorial(
-                        LockedObject.Equatorial.Alpha + LockedObjectDeltaLongitude,
-                        LockedObject.Equatorial.Delta + LockedObjectDeltaLatitude));
+                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
                 }
             };
 
@@ -298,8 +287,8 @@ namespace Astrarium
                 if (LockedObject != null)
                 {
                     Projection.SetVision(new CrdsEquatorial(
-                        LockedObject.Equatorial.Alpha + LockedObjectDeltaLongitude,
-                        LockedObject.Equatorial.Delta + LockedObjectDeltaLatitude));
+                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
                 }
 
                 Invalidate();
