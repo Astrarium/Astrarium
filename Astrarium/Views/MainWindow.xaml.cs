@@ -357,6 +357,7 @@ namespace Astrarium
             SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
 
             map.MouseCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
 
             if (e.Button == WF.MouseButtons.Left)
             {
@@ -366,6 +367,11 @@ namespace Astrarium
                 }
 
                 pOld = new System.Drawing.Point(e.X, e.Y);
+
+                if (map.LockedObject != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage(Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()))));
+                }
             }
 
             if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
