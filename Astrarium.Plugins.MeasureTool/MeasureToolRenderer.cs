@@ -59,9 +59,9 @@ namespace Astrarium.Plugins.MeasureTool
             this.settings = settings;
         }
 
-        ///// <summary>
-        ///// Map should be renderered on MouseMove only if measure tool is on
-        ///// </summary>
+        /// <summary>
+        /// Map should be renderered on MouseMove only if measure tool is on
+        /// </summary>
         public override bool OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
             return IsMeasureToolOn;

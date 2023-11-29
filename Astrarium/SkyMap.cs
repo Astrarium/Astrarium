@@ -384,33 +384,14 @@ namespace Astrarium
 
         public CelestialObject FindObject(PointF point)
         {
-            /*
-            var hor = Projection.Invert(point);
-
-            foreach (var body in drawnObjects.OrderBy(c => Angle.Separation(hor, c.Horizontal)))
-            {
-                double sd = (body is SizeableCelestialObject) ?
-                    (body as SizeableCelestialObject).Semidiameter : 0;
-
-                double size = Math.Max(10, sd / 3600.0 / ViewAngle * Width);
-
-                PointF p = Projection.Project(body.Horizontal);
-
-                if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
-                {
-                    return body;
-                }
-            }
-            */
-
-            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (Projection.ScreenHeight - point.Y - c.Item2.Y) * (Projection.ScreenHeight - point.Y - c.Item2.Y)))
+            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (point.Y - c.Item2.Y) * (point.Y - c.Item2.Y)))
             {
                 double sd = (x.Item1 is SizeableCelestialObject) ?
                     (x.Item1 as SizeableCelestialObject).Semidiameter : 0;
 
                 double size = Projection.GetDiskSize(sd, 10);
 
-                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (Projection.ScreenHeight - x.Item2.Y - point.Y) * (Projection.ScreenHeight - x.Item2.Y - point.Y)) < size / 2)
+                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (x.Item2.Y - point.Y) * (x.Item2.Y - point.Y)) < size / 2)
                 {
                     return x.Item1;
                 }

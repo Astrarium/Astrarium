@@ -342,31 +342,33 @@ namespace Astrarium
 
         private void SkyView_MouseUp(object sender, WF.MouseEventArgs e)
         {
-            pOld = System.Drawing.Point.Empty;
+            pOld = PointF.Empty;
         }
 
-        private System.Drawing.Point pOld = new System.Drawing.Point();
+        private PointF pOld = new PointF();
 
         private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
-            var hor = map.Projection.UnprojectHorizontal(e.X, map.Projection.ScreenHeight - e.Y);
-            var eq = map.Projection.UnprojectEquatorial(e.X, map.Projection.ScreenHeight - e.Y);
+            var p = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
+
+            map.MouseScreenCoordinates = p;
+            var eq = map.MouseEquatorialCoordinates;
+            var hor = map.MouseHorizontalCoordinates;
+
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
 
             SetMouseEquatorialPosition(this, eq);
             SetMouseHorizontalPosition(this, hor);
-            SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.Projection.Context.JulianDay) : null);
-
-            map.MouseScreenCoordinates = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
-            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            SetMousePositionConstellation(this, Constellations.FindConstellation(eq, map.Projection.Context.JulianDay));
 
             if (e.Button == WF.MouseButtons.Left)
             {
-                if (pOld != System.Drawing.Point.Empty)
+                if (pOld != PointF.Empty)
                 {
-                    map.Move(new Vec2(pOld.X, map.Projection.ScreenHeight - pOld.Y), new Vec2(e.X, map.Projection.ScreenHeight - e.Y));
+                    map.Move(new Vec2(pOld.X, pOld.Y), new Vec2(p.X, p.Y));
                 }
 
-                pOld = new System.Drawing.Point(e.X, e.Y);
+                pOld = new PointF(p.X, p.Y);
 
                 if (map.LockedObject != null)
                 {
@@ -376,7 +378,7 @@ namespace Astrarium
 
             if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
             {
-                var body = map.FindObject(new PointF(e.X, e.Y));
+                var body = map.FindObject(p);
                 if (body != null)
                 {
                     if (body is IMagnitudeObject mo)
@@ -506,7 +508,7 @@ namespace Astrarium
         {
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
-                GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
+                GetMapRightClick(this)?.Execute(map.MouseScreenCoordinates);
                 // setting placement target is needed to update context menu colors:
                 // see https://github.com/MahApps/MahApps.Metro/issues/2244
                 Host.ContextMenu.PlacementTarget = Host;
