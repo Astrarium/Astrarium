@@ -45,16 +45,20 @@ namespace Astrarium.Plugins.MeasureTool
             // switch the ruler
             renderer.IsMeasureToolOn = !renderer.IsMeasureToolOn;
 
-            // TODO: implement this logic
             // if measure starts from a celelstial object, 
             // set beginning of the ruler at center of the object,
             // otherwise start from current mouse position
-            //renderer.MeasureOrigin = map.SelectedObject != null ?
-            //    new CrdsHorizontal(map.SelectedObject.Horizontal) :
-            //    new CrdsHorizontal(map.MousePosition);
-            
-            var m = map.MouseScreenCoordinates;
-            renderer.MeasureOrigin = map.Projection.UnprojectEquatorial(m.X, m.Y);
+            if (renderer.IsMeasureToolOn)
+            {
+                if (map.SelectedObject != null)
+                {
+                    renderer.MeasureOrigin = new CrdsEquatorial(map.SelectedObject.Equatorial);
+                }
+                else
+                {
+                    renderer.MeasureOrigin = new CrdsEquatorial(map.MouseEquatorialCoordinates);
+                }
+            }
 
             map.Invalidate();
         }

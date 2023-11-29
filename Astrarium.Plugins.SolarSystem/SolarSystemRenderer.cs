@@ -952,8 +952,6 @@ namespace Astrarium.Plugins.SolarSystem
 
         public override bool OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
-            // TODO: use CelestialObject.Equatorial for this
-
             if (mouseButton != MouseButton.None) return false;
 
             PointF mouse = map.MouseScreenCoordinates;
