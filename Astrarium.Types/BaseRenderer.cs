@@ -25,7 +25,9 @@ namespace Astrarium.Types
         /// </summary>
         public abstract RendererOrder Order { get; }
 
-        public virtual bool OnMouseMove(ISkyMap map, MouseButton mouseButton) { return false; }
+        public virtual void OnMouseMove(ISkyMap map, MouseButton mouseButton) { }
+        public virtual void OnMouseDown(ISkyMap map, MouseButton mouseButton) { }
+        public virtual void OnMouseUp(ISkyMap map, MouseButton mouseButton) { }
     }
 
     /// <summary>

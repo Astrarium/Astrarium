@@ -950,29 +950,40 @@ namespace Astrarium.Plugins.SolarSystem
             return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
-        public override bool OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
-            if (mouseButton != MouseButton.None) return false;
-
-            PointF mouse = map.MouseScreenCoordinates;
-
+            if (mouseButton == MouseButton.None)
             {
-                var p = map.Projection.Project(moon.Equatorial);
-                if (p == null) return false;
-                double r = map.Projection.GetDiskSize(moon.Semidiameter) / 2;
-                bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
-                if (needDraw) return true;
-            }
+                PointF mouse = map.MouseScreenCoordinates;
 
-            {
-                var p = map.Projection.Project(mars.Equatorial);
-                if (p == null) return false;
-                double r = map.Projection.GetDiskSize(mars.Semidiameter) / 2;
-                bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
-                if (needDraw) return true;
-            }
+                // Moon surface features
+                {
+                    var p = map.Projection.Project(moon.Equatorial);
+                    if (p != null)
+                    {
+                        double r = map.Projection.GetDiskSize(moon.Semidiameter) / 2;
+                        bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
+                        if (needDraw)
+                        {
+                            map.Invalidate();
+                        }
+                    }
+                }
 
-            return false;
+                // Mars surface features
+                {
+                    var p = map.Projection.Project(mars.Equatorial);
+                    if (p != null)
+                    {
+                        double r = map.Projection.GetDiskSize(mars.Semidiameter) / 2;
+                        bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
+                        if (needDraw)
+                        {
+                            map.Invalidate();
+                        }
+                    }
+                }
+            }
         }
 
         private Vec2 GetCartesianFeatureCoordinates(Projection prj, float r, CrdsGeographical c, double axisRotation)

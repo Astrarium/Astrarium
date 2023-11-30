@@ -10,12 +10,16 @@ namespace Astrarium.Types
     /// </summary>
     public interface ISkyMap : INotifyPropertyChanged
     {
+        // TODO: remove if not used
         event Action<double> FovChanged;
 
+        /// <summary>
+        /// Value indicating sky darkness (daylight presence). 1 means Sun above horizon, 0 - totally dark sky.
+        /// </summary>
         float DaylightFactor { get; set; }
 
         /// <summary>
-        /// Selected celestial object
+        /// Gets or sets selected celestial object
         /// </summary>
         CelestialObject SelectedObject { get; set; }
 
@@ -24,6 +28,11 @@ namespace Astrarium.Types
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
+        /// <summary>
+        /// Moves map from one point to another (screen positions used)
+        /// </summary>
+        /// <param name="screenPosOld">Old screen position</param>
+        /// <param name="screenPosNew">New screen position</param>
         void Move(Vec2 screenPosOld, Vec2 screenPosNew);
 
         /// <summary>

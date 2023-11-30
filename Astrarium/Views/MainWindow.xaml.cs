@@ -309,6 +309,7 @@ namespace Astrarium
             skyView = new SkyView();
             skyView.Paint += SkyView_Paint;
             skyView.Resize += SkyView_Resize;
+            skyView.MouseDown += SkyView_MouseDown;
             skyView.MouseUp += SkyView_MouseUp;
             skyView.MouseMove += SkyView_MouseMove;
             skyView.MouseWheel += SkyView_MouseWheel;
@@ -328,7 +329,6 @@ namespace Astrarium
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
-
         private void SkyView_MouseDoubleClick(object sender, WF.MouseEventArgs e)
         {
             GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
@@ -340,9 +340,17 @@ namespace Astrarium
             map.Invalidate();
         }
 
+        private void SkyView_MouseDown(object sender, WF.MouseEventArgs e)
+        {
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.RaiseMouseDown();
+        }
+
         private void SkyView_MouseUp(object sender, WF.MouseEventArgs e)
         {
             pOld = PointF.Empty;
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.RaiseMouseUp();
         }
 
         private PointF pOld = new PointF();
@@ -351,11 +359,12 @@ namespace Astrarium
         {
             var p = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
 
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
             map.MouseScreenCoordinates = p;
             var eq = map.MouseEquatorialCoordinates;
             var hor = map.MouseHorizontalCoordinates;
 
-            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.RaiseMouseMove();
 
             SetMouseEquatorialPosition(this, eq);
             SetMouseHorizontalPosition(this, hor);

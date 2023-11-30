@@ -24,21 +24,33 @@ namespace Astrarium.Plugins.UCAC4
             fontNames = new Font("Arial", 7);
         }
 
+        private bool isDrag = false;
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        {
+            isDrag = mouseButton == MouseButton.Left;
+        }
+
+        public override void OnMouseUp(ISkyMap map, MouseButton mouseButton)
+        {
+            isDrag = false;
+            map.Invalidate();
+        }
+
         public override void Render(ISkyMap map)
         {
+            float daylightFactor = map.DaylightFactor;
+
+            // no stars if the Sun above horizon
+            if (daylightFactor == 1) return;
+
+            //if (isDrag) return;
+
             var prj = map.Projection;
 
             if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
-                float daylightFactor = map.DaylightFactor;
-
-                // no stars if the Sun above horizon
-                if (daylightFactor == 1) return;
-
                 float starDimming = 1 - daylightFactor;
-                float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
-
-                // if (isDrag) minStarSize = Math.Max(2, minStarSize);
+                float minStarSize = Math.Max(0.5f, daylightFactor * 3);
 
                 ColorSchema schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
@@ -51,8 +63,6 @@ namespace Astrarium.Plugins.UCAC4
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
                 float magLimit = prj.MagLimit;
-
-                magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.Projection.Fov));
 
                 // J2000 equatorial coordinates of screen center
                 CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, catalog.PrecessionElements0);

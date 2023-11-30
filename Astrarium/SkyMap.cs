@@ -15,6 +15,7 @@ namespace Astrarium
 {
     public class SkyMap : ISkyMap
     {
+        // TODO: remove if not used
         public event Action<double> FovChanged;
 
         /// <summary>
@@ -118,34 +119,42 @@ namespace Astrarium
         /// </summary
         private double lockedObjectShiftDelta;
 
+        /// <inheritdoc/>
+        public CrdsEquatorial MouseEquatorialCoordinates => Projection.UnprojectEquatorial(MouseScreenCoordinates.X, MouseScreenCoordinates.Y);
+
+        /// <inheritdoc/>
+        public CrdsHorizontal MouseHorizontalCoordinates => Projection.UnprojectHorizontal(MouseScreenCoordinates.X, MouseScreenCoordinates.Y);
+
+        /// <inheritdoc/>
+        public PointF MouseScreenCoordinates { get; set; }
+
         /// <summary>
-        /// Last result of needRedraw flag
+        /// Propagates MouseMove event to renderers
         /// </summary>
-        private bool lastNeedRedraw = false;
-
-        /// <inheritdoc/>
-        public CrdsEquatorial MouseEquatorialCoordinates => Projection.UnprojectEquatorial(mouseScreenCoordinates.X, mouseScreenCoordinates.Y);
-
-        /// <inheritdoc/>
-        public CrdsHorizontal MouseHorizontalCoordinates => Projection.UnprojectHorizontal(mouseScreenCoordinates.X, mouseScreenCoordinates.Y);
-
-        private PointF mouseScreenCoordinates;
-
-        public PointF MouseScreenCoordinates
+        public void RaiseMouseMove()
         {
-            get => mouseScreenCoordinates;
-            set
-            {
-                mouseScreenCoordinates = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(this, MouseButton));
-                if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
-                {
-                    lastNeedRedraw = needRedraw;
-                    Invalidate();
-                }
-            }
+            renderers.ForEach(r => r.OnMouseMove(this, MouseButton));
         }
 
+        /// <summary>
+        /// Propagates MouseDown event to renderers
+        /// </summary>
+        public void RaiseMouseDown()
+        {
+            renderers.ForEach(r => r.OnMouseDown(this, MouseButton));
+        }
+
+        /// <summary>
+        /// Propagates MouseUp event to renderers
+        /// </summary>
+        public void RaiseMouseUp()
+        {
+            renderers.ForEach(r => r.OnMouseUp(this, MouseButton));
+        }
+
+        /// <summary>
+        /// Gets or sets current mouse button
+        /// </summary>
         public MouseButton MouseButton { get; set; }
 
         /// <summary>
