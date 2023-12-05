@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -302,16 +303,6 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class ColorConverter : MultiValueConverterBase
-    {
-        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            var schema = (ColorSchema)values[1];
-            var color = ((SkyColor)values[0]).GetColor(schema);
-            return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
-        }
-    }
-
     public class FontToStringConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -321,13 +312,21 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class ColorToStringConverter : MultiValueConverterBase
+    public class ColorToStringConverter : ValueConverterBase
     {
-        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var schema = (ColorSchema)values[1];
-            var color = ((SkyColor)values[0]).GetColor(schema);
+            var color = (Color)value;
             return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
+        }
+    }
+
+    public class ColorToMediaColorConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var color = (Color)value;
+            return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
     }
 

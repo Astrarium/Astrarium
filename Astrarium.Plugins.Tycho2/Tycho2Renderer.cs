@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.Tycho2
                 var schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get<bool>("StarsLabels");
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
-                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema));
+                Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(schema));
 
                 GL.Enable(EnableCap.PointSmooth);
                 GL.Enable(EnableCap.Blend);

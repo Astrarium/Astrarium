@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.FOV
             LoadEquipment();
             Binning = 1;
             Rotation = 0;
-            Color = new SkyColor(System.Drawing.Color.Pink);
+            Color = System.Drawing.Color.Pink;
 
             AddEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: true));
             EditEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: false));
@@ -443,9 +443,9 @@ namespace Astrarium.Plugins.FOV
 
         public ColorSchema ColorSchema => _Settings.Get<ColorSchema>("Schema");
 
-        public SkyColor Color
+        public Color Color
         {
-            get => GetValue<SkyColor>(nameof(Color));
+            get => GetValue<Color>(nameof(Color));
             set => SetValue(nameof(Color), value);
         }
 

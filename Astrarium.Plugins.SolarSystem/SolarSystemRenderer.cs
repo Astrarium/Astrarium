@@ -69,7 +69,7 @@ namespace Astrarium.Plugins.SolarSystem
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
-            brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorSolarSystemLabel").Night.Tint(schema));
+            brushLabel = new SolidBrush(settings.Get<Color>("ColorSolarSystemLabel").Tint(schema));
 
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)

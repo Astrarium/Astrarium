@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.Meteors
 
             meteors = meteors.Where(m => m.ActivityClass <= activityClassLimit);
 
-            var color = settings.Get<SkyColor>("ColorMeteors").Night.Tint(schema);
+            var color = settings.Get<Color>("ColorMeteors").Tint(schema);
             var pen = new Pen(color);
             var brush = new SolidBrush(color);
             var font = settings.Get<Font>("MeteorsLabelsFont");

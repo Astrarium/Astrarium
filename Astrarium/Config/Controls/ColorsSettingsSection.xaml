@@ -24,7 +24,7 @@
             ItemsSource="{Binding ColorSettings}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <c:ColorPicker Caption="{Binding Title}" SelectedColor="{Binding Value}" ColorSchema="{Binding RelativeSource={RelativeSource AncestorType=c:SettingsSection}, Path=DataContext.Settings.Schema}" Margin="6 2" />
+                    <c:ColorPicker Caption="{Binding Title}" SelectedColor="{Binding Value}" Margin="6 2" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

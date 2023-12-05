@@ -22,38 +22,23 @@ namespace Astrarium.Types.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            Color? color = ViewManager.ShowColorDialog(Caption, SelectedColor.GetColor(ColorSchema));
+            Color? color = ViewManager.ShowColorDialog(Caption, SelectedColor);
             if (color != null)
             {
-                SelectedColor.SetColor(color.Value, ColorSchema);
-                SelectedColor = new SkyColor(SelectedColor);
-            }            
+                SelectedColor = color.Value;
+            }
         }
 
-        public SkyColor SelectedColor
+        public Color SelectedColor
         { 
-            get => (SkyColor)GetValue(SelectedColorProperty);
+            get => (Color)GetValue(SelectedColorProperty);
             set => SetValue(SelectedColorProperty, value);
         }
 
         public readonly static DependencyProperty SelectedColorProperty = DependencyProperty.Register(
-            nameof(SelectedColor), typeof(SkyColor), typeof(ColorPicker), new FrameworkPropertyMetadata(new SkyColor(Color.Black))
+            nameof(SelectedColor), typeof(Color), typeof(ColorPicker), new FrameworkPropertyMetadata(Color.Black)
             {
                 BindsTwoWayByDefault = true,
-                DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                AffectsRender = true
-            });
-
-        public ColorSchema ColorSchema
-        {
-            get => (ColorSchema)GetValue(ColorSchemaProperty);
-            set => SetValue(ColorSchemaProperty, value);
-        }
-
-        public readonly static DependencyProperty ColorSchemaProperty = DependencyProperty.Register(
-            nameof(ColorSchema), typeof(ColorSchema), typeof(ColorPicker), new FrameworkPropertyMetadata(ColorSchema.Night)
-            {
-                BindsTwoWayByDefault = false,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                 AffectsRender = true
             });

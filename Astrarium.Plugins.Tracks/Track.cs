@@ -70,7 +70,7 @@ namespace Astrarium.Plugins.Tracks
         /// <summary>
         /// Track color
         /// </summary>
-        public SkyColor Color { get; set; }
+        public Color Color { get; set; }
 
         /// <summary>
         /// Flag indicating is it required to draw track labels or not

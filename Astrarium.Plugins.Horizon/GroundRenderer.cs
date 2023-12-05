@@ -55,7 +55,7 @@ namespace Astrarium.Plugins.Horizon
 
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             GL.Begin(PrimitiveType.LineStrip);
-            GL.Color4(settings.Get<SkyColor>("ColorHorizon").Night.Tint(schema));
+            GL.Color4(settings.Get<Color>("ColorHorizon").Tint(schema));
 
             const int steps = 64;
             var hor = new CrdsHorizontal();
@@ -171,7 +171,7 @@ namespace Astrarium.Plugins.Horizon
             var schema = settings.Get<ColorSchema>("Schema");
             var fontMajor = settings.Get<Font>("CardinalDirectionsFont");
             var fontMinor = new Font(fontMajor.FontFamily, fontMajor.Size * 0.75f, fontMajor.Style);
-            var color = settings.Get<SkyColor>("ColorCardinalDirections").Night.Tint(schema);
+            var color = settings.Get<Color>("ColorCardinalDirections").Tint(schema);
             var brush = new SolidBrush(color);
 
             for (int i = 0; i < cardinalDirections.Length; i++)

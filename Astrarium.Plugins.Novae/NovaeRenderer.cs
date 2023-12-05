@@ -34,7 +34,7 @@ namespace Astrarium.Plugins.Novae
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
             bool drawLabels = settings.Get<bool>("StarsLabels") && settings.Get<bool>("NovaeLabels") && prj.Fov <= limitAllNames;
-            Color labelColor = settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema);
+            Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(schema);
             Brush brushLabel = new SolidBrush(labelColor);
             var fontStarNames = settings.Get<Font>("StarsLabelsFont");
 

@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace Astrarium.ViewModels
                     NotifySchemaChanged();
                 }
             };
-            ColorSettings = settings.OfType<SkyColor>().Select(name => new ColorSetting(settings, name)).ToArray();
+            ColorSettings = settings.OfType<Color>().Select(name => new ColorSetting(settings, name)).ToArray();
         }
 
         public bool IsNightColorSchema
@@ -107,9 +108,9 @@ namespace Astrarium.ViewModels
                 set { }
             }
 
-            public SkyColor Value
+            public Color Value
             {
-                get => settings.Get<SkyColor>(name);
+                get => settings.Get<Color>(name);
                 set => settings.Set(name, value);
             }
         }

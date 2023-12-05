@@ -31,7 +31,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
-            var colorNames = settings.Get<SkyColor>("ColorAsteroidsLabels").Night.Tint(schema);
+            var colorNames = settings.Get<Color>("ColorAsteroidsLabels").Tint(schema);
             Brush brushNames = new SolidBrush(colorNames);
             bool drawLabels = settings.Get("AsteroidsLabels");
             bool drawAll = settings.Get<bool>("AsteroidsDrawAll");

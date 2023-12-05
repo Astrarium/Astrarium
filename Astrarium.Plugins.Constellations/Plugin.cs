@@ -16,9 +16,9 @@ namespace Astrarium.Plugins.Constellations
             DefineSetting("ConstLinesType", ConstellationsCalc.LineType.Traditional);
 
             // Colors
-            DefineSetting("ColorConstLines", new SkyColor(64, 64, 64));
-            DefineSetting("ColorConstBorders", new SkyColor(64, 32, 32));
-            DefineSetting("ColorConstLabels", new SkyColor(64, 32, 32));
+            DefineSetting("ColorConstLines", Color.FromArgb(64, 64, 64));
+            DefineSetting("ColorConstBorders", Color.FromArgb(64, 32, 32));
+            DefineSetting("ColorConstLabels", Color.FromArgb(64, 32, 32));
 
             // Fonts
             DefineSetting("ConstLabelsFont", new Font(FontFamily.GenericSansSerif, 32));

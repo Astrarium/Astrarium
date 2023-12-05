@@ -47,7 +47,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
-        public SkyColor TrackColor { get; set; } = new SkyColor(Color.DimGray);
+        public Color TrackColor { get; set; } = Color.DimGray;
         public bool DrawLabels { get; set; }
         public TimeSpan LabelsStep { get; set; } = TimeSpan.FromDays(1);
 

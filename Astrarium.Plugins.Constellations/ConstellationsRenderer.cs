@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.Constellations
             float fontSize = Math.Max(8, (float)Math.Min((int)(800 / prj.Fov), defFont.Size));
             Font font = new Font(defFont.FontFamily, fontSize, defFont.Style);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
-            Brush brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorConstLabels").Night.Tint(schema));
+            Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorConstLabels").Tint(schema));
             WF.TextFormatFlags formatFlags = WF.TextFormatFlags.HorizontalCenter | WF.TextFormatFlags.VerticalCenter;
 
             var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.Constellations
             // 0.7 coeff is an empyrical
             //fov = Angle.ToRadians(prj.Fov + 1);
 
-            var color = settings.Get<SkyColor>("ColorConstBorders").GetColor(ColorSchema.Night).Tint(schema);
+            var color = settings.Get<Color>("ColorConstBorders").Tint(schema);
 
             GL.Color3(color);
 

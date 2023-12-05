@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
+using System.Drawing;
 
 namespace Astrarium.Plugins.FOV
 {
@@ -24,7 +25,7 @@ namespace Astrarium.Plugins.FOV
         /// Frame color
         /// </summary>
         [JsonConverter(typeof(FovFrameColorJsonConverter))]
-        public SkyColor Color { get; set; }
+        public Color Color { get; set; }
 
         /// <summary>
         /// Frame label, to be shown on sky map

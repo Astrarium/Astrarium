@@ -88,7 +88,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 From = sky.Context.JulianDay,
                 To = sky.Context.JulianDay + 30,
                 LabelsStep = TimeSpan.FromDays(1),
-                Color = new SkyColor(Color.DimGray)
+                Color = Color.DimGray
             });
         }
 
@@ -143,6 +143,6 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         public string Body { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public SkyColor Color { get; set; }
+        public Color Color { get; set; }
     }
 }

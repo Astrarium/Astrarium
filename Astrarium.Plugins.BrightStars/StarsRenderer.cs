@@ -64,7 +64,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get("ConstLines"))
             {
-                var linePen = new Pen(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night).Tint(schema), 1) { DashStyle = DashStyle.Dot };
+                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(schema), 1) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
@@ -95,7 +95,7 @@ namespace Astrarium.Plugins.BrightStars
                 float minStarSize = daylightFactor * 3; // empiric
 
                 var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-                var color = settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema);
+                var color = settings.Get<Color>("ColorStarsLabels").Tint(schema);
                 var brushStarNames = new SolidBrush(color);
                 bool properNames = settings.Get("StarsProperNames");
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);

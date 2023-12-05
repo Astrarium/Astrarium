@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.Tracks
             {
                 if (track.Points.Any())
                 {
-                    var color = track.Color.Night.Tint(schema);
+                    var color = track.Color.Tint(schema);
 
                     GL.Color3(color);
 

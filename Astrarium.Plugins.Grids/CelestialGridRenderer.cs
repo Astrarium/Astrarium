@@ -35,11 +35,11 @@ namespace Astrarium.Plugins.Grids
             var prj = map.Projection;
             var schema = settings.Get<ColorSchema>("Schema");
 
-            Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night.Tint(schema);
-            Color colorGridHorizontal = settings.Get<SkyColor>("ColorHorizontalGrid").Night.Tint(schema);
-            Color colorLineEcliptic = settings.Get<SkyColor>("ColorEcliptic").Night.Tint(schema);
-            Color colorLineGalactic = settings.Get<SkyColor>("ColorGalacticEquator").Night.Tint(schema);
-            Color colorLineMeridian = settings.Get<SkyColor>("ColorMeridian").Night.Tint(schema);
+            Color colorGridEquatorial = settings.Get<Color>("ColorEquatorialGrid").Tint(schema);
+            Color colorGridHorizontal = settings.Get<Color>("ColorHorizontalGrid").Tint(schema);
+            Color colorLineEcliptic = settings.Get<Color>("ColorEcliptic").Tint(schema);
+            Color colorLineGalactic = settings.Get<Color>("ColorGalacticEquator").Tint(schema);
+            Color colorLineMeridian = settings.Get<Color>("ColorMeridian").Tint(schema);
 
             SolidBrush brushHorizontal = new SolidBrush(colorGridHorizontal);
             SolidBrush brushEquatorial = new SolidBrush(colorGridEquatorial);

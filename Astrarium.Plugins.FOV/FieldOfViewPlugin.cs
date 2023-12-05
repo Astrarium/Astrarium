@@ -104,7 +104,7 @@ namespace Astrarium.Plugins.FOV
         private void AddFovFrame()
         {
             var viewModel = ViewManager.CreateViewModel<FovSettingsVM>();
-            viewModel.Frame = new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = new SkyColor(Color.Purple) };
+            viewModel.Frame = new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = Color.Purple };
             if (ViewManager.ShowDialog(viewModel) ?? false)
             {
                 fovFrames.Add(viewModel.Frame);

@@ -54,7 +54,7 @@ namespace Astrarium.Plugins.UCAC4
 
                 ColorSchema schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
-                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema));
+                Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(schema));
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
                 GL.Enable(EnableCap.PointSmooth);
