@@ -34,7 +34,7 @@ namespace Astrarium.Plugins.Atmosphere
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcColor);
 
             // if only one of the flipping enabled
-            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
                 GL.CullFace(CullFaceMode.Back);
             }

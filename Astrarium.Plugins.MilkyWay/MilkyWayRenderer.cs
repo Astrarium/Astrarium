@@ -69,8 +69,7 @@ namespace Astrarium.Plugins.MilkyWay
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            // if only one of the flipping enabled
-            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
                 GL.CullFace(CullFaceMode.Back);
             }

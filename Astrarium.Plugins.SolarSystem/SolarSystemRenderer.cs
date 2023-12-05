@@ -168,7 +168,6 @@ namespace Astrarium.Plugins.SolarSystem
                         Equatorial = saturnMoon.Equatorial,
                         MaximalPointSize = 1.5f,
                         TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
-                        FallbackTextureName = Path.Combine(dataPath, $"Unknown.jpg"),
                         LongitudeShift = saturnMoon.CM,
                         PhaseAngle = saturn.PhaseAngle,
                         RotationAxis = rotAxis,
@@ -446,7 +445,7 @@ namespace Astrarium.Plugins.SolarSystem
                 double delta = 1.0 / segments;
 
                 // rotation matrix to proper orient sphere 
-                Mat4 matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? 1 : -1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
+                Mat4 matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? -1 : 1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
                 // illumination matrix (phase)
                 Mat4 matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * matVision;
@@ -487,8 +486,8 @@ namespace Astrarium.Plugins.SolarSystem
                     // polar cap limits, in fractions of planet diameter
                     if (layer == LAYER_POLAR_CAP)
                     {
-                        cap1 = prj.FlipVertical ? 1 - planetsCalc.MarsNPCWidth / 180 : 1 - planetsCalc.MarsSPCWidth / 180;
-                        cap2 = prj.FlipVertical ? planetsCalc.MarsSPCWidth / 180 : planetsCalc.MarsNPCWidth / 180;
+                        cap1 = prj.FlipVertical ? 1 - planetsCalc.MarsSPCWidth / 180 : 1 - planetsCalc.MarsNPCWidth / 180;
+                        cap2 = prj.FlipVertical ? planetsCalc.MarsNPCWidth / 180 : planetsCalc.MarsSPCWidth / 180;
                     }
 
                     int texture = 0;
@@ -538,7 +537,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                             if (layer == LAYER_PLANET)
                             {
-                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), t * (prj.FlipVertical ? -1 : 1));
+                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), -t * (prj.FlipVertical ? -1 : 1));
                             }
                             else if (layer == LAYER_POLAR_CAP)
                             {
@@ -565,7 +564,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                             if (layer == LAYER_PLANET)
                             {
-                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (t - delta) * (prj.FlipVertical ? -1 : 1));
+                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (delta - t) * (prj.FlipVertical ? -1 : 1));
                             }
                             else if (layer == LAYER_POLAR_CAP)
                             {
@@ -686,7 +685,7 @@ namespace Astrarium.Plugins.SolarSystem
                 if (textureId > 0)
                 {
                     double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
-                    double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
+                    double ty = -(prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
                     GL.TexCoord2(0.5f + 0.499f * tx, 0.5f + 0.499f * ty);
                 }
 
@@ -929,7 +928,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (j = 0; j <= segments / 2; j++)
             {
-                double ang = j / (double)segments * 2 * Math.PI - sign * Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
+                double ang = j / (double)segments * 2 * Math.PI - sign * Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? -1 : 1);
                 x = -Math.Sin(ang);
                 y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
                 Vec3 vecVision = matRings * new Vec3(x, y, 0);
@@ -995,7 +994,7 @@ namespace Astrarium.Plugins.SolarSystem
             double Y = r * Math.Sin(Angle.ToRadians(c.Latitude));
             double X = r * Math.Cos(Angle.ToRadians(c.Latitude)) * Math.Sin(Angle.ToRadians(c.Longitude));
 
-            Y = -Y * (prj.FlipVertical ? -1 : 1);
+            Y = Y * (prj.FlipVertical ? -1 : 1);
             X = X * (prj.FlipHorizontal ? -1 : 1);
 
             // polar coordinates rotated around of visible center of the body disk
@@ -1040,7 +1039,7 @@ namespace Astrarium.Plugins.SolarSystem
             float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
 
             // Center of shadow, relative to Jupiter center
-            Vec2 pShadow = new Vec2(-moon.RectangularS.X * sd * (prj.FlipHorizontal ? -1 : 1), -moon.RectangularS.Y * sd * (prj.FlipVertical ? 1 : -1));
+            Vec2 pShadow = new Vec2(-moon.RectangularS.X * sd * (prj.FlipHorizontal ? -1 : 1), -moon.RectangularS.Y * sd * (prj.FlipVertical ? -1 : 1));
 
             // rotation angle of shadow center respect to center of Jupiter
             double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
@@ -1203,7 +1202,7 @@ namespace Astrarium.Plugins.SolarSystem
                     CrdsRectangular shadowRelative = moon.RectangularS - rect;
 
                     // Center of shadow, relative to Jupiter center
-                    Vec2 p = new Vec2(shadowRelative.X * sd * (prj.FlipHorizontal ? -1 : 1), shadowRelative.Y * sd * (prj.FlipVertical ? 1 : -1));
+                    Vec2 p = new Vec2(shadowRelative.X * sd * (prj.FlipHorizontal ? -1 : 1), shadowRelative.Y * sd * (prj.FlipVertical ? -1 : 1));
 
                     // rotation angle of shadow center respect to center of Jupiter
                     double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);

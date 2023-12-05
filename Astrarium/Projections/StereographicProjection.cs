@@ -26,13 +26,13 @@ namespace Astrarium.Projections
 
             return new Vec2(
                 ScreenWidth / 2 + (FlipHorizontal ? -1 : 1) * vec[0] * f,
-                ScreenHeight / 2 - (FlipVertical ? -1 : 1) * vec[1] * f);
+                ScreenHeight / 2 + (FlipVertical ? -1 : 1) * vec[1] * f);
         }
 
         public override Vec3 Unproject(Vec2 s, Mat4 m)
         {
             double x = (FlipHorizontal ? -1 : 1) * (s[0] - ScreenWidth / 2) / (ScreenScalingFactor * 2);
-            double y = -(FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor * 2);
+            double y = (FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor * 2);
             double lq = x * x + y * y;
 
             Vec3 v = new Vec3(2 * x, 2 * y, lq - 1);

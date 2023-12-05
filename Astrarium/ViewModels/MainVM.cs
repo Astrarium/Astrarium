@@ -244,8 +244,8 @@ namespace Astrarium.ViewModels
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
             
-            var menuMountModeHorizontal = new MenuItem("$Menu.MountMode.Horizontal") { IsCheckable = true, IsChecked = true };
-            var menuMountModeEquatorial = new MenuItem("$Menu.MountMode.Equatorial") { IsCheckable = true };
+            var menuMountModeHorizontal = new MenuItem("$Menu.MapMountMode.Horizontal") { IsCheckable = true, IsChecked = true };
+            var menuMountModeEquatorial = new MenuItem("$Menu.MapMountMode.Equatorial") { IsCheckable = true };
             
             menuMountModeHorizontal.Command = new Command(() => {
                 menuMountModeHorizontal.IsChecked = true;
@@ -261,7 +261,7 @@ namespace Astrarium.ViewModels
                 map.Invalidate();
             });
 
-            var menuMapMountMode = new MenuItem("$Menu.MountMode")
+            var menuMapMountMode = new MenuItem("$Menu.MapMountMode")
             {
                 SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
                     menuMountModeHorizontal,
@@ -272,9 +272,9 @@ namespace Astrarium.ViewModels
             var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
 
-            var projectionMenuItems = projectionTypes.Select(t => new MenuItem(t.Name, new Command(() => map.SetProjection(t))));
+            var projectionMenuItems = projectionTypes.Select(t => new MenuItem($"$Projection.{t.Name}", new Command(() => map.SetProjection(t))));
 
-            var menuMapProjection = new MenuItem("Projection")
+            var menuMapProjection = new MenuItem("$Menu.MapProjection")
             {
                 SubItems = new ObservableCollection<MenuItem>(projectionMenuItems)
             };

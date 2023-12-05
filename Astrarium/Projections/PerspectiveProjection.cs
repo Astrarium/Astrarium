@@ -23,7 +23,7 @@ namespace Astrarium.Projections
             const double zFar = 10000;
 
             MatProjection.Set((FlipHorizontal ? -1 : 1) * f * ratio, 0, 0, 0,
-                            0, -(FlipVertical ? -1 : 1) * f, 0, 0,
+                            0, (FlipVertical ? -1 : 1) * f, 0, 0,
                             0, 0, (zFar + zNear) / (zNear - zFar), -1,
                             0, 0, 2 * zFar * zNear / (zNear - zFar), 0);
         }

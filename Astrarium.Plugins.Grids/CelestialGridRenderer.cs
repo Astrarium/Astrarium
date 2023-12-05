@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.Grids
             GL.Enable(EnableCap.LineStipple);
             GL.Enable(EnableCap.CullFace);
 
-            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
                 GL.CullFace(CullFaceMode.Back);
             }

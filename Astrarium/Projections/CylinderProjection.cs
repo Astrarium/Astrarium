@@ -28,7 +28,7 @@ namespace Astrarium.Projections
             // common part
             return new Vec2(
                 ScreenWidth / 2 + (FlipHorizontal ? -1: 1) * v[0] * (ScreenScalingFactor),
-                ScreenHeight / 2 - (FlipVertical ? -1 : 1) * v[1] * (ScreenScalingFactor)
+                ScreenHeight / 2 + (FlipVertical ? -1 : 1) * v[1] * (ScreenScalingFactor)
                 );
         }
 
@@ -36,7 +36,7 @@ namespace Astrarium.Projections
         {
             Vec2 v = new Vec2(
                 (FlipHorizontal ? -1 : 1) * (s[0] - ScreenWidth / 2) / (ScreenScalingFactor),
-                -(FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor)
+                (FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor)
             );
 
             if (!(v[1] < Math.PI / 2 && v[1] > -Math.PI / 2 && v[0] > -Math.PI && v[0] < Math.PI)) return null;

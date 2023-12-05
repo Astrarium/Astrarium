@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.BrightStars
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             GL.Enable(EnableCap.CullFace);
 
-            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
                 GL.CullFace(CullFaceMode.Back);
             }

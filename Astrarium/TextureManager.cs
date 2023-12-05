@@ -82,7 +82,7 @@ namespace Astrarium
                 // has fallback?
                 if (fallbackPath != null)
                 {
-                    return GetTexture(fallbackPath);
+                    return GetTexture(fallbackPath, null, permanent = true);
                 }
 
                 return 0;
@@ -104,7 +104,7 @@ namespace Astrarium
                 int[] removedIds = null;
                 lock (locker)
                 {
-                    var removed = textures.Where(x => x.UsageCounter > 10).ToArray();
+                    var removed = textures.Where(x => !x.IsPermanent && x.UsageCounter > 10).ToArray();
                     if (removed.Any())
                     {
                         removedIds = removed.Select(x => x.TextureId).ToArray();
