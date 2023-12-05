@@ -195,6 +195,7 @@ namespace Astrarium.ViewModels
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += () => NotifyPropertyChanged(nameof(TimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
+            map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
 
@@ -243,8 +244,8 @@ namespace Astrarium.ViewModels
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
             
-            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IsChecked = true };
-            var menuMountModeEquatorial = new MenuItem("Equatorial") { IsCheckable = true };
+            var menuMountModeHorizontal = new MenuItem("$Menu.MountMode.Horizontal") { IsCheckable = true, IsChecked = true };
+            var menuMountModeEquatorial = new MenuItem("$Menu.MountMode.Equatorial") { IsCheckable = true };
             
             menuMountModeHorizontal.Command = new Command(() => {
                 menuMountModeHorizontal.IsChecked = true;
@@ -260,7 +261,7 @@ namespace Astrarium.ViewModels
                 map.Invalidate();
             });
 
-            var menuMapMountMode = new MenuItem("Mount Mode")
+            var menuMapMountMode = new MenuItem("$Menu.MountMode")
             {
                 SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
                     menuMountModeHorizontal,
@@ -557,6 +558,15 @@ namespace Astrarium.ViewModels
             }
 
             NotifyPropertyChanged(nameof(SelectedObject));
+        }
+
+        private void Map_LockedObjectChanged(CelestialObject obj)
+        {
+            if (obj == null)
+            {
+                // TODO: localize
+                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage("Map is unlocked"));
+            }
         }
 
         private void Zoom(int delta)

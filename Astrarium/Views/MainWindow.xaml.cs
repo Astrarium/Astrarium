@@ -378,11 +378,6 @@ namespace Astrarium
                 }
 
                 pOld = new PointF(p.X, p.Y);
-
-                if (map.LockedObject != null)
-                {
-                    Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage(Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()))));
-                }
             }
 
             if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)

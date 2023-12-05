@@ -85,12 +85,16 @@ namespace Astrarium
             get => lockedObject;
             set
             {
-                lockedObject = value;
-                if (lockedObject != null)
+                if (lockedObject != value)
                 {
-                    var eq = lockedObject.Equatorial;
-                    lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                    lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                    lockedObject = value;
+                    if (lockedObject != null)
+                    {
+                        var eq = lockedObject.Equatorial;
+                        lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                        lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                    }
+                    LockedObjectChanged?.Invoke(lockedObject);
                 }
             }
         }
@@ -102,8 +106,19 @@ namespace Astrarium
             if (LockedObject != null)
             {
                 var eq = LockedObject.Equatorial;
-                lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+
+                var sep = Angle.Separation(Projection.CenterEquatorial, eq);
+                if (sep < 90)
+                {
+                    lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                    lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                }
+                else
+                {
+                    LockedObject = null;
+                }
+
+
             }
 
             Invalidate();
@@ -157,10 +172,11 @@ namespace Astrarium
         /// </summary>
         public MouseButton MouseButton { get; set; }
 
-        /// <summary>
-        /// Occurs when selected celestial object is changed
-        /// </summary>
+        // <inheritdoc />
         public event Action<CelestialObject> SelectedObjectChanged;
+
+        // <inheritdoc />
+        public event Action<CelestialObject> LockedObjectChanged;
 
         public Projection Projection { get; private set; }
 
@@ -445,6 +461,8 @@ namespace Astrarium
             {
                 viewAngleTarget = Projection.Fov;
             }
+
+            LockedObject = null;
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {

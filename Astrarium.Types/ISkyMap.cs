@@ -74,5 +74,7 @@ namespace Astrarium.Types
         event Action<CelestialObject> SelectedObjectChanged;
 
         event Action OnInvalidate;
+
+        event Action<CelestialObject> LockedObjectChanged;
     }
 }

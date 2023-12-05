@@ -66,7 +66,7 @@ namespace Astrarium.Types
         EarthOrbit = 5,
 
         /// <summary>
-        /// Rendering layer for athmosphere
+        /// Rendering layer for atmosphere
         /// </summary>
         Atmosphere = 6,
 
