@@ -36,8 +36,8 @@ namespace Astrarium.Plugins.MinorBodies
             if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
-            var colorNames = settings.Get<Color>("ColorCometsLabels").Tint(schema);
+            var nightMode = settings.Get("NightMode");
+            var colorNames = settings.Get<Color>("ColorCometsLabels").Tint(nightMode);
             Brush brushNames = new SolidBrush(colorNames);
             bool drawLabels = settings.Get("CometsLabels");
             bool drawAll = settings.Get<bool>("CometsDrawAll");
@@ -78,7 +78,7 @@ namespace Astrarium.Plugins.MinorBodies
                     GL.Begin(PrimitiveType.TriangleFan);
 
                     // center
-                    GL.Color4(colorComet.Tint(schema));
+                    GL.Color4(colorComet.Tint(nightMode));
                     GL.Vertex2(p.X, p.Y);
 
                     bool drawTail = tail > 2 * diam;
@@ -126,7 +126,7 @@ namespace Astrarium.Plugins.MinorBodies
 
                     GL.PointSize(size);
                     GL.Begin(PrimitiveType.Points);
-                    GL.Color3(colorComet.Tint(schema));
+                    GL.Color3(colorComet.Tint(nightMode));
                     GL.Vertex2(p.X, p.Y);
                     GL.End();
 

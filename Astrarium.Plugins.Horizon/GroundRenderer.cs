@@ -46,7 +46,7 @@ namespace Astrarium.Plugins.Horizon
             if (!settings.Get<bool>("HorizonLine") || settings.Get("Ground")) return;
 
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -55,7 +55,7 @@ namespace Astrarium.Plugins.Horizon
 
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             GL.Begin(PrimitiveType.LineStrip);
-            GL.Color4(settings.Get<Color>("ColorHorizon").Tint(schema));
+            GL.Color4(settings.Get<Color>("ColorHorizon").Tint(nightMode));
 
             const int steps = 64;
             var hor = new CrdsHorizontal();
@@ -113,7 +113,7 @@ namespace Astrarium.Plugins.Horizon
             // blackout coeff
             int c = nc + (int)((255 - nc) * map.DaylightFactor);
 
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (settings.Get("NightMode"))
             {
                 // night vision tint
                 GL.Color4(Color.FromArgb((int)(c * 0.6), 0, 0));
@@ -168,10 +168,10 @@ namespace Astrarium.Plugins.Horizon
 
             var prj = map.Projection;
 
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
             var fontMajor = settings.Get<Font>("CardinalDirectionsFont");
             var fontMinor = new Font(fontMajor.FontFamily, fontMajor.Size * 0.75f, fontMajor.Style);
-            var color = settings.Get<Color>("ColorCardinalDirections").Tint(schema);
+            var color = settings.Get<Color>("ColorCardinalDirections").Tint(nightMode);
             var brush = new SolidBrush(color);
 
             for (int i = 0; i < cardinalDirections.Length; i++)

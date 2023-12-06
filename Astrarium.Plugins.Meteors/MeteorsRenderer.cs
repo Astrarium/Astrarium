@@ -29,8 +29,7 @@ namespace Astrarium.Plugins.Meteors
             if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
-
+            var nightMode = settings.Get("NightMode");
             bool onlyActive = settings.Get("MeteorsOnlyActive");
             bool showLabels = settings.Get("MeteorsLabels");
             int activityClassLimit = (int)settings.Get("MeteorsActivityClassLimit", MeteorActivityClass.IV);
@@ -44,7 +43,7 @@ namespace Astrarium.Plugins.Meteors
 
             meteors = meteors.Where(m => m.ActivityClass <= activityClassLimit);
 
-            var color = settings.Get<Color>("ColorMeteors").Tint(schema);
+            var color = settings.Get<Color>("ColorMeteors").Tint(nightMode);
             var pen = new Pen(color);
             var brush = new SolidBrush(color);
             var font = settings.Get<Font>("MeteorsLabelsFont");

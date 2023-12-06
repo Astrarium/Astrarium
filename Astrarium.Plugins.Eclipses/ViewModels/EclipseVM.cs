@@ -455,8 +455,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             string tileServerName = settings.Get<string>("EclipseMapTileServer");
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));
             TileServer = tileServer ?? TileServers.First();
-
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
 
             meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);
 
@@ -465,9 +464,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "Schema")
+            if (e.PropertyName == "NightMode")
             {
-                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+                IsDarkMode = settings.Get("NightMode");
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
             }
@@ -611,7 +610,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected ImageAttributes GetImageAttributes()
         {
             // make image "red"
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (settings.Get("NightMode"))
             {
                 float[][] matrix = {
                     new float[] {0.3f, 0, 0, 0, 0},

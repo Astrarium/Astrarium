@@ -52,9 +52,9 @@ namespace Astrarium.Plugins.UCAC4
                 float starDimming = 1 - daylightFactor;
                 float minStarSize = Math.Max(0.5f, daylightFactor * 3);
 
-                ColorSchema schema = settings.Get<ColorSchema>("Schema");
+                bool nightMode = settings.Get("NightMode");
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
-                Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(schema));
+                Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(nightMode));
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
                 GL.Enable(EnableCap.PointSmooth);
@@ -80,7 +80,7 @@ namespace Astrarium.Plugins.UCAC4
                         if (prj.IsInsideScreen(p))
                         {
                             GL.PointSize(size * starsScalingFactor);
-                            GL.Color3(GetColor(star.SpectralClass).Tint(schema));
+                            GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
 
                             GL.Begin(PrimitiveType.Points);
                             GL.Vertex2(p.X, p.Y);

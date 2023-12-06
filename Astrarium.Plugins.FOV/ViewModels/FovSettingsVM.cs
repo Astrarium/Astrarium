@@ -441,7 +441,7 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public ColorSchema ColorSchema => _Settings.Get<ColorSchema>("Schema");
+        public bool NightMode => _Settings.Get("NightMode");
 
         public Color Color
         {

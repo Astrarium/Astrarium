@@ -250,8 +250,6 @@ namespace Astrarium
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
 
-            Schema = settings.Get<ColorSchema>("Schema");
-
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
@@ -273,9 +271,8 @@ namespace Astrarium
                     Invalidate();
                 }
 
-                if (name == "Schema")
+                if (name == "NightMode")
                 {
-                    Schema = settings.Get<ColorSchema>("Schema");
                     Invalidate();
                 }
 
@@ -318,8 +315,6 @@ namespace Astrarium
                 timeSyncWaitEvent.WaitOne((int)rate);
             }
         }
-
-        public ColorSchema Schema { get; private set; } = ColorSchema.Night;
 
         private long rendersCount = 0;
         private long meanRenderTime = 0;

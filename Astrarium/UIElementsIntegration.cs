@@ -59,7 +59,7 @@ namespace Astrarium
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
 
             // Default color schema
-            SettingDefinitions.Add(new SettingDefinition("Schema", ColorSchema.Night));
+            SettingDefinitions.Add(new SettingDefinition("NightMode", false));
 
             // Map transformation
             SettingDefinitions.Add(new SettingDefinition("IsMirrored", false));

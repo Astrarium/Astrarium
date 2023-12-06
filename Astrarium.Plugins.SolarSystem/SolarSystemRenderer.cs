@@ -68,8 +68,8 @@ namespace Astrarium.Plugins.SolarSystem
         {
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
-            brushLabel = new SolidBrush(settings.Get<Color>("ColorSolarSystemLabel").Tint(schema));
+            var nightMode = settings.Get("NightMode");
+            brushLabel = new SolidBrush(settings.Get<Color>("ColorSolarSystemLabel").Tint(nightMode));
 
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
@@ -341,7 +341,7 @@ namespace Astrarium.Plugins.SolarSystem
         private void RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
         {
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
             float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
             // size of object when it's drawn as point (in pixels)
@@ -370,7 +370,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 GL.PointSize(size * starsScalingFactor);
                 GL.Begin(PrimitiveType.Points);
-                GL.Color3(data.Color.Tint(schema));
+                GL.Color3(data.Color.Tint(nightMode));
                 GL.Vertex2(p.X, p.Y);
                 GL.End();
             }
@@ -392,7 +392,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // color of illuminated part
                 float[] diffuse;
 
-                if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+                if (settings.Get("NightMode"))
                 {
                     diffuse = new float[4] { 0.5f, 0, 0, 1f };
                     ambient = new float[4] { 0.5f, 0, 0, 0.5f };
@@ -630,7 +630,7 @@ namespace Astrarium.Plugins.SolarSystem
         private void RenderSun()
         {
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
 
             // do not draw if out of screen
@@ -658,7 +658,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PushMatrix();
             GL.Translate(p.X, p.Y, 0);
 
-            if (schema == ColorSchema.Red)
+            if (nightMode)
             {
                 GL.Color4(Color.Red);
             }
@@ -903,7 +903,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
             }
 
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (settings.Get("NightMode"))
             {
                 GL.Color3(Color.DarkRed);
             }
@@ -911,7 +911,7 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 GL.Color3(Color.White);
             }
-            
+
             GL.Begin(PrimitiveType.TriangleFan);
 
             GL.TexCoord2(1, 0);

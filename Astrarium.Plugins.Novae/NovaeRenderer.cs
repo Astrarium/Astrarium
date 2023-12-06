@@ -28,13 +28,13 @@ namespace Astrarium.Plugins.Novae
 
         public override void Render(ISkyMap map)
         {
-            if (!settings.Get("Stars") || !settings.Get<bool>("Novae")) return;
+            if (!settings.Get("Stars") || !settings.Get("Novae")) return;
             if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
-            bool drawLabels = settings.Get<bool>("StarsLabels") && settings.Get<bool>("NovaeLabels") && prj.Fov <= limitAllNames;
-            Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(schema);
+            var nightMode = settings.Get("NightMode");
+            bool drawLabels = settings.Get("StarsLabels") && settings.Get("NovaeLabels") && prj.Fov <= limitAllNames;
+            Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
             Brush brushLabel = new SolidBrush(labelColor);
             var fontStarNames = settings.Get<Font>("StarsLabelsFont");
 
@@ -66,7 +66,7 @@ namespace Astrarium.Plugins.Novae
                     {
                         GL.PointSize(size);
                         GL.Begin(PrimitiveType.Points);
-                        GL.Color3(Color.White.Tint(schema));
+                        GL.Color3(Color.White.Tint(nightMode));
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 

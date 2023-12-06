@@ -118,7 +118,7 @@ namespace Astrarium.Plugins.Meteors
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
             Moon = Sky.Search("Moon");
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
             settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();
         }
@@ -127,7 +127,7 @@ namespace Astrarium.Plugins.Meteors
         {
             if (settingName == "Schema")
             {
-                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+                IsDarkMode = (bool)value;
             }
         }
 

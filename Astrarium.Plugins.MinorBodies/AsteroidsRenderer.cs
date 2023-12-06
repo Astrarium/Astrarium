@@ -30,8 +30,8 @@ namespace Astrarium.Plugins.MinorBodies
             if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
-            var colorNames = settings.Get<Color>("ColorAsteroidsLabels").Tint(schema);
+            var nightMode = settings.Get("NightMode");
+            var colorNames = settings.Get<Color>("ColorAsteroidsLabels").Tint(nightMode);
             Brush brushNames = new SolidBrush(colorNames);
             bool drawLabels = settings.Get("AsteroidsLabels");
             bool drawAll = settings.Get<bool>("AsteroidsDrawAll");
@@ -69,14 +69,14 @@ namespace Astrarium.Plugins.MinorBodies
                         GL.Begin(PrimitiveType.TriangleFan);
 
                         // center
-                        GL.Color3(colorAsteroid.Tint(schema));
+                        GL.Color3(colorAsteroid.Tint(nightMode));
                         GL.Vertex2(p.X, p.Y);
                         double r = diam / 2;
                         for (int i = 0; i <= 64; i++)
                         {
                             double ang = i / 32.0 * Math.PI;
                             Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
-                            GL.Color3(colorAsteroidEdge.Tint(schema));
+                            GL.Color3(colorAsteroidEdge.Tint(nightMode));
                             GL.Vertex2(v.X, v.Y);
                         }
 
@@ -105,7 +105,7 @@ namespace Astrarium.Plugins.MinorBodies
 
                             GL.PointSize(size);
                             GL.Begin(PrimitiveType.Points);
-                            GL.Color3(colorAsteroid.Tint(schema));
+                            GL.Color3(colorAsteroid.Tint(nightMode));
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 

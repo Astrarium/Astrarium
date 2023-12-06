@@ -18,76 +18,7 @@ namespace Astrarium.ViewModels
 
         public ColorsSettingsVM(ISettings settings) : base(settings)
         {
-            Settings.SettingValueChanged += (s, v) =>
-            {
-                if (s == "Schema")
-                {
-                    NotifySchemaChanged();
-                }
-            };
             ColorSettings = settings.OfType<Color>().Select(name => new ColorSetting(settings, name)).ToArray();
-        }
-
-        public bool IsNightColorSchema
-        {
-            get => Settings.Get<ColorSchema>("Schema") == ColorSchema.Night;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("Schema", ColorSchema.Night);
-                    NotifySchemaChanged();
-                }
-            }
-        }
-
-        public bool IsDayNightColorSchema
-        {
-            get => Settings.Get<ColorSchema>("Schema") == ColorSchema.Day;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("Schema", ColorSchema.Day);
-                    NotifySchemaChanged();
-                }
-            }
-        }
-
-        public bool IsRedColorSchema
-        {
-            get => Settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("Schema", ColorSchema.Red);
-                    NotifySchemaChanged();
-                }
-            }
-        }
-
-        public bool IsWhiteColorSchema
-        {
-            get => Settings.Get<ColorSchema>("Schema") == ColorSchema.White;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("Schema", ColorSchema.White);
-                    NotifySchemaChanged();
-                }
-            }
-        }
-
-        private void NotifySchemaChanged()
-        {
-            NotifyPropertyChanged(
-                nameof(IsNightColorSchema),
-                nameof(IsDayNightColorSchema),
-                nameof(IsRedColorSchema),
-                nameof(IsWhiteColorSchema)
-            );
         }
 
         public class ColorSetting : ViewModelBase

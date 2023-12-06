@@ -57,7 +57,7 @@ namespace Astrarium.ViewModels
 
             this.locationsManager = locationsManager;
 
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
             MapZoomLevel = 7;
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -812,9 +812,9 @@ namespace Astrarium.ViewModels
         /// <param name="value">Setting value</param>
         private void OnSettingValueChanged(string setting, object value)
         {
-            if (setting == "Schema")
+            if (setting == "NightMode")
             {
-                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+                IsDarkMode = settings.Get("NightMode");
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
             }
@@ -837,7 +837,7 @@ namespace Astrarium.ViewModels
         private ImageAttributes GetImageAttributes()
         {
             // make image "red"
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (settings.Get("NightMode"))
             {
                 float[][] matrix = {
                     new float[] {0.3f, 0, 0, 0, 0},

@@ -75,11 +75,11 @@ namespace Astrarium.Plugins.MeasureTool
             if (IsMeasureToolOn)
             {
                 var prj = map.Projection;
-                var schema = settings.Get<ColorSchema>("Schema");
+                var nightMode = settings.Get("NightMode");
                 var m = map.MouseScreenCoordinates;
                 var mouse = prj.UnprojectEquatorial(m.X, m.Y);
                 const int segmentsCount = 32;
-                var color = Color.White.Tint(schema);
+                var color = Color.White.Tint(nightMode);
                 var brush = new SolidBrush(color);
 
                 GL.Enable(EnableCap.Blend);

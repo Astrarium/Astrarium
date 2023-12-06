@@ -33,10 +33,10 @@ namespace Astrarium.Plugins.DeepSky
 
             bool drawLabels = settings.Get("DeepSkyLabels");
             bool drawOutlines = settings.Get("DeepSkyOutlines");
-            var schema = settings.Get<ColorSchema>("Schema");
-            Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(schema);
+            var nightMode = settings.Get("NightMode");
+            Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(nightMode);
             Pen penOutline = new Pen(colorOutline);
-            Color colorLabel = settings.Get<Color>("ColorDeepSkyLabel").Tint(schema);
+            Color colorLabel = settings.Get<Color>("ColorDeepSkyLabel").Tint(nightMode);
             Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
             bool drawImages = settings.Get("DeepSkyImages") && Directory.Exists(imagesPath);
@@ -95,7 +95,7 @@ namespace Astrarium.Plugins.DeepSky
                                 GL.Begin(PrimitiveType.TriangleFan);
 
                                 GL.TexCoord2(0.5, 0.5);
-                                GL.Color4(Color.FromArgb((int)(100 * (1 - map.DaylightFactor)), 255, 255, 255).Tint(schema));
+                                GL.Color4(Color.FromArgb((int)(100 * (1 - map.DaylightFactor)), 255, 255, 255).Tint(nightMode));
                                 GL.Vertex2(p.X, p.Y);
 
                                 GL.TexCoord2(0, 0);

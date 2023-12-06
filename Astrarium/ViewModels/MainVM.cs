@@ -287,31 +287,18 @@ namespace Astrarium.ViewModels
                 })
             };
 
-            var menuColorSchema = new MenuItem("$Menu.ColorSchema")
-            {
-                SubItems = new ObservableCollection<MenuItem>(Enum.GetValues(typeof(ColorSchema))
-                    .Cast<ColorSchema>()
-                    .Select(s =>
-                    {
-                        var menuItem = new MenuItem($"$Settings.Schema.{s}");
-                        menuItem.Command = new Command(() => {
-                            menuItem.IsChecked = true;
-                            settings.SetAndSave("Schema", s);
-                        });
-                        menuItem.AddBinding(new SimpleBinding(settings, "Schema", "IsChecked")
-                        {
-                            SourceToTargetConverter = (schema) => (ColorSchema)schema == s,
-                            TargetToSourceConverter = (isChecked) => (bool)isChecked ? s : settings.Get<ColorSchema>("Schema"),                            
-                        });
-                        return menuItem;
-                    }))
-            };
+            var menuNightMode = new MenuItem("$Menu.NightMode") { IsCheckable = true };
+            menuNightMode.Command = new Command(() => {
+                menuNightMode.IsChecked = !menuNightMode.IsChecked;
+                settings.SetAndSave("NightMode", menuNightMode.IsChecked);
+            });
+            menuNightMode.AddBinding(new SimpleBinding(settings, "NightMode", nameof(MenuItem.IsChecked)));
 
             menuMap.SubItems.Add(menuMapProjection);
             menuMap.SubItems.Add(menuMapTransform);
             menuMap.SubItems.Add(menuMapMountMode);
             menuMap.SubItems.Add(null);
-            menuMap.SubItems.Add(menuColorSchema);
+            menuMap.SubItems.Add(menuNightMode);
             menuMap.SubItems.Add(null);
 
             foreach (var group in groups)
@@ -351,7 +338,6 @@ namespace Astrarium.ViewModels
             menuMap.SubItems.Add(new MenuItem("$Menu.Exit") { Command = ExitAppCommand, HotKey = new KeyGesture(Key.None, ModifierKeys.None, "Alt+F4") });
 
             MainMenuItems.Add(menuMap);
-            
 
             // VIEW
 
@@ -359,8 +345,6 @@ namespace Astrarium.ViewModels
             {
                 SubItems = new ObservableCollection<MenuItem>()
             };
-
-            menuView.SubItems.Add(null);
 
             var menuCompact = new MenuItem("$Menu.CompactMenu");
             menuCompact.Command = new Command(() => {

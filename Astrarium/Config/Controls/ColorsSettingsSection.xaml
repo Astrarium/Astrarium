@@ -10,14 +10,7 @@
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Orientation="Vertical">
-        <GroupBox Header="{t:Text Settings.Schema}" Margin="6">
-            <StackPanel Orientation="Vertical" Margin="2">
-                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Night}" GroupName="Schema" IsChecked="{Binding IsNightColorSchema}"/>
-                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Day}" GroupName="Schema" IsChecked="{Binding IsDayNightColorSchema}"/>
-                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Red}" GroupName="Schema" IsChecked="{Binding IsRedColorSchema}"/>
-                <RadioButton Margin="2" Content="{t:Text Settings.Schema.White}" GroupName="Schema" IsChecked="{Binding IsWhiteColorSchema}"/>
-            </StackPanel>
-        </GroupBox>
+        <CheckBox IsChecked="{Binding Settings.NightMode}" Content="{t:Text Settings.NightMode}" Margin="8" />
         <ItemsControl  
             Width="Auto" 
             Height="Auto"

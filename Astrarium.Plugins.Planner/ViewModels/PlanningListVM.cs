@@ -232,7 +232,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             this.telescopeManager = telescopeManager;
             this.telescopeManager.TelescopeConnectionChanged += () => NotifyPropertyChanged(nameof(IsTelescopeConnected));
 
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
             settings.SettingValueChanged += Settings_SettingValueChanged;
 
             SetTimeCommand = new Command<Date>(SetTime);
@@ -253,9 +253,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void Settings_SettingValueChanged(string settingName, object value)
         {
-            if (settingName == "Schema")
+            if (settingName == "NightMode")
             {
-                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+                IsDarkMode = (bool)value;
             }
         }
 

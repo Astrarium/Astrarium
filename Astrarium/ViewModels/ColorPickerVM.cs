@@ -23,14 +23,7 @@ namespace Astrarium.ViewModels
             set => SetValue(nameof(SelectedColor), value);
         }
 
-        public bool SliderOnly 
-        {
-            get
-            {
-                var schema = settings.Get<ColorSchema>("Schema");
-                return schema != ColorSchema.Night && schema != ColorSchema.Day;
-            }
-        }
+        public bool SliderOnly => settings.Get("NightMode");
 
         public int Height
         {

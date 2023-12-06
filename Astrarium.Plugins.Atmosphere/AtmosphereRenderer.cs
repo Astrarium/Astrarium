@@ -95,7 +95,7 @@ namespace Astrarium.Plugins.Atmosphere
 
                 byte regGreenComponent = (byte)(lightPollutionIntensity / 100 * 255);
                 byte blueComponent = (byte)(regGreenComponent * (1 - lightPolutionTone / 100));
-                Color color = Color.FromArgb(regGreenComponent, regGreenComponent, blueComponent).Tint(settings.Get<ColorSchema>("Schema"));
+                Color color = Color.FromArgb(regGreenComponent, regGreenComponent, blueComponent).Tint(settings.Get("NightMode"));
                 double intensity = (1 - map.DaylightFactor) * (lightPollutionIntensity / 100);
 
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

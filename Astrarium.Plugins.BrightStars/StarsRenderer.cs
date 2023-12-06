@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.BrightStars
         public override void Render(ISkyMap map)
         {
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
 
             GL.Enable(EnableCap.PointSmooth);
             GL.Enable(EnableCap.LineSmooth);
@@ -64,7 +64,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get("ConstLines"))
             {
-                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(schema), 1) { DashStyle = DashStyle.Dot };
+                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(nightMode), 1) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
@@ -95,7 +95,7 @@ namespace Astrarium.Plugins.BrightStars
                 float minStarSize = daylightFactor * 3; // empiric
 
                 var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-                var color = settings.Get<Color>("ColorStarsLabels").Tint(schema);
+                var color = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
                 var brushStarNames = new SolidBrush(color);
                 bool properNames = settings.Get("StarsProperNames");
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
@@ -113,7 +113,7 @@ namespace Astrarium.Plugins.BrightStars
                         if (prj.IsInsideScreen(p))
                         {
                             GL.PointSize(size * starsScalingFactor);
-                            GL.Color3(GetColor(star.Color).Tint(schema));
+                            GL.Color3(GetColor(star.Color).Tint(nightMode));
 
                             GL.Begin(PrimitiveType.Points);
                             GL.Vertex2(p.X, p.Y);

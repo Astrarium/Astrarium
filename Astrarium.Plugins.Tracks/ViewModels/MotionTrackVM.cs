@@ -15,14 +15,14 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
-        public ColorSchema ColorSchema { get; private set; }
+        public bool NightMode { get; private set; }
 
         public MotionTrackVM(ISky sky, ISettings settings, TrackCalc trackCalc)
         {
-            this.sky = sky;            
+            this.sky = sky;
             this.trackCalc = trackCalc;
-            
-            ColorSchema = settings.Get<ColorSchema>("Schema");
+
+            NightMode = settings.Get("NightMode");
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }

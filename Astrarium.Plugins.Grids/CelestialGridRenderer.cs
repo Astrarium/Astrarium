@@ -33,13 +33,13 @@ namespace Astrarium.Plugins.Grids
         public override void Render(ISkyMap map)
         {
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
 
-            Color colorGridEquatorial = settings.Get<Color>("ColorEquatorialGrid").Tint(schema);
-            Color colorGridHorizontal = settings.Get<Color>("ColorHorizontalGrid").Tint(schema);
-            Color colorLineEcliptic = settings.Get<Color>("ColorEcliptic").Tint(schema);
-            Color colorLineGalactic = settings.Get<Color>("ColorGalacticEquator").Tint(schema);
-            Color colorLineMeridian = settings.Get<Color>("ColorMeridian").Tint(schema);
+            Color colorGridEquatorial = settings.Get<Color>("ColorEquatorialGrid").Tint(nightMode);
+            Color colorGridHorizontal = settings.Get<Color>("ColorHorizontalGrid").Tint(nightMode);
+            Color colorLineEcliptic = settings.Get<Color>("ColorEcliptic").Tint(nightMode);
+            Color colorLineGalactic = settings.Get<Color>("ColorGalacticEquator").Tint(nightMode);
+            Color colorLineMeridian = settings.Get<Color>("ColorMeridian").Tint(nightMode);
 
             SolidBrush brushHorizontal = new SolidBrush(colorGridHorizontal);
             SolidBrush brushEquatorial = new SolidBrush(colorGridEquatorial);

@@ -30,7 +30,7 @@ namespace Astrarium.Plugins.Tracks
         public override void Render(ISkyMap map)
         {
             var prj = map.Projection;
-            var schema = settings.Get<ColorSchema>("Schema");
+            var nightMode = settings.Get("NightMode");
             var tracks = trackCalc.Tracks;
 
             GL.Enable(EnableCap.Blend);
@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.Tracks
             {
                 if (track.Points.Any())
                 {
-                    var color = track.Color.Tint(schema);
+                    var color = track.Color.Tint(nightMode);
 
                     GL.Color3(color);
 

@@ -195,7 +195,7 @@ namespace Astrarium.Plugins.JupiterMoons
 
             Date now = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
             selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
 
             Calculate();
         }
@@ -204,7 +204,7 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             if (settingName == "Schema")
             {
-                IsDarkMode = ColorSchema.Red.Equals(value);
+                IsDarkMode = (bool)value;
             }
         }
 
