@@ -1,5 +1,5 @@
-﻿using Astrarium.Types;
-using System;
+﻿using Astrarium.Plugins.Atmosphere.Controls;
+using Astrarium.Types;
 
 namespace Astrarium.Plugins.Atmosphere
 {
@@ -8,6 +8,13 @@ namespace Astrarium.Plugins.Atmosphere
         public Plugin(ISettings settings)
         {
             DefineSetting("Atmosphere", true);
+            DefineSetting("LightPollution", false);
+
+            DefineSetting("LightPollutionAltitude", 60m);
+            DefineSetting("LightPollutionTone", 30m);
+            DefineSetting("LightPollutionIntensity", 30m);
+
+            DefineSettingsSection<AtmosphereSettingsSection, SettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
 

@@ -40,15 +40,14 @@ namespace Astrarium
             set
             {
                 dateTimeSync = value;
+                timeSyncWaitEvent.Set();
 
                 if (value)
                 {
-                    timeSyncEvent.Set();
                     timeSyncResetEvent.Set();
                 }
                 else
                 {
-                    timeSyncEvent.Set();
                     timeSyncResetEvent.Reset();
                 }
             }
@@ -297,13 +296,12 @@ namespace Astrarium
         }
 
         private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
-        private ManualResetEvent timeSyncEvent = new ManualResetEvent(false);
+        private AutoResetEvent timeSyncWaitEvent = new AutoResetEvent(false);
 
         private void TimeSyncWorker()
         {
             while (true)
             {
-                timeSyncEvent.WaitOne();
                 timeSyncResetEvent.WaitOne();
                 double rate = Math.Min(5000, Math.Max(100, Projection.Fov * 100));
                 
@@ -317,8 +315,7 @@ namespace Astrarium
                 }
 
                 Invalidate();
-
-                Thread.Sleep((int)rate);
+                timeSyncWaitEvent.WaitOne((int)rate);
             }
         }
 

@@ -3,6 +3,7 @@ using Astrarium.Types;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,6 +82,52 @@ namespace Astrarium.Plugins.Atmosphere
                 }
 
                 GL.End();
+            }
+
+            // Light pollution overlay
+            if (map.DaylightFactor < 1 && settings.Get("LightPollution"))
+            {
+                double lightPollutionAltitude = (double)settings.Get<decimal>("LightPollutionAltitude");
+                if (lightPollutionAltitude == 0) return;
+
+                double lightPollutionIntensity = (double)settings.Get<decimal>("LightPollutionIntensity");
+                double lightPolutionTone = (double)settings.Get<decimal>("LightPollutionTone");
+
+                byte regGreenComponent = (byte)(lightPollutionIntensity / 100 * 255);
+                byte blueComponent = (byte)(regGreenComponent * (1 - lightPolutionTone / 100));
+                Color color = Color.FromArgb(regGreenComponent, regGreenComponent, blueComponent).Tint(settings.Get<ColorSchema>("Schema"));
+                double intensity = (1 - map.DaylightFactor) * (lightPollutionIntensity / 100);
+
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                stepAlt = lightPollutionAltitude / 9;
+                for (double alt = stepAlt; alt <= lightPollutionAltitude + 1e-6; alt += stepAlt)
+                {
+                    GL.Begin(PrimitiveType.QuadStrip);
+
+                    for (double azi = 0; azi <= 360; azi += stepAzi)
+                    {
+                        for (int k = 0; k < 2; k++)
+                        {
+                            var hor = new CrdsHorizontal(azi, alt - (k * stepAlt));
+                            var p = prj.Project(hor);
+                            if (p != null)
+                            {
+                                byte bInt = (byte)(255 * intensity * ((lightPollutionAltitude - hor.Altitude) / lightPollutionAltitude));
+                                GL.Color4(Color.FromArgb(bInt, color));
+                                GL.Vertex2(p.X, p.Y);
+                            }
+                            else
+                            {
+                                GL.End();
+                                GL.Begin(PrimitiveType.QuadStrip);
+                                break;
+                            }
+                        }
+                    }
+
+                    GL.End();
+                }
             }
         }
     }

@@ -494,7 +494,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (layer == LAYER_PLANET)
                     {
-                        texture = textureManager.GetTexture(data.TextureName, data.FallbackTextureName);
+                        texture = textureManager.GetTexture(data.TextureName, data.FallbackTextureName, permanent: data.FallbackTextureName != null);
                     }
                     else if (layer == LAYER_POLAR_CAP)
                     {

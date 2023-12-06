@@ -39,5 +39,18 @@
 			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 		</ProjectReference>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Controls\AtmosphereSettingsSection.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Controls\AtmosphereSettingsSection.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
+	</ItemGroup>
 	
 </Project>

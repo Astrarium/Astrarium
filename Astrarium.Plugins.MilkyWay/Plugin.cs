@@ -9,7 +9,7 @@ namespace Astrarium.Plugins.MilkyWay
         public Plugin()
         {
             DefineSetting("MilkyWay", true);
-            DefineSetting("ColorMilkyWay", Color.FromArgb(20, 20, 20));
+            DefineSetting("MilkyWayDimOnZoom", true);
             DefineSettingsSection<MilkyWaySettingsSection, SettingsViewModel>();
         }
     }

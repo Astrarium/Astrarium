@@ -13,9 +13,9 @@
     d:DesignWidth="800">
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Ground}" IsChecked="{Binding Settings.Ground}" Margin="2" />
-        <StackPanel Orientation="Horizontal" Margin="2">
+        <StackPanel Orientation="Horizontal" Margin="-2 0 0 0">
             <Label Content="{t:Text Settings.GroundTextureNightDimming}" />
-            <c:NumericUpDown Minimum="0" Width="80" Maximum="100" DecimalPlaces="0" Value="{Binding Settings.GroundTextureNightDimming, UpdateSourceTrigger=PropertyChanged}" />
+            <c:NumericUpDown Minimum="0" Width="60" Maximum="100" DecimalPlaces="0" Value="{Binding Settings.GroundTextureNightDimming, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
         <CheckBox Content="{t:Text Settings.HorizonLine}" IsChecked="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.LabelCardinalDirections}" IsChecked="{Binding Settings.LabelCardinalDirections}" IsEnabled="{Binding Settings.HorizonLine}" Margin="2" />

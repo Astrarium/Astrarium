@@ -40,7 +40,7 @@ namespace Astrarium.Plugins.MilkyWay
             var prj = map.Projection;
 
             // nautical twilight: suppose Milky Way is not visible
-            if (milkyWayCalc.SunAltitude > -12) return;
+            if (settings.Get("Atmosphere") && milkyWayCalc.SunAltitude > -12) return;
 
             const double maxAlpha = 60;
             const double minAlpha = 1;
@@ -48,9 +48,15 @@ namespace Astrarium.Plugins.MilkyWay
 
             double maxFov = prj.MaxFov;
 
-            double a = -(maxAlpha - minAlpha) / (minFov - maxFov);
-            double b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
+            double a = 0;
+            double b = maxAlpha;
 
+            if (settings.Get("MilkyWayDimOnZoom"))
+            {
+                a = -(maxAlpha - minAlpha) / (minFov - maxFov);
+                b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
+            }
+            
             // milky way dimming
             int alpha = Math.Min((int)(a * prj.Fov + b), 255);
 
