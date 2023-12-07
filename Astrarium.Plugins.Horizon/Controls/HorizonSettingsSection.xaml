@@ -20,5 +20,8 @@
         <CheckBox Content="{t:Text Settings.HorizonLine}" IsChecked="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.LabelCardinalDirections}" IsChecked="{Binding Settings.LabelCardinalDirections}" IsEnabled="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MeasureAzimuthFromNorth}" IsChecked="{Binding Settings.MeasureAzimuthFromNorth}" Margin="2" />
+
+        <Label Content="Landscape:" />
+        <ComboBox Margin="4" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" />
     </StackPanel>
 </c:SettingsSection>

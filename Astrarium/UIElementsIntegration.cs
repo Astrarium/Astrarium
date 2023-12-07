@@ -26,9 +26,6 @@ namespace Astrarium
             // App theme
             SettingDefinitions.Add(new SettingDefinition("AppTheme", "DeepBlue"));
 
-            // DateTime sync period
-            SettingDefinitions.Add(new SettingDefinition("DateTimeSyncPeriod", 1));
-
             // Flag indicating main window should be maximized on startup
             SettingDefinitions.Add(new SettingDefinition("StartMaximized", false));
 
@@ -58,7 +55,7 @@ namespace Astrarium
             // Default size of main window
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
 
-            // Default color schema
+            // Night mode flag
             SettingDefinitions.Add(new SettingDefinition("NightMode", false));
 
             // Map transformation

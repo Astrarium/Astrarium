@@ -11,6 +11,7 @@
     d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Orientation="Vertical">
         <CheckBox IsChecked="{Binding Settings.NightMode}" Content="{t:Text Settings.NightMode}" Margin="8" />
+        <Separator Margin="8 4 8 8" />
         <ItemsControl  
             Width="Auto" 
             Height="Auto"

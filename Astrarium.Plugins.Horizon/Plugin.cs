@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.Horizon.Controls;
+using Astrarium.Plugins.Horizon.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,12 @@ namespace Astrarium.Plugins.Horizon
     {
         private readonly ISettings settings = null;
 
-        public Plugin(ISettings settings)
+        public Plugin(ISettings settings, ILandscapesManager landscapesManager)
         {
             this.settings = settings;
 
             DefineSetting("Ground", true);
+            DefineSetting("Landscape", "Derechin");
             DefineSetting("HorizonLine", true);
             DefineSetting("GroundTextureNightDimming", 90m);
             DefineSetting("LabelCardinalDirections", true);
@@ -33,7 +35,7 @@ namespace Astrarium.Plugins.Horizon
 
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
 
-            DefineSettingsSection<HorizonSettingsSection, SettingsViewModel>();
+            DefineSettingsSection<HorizonSettingsSection, HorizonSettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
 

@@ -113,7 +113,7 @@ namespace Astrarium
                     {
                         window.DialogResult = dialogResult;
                     }
-                    
+
                     window.Close();
 
                     viewModel.Closing -= viewModelClosingHandler;

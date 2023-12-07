@@ -22,6 +22,7 @@
   </Target>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="OpenTK" Version="3.3.3" />
   </ItemGroup>
 	
@@ -53,15 +54,18 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-
+  
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Folder Include="Landscapes\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\pano.png">
+    <None Update="Landscapes\*.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+	<None Update="Landscapes\*.json">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>

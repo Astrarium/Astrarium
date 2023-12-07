@@ -77,11 +77,6 @@ namespace Astrarium.Controls
         private double _Value = 0;
 
         /// <summary>
-        /// Backing field for <see cref="SliderOnly"/> property.
-        /// </summary>
-        private bool _SliderOnly = false;
-
-        /// <summary>
         /// Color to highlight value slider when mouse is over
         /// </summary>
         public Color SliderThumbsHighlightColor { get; set; } = Color.White;
@@ -142,19 +137,6 @@ namespace Astrarium.Controls
         public double Value => _Value;
 
         /// <summary>
-        /// Flag indicating to display or not the color wheel
-        /// </summary>
-        public bool SliderOnly
-        {
-            get => _SliderOnly;
-            set
-            {
-                _SliderOnly = value;
-                Invalidate();
-            }
-        }
-
-        /// <summary>
         /// Fired when selected color is changed
         /// </summary>
         public event Action SelectedColorChanged;
@@ -200,7 +182,7 @@ namespace Astrarium.Controls
             center.Y = 10 + radius;
 
             slider.X = colorWheel.X - 5;
-            slider.Y = SliderOnly ? 20 : colorWheel.Height + 20;
+            slider.Y = colorWheel.Height + 20;
             slider.Width = colorWheel.Width + 10;
             slider.Height = 10;
 
@@ -211,11 +193,7 @@ namespace Astrarium.Controls
             colorPoint.X = (int)(center.X + r * cos);
             colorPoint.Y = (int)(center.Y + r * sin);
 
-            if (!SliderOnly)
-            {
-                DrawColorWheel(e.Graphics);
-            }
-
+            DrawColorWheel(e.Graphics);
             DrawValueSlider(e.Graphics);
         }
 
@@ -341,7 +319,7 @@ namespace Astrarium.Controls
 
         private bool IsInsideColorWheel(PointF p)
         {
-            return !SliderOnly && Math.Sqrt((p.X - center.X) * (p.X - center.X) + (p.Y - center.Y) * (p.Y - center.Y)) <= radius;
+            return Math.Sqrt((p.X - center.X) * (p.X - center.X) + (p.Y - center.Y) * (p.Y - center.Y)) <= radius;
         }
 
         private bool IsInsideValueSlider(PointF p)

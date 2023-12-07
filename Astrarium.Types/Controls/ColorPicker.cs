@@ -30,7 +30,7 @@ namespace Astrarium.Types.Controls
         }
 
         public Color SelectedColor
-        { 
+        {
             get => (Color)GetValue(SelectedColorProperty);
             set => SetValue(SelectedColorProperty, value);
         }

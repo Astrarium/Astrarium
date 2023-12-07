@@ -8,11 +8,16 @@ namespace Astrarium.Plugins.Atmosphere
         public Plugin(ISettings settings)
         {
             DefineSetting("Atmosphere", true);
-            DefineSetting("LightPollution", false);
 
+            DefineSetting("LightPollution", false);
             DefineSetting("LightPollutionAltitude", 60m);
             DefineSetting("LightPollutionTone", 30m);
             DefineSetting("LightPollutionIntensity", 30m);
+
+            DefineSetting("Fog", false);
+            DefineSetting("FogAltitude", 10m);
+            DefineSetting("FogSpreading", 10m);
+            DefineSetting("FogIntensity", 30m);
 
             DefineSettingsSection<AtmosphereSettingsSection, SettingsViewModel>();
 

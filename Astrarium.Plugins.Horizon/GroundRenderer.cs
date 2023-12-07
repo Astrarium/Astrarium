@@ -18,6 +18,7 @@ namespace Astrarium.Plugins.Horizon
     {
         private readonly ISkyMap map;
         private readonly ISettings settings;
+        private readonly ILandscapesManager landscapesManager;
         private readonly ITextureManager textureManager;
 
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
@@ -25,9 +26,10 @@ namespace Astrarium.Plugins.Horizon
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
         private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public GroundRenderer(ISkyMap map, ITextureManager textureManager, ISettings settings)
+        public GroundRenderer(ISkyMap map, ILandscapesManager landscapesManager, ITextureManager textureManager, ISettings settings)
         {
             this.map = map;
+            this.landscapesManager = landscapesManager;
             this.textureManager = textureManager;
             this.settings = settings;
         }
@@ -99,7 +101,11 @@ namespace Astrarium.Plugins.Horizon
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            int textureId = textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true, action: null, alphaChannel: true);
+            string landscapeName = settings.Get<string>("Landscape");
+            Landscape landscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == landscapeName);
+            if (!File.Exists(landscape?.Path)) return;
+
+            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
 
             int steps = prj.Fov < 90 ? 32 : 128;

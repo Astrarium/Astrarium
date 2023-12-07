@@ -97,6 +97,19 @@ namespace Astrarium
             }
         }
 
+        public void RemoveTexture(string path)
+        {
+            lock (locker)
+            {
+                var texture = textures.FirstOrDefault(x => x.Path == path);
+                if (texture != null)
+                {
+                    textures.Remove(texture);
+                    Application.Current.Dispatcher.Invoke(() => GL.DeleteTexture(texture.TextureId));
+                }
+            }
+        }
+
         private void Disposing()
         {
             while (true)
