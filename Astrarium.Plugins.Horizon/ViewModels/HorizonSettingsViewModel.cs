@@ -30,6 +30,7 @@ namespace Astrarium.Plugins.Horizon.ViewModels
                 Landscape oldLandscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == oldLandscapeName);
                 textureManager.RemoveTexture(oldLandscape.Path);
                 Settings.Set("Landscape", value.Title);
+                NotifyPropertyChanged(nameof(SelectedLandscape));
             }
         }
     }
