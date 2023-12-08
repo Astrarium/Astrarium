@@ -152,7 +152,7 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, ISettings settings, UIElementsIntegration uiIntegration)
+        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
             this.map = map;
@@ -164,9 +164,15 @@ namespace Astrarium.ViewModels
                 Task.Run(async () =>
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3));
-                    appUpdater.CheckUpdates(x => OnAppUpdateFound(x));
+                    appUpdater.CheckUpdates(OnAppUpdateFound);
                 });
             }
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                donations.CheckDonates(OnRequestDonation);
+            });
 
             sky.Calculate();
 
@@ -492,6 +498,15 @@ namespace Astrarium.ViewModels
                 var vm = ViewManager.CreateViewModel<AppUpdateVM>();
                 vm.SetReleaseInfo(lastRelease);
                 ViewManager.ShowDialog(vm);
+            });
+        }
+
+        private DonationResult OnRequestDonation()
+        {
+            return Application.Current.Dispatcher.Invoke(() =>
+            {
+                // TODO: show messagebox
+                return DonationResult.Delayed;
             });
         }
 

@@ -59,11 +59,10 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox Margin="0 4" Grid.Column="0" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" />
-                    <Button Grid.Column="1" Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddLandscapeCommand}" />
-                    <Button Grid.Column="2" Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding SelectedLandscape.UserDefined}" Command="{Binding DeleteLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
+                    <ComboBox Margin="0 4" Grid.Column="0" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" PreviewMouseWheel="ComboBox_PreviewMouseWheel" />
+                    <Button Grid.Column="1" Content="Add..." Padding="8 0" Margin="4 0 0 0" Command="{Binding AddLandscapeCommand}" />
+                    <Button Grid.Column="2" Content="Delete" Padding="8 0" Margin="4 0 0 0" Visibility="{Binding SelectedLandscape.UserDefined, Converter={s:BoolToVisibilityConverter}}" Command="{Binding DeleteLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
                 </Grid>
-
 
                 <StackPanel MaxWidth="500"  Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock Padding="0 8 0 0" HorizontalAlignment="Stretch" IsEnabled="False" FontSize="12" Margin="2" TextWrapping="Wrap" Text="{Binding SelectedLandscape.Description}" Visibility="{Binding SelectedLandscape.Description, Converter={s:NotNullToVisibilityConverter}}" />
@@ -76,7 +75,7 @@
                         <TextBlock IsEnabled="False" FontSize="12" Margin="2" Text="{Binding SelectedLandscape.Copyright}" />
                     </StackPanel>
                     <TextBlock FontSize="12" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.URL, Converter={s:NotNullToVisibilityConverter}}">
-                            <Hyperlink Command="{Binding OpenURLCommand}"><Run Text="{Binding SelectedLandscape.URL}" /></Hyperlink>
+                        <Hyperlink Command="{Binding OpenURLCommand}"><Run Text="{Binding SelectedLandscape.URL}" /></Hyperlink>
                     </TextBlock>
                 </StackPanel>
 

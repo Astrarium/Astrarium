@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Astrarium.Plugins.Horizon.ViewModels
 {
@@ -39,12 +40,39 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
             AddLandscapeCommand = new Command(() =>
             {
-                string[] files = ViewManager.ShowOpenFileDialog("Choose the landscape", "(PNG files)|*.png", multiSelect: false, out int index);
+                string[] files = ViewManager.ShowOpenFileDialog("Choose the landscape", "PNG panorama files (*.png)|*.png", multiSelect: false, out int index);
                 if (files != null && files.Any())
                 {
-                    // TODO: checks
+                    string landscapeImageFile = files[0];
 
-                    var landscape = landscapesManager.CreateLandscape(files[0]);
+
+                    using (var stream = File.OpenRead(landscapeImageFile))
+                    {
+                        var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.Default);
+
+                        if (decoder.CodecInfo.MimeTypes != "image/png")
+                        {
+                            ViewManager.ShowMessageBox("$Error", "Landscape should be a panoramic PNG image.");
+                            return;
+                        }
+
+                        int height = decoder.Frames[0].PixelHeight;
+                        int width = decoder.Frames[0].PixelWidth;
+
+                        if (width / height != 2)
+                        {
+                            ViewManager.ShowMessageBox("$Error", "Landscape image should be a panoramic image with width-to-height aspect ratio 2:1.");
+                            return;
+                        }
+
+                        if (width > 8192)
+                        {
+                            ViewManager.ShowMessageBox("$Error", "Landscape image is too large. Maximal width is 8192 pixels.");
+                            return;
+                        }
+                    }
+
+                    var landscape = landscapesManager.CreateLandscape(landscapeImageFile);
                     NotifyPropertyChanged(nameof(Landscapes));
                     SelectedLandscape = landscape;
                 }

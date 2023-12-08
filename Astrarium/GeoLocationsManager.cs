@@ -28,7 +28,6 @@ namespace Astrarium
         /// </summary>
         public GeoLocationsManager()
         {
-            //CreateCitiesFile();
             string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
             fileReader = new StreamReader(File.OpenRead(filePath), Encoding.UTF8);
         }

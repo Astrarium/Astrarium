@@ -5,9 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
 namespace Astrarium.Plugins.Horizon
 {
@@ -55,6 +52,7 @@ namespace Astrarium.Plugins.Horizon
 
         public Landscape CreateLandscape(string imageFilePath)
         {
+            Directory.CreateDirectory(userLandscapesPath);
             string targetFile = Path.Combine(userLandscapesPath, Path.GetFileName(imageFilePath));
             File.Copy(imageFilePath, targetFile, true);
             Landscape landscape = ReadLandscapeMetadata(targetFile);
