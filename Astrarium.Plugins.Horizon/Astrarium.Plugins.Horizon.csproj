@@ -54,16 +54,9 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Landscapes\" />
-  </ItemGroup>
 
   <ItemGroup>
-    <None Update="Landscapes\*.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-	<None Update="Landscapes\*.json">
+	<None Update="Landscapes\*.*">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
   </ItemGroup>

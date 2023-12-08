@@ -82,7 +82,7 @@ namespace Astrarium
                 // has fallback?
                 if (fallbackPath != null)
                 {
-                    return GetTexture(fallbackPath, null, permanent = true);
+                    return GetTexture(fallbackPath, null, permanent = true, action: null, alphaChannel);
                 }
 
                 return 0;

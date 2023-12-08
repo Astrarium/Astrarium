@@ -23,11 +23,14 @@ namespace Astrarium.Plugins.Horizon
         public string Description { get; set; }
         public string Copyright { get; set; }
         public string Author { get; set; }
+        public string URL { get; set; }
     }
 
     public interface ILandscapesManager
     {
         ICollection<Landscape> Landscapes { get; }
+
+        Landscape CreateLandscape(string filePath);
     }
 
     [Singleton(typeof(ILandscapesManager))]
@@ -48,6 +51,16 @@ namespace Astrarium.Plugins.Horizon
         public LandscapesManager()
         {
             Landscapes = new List<Landscape>(GetLandscapesFromDir(landscapesPath).Concat(GetLandscapesFromDir(userLandscapesPath, userDefined: true)));
+        }
+
+        public Landscape CreateLandscape(string imageFilePath)
+        {
+            string targetFile = Path.Combine(userLandscapesPath, Path.GetFileName(imageFilePath));
+            File.Copy(imageFilePath, targetFile, true);
+            Landscape landscape = ReadLandscapeMetadata(targetFile);
+            landscape.UserDefined = true;
+            Landscapes.Add(landscape);
+            return landscape;
         }
 
         private ICollection<Landscape> GetLandscapesFromDir(string directory, bool userDefined = false)

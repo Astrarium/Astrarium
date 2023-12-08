@@ -48,40 +48,40 @@
         <CheckBox Content="{t:Text Settings.LabelCardinalDirections}" IsChecked="{Binding Settings.LabelCardinalDirections}" IsEnabled="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MeasureAzimuthFromNorth}" IsChecked="{Binding Settings.MeasureAzimuthFromNorth}" Margin="2" />
 
-        <GroupBox Padding="4">
+        <GroupBox Padding="4" Margin="0 4 0 0">
             <GroupBox.Header>
                 <CheckBox Content="Landscape" />
             </GroupBox.Header>
-            <StackPanel Orientation="Vertical" MaxWidth="600" HorizontalAlignment="Left">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" />
+                    <ComboBox Margin="0 4" Grid.Column="0" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" />
                     <Button Grid.Column="1" Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddLandscapeCommand}" />
                     <Button Grid.Column="2" Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding SelectedLandscape.UserDefined}" Command="{Binding DeleteLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
                 </Grid>
 
-                <Grid Margin="0 8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0" HorizontalAlignment="Stretch" MaxHeight="100" MaxWidth="200">
-                        <Grid Background="SkyBlue"  />
-                        <Image Source="{Binding SelectedLandscape.Path}" />
-                    </Grid>
 
-                    <StackPanel Grid.Column="1"  Orientation="Vertical">
-                        <TextBlock IsEnabled="False" FontSize="12" Margin="8" TextWrapping="Wrap" Text="{Binding SelectedLandscape.Description}" />
-                        <TextBlock IsEnabled="False" FontSize="12" Margin="8" Text="Author: " />
-                        <TextBlock IsEnabled="False" FontSize="12" Margin="8" Text="{Binding SelectedLandscape.Author}" />
+                <StackPanel MaxWidth="500"  Orientation="Vertical" HorizontalAlignment="Left">
+                    <TextBlock Padding="0 8 0 0" HorizontalAlignment="Stretch" IsEnabled="False" FontSize="12" Margin="2" TextWrapping="Wrap" Text="{Binding SelectedLandscape.Description}" Visibility="{Binding SelectedLandscape.Description, Converter={s:NotNullToVisibilityConverter}}" />
+                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.Author, Converter={s:NotNullToVisibilityConverter}}">
+                        <TextBlock IsEnabled="True" FontSize="12" Margin="2" Text="Author" />
+                        <TextBlock IsEnabled="False" FontSize="12" Margin="2" Text="{Binding SelectedLandscape.Author}" />
                     </StackPanel>
-                    
-                </Grid>
-                
+                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.Copyright, Converter={s:NotNullToVisibilityConverter}}">
+                        <TextBlock IsEnabled="True" FontSize="12" Margin="2" Text="Copyright" />
+                        <TextBlock IsEnabled="False" FontSize="12" Margin="2" Text="{Binding SelectedLandscape.Copyright}" />
+                    </StackPanel>
+                    <TextBlock FontSize="12" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.URL, Converter={s:NotNullToVisibilityConverter}}">
+                            <Hyperlink Command="{Binding OpenURLCommand}"><Run Text="{Binding SelectedLandscape.URL}" /></Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+
+
             </StackPanel>
         </GroupBox>
         

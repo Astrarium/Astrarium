@@ -105,7 +105,12 @@ namespace Astrarium.Plugins.Horizon
             Landscape landscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == landscapeName);
             if (!File.Exists(landscape?.Path)) return;
 
-            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
+            string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
+            string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
+            string fallbackPath = Path.Combine(landscapeLocation, $"{landscapeFileName}.thumb");
+            fallbackPath = File.Exists(fallbackPath) ? fallbackPath : null;
+
+            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath, permanent: true, action: null, alphaChannel: true);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
 
             int steps = prj.Fov < 90 ? 32 : 128;
