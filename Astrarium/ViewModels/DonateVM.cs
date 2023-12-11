@@ -12,6 +12,9 @@ namespace Astrarium.ViewModels
         public Command DelayCommand { get; private set; }
         public Command DonateCommand { get; private set; }
         public Command BlockCommand { get; private set; }
+        public Command DismissCommand { get; private set; }
+
+        public bool OpenedByUser { get; set; }
 
         public DonationResult Result { get; private set; }
 
@@ -20,6 +23,7 @@ namespace Astrarium.ViewModels
             DelayCommand = new Command(() => CloseWithResult(DonationResult.Delayed));
             DonateCommand = new Command(() => CloseWithResult(DonationResult.Donated));
             BlockCommand = new Command(() => CloseWithResult(DonationResult.Blocked));
+            DismissCommand = new Command(Close);
         }
 
         private void CloseWithResult(DonationResult result)

@@ -44,6 +44,7 @@ namespace Astrarium.ViewModels
         public Command ChangeSettingsCommand { get; private set; }
         public Command ShowAboutCommand { get; private set; }
         public Command CheckForUpdatesCommand { get; private set; }
+        public Command DonateCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
 
@@ -168,7 +169,7 @@ namespace Astrarium.ViewModels
             Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(3));
-                donations.CheckDonates(OnRequestDonation);
+                donations.CheckDonates(() => OpenDonationDialog());
             });
 
             sky.Calculate();
@@ -191,6 +192,7 @@ namespace Astrarium.ViewModels
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
             CheckForUpdatesCommand = new Command(CheckForUpdates);
+            DonateCommand = new Command(() => OpenDonationDialog(openedByUser: true));
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
@@ -433,6 +435,7 @@ namespace Astrarium.ViewModels
                     },
                     null,
                     new MenuItem("$Menu.CheckForUpdates", CheckForUpdatesCommand),
+                    new MenuItem("$Menu.Donate", DonateCommand),
                     new MenuItem("$Menu.About", ShowAboutCommand)
                 }
             };
@@ -498,11 +501,12 @@ namespace Astrarium.ViewModels
             });
         }
 
-        private DonationResult OnRequestDonation()
+        private DonationResult OpenDonationDialog(bool openedByUser = false)
         {
             return Application.Current.Dispatcher.Invoke(() =>
             {
                 var vm = ViewManager.CreateViewModel<DonateVM>();
+                vm.OpenedByUser = openedByUser;
                 ViewManager.ShowDialog(vm);
                 if (vm.Result == DonationResult.Donated)
                 {
