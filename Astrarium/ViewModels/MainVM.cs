@@ -6,10 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -505,8 +502,20 @@ namespace Astrarium.ViewModels
         {
             return Application.Current.Dispatcher.Invoke(() =>
             {
-                // TODO: show messagebox
-                return DonationResult.Delayed;
+                var vm = ViewManager.CreateViewModel<DonateVM>();
+                ViewManager.ShowDialog(vm);
+                if (vm.Result == DonationResult.Donated)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start("https://astrarium.space/donate");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Unable to start browser.");
+                    }
+                }
+                return vm.Result;
             });
         }
 

@@ -15,7 +15,7 @@ namespace Astrarium.Plugins.Horizon
     {
         private readonly ISettings settings = null;
 
-        public Plugin(ISettings settings, ILandscapesManager landscapesManager)
+        public Plugin(ISettings settings)
         {
             this.settings = settings;
 

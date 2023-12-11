@@ -16,7 +16,8 @@ namespace Astrarium
     public enum DonationResult
     {
         Delayed = 0,
-        Donated = 1
+        Donated = 1,
+        Blocked = 2
     }
 
     public class DonationsHelper : IDonationsHelper
@@ -26,50 +27,60 @@ namespace Astrarium
             string settingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium");
             string statsFile = Path.Combine(settingsDir, "Stats.json");
 
+            RunStats stats;
+
             if (!File.Exists(statsFile))
             {
                 Directory.CreateDirectory(settingsDir);
-                RunStats stats = new RunStats()
+                stats = new RunStats()
                 {
-                    FirstRun = DateTime.UtcNow,
-                    RunsCount = 1
+                    StartTime = DateTime.UtcNow,
+                    RunsCount = 0
                 };
-                File.WriteAllText(statsFile, JsonConvert.SerializeObject(stats));
-                File.SetAttributes(statsFile, FileAttributes.Hidden);
             }
             else
             {
                 // try to read file
-                RunStats stats = JsonConvert.DeserializeObject<RunStats>(File.ReadAllText(statsFile));
+                stats = JsonConvert.DeserializeObject<RunStats>(File.ReadAllText(statsFile));
 
                 // suppose donated
-                if (stats.DialogShown) return;
+                if (stats.Stopped) return;
 
-                if (DateTime.UtcNow.Subtract(stats.FirstRun).TotalDays > 10 && 
+                if (DateTime.UtcNow.Subtract(stats.StartTime).TotalDays > 10 &&
                     stats.RunsCount > 5 &&
                     new Ping().Send("www.google.com").Status == IPStatus.Success)
                 {
                     DonationResult result = onRequestDonation();
                     if (result == DonationResult.Delayed)
                     {
-                        // TODO: delay logic
+                        stats.StartTime = DateTime.Now;
+                        stats.RunsCount = 0;
                     }
                     else if (result == DonationResult.Donated)
                     {
-                        // TODO: donated logic
+                        stats.Stopped = true;
                     }
                 }
+            }
 
-                stats.RunsCount++;
+            stats.RunsCount++;
+            try
+            {
+                File.SetAttributes(statsFile, FileAttributes.Normal);
                 File.WriteAllText(statsFile, JsonConvert.SerializeObject(stats));
+                File.SetAttributes(statsFile, FileAttributes.Hidden);
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 
         private class RunStats
         {
-            public DateTime FirstRun { get; set; }
+            public DateTime StartTime { get; set; }
             public int RunsCount { get; set; }
-            public bool DialogShown { get; set; }
+            public bool Stopped { get; set; }
         }
     }
 }

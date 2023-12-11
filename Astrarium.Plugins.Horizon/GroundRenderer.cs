@@ -107,10 +107,10 @@ namespace Astrarium.Plugins.Horizon
 
             string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
             string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
-            string fallbackPath = Path.Combine(landscapeLocation, $"{landscapeFileName}.thumb");
-            fallbackPath = File.Exists(fallbackPath) ? fallbackPath : null;
+            //string fallbackPath = Path.Combine(landscapeLocation, $"{landscapeFileName}.thumb");
+            //fallbackPath = File.Exists(fallbackPath) ? fallbackPath : null;
 
-            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath, permanent: true, action: null, alphaChannel: true);
+            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
 
             int steps = prj.Fov < 90 ? 32 : 128;
@@ -139,6 +139,8 @@ namespace Astrarium.Plugins.Horizon
 
             double latStop = textureId > 0 ? 90 : 0;
 
+            double aziShift = 10;
+
             for (double lat = -80; lat <= latStop; lat += 10)
             {
                 GL.Begin(PrimitiveType.TriangleStrip);
@@ -147,7 +149,7 @@ namespace Astrarium.Plugins.Horizon
                 {
                     for (int k = 0; k < 2; k++)
                     {
-                        var p = prj.Project(new CrdsHorizontal(i / (double)steps * 360, lat - k * 10));
+                        var p = prj.Project(new CrdsHorizontal(i / (double)steps * 360 + aziShift, lat - k * 10));
 
                         if (p != null)
                         {
