@@ -21,6 +21,7 @@ namespace Astrarium.Plugins.Horizon
 
             DefineSetting("Ground", true);
             DefineSetting("Landscape", "Derechin");
+            DefineSetting("LandscapeLabels", false);
             DefineSetting("HorizonLine", true);
             DefineSetting("GroundTextureNightDimming", 90m);
             DefineSetting("LabelCardinalDirections", true);

@@ -25,6 +25,8 @@ namespace Astrarium.Types
         {
             bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             gfx = Graphics.FromImage(bmp);
+            //gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+            //gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             texture = GL.GenTexture();
 
@@ -47,13 +49,13 @@ namespace Astrarium.Types
         public void DrawString(string text, Font font, Brush brush, PointF point)
         {
             gfx.Clear(Color.Transparent);
-
             gfx.DrawString(text, font, brush, new Point());
 
             GL.Color3(Color.Transparent);
             GL.Enable(EnableCap.Blend);
 
             // this needed for proper texture overlapping
+            //GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.BlendFunc(BlendingFactor.One, BlendingFactor.One);
 
             GL.Enable(EnableCap.Texture2D);

@@ -24,7 +24,6 @@ namespace Astrarium.Plugins.Horizon
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
-        private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         public GroundRenderer(ISkyMap map, ILandscapesManager landscapesManager, ITextureManager textureManager, ISettings settings)
         {
@@ -107,8 +106,6 @@ namespace Astrarium.Plugins.Horizon
 
             string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
             string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
-            //string fallbackPath = Path.Combine(landscapeLocation, $"{landscapeFileName}.thumb");
-            //fallbackPath = File.Exists(fallbackPath) ? fallbackPath : null;
 
             int textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
@@ -139,7 +136,7 @@ namespace Astrarium.Plugins.Horizon
 
             double latStop = textureId > 0 ? 90 : 0;
 
-            double aziShift = 10;
+            double aziShift = landscape.AzimuthShift;
 
             for (double lat = -80; lat <= latStop; lat += 10)
             {
@@ -173,6 +170,22 @@ namespace Astrarium.Plugins.Horizon
             GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
+
+            if (settings.Get("LandscapeLabels"))
+            {
+                foreach (var label in landscape.Labels)
+                {
+                    var p = prj.Project(new CrdsHorizontal(label.Azimuth, label.Altitude));
+                    if (prj.IsInsideScreen(p))
+                    {
+                        var p1 = new Vec2(p.X, p.Y + 30);
+                        var p0 = new Vec2(p.X + 5, p.Y + 30);
+                        Primitives.DrawLine(p1, p, Pens.Red);
+
+                        textRenderer.Value.DrawString(label.Title, SystemFonts.DefaultFont, Brushes.Red, p0);
+                    }
+                }
+            }
         }
 
         private void RenderCardinalLabels()

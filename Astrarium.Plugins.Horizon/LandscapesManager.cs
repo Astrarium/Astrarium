@@ -16,11 +16,20 @@ namespace Astrarium.Plugins.Horizon
         [JsonIgnore]
         public bool UserDefined { get; set; }
 
+        public double AzimuthShift { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Copyright { get; set; }
         public string Author { get; set; }
         public string URL { get; set; }
+        public LandscapeLabel[] Labels { get; set; }
+    }
+
+    public class LandscapeLabel
+    {
+        public string Title { get; set; }
+        public double Altitude { get; set; }
+        public double Azimuth { get; set; }
     }
 
     public interface ILandscapesManager
