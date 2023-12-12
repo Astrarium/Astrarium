@@ -15,6 +15,7 @@ namespace Astrarium.ViewModels
         public Command DismissCommand { get; private set; }
 
         public bool OpenedByUser { get; set; }
+        public bool AlreadyDelayed { get; set; }
 
         public DonationResult Result { get; private set; }
 

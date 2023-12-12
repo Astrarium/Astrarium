@@ -62,7 +62,7 @@ namespace Astrarium.Types
             CultureInfo.DefaultThreadCurrentUICulture = culture;
 
             if (!culture.Equals(currentCulture))
-            {                
+            {
                 LoadLocalizationStrings();
                 currentCulture = culture;
                 LocaleChanged?.Invoke();

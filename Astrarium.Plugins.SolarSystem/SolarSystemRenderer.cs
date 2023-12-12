@@ -639,16 +639,13 @@ namespace Astrarium.Plugins.SolarSystem
 
             float r = diam / 2;
             Vec2 p = prj.Project(sun.Equatorial);
-            if (p == null) return; 
+            if (p == null) return;
 
             double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
 
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
             int textureId = -1;
 
-            if (settings.Get("SunTexture"))
+            if (settings.Get("SunTexture") && r > 5)
             {
                 GL.Enable(EnableCap.Texture2D);
                 textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
@@ -662,15 +659,25 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 GL.Color4(Color.Red);
             }
+            else if (textureId > 0)
+            {
+                GL.Color4(Color.White);
+            }
             else
             {
-                if (textureId > 0)
+                if (map.DaylightFactor == 1)
                 {
-                    GL.Color3(Color.White);
+                    GL.Color4(Color.White);
                 }
                 else
                 {
-                    GL.Color3(Color.Orange);
+                    var f = map.DaylightFactor;
+                    var c1 = Color.Orange;
+                    var c2 = Color.White;
+                    float R = c1.R + f * (c2.R - c1.R);
+                    float G = c1.G + f * (c2.G - c1.G);
+                    float B = c1.B + f * (c2.B - c1.B);
+                    GL.Color4(Color.FromArgb((byte)R, (byte)G, (byte)B));
                 }
             }
 
@@ -688,7 +695,7 @@ namespace Astrarium.Plugins.SolarSystem
                     double ty = -(prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
                     GL.TexCoord2(0.5f + 0.499f * tx, 0.5f + 0.499f * ty);
                 }
-
+                
                 GL.Vertex2(v.X, v.Y);
             }
 
@@ -697,7 +704,6 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PopMatrix();
 
             GL.Disable(EnableCap.Texture2D);
-            GL.Disable(EnableCap.Blend);
 
             map.AddDrawnObject(p, sun, diam);
 

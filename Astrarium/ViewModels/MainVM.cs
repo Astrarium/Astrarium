@@ -21,6 +21,7 @@ namespace Astrarium.ViewModels
         private readonly ISkyMap map;
         private readonly ISettings settings;
         private readonly IAppUpdater appUpdater;
+        private readonly IDonationsHelper donations;
 
         public string MapViewAngleString { get; private set; }
         public string DateString { get; private set; }
@@ -155,6 +156,7 @@ namespace Astrarium.ViewModels
             this.sky = sky;
             this.map = map;
             this.settings = settings;
+            this.donations = donations;
             this.appUpdater = appUpdater;
 
             if (settings.Get("CheckUpdatesOnStart"))
@@ -169,7 +171,7 @@ namespace Astrarium.ViewModels
             Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(3));
-                donations.CheckDonates(() => OpenDonationDialog());
+                donations.CheckDonates(ctx => OpenDonationDialog(ctx));
             });
 
             sky.Calculate();
@@ -192,7 +194,7 @@ namespace Astrarium.ViewModels
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
             CheckForUpdatesCommand = new Command(CheckForUpdates);
-            DonateCommand = new Command(() => OpenDonationDialog(openedByUser: true));
+            DonateCommand = new Command(OpenDonationDialog);
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
@@ -501,12 +503,20 @@ namespace Astrarium.ViewModels
             });
         }
 
-        private DonationResult OpenDonationDialog(bool openedByUser = false)
+        private class DonationContext : IDonationContext
+        {
+            public bool Delayed => false;
+            public bool OpenedByUser => true;
+            public bool Stopped => false;
+        }
+
+        private DonationResult OpenDonationDialog(IDonationContext ctx)
         {
             return Application.Current.Dispatcher.Invoke(() =>
             {
                 var vm = ViewManager.CreateViewModel<DonateVM>();
-                vm.OpenedByUser = openedByUser;
+                vm.OpenedByUser = ctx.OpenedByUser;
+                vm.AlreadyDelayed = ctx.Delayed;
                 ViewManager.ShowDialog(vm);
                 if (vm.Result == DonationResult.Donated)
                 {
@@ -757,6 +767,15 @@ namespace Astrarium.ViewModels
         private async void CheckForUpdates()
         {
             await Task.Run(() => appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x)));
+        }
+
+        private void OpenDonationDialog()
+        {
+            var result = OpenDonationDialog(new DonationContext());
+            if (result == DonationResult.Donated)
+            {
+                donations.StopChecks();
+            }
         }
 
         private void GoToObject(CelestialObject body)

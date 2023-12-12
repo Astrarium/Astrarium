@@ -23,7 +23,7 @@
                 <TextBlock FontSize="16" FontWeight="Bold" Text="{t:Text DonateWindow.DonateButton}" />
             </Button>
             <StackPanel Visibility="{Binding OpenedByUser, Converter={s:InverseBoolToVisibilityConverter}}" Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock  TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="50 0">
+                <TextBlock Visibility="{Binding AlreadyDelayed, Converter={s:BoolToVisibilityConverter}}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="50 0">
                     <Hyperlink Foreground="{StaticResource BrushControlLightBackground}" Command="{Binding BlockCommand}"><Run Text="{t:Text DonateWindow.NeverRemind}" /></Hyperlink>
                 </TextBlock>
                 <TextBlock TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="50 0">
