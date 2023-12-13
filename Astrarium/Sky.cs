@@ -31,7 +31,7 @@ namespace Astrarium
         public SkyContext Context { get; private set; }
 
         public event Action Calculated;
-        public event Action TimeSyncChanged;
+        public event Action<bool> TimeSyncChanged;
 
         private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
         private bool timeSync = false;
@@ -51,7 +51,7 @@ namespace Astrarium
                     {
                         timeSyncResetEvent.Reset();
                     }
-                    TimeSyncChanged?.Invoke();
+                    TimeSyncChanged?.Invoke(value);
                 }
             }
         }

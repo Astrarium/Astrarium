@@ -9,7 +9,7 @@ namespace Astrarium.Types
     {
         SkyContext Context { get; }
         event Action Calculated;
-        event Action TimeSyncChanged;
+        event Action<bool> TimeSyncChanged;
         void SetDate(double jd);
         void Calculate();
         bool TimeSync { get; set; }

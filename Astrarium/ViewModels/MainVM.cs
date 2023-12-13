@@ -138,16 +138,14 @@ namespace Astrarium.ViewModels
             get => GetValue<CrdsHorizontal>(nameof(MouseHorizontalCoordinates));
         }
 
-        private bool dateTimeSync = false;
-
         public bool TimeSync
         {
-            get => dateTimeSync;
+            get => GetValue<bool>(nameof(TimeSync));
             set
             {
-                dateTimeSync = value;
                 sky.TimeSync = value;
                 map.TimeSync = value;
+                SetValue(nameof(TimeSync), value);
             }
         }
 
@@ -200,7 +198,7 @@ namespace Astrarium.ViewModels
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += map.Invalidate;
-            sky.TimeSyncChanged += () => NotifyPropertyChanged(nameof(TimeSync));
+            sky.TimeSyncChanged += Sky_TimeSyncChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
@@ -491,6 +489,11 @@ namespace Astrarium.ViewModels
             menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
 
             ContextMenuItems.Add(menuLock);
+        }
+
+        private void Sky_TimeSyncChanged(bool timeSync)
+        {
+            TimeSync = timeSync;
         }
 
         private void OnAppUpdateFound(LastRelease lastRelease)
