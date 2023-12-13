@@ -103,6 +103,30 @@ namespace Astrarium.Types
                             0, 0, 0, 1);
         }
 
+        public static Mat4 StretchX(double scale)
+        {
+            return new Mat4(scale, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1);
+        }
+
+        public static Mat4 StretchY(double scale)
+        {
+            return new Mat4(1, 0, 0, 0,
+                            0, scale, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1);
+        }
+
+        public static Mat4 StretchZ(double scale)
+        {
+            return new Mat4(1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, scale, 0,
+                            0, 0, 0, 1);
+        }
+
         public static Mat4 ZRotation(double angle)
         {
             double c = Math.Cos(angle);

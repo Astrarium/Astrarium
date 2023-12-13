@@ -176,6 +176,7 @@ namespace Astrarium.Types
         {
             Vec2 p = Project(h + new CrdsHorizontal(0, 1));
             Vec2 p0 = Project(h);
+            if (p == null || p0 == null) return 0;
             return -(FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 

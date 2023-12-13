@@ -97,6 +97,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (body is Planet planet)
                 {
+                    double rotZenith = prj.GetAxisRotation(planet.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime), 0);
                     double rotAxis = prj.GetAxisRotation(planet.Equatorial, planet.Appearance.P);
                     double rotPhase = prj.GetPhaseRotation(planet.Ecliptical);
                     string label = settings.Get("PlanetsLabelsMag") ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
@@ -112,6 +113,7 @@ namespace Astrarium.Plugins.SolarSystem
                         Flattening = planet.Flattening,
                         LatitudeShift = -planet.Appearance.D,
                         LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
+                        RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[planet.Number - 1],
@@ -315,6 +317,11 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public double RotationPhase { get; set; }
 
+            /// <summary>
+            /// Rotation angle of vector pointed to zenith, measured counter-clockwise from top of screen
+            /// </summary>
+            public double RotationZenith { get; set; }
+
             public double PhaseAngle { get; set; }
             public double Flattening { get; set; }
 
@@ -456,8 +463,28 @@ namespace Astrarium.Plugins.SolarSystem
                 // rotation of phase
                 double rotPhase = Angle.ToRadians(data.RotationPhase);
 
+                
                 matVision = Mat4.ZRotation(rotAxis) * matVision;
                 matLight = Mat4.ZRotation(rotPhase) * matLight;
+
+                // take refraction into account
+                if (false)
+                {
+                    // rotation angle around Zenith direction
+                    double rotZenith = Angle.ToRadians(data.RotationZenith);
+
+                    // TODO: flattening a disk near horizon, take from body altitude
+                    double mu = 5.0 / 6.0; 
+
+                    // See explanation here: https://math.stackexchange.com/questions/567254/how-to-create-a-2d-geometric-transformation-matrix-to-stretch-an-image-along-a-g
+                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(mu) * Mat4.ZRotation(-rotZenith);
+
+                    // How to calculate refraction in equatorial coordinates:
+                    // https://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?bibcode=1996PASP..108.1051S&db_key=AST&page_ind=5&data_type=GIF&type=SCREEN_VIEW&classic=YES
+
+                    matVision = matRefraction * matVision;
+                    matLight = matRefraction * matLight;
+                }
 
                 float shadowSmoothness = data.SmoothShadow ? 1 : 5;
 
