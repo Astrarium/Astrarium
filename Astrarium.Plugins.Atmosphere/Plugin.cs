@@ -19,11 +19,15 @@ namespace Astrarium.Plugins.Atmosphere
             DefineSetting("FogSpreading", 10m);
             DefineSetting("FogIntensity", 30m);
 
+            DefineSetting("Refraction", false);
+
             DefineSettingsSection<AtmosphereSettingsSection, SettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
 
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconAtmosphere", "$Settings.Atmosphere", new SimpleBinding(settings, "Atmosphere", "IsChecked")));
+
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconStar", "Refraction", new SimpleBinding(settings, "Refraction", "IsChecked")));
         }
     }
 }

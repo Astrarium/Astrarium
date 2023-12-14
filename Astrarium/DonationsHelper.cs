@@ -58,7 +58,6 @@ namespace Astrarium
                 }
             }
             
-
             stats.RunsCount++;
             WriteToFile(stats);
         }

@@ -236,6 +236,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (body is Moon)
                 {
+                    double rotZenith = prj.GetAxisRotation(moon.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime), 0);
                     double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
                     double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
                     double size = prj.GetDiskSize(moon.Semidiameter, 10);
@@ -252,6 +253,7 @@ namespace Astrarium.Plugins.SolarSystem
                         PhaseAngle = moon.PhaseAngle,
                         LatitudeShift = -moon.Libration.b,
                         LongitudeShift = -moon.Libration.l,
+                        RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 3474,
@@ -463,18 +465,17 @@ namespace Astrarium.Plugins.SolarSystem
                 // rotation of phase
                 double rotPhase = Angle.ToRadians(data.RotationPhase);
 
-                
                 matVision = Mat4.ZRotation(rotAxis) * matVision;
                 matLight = Mat4.ZRotation(rotPhase) * matLight;
 
                 // take refraction into account
-                if (false)
+                if (settings.Get("Refraction"))
                 {
                     // rotation angle around Zenith direction
                     double rotZenith = Angle.ToRadians(data.RotationZenith);
 
                     // TODO: flattening a disk near horizon, take from body altitude
-                    double mu = 5.0 / 6.0; 
+                    double mu = 5.0 / 6.0;
 
                     // See explanation here: https://math.stackexchange.com/questions/567254/how-to-create-a-2d-geometric-transformation-matrix-to-stretch-an-image-along-a-g
                     var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(mu) * Mat4.ZRotation(-rotZenith);
