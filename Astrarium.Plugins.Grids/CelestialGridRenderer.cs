@@ -61,30 +61,49 @@ namespace Astrarium.Plugins.Grids
                 GL.CullFace(CullFaceMode.Front);
             }
 
+            // TODO: refactor below code in order to support refraction
+
             if (settings.Get("GalacticEquator"))
             {
-                DrawLine(prj, prj.MatEquatorialToVision * calc.MatGalactic, colorLineGalactic);
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsGalactical gal = new CrdsGalactical(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    gal.l = (double)i / segments * 360;
+                    var eq1950 = gal.ToEquatorial();
+                    var eq = Precession.GetEquatorialCoordinates(eq1950, calc.PrecessionalElementsB1950ToCurrent);
+                    return prj.Project(eq);
+                };
+
+                DrawLine(prj, colorLineGalactic, segments, project);
             }
 
             if (settings.Get("EclipticLine"))
             {
-                var mat = prj.MatEquatorialToVision * calc.MatEcliptic;
-                DrawLine(prj, mat, colorLineEcliptic);
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsEcliptical ecl = new CrdsEcliptical(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    ecl.Lambda = (double)i / segments * 360;
+                    return prj.Project(ecl.ToEquatorial(prj.Context.Epsilon));
+                };
+
+                DrawLine(prj, colorLineEcliptic, segments, project);
 
                 if (settings.Get("LabelEquinoxPoints"))
                 {
-                    DrawLabels(prj, i => Math.PI * i, i => 0, mat, equinoxLabels, fontEquinoxLabel, brushEcliptic);
+                    // DrawLabels(prj, i => Math.PI * i, i => 0, mat, equinoxLabels, fontEquinoxLabel, brushEcliptic);
                 }
 
                 if (settings.Get("LabelLunarNodes"))
                 {
-                    DrawLabels(prj, i => calc.LunarAscendingNodeLongitude + i * Math.PI, i => 0, mat, nodesLabels, fontNodeLabel, brushEcliptic);
+                    // DrawLabels(prj, i => calc.LunarAscendingNodeLongitude + i * Math.PI, i => 0, mat, nodesLabels, fontNodeLabel, brushEcliptic);
                 }
             }
 
             if (settings.Get("HorizontalGrid"))
             {
-                DrawGridLines(prj, prj.MatHorizontalToVision, prj.VecHorizontalVision, colorGridHorizontal);
+                DrawGridLines(prj, prj.MatHorizontalToVision, colorGridHorizontal);
 
                 if (settings.Get("LabelHorizontalPoles"))
                 {
@@ -94,12 +113,22 @@ namespace Astrarium.Plugins.Grids
 
             if (settings.Get("EquatorialGrid"))
             {
-                DrawGridLines(prj, prj.MatEquatorialToVision, prj.VecEquatorialVision, colorGridEquatorial);
-            
-                if (settings.Get("LabelEquatorialPoles"))
+                CrdsEquatorial eq = new CrdsEquatorial();
+                Func<double, double, Vec2> project = (double lon, double lat) =>
                 {
-                    DrawLabels(prj, i => 0, i => Math.PI / 2 * (1 - 2 * i), prj.MatEquatorialToVision, equatorialLabels, SystemFonts.DefaultFont, brushEquatorial);
-                }
+                    eq.Alpha = lon;
+                    eq.Delta = lat;
+                    return prj.Project(eq);
+                };
+
+                DrawGrid(prj, colorGridEquatorial, project);
+
+                //DrawGridLines(prj, prj.MatEquatorialToVision, colorGridEquatorial);
+
+                //if (settings.Get("LabelEquatorialPoles"))
+                //{
+                //    DrawLabels(prj, i => 0, i => Math.PI / 2 * (1 - 2 * i), prj.MatEquatorialToVision, equatorialLabels, SystemFonts.DefaultFont, brushEquatorial);
+                //}
             }
 
             if (settings.Get("MeridianLine"))
@@ -132,6 +161,31 @@ namespace Astrarium.Plugins.Grids
             }
         }
 
+        private void DrawLine(Projection prj, Color color, int segments, Func<int, Vec2> projectPoint)
+        {
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
+
+            GL.Begin(PrimitiveType.LineStrip);
+
+            for (int i = 0; i <= segments; i++)
+            {
+                var p = projectPoint(i);
+
+                if (p != null)
+                {
+                    GL.Vertex2(p.X, p.Y);
+                }
+                else
+                {
+                    GL.End();
+                    GL.Begin(PrimitiveType.LineStrip);
+                }
+            }
+
+            GL.End();
+        }
+
         private void DrawLine(Projection prj, Mat4 mat, Color color)
         {
             int segments = prj.Fov < 45 ? 128 : 64;
@@ -159,7 +213,69 @@ namespace Astrarium.Plugins.Grids
             GL.End();
         }
 
-        private void DrawGridLines(Projection prj, Mat4 mat, Vec3 vision, Color color)
+        private void DrawGrid(Projection prj, Color color, Func<double, double, Vec2> projectPoint)
+        {
+            int segments = prj.Fov < 45 ? 128 : 64;
+
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
+
+            // HOR. GRID
+            {
+                // parallels
+                for (int alt = -80; alt <= 80; alt += 10)
+                {
+                    GL.Begin(PrimitiveType.LineStrip);
+
+                    for (int i = 0; i <= segments; i++)
+                    {
+                        double lon = i / (double)segments * 360;
+                        double lat = alt;
+
+                        var p = projectPoint(lon, lat);
+
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
+                    }
+
+                    GL.End();
+                }
+
+                // meridians
+                for (int i = 0; i < 24; i++)
+                {
+                    GL.Begin(PrimitiveType.LineStrip);
+
+                    for (int alt = -80; alt <= 80; alt += 2)
+                    {
+                        double lon = i / 24.0 * 360;
+                        double lat = alt;
+
+                        var p = projectPoint(lon, lat);
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
+                    }
+
+                    GL.End();
+                }
+            }
+        }
+
+        private void DrawGridLines(Projection prj, Mat4 mat, Color color)
         {
             int segments = prj.Fov < 45 ? 128 : 64;
 

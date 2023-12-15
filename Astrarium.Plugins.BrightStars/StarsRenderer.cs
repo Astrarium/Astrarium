@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.BrightStars
         public override void Render(ISkyMap map)
         {
             var prj = map.Projection;
-            var nightMode = settings.Get("NightMode");
+            bool nightMode = settings.Get("NightMode");
 
             GL.Enable(EnableCap.PointSmooth);
             GL.Enable(EnableCap.LineSmooth);

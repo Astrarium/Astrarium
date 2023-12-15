@@ -26,9 +26,13 @@ namespace Astrarium.Plugins.Grids
         /// </summary>
         public double LunarAscendingNodeLongitude { get; private set; }
 
+        public PrecessionalElements PrecessionalElementsB1950ToCurrent { get; private set; }
+
         public override void Calculate(SkyContext context)
         {
             MatEcliptic = Mat4.XRotation(Angle.ToRadians(context.Epsilon));
+
+            PrecessionalElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_B1950, context.JulianDay);
 
             // precessional elements from J2000 to current epoch
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);

@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.Tycho2
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
                 // J2000 equatorial coordinates of screen center
-                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, tycho2.PrecessionalElements0);
+                CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.WithoutRefraction(prj.CenterEquatorial), tycho2.PrecessionalElements0);
 
                 // years since initial catalogue epoch
                 double t = prj.Context.Get(tycho2.YearsSince2000);
@@ -60,7 +60,7 @@ namespace Astrarium.Plugins.Tycho2
                 float magLimit = prj.MagLimit;
                 magLimit = (float)(-1.44995 * Math.Log(0.000230685 * prj.Fov));
 
-                var stars = tycho2.GetStars(prj.Context, eq, prj.Fov, m => m <= magLimit);
+                var stars = tycho2.GetStars(prj.Context, eq0, prj.Fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {

@@ -38,14 +38,15 @@ namespace Astrarium.Plugins.MinorBodies
             decimal drawAllMagLimit = settings.Get<decimal>("AsteroidsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");
             var font = settings.Get<Font>("AsteroidsLabelsFont");
-
-            var asteroids = asteroidsCalc.Asteroids.Where(a => Angle.Separation(prj.CenterEquatorial, a.Equatorial) < prj.Fov);
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var asteroids = asteroidsCalc.Asteroids;
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
             foreach (var a in asteroids)
             {
-                double ad = Angle.Separation(a.Equatorial, prj.CenterEquatorial);
+                double ad = Angle.Separation(a.Equatorial, eqCenter);
 
-                if (ad < prj.Fov + a.Semidiameter / 3600)
+                if (ad < fov + a.Semidiameter / 3600)
                 {
                     float diam = prj.GetDiskSize(a.Semidiameter);
                     float size = prj.GetPointSize(a.Magnitude);

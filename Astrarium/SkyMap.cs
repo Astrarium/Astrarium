@@ -222,6 +222,7 @@ namespace Astrarium
             Projection.SetVision(vision);
             Projection.FlipVertical = settings.Get("IsInverted");
             Projection.FlipHorizontal = settings.Get("IsMirrored");
+            Projection.UseRefraction = settings.Get("Refraction");
             Projection.ViewMode = mode;
             Projection.SetScreenSize(w, h);
             FovChanged?.Invoke(fov);
@@ -285,6 +286,12 @@ namespace Astrarium
                 if (name == "IsInverted")
                 {
                     Projection.FlipVertical = settings.Get("IsInverted");
+                    Invalidate();
+                }
+
+                if (name == "Refraction")
+                {
+                    Projection.UseRefraction = settings.Get("Refraction");
                     Invalidate();
                 }
             };

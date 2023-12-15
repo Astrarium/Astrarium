@@ -44,8 +44,9 @@ namespace Astrarium.Plugins.MinorBodies
             decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             var font = settings.Get<Font>("CometsLabelsFont");
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
-            var comets = cometsCalc.Comets.Where(a => Angle.Separation(prj.CenterEquatorial, a.Equatorial) < prj.Fov + Angle.Separation(a.Equatorial, a.TailEquatorial));
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, a.Equatorial) < prj.Fov + Angle.Separation(a.Equatorial, a.TailEquatorial));
 
             foreach (var c in comets)
             {

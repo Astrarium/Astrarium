@@ -285,7 +285,8 @@ namespace Astrarium.Types
 
         public Vec2 Project(CrdsEquatorial eq)
         {
-            Vec3 v = SphericalToCartesian(Angle.ToRadians(eq.Alpha), Angle.ToRadians(eq.Delta));
+            var eqR = WithRefraction(eq);
+            Vec3 v = SphericalToCartesian(Angle.ToRadians(eqR.Alpha), Angle.ToRadians(eqR.Delta));
             return Project(v, MatEquatorialToVision);
         }
 
@@ -494,6 +495,24 @@ namespace Astrarium.Types
                 lat = Math.Asin(v[2] / r);
             }
             lng = Math.Atan2(v[1], v[0]);
+        }
+
+        public bool UseRefraction { get; set; }
+
+        public CrdsEquatorial WithRefraction(CrdsEquatorial eq)
+        {
+            if (UseRefraction)
+                return eq.ToVisibleCoordinates(Context.GeoLocation, Context.SiderealTime);
+            else
+                return eq;
+        }
+
+        public CrdsEquatorial WithoutRefraction(CrdsEquatorial eq)
+        {
+            if (UseRefraction)
+                return eq.ToTrueCoordinates(Context.GeoLocation, Context.SiderealTime);
+            else
+                return eq;
         }
     }
 }

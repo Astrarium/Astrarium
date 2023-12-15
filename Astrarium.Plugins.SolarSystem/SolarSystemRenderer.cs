@@ -95,17 +95,14 @@ namespace Astrarium.Plugins.SolarSystem
                     continue;
                 }
 
-                CrdsEquatorial eq = body.Equatorial;
                 double rotZenith = 0;
                 double mu = 1;
 
                 if (settings.Get("Refraction"))
                 {
-                    CrdsHorizontal hor = eq.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                    CrdsHorizontal hor = body.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
                     rotZenith = prj.GetAxisRotation(hor, 0);
-                    mu = Refraction.Flattening(hor.Altitude, moon.Semidiameter / 3600 * 2);
-                    hor.Altitude += Refraction.Correction(hor.Altitude);
-                    eq = hor.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                    mu = Refraction.Flattening(hor.Altitude);
                 }
 
                 if (body is Planet planet)
@@ -116,7 +113,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                     RenderSolarSystemObject(planet, new SphereParameters()
                     {
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         Color = GetPlanetColor(planet.Number),
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
@@ -125,6 +122,7 @@ namespace Astrarium.Plugins.SolarSystem
                         Flattening = planet.Flattening,
                         LatitudeShift = -planet.Appearance.D,
                         LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
+                        Refraction = mu,
                         RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
@@ -146,7 +144,7 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(mm, new SphereParameters()
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
@@ -160,9 +158,11 @@ namespace Astrarium.Plugins.SolarSystem
                         TextureName = Path.Combine(dataPath, $"5-{jupiterMoon.Number}.jpg"),
                         LongitudeShift = jupiterMoon.CM,
                         PhaseAngle = jupiter.PhaseAngle,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         DrawLabel = settings.Get("PlanetsLabels") && prj.Fov <= 1,
                         MaximalPointSize = 3
                     });
@@ -179,11 +179,13 @@ namespace Astrarium.Plugins.SolarSystem
                     double rotPhase = prj.GetPhaseRotation(saturn.Ecliptical);
                     RenderSolarSystemObject(saturnMoon, new SphereParameters()
                     {
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         MaximalPointSize = 1.5f,
                         TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
                         LongitudeShift = saturnMoon.CM,
                         PhaseAngle = saturn.PhaseAngle,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         DrawLabel = settings.Get("PlanetsLabels")
@@ -194,7 +196,7 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(uranusMoon, new SphereParameters()
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
@@ -204,7 +206,7 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(neptuneMoon, new SphereParameters()
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
@@ -215,9 +217,9 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(gm, new SphereParameters()
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         MaximalDiskSize = 0,
-                        MaximalPointSize = 2
+                        MaximalPointSize = 2,
                     });
                 }
                 else if (body is Pluto pluto)
@@ -228,13 +230,15 @@ namespace Astrarium.Plugins.SolarSystem
 
                     RenderSolarSystemObject(pluto, new SphereParameters()
                     {
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         Color = GetPlanetColor(pluto.Number),
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
                         LatitudeShift = -pluto.Appearance.D,
                         LongitudeShift = pluto.Appearance.CM,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[pluto.Number - 1],
@@ -244,7 +248,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (body is Sun)
                 {
-                    RenderSun();
+                    RenderSun(new SphereParameters() { Refraction = mu, RotationZenith = rotZenith });
                 }
                 else if (body is Moon)
                 {
@@ -254,9 +258,28 @@ namespace Astrarium.Plugins.SolarSystem
                     int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
                     string textureName = $"Moon-{q}k.jpg";
 
+                    var moonHor = moon.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                    double hUp = moonHor.Altitude + moon.Semidiameter / 3600; // true
+                    double hDown = moonHor.Altitude - moon.Semidiameter / 3600; // true
+
+                    var eqUp = new CrdsHorizontal(moonHor.Azimuth, hUp).ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                    var eqDown = new CrdsHorizontal(moonHor.Azimuth, hDown).ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+
+                    {
+                        var pUp = prj.Project(eqUp);
+                        var pDown = prj.Project(eqDown);
+
+                        if (pUp != null && pUp != null)
+                        {
+                            Primitives.DrawEllipse(pUp, Pens.Blue, 5);
+                            Primitives.DrawEllipse(pDown, Pens.Blue, 5);
+                        }
+                    }
+
+
                     RenderSolarSystemObject(moon, new SphereParameters()
                     {
-                        Equatorial = eq,
+                        Equatorial = body.Equatorial,
                         TextureName = Path.Combine(dataPath, textureName),
                         FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
                         MinimalDiskSize = 10,
@@ -413,7 +436,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // do not draw if out of screen
                 double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
-                if (Angle.Separation(prj.CenterEquatorial, data.Equatorial) > fov + body.Semidiameter / 3600 * 2) return;
+                if (Angle.Separation(prj.WithoutRefraction(prj.CenterEquatorial), data.Equatorial) > fov + body.Semidiameter / 3600 * 2) return;
 
                 GL.Enable(EnableCap.Texture2D);
 
@@ -495,18 +518,8 @@ namespace Astrarium.Plugins.SolarSystem
                 // take refraction into account
                 if (settings.Get("Refraction"))
                 {
-                    // rotation angle around Zenith direction
                     double rotZenith = Angle.ToRadians(data.RotationZenith);
-
-                    // flattening a disk due to refraction
-                    double mu = data.Refraction;
-
-                    // See explanation here: https://math.stackexchange.com/questions/567254/how-to-create-a-2d-geometric-transformation-matrix-to-stretch-an-image-along-a-g
-                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(mu) * Mat4.ZRotation(-rotZenith);
-
-                    // How to calculate refraction in equatorial coordinates:
-                    // https://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?bibcode=1996PASP..108.1051S&db_key=AST&page_ind=5&data_type=GIF&type=SCREEN_VIEW&classic=YES
-
+                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
                     matVision = matRefraction * matVision;
                     matLight = matRefraction * matLight;
                 }
@@ -679,21 +692,23 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderSun()
+        private void RenderSun(SphereParameters data)
         {
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             // do not draw if out of screen
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            if (Angle.Separation(prj.CenterEquatorial, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
+            if (Angle.Separation(eqCenter, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
 
             float r = diam / 2;
             Vec2 p = prj.Project(sun.Equatorial);
             if (p == null) return;
 
             double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
+            double rotZenith = Angle.ToRadians(data.RotationZenith);
 
             int textureId = -1;
 
@@ -739,7 +754,14 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 double ang0 = Angle.ToRadians(i / 64.0 * 360);
                 double ang = ang0 + rotAxis;
+
                 Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+
+                if (prj.UseRefraction)
+                {
+                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
+                    v = matRefraction * v;
+                }
 
                 if (textureId > 0)
                 {
@@ -983,6 +1005,13 @@ namespace Astrarium.Plugins.SolarSystem
 
             // rotation matrix for rings vision
             var matRings = Mat4.ZRotation(rotAxis) * Mat4.XRotation(Angle.ToRadians(data.LatitudeShift - 90));
+
+            if (prj.UseRefraction)
+            {
+                double rotZenith = Angle.ToRadians(data.RotationZenith);
+                var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
+                matRings = matRefraction * matRings;
+            }
 
             for (j = 0; j <= segments / 2; j++)
             {
