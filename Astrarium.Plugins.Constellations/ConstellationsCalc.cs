@@ -19,9 +19,7 @@ namespace Astrarium.Plugins.Constellations
         /// <summary>
         /// Constellations borders coordinates
         /// </summary>
-        //public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
-
-        public List<List<Vec3>> Borders { get; private set; } = new List<List<Vec3>>();
+        public List<List<CrdsEquatorial>> Borders { get; private set; } = new List<List<CrdsEquatorial>>();
 
         /// <summary>
         /// List of constellation lines (traditional)
@@ -33,8 +31,15 @@ namespace Astrarium.Plugins.Constellations
         /// </summary>
         public List<Tuple<int, int>> ConstLinesRey { get; private set; } = new List<Tuple<int, int>>();
 
-        public Mat4 MatPrecession { get; private set; }
-        public Mat4 MatPrecession0 { get; private set; }
+        /// <summary>
+        /// Precession elements for conversion Current Epoch -> B1950.0
+        /// </summary>
+        public PrecessionalElements PrecessionElementsCurrentToB1950 { get; private set; }
+
+        /// <summary>
+        /// Precession elements for conversion B1950.0 -> Current Epoch
+        /// </summary>
+        public PrecessionalElements PrecessionElementsB1950ToCurrent { get; private set; }
 
         private readonly ISky sky;
         private readonly ISettings settings;
@@ -57,20 +62,10 @@ namespace Astrarium.Plugins.Constellations
         public override void Calculate(SkyContext context)
         {
             // precessional elements from J2000 to current epoch
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            PrecessionElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             // precessional elements from current epoch to J2000
-            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
-
-            MatPrecession =
-                Mat4.ZRotation(Angle.ToRadians(p.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p.zeta));
-
-            MatPrecession0 =
-                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
+            PrecessionElementsCurrentToB1950 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
         }
 
         public override void Initialize()
@@ -105,22 +100,19 @@ namespace Astrarium.Plugins.Constellations
             
             using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
-                List<Vec3> block = null;
+                List<CrdsEquatorial> block = null;
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
                     bool start = sr.ReadBoolean();
                     if (start)
                     {
-                        block = new List<Vec3>();
+                        block = new List<CrdsEquatorial>();
                         Borders.Add(block);
                     }
 
-                    double lon = Angle.ToRadians(sr.ReadDouble());
-                    double lat = Angle.ToRadians(sr.ReadDouble());
-
-                    var vec = Projection.SphericalToCartesian(lon, lat);
-
-                    block.Add(vec);
+                    double ra = sr.ReadDouble();
+                    double dec = sr.ReadDouble();
+                    block.Add(new CrdsEquatorial(ra, dec));
                 }
             }
         }
@@ -139,7 +131,7 @@ namespace Astrarium.Plugins.Constellations
                     ConstLabels.Add(new ConstellationLabel()
                     {
                         Code = code.Substring(0, 3),
-                        Cartesian = Projection.SphericalToCartesian(Angle.ToRadians(sr.ReadSingle()), Angle.ToRadians(sr.ReadSingle()))
+                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
                     });
                 }
             }
@@ -149,7 +141,7 @@ namespace Astrarium.Plugins.Constellations
         {
             List<Tuple<int, int>> lines = new List<Tuple<int, int>>();
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"Data/{fileName}");
-            string[] chunks = null;
+            string[] chunks;
             int from, to;
             string line = "";
 

@@ -47,13 +47,12 @@ namespace Astrarium.Plugins.Constellations
             Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorConstLabels").Tint(nightMode));
             WF.TextFormatFlags formatFlags = WF.TextFormatFlags.HorizontalCenter | WF.TextFormatFlags.VerticalCenter;
 
-            var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
-
             var constellations = constellationsCalc.ConstLabels;
 
             foreach (var c in constellations)
             {
-                var p = prj.Project(c.Cartesian, mat);
+                var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, prj.Context.PrecessionElements);
+                var p = prj.Project(eq);
                 if (prj.IsInsideScreen(p))
                 {
                     var constellation = sky.GetConstellation(c.Code);
@@ -87,15 +86,9 @@ namespace Astrarium.Plugins.Constellations
             GL.Enable(EnableCap.LineSmooth);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            // eq vision vector in J2000 coords
-            var vecVision = constellationsCalc.MatPrecession0 * prj.VecEquatorialVision;
-
-            // matrix for projection
-            var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
-
             double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double fov = Angle.ToRadians(prj.Fov * Math.Sqrt(h * h + w * w) / 2);
+            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
 
             // max angular distance from current vision vector
             // 0.7 coeff is an empyrical
@@ -105,23 +98,26 @@ namespace Astrarium.Plugins.Constellations
 
             GL.Color3(color);
 
+            CrdsEquatorial eqCenter = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, constellationsCalc.PrecessionElementsCurrentToB1950);
+
             foreach (var block in constellationsCalc.Borders)
             {
                 for (int i = 0; i < block.Count - 1; i++)
                 {
-                    if (vecVision.Angle(block[i]) > fov && vecVision.Angle(block[i + 1]) > fov)
+                    if (Angle.Separation(eqCenter, block[i]) < fov ||
+                        Angle.Separation(eqCenter, block[i + 1]) < fov)
                     {
-                        continue;
-                    }
-
-                    var p1 = prj.Project(block[i], mat);
-                    var p2 = prj.Project(block[i + 1], mat);
-                    if (p1 != null && p2 != null)
-                    {
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Vertex2(p1.X, p1.Y);
-                        GL.Vertex2(p2.X, p2.Y);
-                        GL.End();
+                        var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsB1950ToCurrent);
+                        var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsB1950ToCurrent);
+                        var p1 = prj.Project(eq1);
+                        var p2 = prj.Project(eq2);
+                        if (p1 != null && p2 != null)
+                        {
+                            GL.Begin(PrimitiveType.Lines);
+                            GL.Vertex2(p1.X, p1.Y);
+                            GL.Vertex2(p2.X, p2.Y);
+                            GL.End();
+                        }
                     }
                 }
             }

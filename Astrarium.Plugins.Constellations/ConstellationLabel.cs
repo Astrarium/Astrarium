@@ -1,4 +1,4 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
 
 namespace Astrarium.Plugins.Constellations
 {
@@ -11,8 +11,8 @@ namespace Astrarium.Plugins.Constellations
         public string Code { get; set; }
 
         /// <summary>
-        /// Cartesian coordinates of constellation label, for J2000.0
+        /// Equatorial coordinates of constellation label, for J2000.0
         /// </summary>
-        public Vec3 Cartesian { get; set; }
+        public CrdsEquatorial Equatorial0 { get; set; }
     }
 }

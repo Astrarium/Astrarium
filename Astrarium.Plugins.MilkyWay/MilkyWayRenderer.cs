@@ -99,7 +99,7 @@ namespace Astrarium.Plugins.MilkyWay
                 for (int i = 0; i <= steps; i++)
                 {
                     double lon = Angle.ToRadians(360 - i / (double)steps * 360);
-                    
+
                     for (int k = 0; k < 2; k++)
                     {
                         var v = Projection.SphericalToCartesian(lon, Angle.ToRadians(lat - k * 10));
