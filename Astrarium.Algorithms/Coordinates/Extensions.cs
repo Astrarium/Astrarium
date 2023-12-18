@@ -310,13 +310,6 @@ namespace Astrarium.Algorithms
             return new CrdsEquatorial(planet.Alpha - dAlpha, planet.Delta - dDelta);
         }
 
-        public static CrdsHorizontal WithRefraction(this CrdsHorizontal h0)
-        {
-            //if (h0.Altitude < 0) return h0;
-            double R = 1.02 / Math.Tan(Angle.ToRadians(h0.Altitude + 10.3 / (h0.Altitude + 5.11)));
-            return new CrdsHorizontal(h0.Azimuth, h0.Altitude + R / 60);
-        }
-
         /// <summary>
         /// Calculates distance in kilometers between 2 points on the Earth surface.
         /// </summary>
