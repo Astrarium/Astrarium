@@ -85,17 +85,34 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarButtonTemplate">
-                        <Button Padding="0" Margin="0" Width="24" Height="24" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
+                        <Button Padding="0" Margin="1 0" Width="24" Height="24" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
+                            <Button.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource ColorControlBackground}" />
+                            </Button.BorderBrush>
                             <Button.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>
                                         <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                     </Rectangle.Fill>
                                     <Rectangle.OpacityMask>
-                                        <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                        <ImageBrush AlignmentX="Center" AlignmentY="Center" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="None" />
                                     </Rectangle.OpacityMask>
                                 </Rectangle>
                             </Button.Content>
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCheckable}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsChecked}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                         </Button>
                     </DataTemplate>
 
@@ -107,7 +124,7 @@
                                         <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                     </Rectangle.Fill>
                                     <Rectangle.OpacityMask>
-                                        <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                        <ImageBrush AlignmentX="Center" AlignmentY="Center" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}" Stretch="None" />
                                     </Rectangle.OpacityMask>
                                 </Rectangle>
                             </ToggleButton.Content>
@@ -137,6 +154,25 @@
                     </DataTemplate>
                 </ToolBar.ItemTemplate>
             </ToolBar>
+
+            <!--<ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                <ToggleButton.Content>
+                    <Rectangle Margin="2" Width="18" Height="18">
+                        <Rectangle.Fill>
+                            <SolidColorBrush Color="{DynamicResource ColorForeground}" />
+                        </Rectangle.Fill>
+                        <Rectangle.OpacityMask>
+                            <ImageBrush AlignmentX="Center" AlignmentY="Center" Stretch="None">
+                                <ImageBrush.ImageSource>
+
+                                    
+
+                                </ImageBrush.ImageSource>
+                            </ImageBrush>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </ToggleButton.Content>
+            </ToggleButton>-->
 
             <c:AutoCompleteTextBox 
                 Watermark="{t:Text Toolbar.SearchHint}"

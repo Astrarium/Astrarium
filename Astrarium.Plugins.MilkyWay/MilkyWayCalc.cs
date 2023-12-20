@@ -16,8 +16,8 @@ namespace Astrarium.Plugins.MilkyWay
         /// Altitude of the Sun above horizon
         /// </summary>
         public double SunAltitude { get; private set; }
-        
-        public Mat4 MatGalactic { get; private set; }
+
+        public PrecessionalElements PrecessionElementsB1950ToCurrent { get; private set; }
 
         private readonly ISky sky;
 
@@ -31,21 +31,8 @@ namespace Astrarium.Plugins.MilkyWay
             // solar altitude, in degrees
             SunAltitude = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime).Altitude;
 
-            // precessional elements from J2000 to current epoch
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-
-            // precession matrix used to convert J2000.0 galactical coordinates to current epoch
-            var matPrecession =
-                Mat4.ZRotation(Angle.ToRadians(p.z)) *
-                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(p.zeta));
-
-            // J2000.0 galactical reference points
-            // 192.855 = 12h 51.4m (alpha0)
-            // 27.12825 (delta0)
-            // 122.93314 (lon)
-            MatGalactic = matPrecession * Mat4.ZRotation(Angle.ToRadians(192.855)) * Mat4.YRotation(Angle.ToRadians(90 - 27.12825)) * Mat4.ZRotation(Angle.ToRadians(180 - 122.93314));
-
+            // precession elements from B1950 to current epoch
+            PrecessionElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_B1950, context.JulianDay);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Astrarium.Types
 
     public class ToolbarButton : ToolbarButtonBase
     {
-        public ToolbarButton(string imageKey, string toolTip, Command command)
+        public ToolbarButton(string imageKey, string toolTip, Command command = null)
         {
             ImageKey = imageKey;
             Tooltip = toolTip;
@@ -51,6 +51,18 @@ namespace Astrarium.Types
             get => GetValue<object>(nameof(CommandParameter), null);
             set => SetValue(nameof(CommandParameter), value);
         }
+
+        public bool IsChecked
+        {
+            get => GetValue<bool>(nameof(IsChecked));
+            set => SetValue(nameof(IsChecked), value);
+        }
+
+        public bool IsCheckable
+        {
+            get => GetValue<bool>(nameof(IsCheckable));
+            set => SetValue(nameof(IsCheckable), value);
+        }
     }
 
     public class ToolbarToggleButton : ToolbarButton
@@ -58,12 +70,6 @@ namespace Astrarium.Types
         public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding checkedBinding) : base(imageKey, toolTip, null)
         {
             AddBinding(checkedBinding);
-        }
-
-        public bool IsChecked
-        {
-            get => GetValue<bool>(nameof(IsChecked));
-            set => SetValue(nameof(IsChecked), value);
         }
     }
 }

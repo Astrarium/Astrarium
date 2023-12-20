@@ -98,11 +98,11 @@ namespace Astrarium.Plugins.SolarSystem
                 double rotZenith = 0;
                 double mu = 1;
 
-                if (settings.Get("Refraction"))
+                if (prj.UseRefraction)
                 {
                     CrdsHorizontal hor = body.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
                     rotZenith = prj.GetAxisRotation(hor, 0);
-                    mu = Refraction.Flattening(hor.Altitude);
+                    mu = Refraction.Flattening(hor.Altitude, prj.RefractionPressure, prj.RefractionTemperature);
                 }
 
                 if (body is Planet planet)
@@ -503,7 +503,7 @@ namespace Astrarium.Plugins.SolarSystem
                 matLight = Mat4.ZRotation(rotPhase) * matLight;
 
                 // take refraction into account
-                if (settings.Get("Refraction"))
+                if (prj.UseRefraction)
                 {
                     double rotZenith = Angle.ToRadians(data.RotationZenith);
                     var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
@@ -1188,6 +1188,8 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, string shadowLabel, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, double refraction, double rotZenith)
         {
+            var prj = map.Projection;
+
             GL.PushMatrix();
             GL.Translate(pBody.X, pBody.Y, 0);
 
@@ -1216,7 +1218,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // rotate for 't' radians
                 v = Mat4.ZRotation(t) * v;
 
-                if (settings.Get("Refraction"))
+                if (prj.UseRefraction)
                 {
                     double rz = Angle.ToRadians(rotZenith);
                     var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
@@ -1271,7 +1273,7 @@ namespace Astrarium.Plugins.SolarSystem
                         v = Mat4.ZRotation(rot) * v;
 
                         // refraction flattening
-                        if (settings.Get("Refraction"))
+                        if (prj.UseRefraction)
                         {
                             double rz = Angle.ToRadians(rotZenith);
                             var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
@@ -1301,7 +1303,7 @@ namespace Astrarium.Plugins.SolarSystem
                         v = Mat4.ZRotation(rot) * v;
 
                         // refraction flattening
-                        if (settings.Get("Refraction"))
+                        if (prj.UseRefraction)
                         {
                             double rz = Angle.ToRadians(rotZenith);
                             var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
@@ -1328,7 +1330,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.PopMatrix();
 
-            //map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
+            // TODO: get brush from settings
+            map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
         }
 
         private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, SphereParameters data, CrdsRectangular rect = null)

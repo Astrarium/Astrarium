@@ -215,7 +215,7 @@ namespace Astrarium
             var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
             int w = Projection?.ScreenWidth ?? 1;
             int h = Projection?.ScreenHeight ?? 1;
-            var mode = Projection?.ViewMode ?? ProjectionViewType.Horizontal;
+            
 
             Projection = (Projection)Activator.CreateInstance(type, context);
             Projection.Fov = fov;
@@ -223,7 +223,9 @@ namespace Astrarium
             Projection.FlipVertical = settings.Get("IsInverted");
             Projection.FlipHorizontal = settings.Get("IsMirrored");
             Projection.UseRefraction = settings.Get("Refraction");
-            Projection.ViewMode = mode;
+            Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
+            Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+            Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
             Projection.SetScreenSize(w, h);
             FovChanged?.Invoke(fov);
             Invalidate();
@@ -277,6 +279,11 @@ namespace Astrarium
                     Invalidate();
                 }
 
+                if (name == "ViewMode")
+                {
+                    Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
+                }
+
                 if (name == "IsMirrored")
                 {
                     Projection.FlipHorizontal = settings.Get("IsMirrored");
@@ -292,6 +299,18 @@ namespace Astrarium
                 if (name == "Refraction")
                 {
                     Projection.UseRefraction = settings.Get("Refraction");
+                    Invalidate();
+                }
+
+                if (name == "RefractionPressure")
+                {
+                    Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
+                    Invalidate();
+                }
+
+                if (name == "RefractionTemperature")
+                {
+                    Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
                     Invalidate();
                 }
             };

@@ -216,6 +216,53 @@ namespace Astrarium.ViewModels
             // predefined toolbar groups
             List<string> groups = new List<string> { "Objects", "Constellations", "Grids", "Ground" };
 
+            //uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconModeEquatorial", "$Settings.ViewMode", new SimpleBinding(settings, "ViewMode", "IsChecked") 
+            //{ 
+            //    SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Equatorial,
+            //    TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal
+            //}));
+
+            //uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconModeHorizontal", "$Settings.ViewMode", new SimpleBinding(settings, "ViewMode", "IsChecked")
+            //{
+            //    SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Horizontal,
+            //    TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial,                
+            //}));
+
+            var btnViewModeEquatorial = new ToolbarButton("IconModeEquatorial", "$Settings.ViewMode") { IsCheckable = true };
+            btnViewModeEquatorial.Command = new Command(() => {
+                settings.SetAndSave("ViewMode", ProjectionViewType.Equatorial);
+                map.Invalidate();
+            });
+
+            btnViewModeEquatorial.AddBinding(new SimpleBinding(settings, "ViewMode", "IsChecked") 
+            {
+                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Equatorial,
+                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal
+            });
+
+
+            var btnViewModeHorizontal = new ToolbarButton("IconModeHorizontal", "$Settings.ViewMode") { IsCheckable = true }; ;
+            btnViewModeHorizontal.Command = new Command(() => {
+                settings.SetAndSave("ViewMode", ProjectionViewType.Horizontal);
+                map.Invalidate();
+            });
+
+            btnViewModeHorizontal.AddBinding(new SimpleBinding(settings, "ViewMode", "IsChecked")
+            {
+                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Horizontal,
+                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial
+            });
+
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconNightMode", "", new SimpleBinding(settings, "NightMode", "IsChecked")));
+
+            uiIntegration.ToolbarButtons.Add("View", btnViewModeHorizontal);
+            uiIntegration.ToolbarButtons.Add("View", btnViewModeEquatorial);
+
+
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "", new SimpleBinding(settings, "IsMirrored", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "", new SimpleBinding(settings, "IsInverted", "IsChecked")));
+
+
             foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
                 foreach (var button in uiIntegration.ToolbarButtons[group])
@@ -251,18 +298,31 @@ namespace Astrarium.ViewModels
             
             var menuMountModeHorizontal = new MenuItem("$Menu.MapMountMode.Horizontal") { IsCheckable = true, IsChecked = true };
             var menuMountModeEquatorial = new MenuItem("$Menu.MapMountMode.Equatorial") { IsCheckable = true };
-            
+
+            menuMountModeHorizontal.AddBinding(new SimpleBinding(settings, "ViewMode", "IsChecked")
+            {
+                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Horizontal,
+                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial
+            });
+
+            menuMountModeEquatorial.AddBinding(new SimpleBinding(settings, "ViewMode", "IsChecked")
+            {
+                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Equatorial,
+                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal
+            });
+
+
             menuMountModeHorizontal.Command = new Command(() => {
-                menuMountModeHorizontal.IsChecked = true;
-                menuMountModeEquatorial.IsChecked = false;
-                map.Projection.ViewMode = ProjectionViewType.Horizontal;
+                //menuMountModeHorizontal.IsChecked = true;
+                //menuMountModeEquatorial.IsChecked = false;
+                settings.SetAndSave("ViewMode", ProjectionViewType.Horizontal);
                 map.Invalidate();
             });
             
             menuMountModeEquatorial.Command = new Command(() => {
-                menuMountModeEquatorial.IsChecked = true;
-                menuMountModeHorizontal.IsChecked = false;
-                map.Projection.ViewMode = ProjectionViewType.Equatorial;
+                //menuMountModeEquatorial.IsChecked = true;
+                //menuMountModeHorizontal.IsChecked = false;
+                settings.SetAndSave("ViewMode", ProjectionViewType.Equatorial);
                 map.Invalidate();
             });
 

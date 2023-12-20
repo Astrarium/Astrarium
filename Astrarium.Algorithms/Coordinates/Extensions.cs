@@ -35,12 +35,20 @@ namespace Astrarium.Algorithms
             double phi = Angle.ToRadians(geo.Latitude);
             double delta = Angle.ToRadians(eq.Delta);
 
+            double sinH = Math.Sin(H);
+            double cosH = Math.Cos(H);
+            double sinPhi = Math.Sin(phi);
+            double cosPhi = Math.Cos(phi);
+            double sinDelta = Math.Sin(delta);
+            double cosDelta = Math.Cos(delta);
+            double tanDelta = Math.Tan(delta);
+
+            double Y = sinH;
+            double X = cosH * sinPhi - tanDelta * cosPhi;
+
             CrdsHorizontal hor = new CrdsHorizontal();
 
-            double Y = Math.Sin(H);
-            double X = Math.Cos(H) * Math.Sin(phi) - Math.Tan(delta) * Math.Cos(phi);
-
-            hor.Altitude = Angle.ToDegrees(Math.Asin(Math.Sin(phi) * Math.Sin(delta) + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(H)));
+            hor.Altitude = Angle.ToDegrees(Math.Asin(sinPhi * sinDelta + cosPhi * cosDelta * cosH));
 
             hor.Azimuth = Angle.ToDegrees(Math.Atan2(Y, X));
             hor.Azimuth = Angle.To360(hor.Azimuth);
@@ -57,18 +65,25 @@ namespace Astrarium.Algorithms
         /// <returns>Pair of equatorial coordinates</returns>
         public static CrdsEquatorial ToEquatorial(this CrdsHorizontal hor, CrdsGeographical geo, double theta0)
         {
-            CrdsEquatorial eq = new CrdsEquatorial();
             double A = Angle.ToRadians(hor.Azimuth);
             double h = Angle.ToRadians(hor.Altitude);
             double phi = Angle.ToRadians(geo.Latitude);
 
-            double Y = Math.Sin(A);
-            double X = Math.Cos(A) * Math.Sin(phi) + Math.Tan(h) * Math.Cos(phi);
+            double sinPhi = Math.Sin(phi);
+            double cosPhi = Math.Cos(phi);
+            double sinA = Math.Sin(A);
+            double cosA = Math.Cos(A);
+            double sinH = Math.Sin(h);
+            double cosH = Math.Cos(h);
+
+            double Y = sinA;
+            double X = cosA * sinPhi + Math.Tan(h) * cosPhi;
 
             double H = Angle.ToDegrees(Math.Atan2(Y, X));
 
+            CrdsEquatorial eq = new CrdsEquatorial();
             eq.Alpha = Angle.To360(theta0 - geo.Longitude - H);
-            eq.Delta = Angle.ToDegrees(Math.Asin(Math.Sin(phi) * Math.Sin(h) - Math.Cos(phi) * Math.Cos(h) * Math.Cos(A)));
+            eq.Delta = Angle.ToDegrees(Math.Asin(sinPhi * sinH - cosPhi * cosH * cosA));
 
             return eq;
         }
@@ -82,6 +97,8 @@ namespace Astrarium.Algorithms
         public static CrdsEquatorial ToEquatorial(this CrdsEcliptical ecl, double epsilon)
         {
             CrdsEquatorial eq = new CrdsEquatorial();
+
+            // TODO: optimize
 
             epsilon = Angle.ToRadians(epsilon);
             double lambda = Angle.ToRadians(ecl.Lambda);
@@ -104,6 +121,8 @@ namespace Astrarium.Algorithms
         /// <returns></returns>
         public static CrdsEcliptical ToEcliptical(this CrdsEquatorial eq, double epsilon)
         {
+            // TODO: optimize
+
             CrdsEcliptical ecl = new CrdsEcliptical();
 
             epsilon = Angle.ToRadians(epsilon);
@@ -131,7 +150,9 @@ namespace Astrarium.Algorithms
             double alpha0_alpha = Angle.ToRadians(192.25 - eq.Alpha);
             double delta = Angle.ToRadians(eq.Delta);
             double delta0 = Angle.ToRadians(27.4);
-            
+
+            // TODO: optimize
+
             double Y = Math.Sin(alpha0_alpha);
             double X = Math.Cos(alpha0_alpha) * Math.Sin(delta0) - Math.Tan(delta) * Math.Cos(delta0);
             double sinb = Math.Sin(delta) * Math.Sin(delta0) + Math.Cos(delta) * Math.Cos(delta0) * Math.Cos(alpha0_alpha);
@@ -154,9 +175,13 @@ namespace Astrarium.Algorithms
             double delta0 = Angle.ToRadians(27.4);
             double b = Angle.ToRadians(gal.b);
 
+            double sinDelta0 = Math.Sin(delta0);
+            double cosDelta0 = Math.Cos(delta0);
+            double cosL_l0 = Math.Cos(l_l0);
+
             double Y = Math.Sin(l_l0);
-            double X = Math.Cos(l_l0) * Math.Sin(delta0) - Math.Tan(b) * Math.Cos(delta0);
-            double sinDelta = Math.Sin(b) * Math.Sin(delta0) + Math.Cos(b) * Math.Cos(delta0) * Math.Cos(l_l0);
+            double X = cosL_l0 * sinDelta0 - Math.Tan(b) * cosDelta0;
+            double sinDelta = Math.Sin(b) * sinDelta0 + Math.Cos(b) * cosDelta0 * cosL_l0;
 
             eq.Alpha = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)) + 12.25);
             eq.Delta = Angle.ToDegrees(Math.Asin(sinDelta));
@@ -234,6 +259,8 @@ namespace Astrarium.Algorithms
         /// <returns>Topocentrical ecliptical coordinates of a planet</returns>
         public static CrdsEcliptical ToEcliptical(this CrdsRectangular rect)
         {
+            // TODO: optimize
+
             double lambda = Angle.To360(Angle.ToDegrees(Math.Atan2(rect.Y, rect.X)));
             double beta = Angle.ToDegrees(Math.Atan(rect.Z / Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y)));
             double distance = Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y + rect.Z * rect.Z);
@@ -254,6 +281,8 @@ namespace Astrarium.Algorithms
         /// </remarks>
         public static CrdsEquatorial ToTopocentric(this CrdsEquatorial eq, CrdsGeographical geo, double theta0, double pi)
         {
+            // TODO: optimize
+
             double H = Angle.ToRadians(HourAngle(theta0, geo.Longitude, eq.Alpha));
             double delta = Angle.ToRadians(eq.Delta);
             double sinPi = Math.Sin(Angle.ToRadians(pi));
@@ -285,6 +314,8 @@ namespace Astrarium.Algorithms
         /// </remarks>
         public static CrdsEquatorial ToEquatorial(this CrdsRectangular m, CrdsEquatorial planet, double P, double semidiameter)
         {
+            // TODO: optimize
+
             // convert rectangular planetocentrical coordinates to planetocentrical polar coordinates
 
             // radius-vector of moon, in planet's equatorial radii

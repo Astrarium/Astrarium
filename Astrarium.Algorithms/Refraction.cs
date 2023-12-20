@@ -37,23 +37,9 @@ namespace Astrarium.Algorithms
             const double diameter = 0.001;
             double horU = h + diameter / 2;
             double horD = h - diameter / 2;
-            horU += CorrectionForVisibleCoordinates(horU);
-            horD += CorrectionForVisibleCoordinates(horD);
+            horU += CorrectionForVisibleCoordinates(horU, P, T);
+            horD += CorrectionForVisibleCoordinates(horD, P, T);
             return (horU - horD) / diameter;
-        }
-
-        public static CrdsEquatorial ToVisibleCoordinates(this CrdsEquatorial eq, CrdsGeographical geo, double theta0)
-        {
-            CrdsHorizontal hor = eq.ToHorizontal(geo, theta0);
-            hor.Altitude += CorrectionForVisibleCoordinates(hor.Altitude);
-            return hor.ToEquatorial(geo, theta0);
-        }
-
-        public static CrdsEquatorial ToTrueCoordinates(this CrdsEquatorial eq, CrdsGeographical geo, double theta0)
-        {
-            CrdsHorizontal hor = eq.ToHorizontal(geo, theta0);
-            hor.Altitude -= CorrectionForTrueCoordinates(hor.Altitude);
-            return hor.ToEquatorial(geo, theta0);
         }
     }
 }

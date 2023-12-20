@@ -62,6 +62,9 @@ namespace Astrarium
             SettingDefinitions.Add(new SettingDefinition("IsMirrored", false));
             SettingDefinitions.Add(new SettingDefinition("IsInverted", false));
 
+            // View mode
+            SettingDefinitions.Add(new SettingDefinition("ViewMode", ProjectionViewType.Horizontal));
+
             SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(FontsSettingsSection), typeof(FontsSettingsVM)));

@@ -56,7 +56,7 @@ namespace Astrarium.Plugins.MeasureTool
                 }
                 else
                 {
-                    renderer.MeasureOrigin = new CrdsEquatorial(map.MouseEquatorialCoordinates);
+                    renderer.MeasureOrigin = map.Projection.WithoutRefraction(new CrdsEquatorial(map.MouseEquatorialCoordinates));
                 }
             }
 

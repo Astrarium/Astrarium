@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Astrarium.Types
 {
+    /// <summary>
+    /// Base class for map projections
+    /// </summary>
     public abstract class Projection
     {
         /// <summary>
@@ -16,7 +19,14 @@ namespace Astrarium.Types
         /// </summary>
         protected double ScreenScalingFactor { get; private set; }
 
+        /// <summary>
+        /// Backing field for <see cref="FlipHorizontal"/>
+        /// </summary>
         private bool flipHorizontal = false;
+
+        /// <summary>
+        /// Flag indicating flipping image horizontally
+        /// </summary>
         public bool FlipHorizontal
         {
             get => flipHorizontal;
@@ -27,7 +37,14 @@ namespace Astrarium.Types
             }
         }
 
+        /// <summary>
+        /// Backing field for <see cref="FlipVertical"/>
+        /// </summary>
         private bool flipVertical = false;
+
+        /// <summary>
+        /// Flag indicating flipping image vertically
+        /// </summary>
         public bool FlipVertical
         {
             get => flipVertical;
@@ -91,7 +108,14 @@ namespace Astrarium.Types
         /// </summary>
         public Vec3 VecEquatorialVision { get; private set; }
 
+        /// <summary>
+        /// Backing field for <see cref="ViewMode"/>
+        /// </summary>
         private ProjectionViewType viewMode = ProjectionViewType.Horizontal;
+        
+        /// <summary>
+        /// View mode: equatorial (NCP up) or horizontal (Zenith up)
+        /// </summary>
         public ProjectionViewType ViewMode
         {
             get => viewMode;
@@ -132,6 +156,12 @@ namespace Astrarium.Types
         // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
         public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
+        /// <summary>
+        /// Gets pixel size of point object (like star), depending on object magnitude.
+        /// </summary>
+        /// <param name="mag">Magnitude of object</param>
+        /// <param name="maxDrawingSize">Maximal drawing size of a point, set 0 as no limit.</param>
+        /// <returns>Returns pixel size of point object (like star), depending on object magnitude.</returns>
         public float GetPointSize(float mag, float maxDrawingSize = 0)
         {
             float mag0 = MagLimit;
@@ -144,9 +174,7 @@ namespace Astrarium.Types
                 size = mag0 - mag;
 
             if (maxDrawingSize > 0)
-            {
                 return Math.Min(size, maxDrawingSize);
-            }
             else
                 return size;
         }
@@ -163,7 +191,7 @@ namespace Astrarium.Types
             Vec2 p = Project(eq + new CrdsEquatorial(0, 1));
             Vec2 p0 = Project(eq);
             if (p == null || p0 == null) return 0;
-            return -(FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
+            return (FlipVertical ? 1 : -1) * (90 + (FlipHorizontal ? 1 : -1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 
         /// <summary>
@@ -177,7 +205,7 @@ namespace Astrarium.Types
             Vec2 p = Project(h + new CrdsHorizontal(0, 1));
             Vec2 p0 = Project(h);
             if (p == null || p0 == null) return 0;
-            return -(FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
+            return (FlipVertical ? 1 : -1) * (90 + (FlipHorizontal ? 1 : -1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 
         public double GetPhaseRotation(CrdsEcliptical ecl)
@@ -209,15 +237,6 @@ namespace Astrarium.Types
             ScreenHeight = 768;
 
             fov = 90;
-        }
-
-        public static Type[] ProjectionTypes => System.Reflection.Assembly.GetAssembly(typeof(Projection))
-            .GetTypes()
-             .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
-
-        public static Projection Create<TProjection>(SkyContext context) where TProjection : Projection
-        {
-            return (Projection)Activator.CreateInstance(typeof(TProjection), context);
         }
 
         private void UpdateMatrices()
@@ -497,22 +516,47 @@ namespace Astrarium.Types
             lng = Math.Atan2(v[1], v[0]);
         }
 
+        /// <summary>
+        /// Flag indicating atmospheric refraction corrections is applied
+        /// </summary>
         public bool UseRefraction { get; set; }
+
+        /// <summary>
+        /// Air temperature, °C, used for refraction corrections
+        /// </summary>
+        public double RefractionTemperature { get; set; } = 10;
+
+        /// <summary>
+        /// Atmospheric pressure, in hPa (mbar), used for refraction corrections
+        /// </summary>
+        public double RefractionPressure { get; set; } = 1010;
 
         public CrdsEquatorial WithRefraction(CrdsEquatorial eq)
         {
             if (UseRefraction)
-                return eq.ToVisibleCoordinates(Context.GeoLocation, Context.SiderealTime);
+            {
+                CrdsHorizontal hor = eq.ToHorizontal(Context.GeoLocation, Context.SiderealTime);
+                hor.Altitude += Refraction.CorrectionForVisibleCoordinates(hor.Altitude, RefractionPressure, RefractionTemperature);
+                return hor.ToEquatorial(Context.GeoLocation, Context.SiderealTime);
+            }
             else
+            {
                 return eq;
+            }
         }
 
         public CrdsEquatorial WithoutRefraction(CrdsEquatorial eq)
         {
             if (UseRefraction)
-                return eq.ToTrueCoordinates(Context.GeoLocation, Context.SiderealTime);
+            {
+                CrdsHorizontal hor = eq.ToHorizontal(Context.GeoLocation, Context.SiderealTime);
+                hor.Altitude -= Refraction.CorrectionForTrueCoordinates(hor.Altitude, RefractionPressure, RefractionTemperature);
+                return hor.ToEquatorial(Context.GeoLocation, Context.SiderealTime);
+            }
             else
+            {
                 return eq;
+            }
         }
     }
 }

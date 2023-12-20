@@ -86,8 +86,6 @@ namespace Astrarium.Plugins.MilkyWay
 
             GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(texturePath));
 
-            var mat = prj.MatEquatorialToVision * milkyWayCalc.MatGalactic;
-
             const int steps = 32;
 
             GL.Color4(Color.FromArgb(alpha, 205, 225, 255).Tint(nightMode));
@@ -98,12 +96,17 @@ namespace Astrarium.Plugins.MilkyWay
 
                 for (int i = 0; i <= steps; i++)
                 {
-                    double lon = Angle.ToRadians(360 - i / (double)steps * 360);
+                    double lon = 360 - i / (double)steps * 360;
 
                     for (int k = 0; k < 2; k++)
                     {
-                        var v = Projection.SphericalToCartesian(lon, Angle.ToRadians(lat - k * 10));
-                        var p = prj.Project(v, mat);
+                        // galactical coordinates of a point, for B1950.0 epoch
+                        var gal = new CrdsGalactical(lon, lat - k * 10);
+
+                        // convert to equatorial coordinates for current epoch
+                        var eq = Precession.GetEquatorialCoordinates(gal.ToEquatorial(), milkyWayCalc.PrecessionElementsB1950ToCurrent);
+
+                        var p = prj.Project(eq);
 
                         if (p != null)
                         {

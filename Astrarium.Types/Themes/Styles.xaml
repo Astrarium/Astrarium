@@ -1212,9 +1212,9 @@
                         <Rectangle
                             x:Name="Border"
                             Fill="{TemplateBinding Background}"
-                            Stroke="Transparent"
+                            Stroke="{TemplateBinding BorderBrush}"
                             Height="{TemplateBinding Height}"
-                            StrokeThickness="0" />
+                            StrokeThickness="{TemplateBinding BorderThickness}" />
                         <ContentPresenter 
                             x:Name="contentPresenter" 
                             Content="{TemplateBinding Content}"
@@ -1250,20 +1250,21 @@
     </Style>
 
     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+        <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
     <Style x:Key="WindowTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type ButtonBase}}">
         <Setter Property="Width" Value="24" />
         <Setter Property="Height" Value="24" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Background" Value="{StaticResource BrushWindowTitleBackground}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background">
                     <Setter.Value>
-                        <SolidColorBrush Color="{DynamicResource ColorWindowBackground}" Opacity="0.5" />
+                        <SolidColorBrush Color="{DynamicResource ColorControlBackground}" Opacity="1" />
                     </Setter.Value>
                 </Setter>
                 <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>

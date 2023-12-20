@@ -109,8 +109,10 @@ namespace Astrarium.Plugins.Constellations
                     {
                         var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsB1950ToCurrent);
                         var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsB1950ToCurrent);
+
                         var p1 = prj.Project(eq1);
                         var p2 = prj.Project(eq2);
+
                         if (p1 != null && p2 != null)
                         {
                             GL.Begin(PrimitiveType.Lines);

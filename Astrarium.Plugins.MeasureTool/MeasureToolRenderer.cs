@@ -77,7 +77,7 @@ namespace Astrarium.Plugins.MeasureTool
                 var prj = map.Projection;
                 var nightMode = settings.Get("NightMode");
                 var m = map.MouseScreenCoordinates;
-                var mouse = prj.UnprojectEquatorial(m.X, m.Y);
+                var mouse = prj.WithoutRefraction(prj.UnprojectEquatorial(m.X, m.Y));
                 const int segmentsCount = 32;
                 var color = Color.White.Tint(nightMode);
                 var brush = new SolidBrush(color);
