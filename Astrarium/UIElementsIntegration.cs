@@ -59,8 +59,8 @@ namespace Astrarium
             SettingDefinitions.Add(new SettingDefinition("NightMode", false));
 
             // Map transformation
-            SettingDefinitions.Add(new SettingDefinition("IsMirrored", false));
-            SettingDefinitions.Add(new SettingDefinition("IsInverted", false));
+            SettingDefinitions.Add(new SettingDefinition("FlipHorizontal", false));
+            SettingDefinitions.Add(new SettingDefinition("FlipVertical", false));
 
             // View mode
             SettingDefinitions.Add(new SettingDefinition("ViewMode", ProjectionViewType.Horizontal));

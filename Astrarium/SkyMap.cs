@@ -220,8 +220,8 @@ namespace Astrarium
             Projection = (Projection)Activator.CreateInstance(type, context);
             Projection.Fov = fov;
             Projection.SetVision(vision);
-            Projection.FlipVertical = settings.Get("IsInverted");
-            Projection.FlipHorizontal = settings.Get("IsMirrored");
+            Projection.FlipVertical = settings.Get("FlipVertical");
+            Projection.FlipHorizontal = settings.Get("FlipHorizontal");
             Projection.UseRefraction = settings.Get("Refraction");
             Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
             Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
@@ -284,15 +284,15 @@ namespace Astrarium
                     Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
                 }
 
-                if (name == "IsMirrored")
+                if (name == "FlipHorizontal")
                 {
-                    Projection.FlipHorizontal = settings.Get("IsMirrored");
+                    Projection.FlipHorizontal = settings.Get("FlipHorizontal");
                     Invalidate();
                 }
 
-                if (name == "IsInverted")
+                if (name == "FlipVertical")
                 {
-                    Projection.FlipVertical = settings.Get("IsInverted");
+                    Projection.FlipVertical = settings.Get("FlipVertical");
                     Invalidate();
                 }
 
