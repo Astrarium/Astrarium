@@ -49,8 +49,6 @@ namespace Astrarium.ViewModels
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
 
-        private Command<ProjectionViewType> ChangeViewModeCommand;
-
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -198,8 +196,6 @@ namespace Astrarium.ViewModels
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
-            ChangeViewModeCommand = new Command<ProjectionViewType>(ChangeViewMode);
-
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
@@ -232,21 +228,23 @@ namespace Astrarium.ViewModels
             // predefined toolbar groups
             List<string> groups = new List<string> { "Objects", "Constellations", "Grids", "Ground" };
 
+            var changeViewModeCommand = new Command<ProjectionViewType>(mode => settings.SetAndSave("ViewMode", mode));
+
             var btnViewModeEquatorial = new ToolbarButton("IconModeEquatorial", "$Settings.ViewMode.Equatorial") { IsCheckable = true };
-            btnViewModeEquatorial.Command = ChangeViewModeCommand;
+            btnViewModeEquatorial.Command = changeViewModeCommand;
             btnViewModeEquatorial.CommandParameter = ProjectionViewType.Equatorial;
             btnViewModeEquatorial.AddBinding(bindingViewModeEquatorial);
 
             var btnViewModeHorizontal = new ToolbarButton("IconModeHorizontal", "$Settings.ViewMode.Horizontal") { IsCheckable = true }; ;
-            btnViewModeHorizontal.Command = ChangeViewModeCommand;
+            btnViewModeHorizontal.Command = changeViewModeCommand;
             btnViewModeHorizontal.CommandParameter = ProjectionViewType.Horizontal;
             btnViewModeHorizontal.AddBinding(bindingViewModeHorizontal);
 
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconNightMode", "", new SimpleBinding(settings, "NightMode", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconNightMode", "$Settings.NightMode", new SimpleBinding(settings, "NightMode", "IsChecked")));
             uiIntegration.ToolbarButtons.Add("View", btnViewModeHorizontal);
             uiIntegration.ToolbarButtons.Add("View", btnViewModeEquatorial);
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "", new SimpleBinding(settings, "FlipHorizontal", "IsChecked")));
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "", new SimpleBinding(settings, "FlipVertical", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "$Settings.FlipHorizontal", new SimpleBinding(settings, "FlipHorizontal", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "$Settings.FlipVertical", new SimpleBinding(settings, "FlipVertical", "IsChecked")));
 
             foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
@@ -283,12 +281,12 @@ namespace Astrarium.ViewModels
             
             var menuMountModeHorizontal = new MenuItem("$Menu.MapMountMode.Horizontal") { IsCheckable = true, IsChecked = true };
             menuMountModeHorizontal.AddBinding(bindingViewModeHorizontal);
-            menuMountModeHorizontal.Command = ChangeViewModeCommand;
+            menuMountModeHorizontal.Command = changeViewModeCommand;
             menuMountModeHorizontal.CommandParameter = ProjectionViewType.Horizontal;
 
             var menuMountModeEquatorial = new MenuItem("$Menu.MapMountMode.Equatorial") { IsCheckable = true };
             menuMountModeEquatorial.AddBinding(bindingViewModeEquatorial);
-            menuMountModeEquatorial.Command = ChangeViewModeCommand;
+            menuMountModeEquatorial.Command = changeViewModeCommand;
             menuMountModeEquatorial.CommandParameter = ProjectionViewType.Equatorial;
 
             var menuMapMountMode = new MenuItem("$Menu.MapMountMode")
@@ -617,11 +615,6 @@ namespace Astrarium.ViewModels
                 // TODO: localize
                 Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage("Map is unlocked"));
             }
-        }
-
-        private void ChangeViewMode(ProjectionViewType mode)
-        {
-            settings.SetAndSave("ViewMode", mode);
         }
 
         private void Zoom(int delta)

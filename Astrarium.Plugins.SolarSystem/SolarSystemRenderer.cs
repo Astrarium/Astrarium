@@ -428,6 +428,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.Enable(EnableCap.Texture2D);
 
                 float[] zero = new float[4] { 0, 0, 0, 0 };
+                float[] one = new float[4] { 1, 1, 1, 1 };
 
                 // color of unilluminated part 
                 float[] ambient;
@@ -442,17 +443,16 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else
                 {
-                    diffuse = new float[4] { 1, 1, 1, 1 };
-                    ambient = new float[4] { 0.25f, 0.25f, 0.25f, 1f };
+                    diffuse = one;
+                    ambient = new float[4] { 0.2f, 0.2f, 0.2f, 0f };
                 }
 
-                GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { 0, 0, 0, 1 });
                 GL.Light(LightName.Light0, LightParameter.Diffuse, diffuse);
+                GL.Light(LightName.Light0, LightParameter.Ambient, zero);
                 GL.Light(LightName.Light0, LightParameter.Specular, zero);
-                GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, 1f);
 
+                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, one);
                 GL.Material(MaterialFace.Front, MaterialParameter.Ambient, ambient);
-                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, diffuse);
                 GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
                 GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
                 GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
@@ -874,8 +874,10 @@ namespace Astrarium.Plugins.SolarSystem
                 var p = prj.Project(data.Equatorial);
 
                 // TODO: move color to settings
-                Brush brush = new SolidBrush(Color.AntiqueWhite);
-                Pen pen = new Pen(Color.AntiqueWhite);
+                Color featureColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
+
+                Brush brush = new SolidBrush(featureColor);
+                Pen pen = new Pen(featureColor);
 
                 // TODO: create separate setting for feature labels font
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
