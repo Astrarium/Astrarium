@@ -41,12 +41,14 @@ namespace Astrarium.Plugins.MinorBodies
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             var asteroids = asteroidsCalc.Asteroids;
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            Color clrEdge = colorAsteroidEdge.Tint(nightMode);
+            Color clrCenter = colorAsteroid.Tint(nightMode);
 
             foreach (var a in asteroids)
             {
                 double ad = Angle.Separation(a.Equatorial, eqCenter);
 
-                if (ad < fov + a.Semidiameter / 3600)
+                if (ad < fov + a.Semidiameter / 3600 + 1e-2)
                 {
                     float diam = prj.GetDiskSize(a.Semidiameter);
                     float size = prj.GetPointSize(a.Magnitude);
@@ -56,8 +58,6 @@ namespace Astrarium.Plugins.MinorBodies
                     {
                         size = 1;
                     }
-
-                    string label = drawLabelMag ? $"{a.Name} {Formatters.Magnitude.Format(a.Magnitude)}" : a.Name;
 
                     // asteroid should be rendered as disk
                     if ((int)diam > 0 && diam > size)
@@ -70,14 +70,14 @@ namespace Astrarium.Plugins.MinorBodies
                         GL.Begin(PrimitiveType.TriangleFan);
 
                         // center
-                        GL.Color3(colorAsteroid.Tint(nightMode));
+                        GL.Color3(clrCenter);
                         GL.Vertex2(p.X, p.Y);
                         double r = diam / 2;
                         for (int i = 0; i <= 64; i++)
                         {
                             double ang = i / 32.0 * Math.PI;
                             Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
-                            GL.Color3(colorAsteroidEdge.Tint(nightMode));
+                            GL.Color3(clrEdge);
                             GL.Vertex2(v.X, v.Y);
                         }
 
@@ -106,7 +106,7 @@ namespace Astrarium.Plugins.MinorBodies
 
                             GL.PointSize(size);
                             GL.Begin(PrimitiveType.Points);
-                            GL.Color3(colorAsteroid.Tint(nightMode));
+                            GL.Color3(clrCenter);
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 

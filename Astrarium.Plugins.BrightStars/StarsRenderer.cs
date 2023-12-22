@@ -57,10 +57,10 @@ namespace Astrarium.Plugins.BrightStars
             double maxFov = prj.MaxFov * 0.7;
 
             // fov
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) + 1e-2;
 
             // equatorial coordinates of screen center for current epoch
-            CrdsEquatorial eq = prj.CenterEquatorial;
+            CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             if (settings.Get("ConstLines"))
             {
@@ -71,8 +71,8 @@ namespace Astrarium.Plugins.BrightStars
                     var s1 = allStars.ElementAt(line.Item1);
                     var s2 = allStars.ElementAt(line.Item2);
 
-                    if (Angle.Separation(eq, s1.Equatorial) < maxFov &&
-                        Angle.Separation(eq, s2.Equatorial) < maxFov)
+                    if (Angle.Separation(eqCenter, s1.Equatorial) < maxFov &&
+                        Angle.Separation(eqCenter, s2.Equatorial) < maxFov)
                     {
                         var p1 = prj.Project(s1.Equatorial);
                         var p2 = prj.Project(s2.Equatorial);
@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.BrightStars
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
                 float magLimit = prj.MagLimit;
-                var stars = starsCalc.GetStars(eq, fov, m => m <= magLimit);
+                var stars = starsCalc.GetStars(eqCenter, fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {

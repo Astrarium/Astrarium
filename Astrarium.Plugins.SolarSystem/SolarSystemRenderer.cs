@@ -421,9 +421,11 @@ namespace Astrarium.Plugins.SolarSystem
             else if (diam >= data.MinimalDiskSize && diam >= data.MaximalPointSize)
             {
                 // do not draw if out of screen
-                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) + 1e-2;
 
-                if (Angle.Separation(prj.CenterEquatorial, prj.WithRefraction(data.Equatorial)) > fov + body.Semidiameter / 3600) return false;
+                var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+                
+                if (Angle.Separation(eqCenter, data.Equatorial) > fov + body.Semidiameter / 3600) return false;
 
                 GL.Enable(EnableCap.Texture2D);
 
@@ -654,7 +656,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.Disable(EnableCap.Texture2D);
 
                 if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null &&
-                    Angle.Separation(prj.CenterEquatorial, prj.WithRefraction(data.EarthShadowCoordinates)) < fov + moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter / 3600)
+                    Angle.Separation(eqCenter, data.EarthShadowCoordinates) < fov + moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter / 3600)
                 {
                     RenderEarthShadow(data);
                 }
