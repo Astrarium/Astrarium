@@ -248,7 +248,12 @@ namespace Astrarium
                 }
             };
 
-            SetProjection(typeof(StereographicProjection));
+            var projectionTypeName = settings.Get("Projection", nameof(StereographicProjection));
+
+            var projectionType = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).FirstOrDefault(t => t.Name == projectionTypeName) ?? typeof(StereographicProjection);
+
+            SetProjection(projectionType);
 
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());

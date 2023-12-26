@@ -149,6 +149,12 @@ namespace Astrarium.ViewModels
             }
         }
 
+        private void SetProjection(Type projectionType)
+        {
+            map.SetProjection(projectionType);
+            settings.SetAndSave("Projection", projectionType.Name);
+        }
+
         public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
@@ -300,7 +306,15 @@ namespace Astrarium.ViewModels
             var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
 
-            var projectionMenuItems = projectionTypes.Select(t => new MenuItem($"$Projection.{t.Name}", new Command(() => map.SetProjection(t))));
+            var projectionMenuItems = projectionTypes.Select(t => new MenuItem($"$Projection.{t.Name}", new Command(() => SetProjection(t))) { IsCheckable = true });
+
+            for (int i = 0; i < projectionTypes.Length; i++)
+            {
+                var projectionMenuItem = projectionMenuItems.ElementAt(i);
+                var binding = new SimpleBinding(settings, "Projection", nameof(MenuItem.IsChecked));
+                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projectionTypes[i].Name;
+                projectionMenuItem.AddBinding(binding);
+            }
 
             var menuMapProjection = new MenuItem("$Menu.MapProjection")
             {

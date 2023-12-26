@@ -85,6 +85,9 @@ namespace Astrarium.Plugins.Horizon
         {
             var prj = map.Projection;
             if (!settings.Get<bool>("Ground")) return;
+            int textureId = 0;
+            double aziShift = 0;
+            var labels = new LandscapeLabel[0];
 
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.CullFace);
@@ -100,15 +103,24 @@ namespace Astrarium.Plugins.Horizon
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            string landscapeName = settings.Get<string>("Landscape");
-            Landscape landscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == landscapeName);
-            if (!File.Exists(landscape?.Path)) return;
-
-            string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
-            string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
-
-            int textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
-            GL.BindTexture(TextureTarget.Texture2D, textureId);
+            if (settings.Get("UseLandscape"))
+            {
+                string landscapeName = settings.Get<string>("Landscape");
+                Landscape landscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == landscapeName);
+                if (File.Exists(landscape?.Path))
+                {
+                    string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
+                    string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
+                    aziShift = landscape.AzimuthShift;
+                    labels = landscape.Labels;
+                    textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
+                    GL.BindTexture(TextureTarget.Texture2D, textureId);
+                }
+            }
+            else
+            {
+                GL.Disable(EnableCap.Texture2D);
+            }
 
             int steps = prj.Fov < 90 ? 32 : 128;
 
@@ -136,7 +148,7 @@ namespace Astrarium.Plugins.Horizon
 
             double latStop = textureId > 0 ? 90 : 0;
 
-            double aziShift = landscape.AzimuthShift;
+
 
             for (double lat = -80; lat <= latStop; lat += 10)
             {
@@ -173,7 +185,7 @@ namespace Astrarium.Plugins.Horizon
 
             if (settings.Get("LandscapeLabels"))
             {
-                foreach (var label in landscape.Labels)
+                foreach (var label in labels)
                 {
                     var p = prj.Project(new CrdsHorizontal(label.Azimuth, label.Altitude));
                     if (prj.IsInsideScreen(p))

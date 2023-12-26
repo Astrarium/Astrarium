@@ -22,9 +22,9 @@
 
         <GroupBox Padding="4" IsEnabled="{Binding Settings.Ground}">
             <GroupBox.Header>
-                <CheckBox Content="{t:Text Settings.Landscape}" />
+                <CheckBox Content="{t:Text Settings.UseLandscape}" IsChecked="{Binding Settings.UseLandscape}" />
             </GroupBox.Header>
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" IsEnabled="{Binding Settings.UseLandscape}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200" />

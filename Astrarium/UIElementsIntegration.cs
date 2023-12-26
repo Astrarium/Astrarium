@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Config.Controls;
+using Astrarium.Projections;
 using Astrarium.Types;
 using Astrarium.ViewModels;
 using System;
@@ -54,6 +55,9 @@ namespace Astrarium
 
             // Default size of main window
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
+
+            // Projection
+            SettingDefinitions.Add(new SettingDefinition("Projection", nameof(StereographicProjection)));
 
             // Night mode flag
             SettingDefinitions.Add(new SettingDefinition("NightMode", false));
