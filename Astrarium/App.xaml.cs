@@ -223,7 +223,7 @@ namespace Astrarium
 
             progress.Report($"Creating renderers");
 
-            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().ToArray();
+            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().OrderBy(x => x.Order).ToArray();
             var defaultRenderingOrder = new RenderingOrder(renderers.OrderBy(r => r.Order).Select(r => new RenderingOrderItem(r)));
             uiIntegration.SettingDefinitions.Add(new SettingDefinition("RenderingOrder", defaultRenderingOrder, false));
 

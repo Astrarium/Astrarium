@@ -837,22 +837,20 @@ namespace Astrarium.Plugins.SolarSystem
                 Color[] shadowColors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.FromArgb(0, 0, 0, 0) };
 
                 // render shadow
-                RenderEclipseShadow(pMoon, pShadow, Text.Get("EarthShadow.Label"), rMoon, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
+                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
 
                 // draw shadow outline
-                if (settings.Get("EarthShadowOutline"))
+                if (settings.Get("EarthShadowOutline") && pMoon.Distance(pShadow) <= sdPenumbraPixels + rMoon)
                 {
+                    // TODO: move to settings
                     Color clrShadowOutline = Color.FromArgb(100, 50, 0);
                     var pen = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
 
                     Primitives.DrawEllipse(pShadow, pen, sdPenumbraPixels, sdPenumbraPixels * data.Refraction, data.RotationZenith);
                     Primitives.DrawEllipse(pShadow, pen, sdUmbraPixels, sdUmbraPixels * data.Refraction, data.RotationZenith);
 
-                    if (map.Projection.Fov <= 10)
-                    {
-                        var brush = new SolidBrush(clrShadowOutline);
-                        textRenderer.Value.DrawString(Text.Get("EarthShadow.Label"), fontShadowLabel, brush, new Vec2(sdPenumbraPixels * 0.71, -sdPenumbraPixels * 0.71));
-                    }
+                    var brush = new SolidBrush(clrShadowOutline);
+                    map.DrawObjectLabel(textRenderer.Value, Text.Get("EarthShadow.Label"), fontShadowLabel, brush, pShadow, (float)sdPenumbraPixels * 2);
                 }
             }
         }
@@ -1151,7 +1149,13 @@ namespace Astrarium.Plugins.SolarSystem
             // Radius of eclipsing moon
             float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
 
-            RenderEclipseShadow(pMoon, pShadow, Text.Get("EclipsedByJupiter"), sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening, data.Refraction, data.RotationZenith);
+            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening, data.Refraction, data.RotationZenith);
+
+            if (pShadow.Distance(pMoon) <= sd + sdMoon)
+            {
+                // TODO: get brush from settings
+                map.DrawObjectLabel(textRenderer.Value, Text.Get("EclipsedByJupiter"), fontShadowLabel, Brushes.Brown, pMoon, 2 * sdMoon);
+            }
 
             // Draw Jupiter shadow outline
             // TODO: add setting to display outline
@@ -1190,7 +1194,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PopMatrix();
         }
 
-        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, string shadowLabel, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, double refraction, double rotZenith)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, double refraction, double rotZenith)
         {
             var prj = map.Projection;
 
@@ -1202,6 +1206,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Clear(ClearBufferMask.StencilBufferBit);
             GL.StencilMask(0xFF);
             GL.ColorMask(false, false, false, false);
+
             GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
             GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
@@ -1333,9 +1338,6 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.StencilTest);
 
             GL.PopMatrix();
-
-            // TODO: get brush from settings
-            map.DrawObjectLabel(textRenderer.Value, shadowLabel, fontShadowLabel, Brushes.Red, pShadow, 1);
         }
 
         private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, SphereParameters data, CrdsRectangular rect = null)
@@ -1401,7 +1403,13 @@ namespace Astrarium.Plugins.SolarSystem
                         double[] shadowRadii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
                         Color[] shadowColors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
 
-                        RenderEclipseShadow(pBody, pShadow, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), radiusBody, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
+                        RenderEclipseShadow(pBody, pShadow, radiusBody, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
+
+                        if (pShadow.Distance(pBody) <= radiusBody + radiusUmbra)
+                        {
+                            // TODO: get brush from settings
+                            map.DrawObjectLabel(textRenderer.Value, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, Brushes.Brown, pShadow, 2 * radiusUmbra);
+                        }
                     }
                 }
             }

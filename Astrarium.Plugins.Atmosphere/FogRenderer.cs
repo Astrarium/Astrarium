@@ -2,17 +2,13 @@
 using Astrarium.Types;
 using OpenTK.Graphics.OpenGL;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Atmosphere
 {
     public class FogRenderer : BaseRenderer
     {
-        public override RendererOrder Order => RendererOrder.Terrestrial;
+        public override RendererOrder Order => RendererOrder.Surround;
 
         private readonly ISettings settings;
 

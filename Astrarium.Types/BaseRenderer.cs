@@ -76,8 +76,13 @@ namespace Astrarium.Types
         Terrestrial = 7,
 
         /// <summary>
+        /// Rendering layer for surrounding objects, like fog, solar rays flares and etc.
+        /// </summary>
+        Surround = 8,
+
+        /// <summary>
         /// Rendering layer for foreground objects which overlap all previous layers
         /// </summary>
-        Foreground = 8
+        Foreground = 9
     }
 }
