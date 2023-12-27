@@ -19,6 +19,7 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
         public ICommand OpenURLCommand { get; private set; }
         public ICommand AddLandscapeCommand { get; private set; }
+        public ICommand EditLandscapeCommand { get; private set; }
         public ICommand DeleteLandscapeCommand { get; private set; }
 
         public HorizonSettingsViewModel(ISettings settings, ITextureManager textureManager, ILandscapesManager landscapesManager) : base(settings)
@@ -40,11 +41,10 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
             AddLandscapeCommand = new Command(() =>
             {
-                string[] files = ViewManager.ShowOpenFileDialog("Choose the landscape", "PNG panorama files (*.png)|*.png", multiSelect: false, out int index);
+                string[] files = ViewManager.ShowOpenFileDialog("$AddLandscapeDialog.Title", Text.Get("AddLandscapeDialog.FilterText"), multiSelect: false, out int index);
                 if (files != null && files.Any())
                 {
                     string landscapeImageFile = files[0];
-
 
                     using (var stream = File.OpenRead(landscapeImageFile))
                     {
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
                         if (decoder.CodecInfo.MimeTypes != "image/png")
                         {
-                            ViewManager.ShowMessageBox("$Error", "Landscape should be a panoramic PNG image.");
+                            ViewManager.ShowMessageBox("$Error", "$AddLandscapeDialog.Error.UnknownFormat");
                             return;
                         }
 
@@ -61,13 +61,13 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
                         if (width / height != 2)
                         {
-                            ViewManager.ShowMessageBox("$Error", "Landscape image should be a panoramic image with width-to-height aspect ratio 2:1.");
+                            ViewManager.ShowMessageBox("$Error", "$AddLandscapeDialog.Error.InvalidAspectRatio");
                             return;
                         }
 
                         if (width > 8192)
                         {
-                            ViewManager.ShowMessageBox("$Error", "Landscape image is too large. Maximal width is 8192 pixels.");
+                            ViewManager.ShowMessageBox("$Error", "$AddLandscapeDialog.Error.TooLarge");
                             return;
                         }
                     }
@@ -78,12 +78,38 @@ namespace Astrarium.Plugins.Horizon.ViewModels
                 }
             });
 
+            EditLandscapeCommand = new Command<Landscape>((Landscape landscape) =>
+            {
+                var vm = ViewManager.CreateViewModel<LandscapeEditorViewModel>();
+
+                vm.Title = landscape.Title;
+                vm.Author = landscape.Author;
+                vm.AzimuthShift = (decimal)landscape.AzimuthShift;
+                vm.Copyright = landscape.Copyright;
+                vm.Description = landscape.Description;
+                vm.URL = landscape.URL;
+
+                if (ViewManager.ShowDialog(vm) == true)
+                {
+                    landscape.Title = vm.Title;
+                    landscape.Author = vm.Author;
+                    landscape.AzimuthShift = (double)vm.AzimuthShift;
+                    landscape.Copyright = vm.Copyright;
+                    landscape.Description = vm.Description;
+                    landscape.URL = vm.URL;
+
+                    landscapesManager.SaveLandscapeMetadata(landscape);
+                    SelectedLandscape = landscape;
+                    NotifyPropertyChanged(nameof(Landscapes), nameof(SelectedLandscape));
+                }
+            });
+
             DeleteLandscapeCommand = new Command<Landscape>((Landscape landscape) => 
             {
                 // do not allow remove non-user-defined landscapes
                 if (landscape?.UserDefined != true) return;
 
-                if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the landscape?", System.Windows.MessageBoxButton.YesNo) != System.Windows.MessageBoxResult.Yes) return;
+                if (ViewManager.ShowMessageBox("$Warning", "$DeleteLandscapeDialog.Confirmation", System.Windows.MessageBoxButton.YesNo) != System.Windows.MessageBoxResult.Yes) return;
 
                 if (File.Exists(landscape.Path))
                 {
@@ -112,7 +138,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
             {
                 if (value != null)
                 {
-
                     string oldLandscapeName = Settings.Get<string>("Landscape");
                     Landscape oldLandscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == oldLandscapeName);
 

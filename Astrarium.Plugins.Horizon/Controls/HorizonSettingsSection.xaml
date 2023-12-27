@@ -30,10 +30,12 @@
                         <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <ComboBox Margin="0 4" Grid.Column="0" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding SelectedLandscape}" DisplayMemberPath="Title" PreviewMouseWheel="ComboBox_PreviewMouseWheel" />
                     <Button Grid.Column="1" Content="{t:Text Settings.Landscape.Add}" Padding="8 0" Margin="4 0 0 0" Command="{Binding AddLandscapeCommand}" />
-                    <Button Grid.Column="2" Content="{t:Text Settings.Landscape.Delete}" Padding="8 0" Margin="4 0 0 0" Visibility="{Binding SelectedLandscape.UserDefined, Converter={s:BoolToVisibilityConverter}}" Command="{Binding DeleteLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
+                    <Button Grid.Column="2" Content="{t:Text Settings.Landscape.Edit}" Padding="8 0" Margin="4 0 0 0" Visibility="{Binding SelectedLandscape.UserDefined, Converter={s:BoolToVisibilityConverter}}" Command="{Binding EditLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
+                    <Button Grid.Column="4" Content="{t:Text Settings.Landscape.Delete}" Padding="8 0" Margin="4 0 0 0" Visibility="{Binding SelectedLandscape.UserDefined, Converter={s:BoolToVisibilityConverter}}" Command="{Binding DeleteLandscapeCommand}" CommandParameter="{Binding SelectedLandscape}" />
                 </Grid>
 
                 <StackPanel MaxWidth="500"  Orientation="Vertical" HorizontalAlignment="Left">

@@ -37,6 +37,7 @@ namespace Astrarium.Plugins.Horizon
         ICollection<Landscape> Landscapes { get; }
 
         Landscape CreateLandscape(string filePath);
+        void SaveLandscapeMetadata(Landscape landscape);
     }
 
     [Singleton(typeof(ILandscapesManager))]
@@ -68,6 +69,14 @@ namespace Astrarium.Plugins.Horizon
             landscape.UserDefined = true;
             Landscapes.Add(landscape);
             return landscape;
+        }
+
+        public void SaveLandscapeMetadata(Landscape landscape)
+        {
+            string file = landscape.Path;
+            string metadataFile = Path.Combine(Path.GetDirectoryName(file), $"{Path.GetFileNameWithoutExtension(file)}.json");
+            Directory.CreateDirectory(userLandscapesPath);
+            File.WriteAllText(metadataFile, JsonConvert.SerializeObject(landscape));
         }
 
         private ICollection<Landscape> GetLandscapesFromDir(string directory, bool userDefined = false)
