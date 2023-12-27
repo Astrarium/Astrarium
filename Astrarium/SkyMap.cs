@@ -215,7 +215,6 @@ namespace Astrarium
             var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
             int w = Projection?.ScreenWidth ?? 1;
             int h = Projection?.ScreenHeight ?? 1;
-            
 
             Projection = (Projection)Activator.CreateInstance(type, context);
             Projection.Fov = fov;

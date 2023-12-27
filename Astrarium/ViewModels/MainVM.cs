@@ -306,14 +306,16 @@ namespace Astrarium.ViewModels
             var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
 
-            var projectionMenuItems = projectionTypes.Select(t => new MenuItem($"$Projection.{t.Name}", new Command(() => SetProjection(t))) { IsCheckable = true });
-
+            var projectionMenuItems = new List<MenuItem>();
             for (int i = 0; i < projectionTypes.Length; i++)
             {
-                var projectionMenuItem = projectionMenuItems.ElementAt(i);
+                var projectionType = projectionTypes[i];
+                var projectionMenuItem = new MenuItem($"$Projection.{projectionType.Name}");
+                projectionMenuItem.Command = new Command(() => SetProjection(projectionType));
                 var binding = new SimpleBinding(settings, "Projection", nameof(MenuItem.IsChecked));
-                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projectionTypes[i].Name;
+                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projectionType.Name;
                 projectionMenuItem.AddBinding(binding);
+                projectionMenuItems.Add(projectionMenuItem);
             }
 
             var menuMapProjection = new MenuItem("$Menu.MapProjection")
