@@ -1,9 +1,5 @@
 ﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Horizon.ViewModels
@@ -31,11 +27,12 @@ namespace Astrarium.Plugins.Horizon.ViewModels
             try
             {
                 if (string.IsNullOrWhiteSpace(Title))
-                    throw new Exception("Title is missing");
+                    throw new Exception(Text.Get("LandscapeEditorView.Validator.EmptyTitle"));
 
-                if (!string.IsNullOrWhiteSpace(URL) && Uri.TryCreate(URL, UriKind.Absolute, out Uri uriResult) && 
-                    (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
-                    throw new Exception("Invalid URL");
+                Uri uriResult;
+                if (!string.IsNullOrWhiteSpace(URL) && !(Uri.TryCreate(URL, UriKind.Absolute, out uriResult) && 
+                    (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)))
+                    throw new Exception(Text.Get("LandscapeEditorView.Validator.InvalidUrl"));
             }
             catch (Exception ex)
             {

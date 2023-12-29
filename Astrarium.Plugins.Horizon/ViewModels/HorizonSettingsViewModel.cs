@@ -91,12 +91,12 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
                 if (ViewManager.ShowDialog(vm) == true)
                 {
-                    landscape.Title = vm.Title;
-                    landscape.Author = vm.Author;
+                    landscape.Title = NullIfEmpty(vm.Title);
+                    landscape.Author = NullIfEmpty(vm.Author);
                     landscape.AzimuthShift = (double)vm.AzimuthShift;
-                    landscape.Copyright = vm.Copyright;
-                    landscape.Description = vm.Description;
-                    landscape.URL = vm.URL;
+                    landscape.Copyright = NullIfEmpty(vm.Copyright);
+                    landscape.Description = NullIfEmpty(vm.Description);
+                    landscape.URL = NullIfEmpty(vm.URL);
 
                     landscapesManager.SaveLandscapeMetadata(landscape);
                     SelectedLandscape = landscape;
@@ -150,6 +150,11 @@ namespace Astrarium.Plugins.Horizon.ViewModels
                     NotifyPropertyChanged(nameof(SelectedLandscape));
                 }
             }
+        }
+
+        private string NullIfEmpty(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value; 
         }
     }
 }

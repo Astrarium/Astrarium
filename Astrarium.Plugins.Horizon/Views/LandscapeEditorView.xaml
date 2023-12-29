@@ -9,11 +9,11 @@
         mc:Ignorable="d"
         Title="{t:Text LandscapeEditorView.Title}" 
         Style="{StaticResource {x:Type Window}}" 
-        MinHeight="400" MinWidth="400"
+        MinHeight="400" MinWidth="800"
         WindowStartupLocation="CenterScreen"
         s:WindowProperties.MinButtonVisible="Collapsed"
         s:WindowProperties.MaxButtonVisible="Collapsed"
-        Height="400" Width="600">
+        Height="400" Width="800">
     <Grid Margin="8">
         <Grid>
 
@@ -37,32 +37,32 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Label Content="Name:" Grid.Column="0" />
+                <Label Content="{t:Text LandscapeEditorView.Landscape.Title}" Grid.Column="0" />
                 <TextBox Text="{Binding Title}" Grid.Column="1" />
 
-                <Label Content="Azimuth shift:" Grid.Column="0" Grid.Row="1"  />
+                <Label Content="{t:Text LandscapeEditorView.Landscape.AzimuthShift}" Grid.Column="0" Grid.Row="1"  />
 
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
                     <c:NumericUpDown Width="80" Minimum="-360" Maximum="360" Step="1" DecimalPlaces="2" Value="{Binding AzimuthShift}"   />
-                    <TextBlock Margin="4 0" Text="(comments)" VerticalAlignment="Center" />
+                    <TextBlock Margin="8 0" Text="{t:Text LandscapeEditorView.Landscape.AzimuthShift.Comments}" IsEnabled="False" VerticalAlignment="Center" />
                 </StackPanel>
-                
-                <Label Content="Author: " Grid.Column="0" Grid.Row="2" />
+
+                <Label Content="{t:Text LandscapeEditorView.Landscape.Author}" Grid.Column="0" Grid.Row="2" />
                 <TextBox Text="{Binding Author}" Grid.Column="1" Grid.Row="2" />
 
-                <Label Content="Copyright: " Grid.Column="0" Grid.Row="3" />
+                <Label Content="{t:Text LandscapeEditorView.Landscape.Copyright}" Grid.Column="0" Grid.Row="3" />
                 <TextBox Text="{Binding Copyright}" Grid.Column="1" Grid.Row="3" />
 
-                <Label Content="URL: " Grid.Column="0" Grid.Row="4" />
+                <Label Content="{t:Text LandscapeEditorView.Landscape.URL}" Grid.Column="0" Grid.Row="4" />
                 <TextBox Text="{Binding URL}" Grid.Column="1" Grid.Row="4" />
             </Grid>
 
-            <Label Grid.Row="1" Content="Description:" />
+            <Label Grid.Row="1" Content="{t:Text LandscapeEditorView.Landscape.Description}" />
             <TextBox VerticalScrollBarVisibility="Auto" Grid.Row="2" Text="{Binding Description}" TextWrapping="Wrap" Height="Auto" AcceptsReturn="True" />
 
             <StackPanel Margin=" 0 8 0 0" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button MinWidth="80" Margin="4 0 0 0" Content="OK" Command="{Binding OKCommand}" />
-                <Button MinWidth="80" Margin="4 0 0 0" Content="Cancel" Command="{Binding CancelCommand}" />
+                <Button MinWidth="80" Margin="4 0 0 0" Content="{t:Text OK}" Command="{Binding OKCommand}" />
+                <Button MinWidth="80" Margin="4 0 0 0" Content="{t:Text Cancel}" Command="{Binding CancelCommand}" />
             </StackPanel>
 
         </Grid>
