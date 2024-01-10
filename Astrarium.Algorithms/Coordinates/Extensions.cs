@@ -96,19 +96,23 @@ namespace Astrarium.Algorithms
         /// <returns>Pair of equatorial coordinates.</returns>
         public static CrdsEquatorial ToEquatorial(this CrdsEcliptical ecl, double epsilon)
         {
-            CrdsEquatorial eq = new CrdsEquatorial();
-
-            // TODO: optimize
-
             epsilon = Angle.ToRadians(epsilon);
             double lambda = Angle.ToRadians(ecl.Lambda);
             double beta = Angle.ToRadians(ecl.Beta);
 
-            double Y = Math.Sin(lambda) * Math.Cos(epsilon) - Math.Tan(beta) * Math.Sin(epsilon);
-            double X = Math.Cos(lambda);
+            double sinEpsilon = Math.Sin(epsilon);
+            double cosEpsilon = Math.Cos(epsilon);
+
+            double sinLambda = Math.Sin(lambda);
+            double cosLambda = Math.Cos(lambda);
+
+            double Y = sinLambda * cosEpsilon - Math.Tan(beta) * sinEpsilon;
+            double X = cosLambda;
+
+            CrdsEquatorial eq = new CrdsEquatorial();
 
             eq.Alpha = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)));
-            eq.Delta = Angle.ToDegrees(Math.Asin(Math.Sin(beta) * Math.Cos(epsilon) + Math.Cos(beta) * Math.Sin(epsilon) * Math.Sin(lambda)));
+            eq.Delta = Angle.ToDegrees(Math.Asin(Math.Sin(beta) * cosEpsilon + Math.Cos(beta) * sinEpsilon * sinLambda));
 
             return eq;
         }
@@ -121,19 +125,23 @@ namespace Astrarium.Algorithms
         /// <returns></returns>
         public static CrdsEcliptical ToEcliptical(this CrdsEquatorial eq, double epsilon)
         {
-            // TODO: optimize
-
             CrdsEcliptical ecl = new CrdsEcliptical();
 
             epsilon = Angle.ToRadians(epsilon);
             double alpha = Angle.ToRadians(eq.Alpha);
             double delta = Angle.ToRadians(eq.Delta);
 
-            double Y = Math.Sin(alpha) * Math.Cos(epsilon) + Math.Tan(delta) * Math.Sin(epsilon);
-            double X = Math.Cos(alpha);
-            
+            double sinEpsilon = Math.Sin(epsilon);
+            double cosEpsilon = Math.Cos(epsilon);
+
+            double sinAlpha = Math.Sin(alpha);
+            double cosAlpha = Math.Cos(alpha);
+
+            double Y = sinAlpha * cosEpsilon + Math.Tan(delta) * sinEpsilon;
+            double X = cosAlpha;
+
             ecl.Lambda = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)));
-            ecl.Beta = Angle.ToDegrees(Math.Asin(Math.Sin(delta) * Math.Cos(epsilon) - Math.Cos(delta) * Math.Sin(epsilon) * Math.Sin(alpha)));
+            ecl.Beta = Angle.ToDegrees(Math.Asin(Math.Sin(delta) * cosEpsilon - Math.Cos(delta) * sinEpsilon * sinAlpha));
 
             return ecl;
         }
@@ -151,11 +159,13 @@ namespace Astrarium.Algorithms
             double delta = Angle.ToRadians(eq.Delta);
             double delta0 = Angle.ToRadians(27.4);
 
-            // TODO: optimize
+            double sinDelta0 = Math.Sin(delta0);
+            double cosDelta0 = Math.Cos(delta0);
+            double cosAlpha0_alpha = Math.Cos(alpha0_alpha);
 
             double Y = Math.Sin(alpha0_alpha);
-            double X = Math.Cos(alpha0_alpha) * Math.Sin(delta0) - Math.Tan(delta) * Math.Cos(delta0);
-            double sinb = Math.Sin(delta) * Math.Sin(delta0) + Math.Cos(delta) * Math.Cos(delta0) * Math.Cos(alpha0_alpha);
+            double X = cosAlpha0_alpha * sinDelta0 - Math.Tan(delta) * cosDelta0;
+            double sinb = Math.Sin(delta) * sinDelta0 + Math.Cos(delta) * cosDelta0 * cosAlpha0_alpha;
 
             gal.l = Angle.To360(303 - Angle.ToDegrees(Math.Atan2(Y, X)));
             gal.b = Angle.ToDegrees(Math.Asin(sinb));
@@ -259,11 +269,13 @@ namespace Astrarium.Algorithms
         /// <returns>Topocentrical ecliptical coordinates of a planet</returns>
         public static CrdsEcliptical ToEcliptical(this CrdsRectangular rect)
         {
-            // TODO: optimize
+            double x2 = rect.X * rect.X;
+            double y2 = rect.Y * rect.Y;
+            double z2 = rect.Z * rect.Z;
 
             double lambda = Angle.To360(Angle.ToDegrees(Math.Atan2(rect.Y, rect.X)));
-            double beta = Angle.ToDegrees(Math.Atan(rect.Z / Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y)));
-            double distance = Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y + rect.Z * rect.Z);
+            double beta = Angle.ToDegrees(Math.Atan(rect.Z / Math.Sqrt(x2 + y2)));
+            double distance = Math.Sqrt(x2 + y2 + z2);
             return new CrdsEcliptical(lambda, beta, distance);
         }
 
@@ -281,15 +293,16 @@ namespace Astrarium.Algorithms
         /// </remarks>
         public static CrdsEquatorial ToTopocentric(this CrdsEquatorial eq, CrdsGeographical geo, double theta0, double pi)
         {
-            // TODO: optimize
-
             double H = Angle.ToRadians(HourAngle(theta0, geo.Longitude, eq.Alpha));
             double delta = Angle.ToRadians(eq.Delta);
             double sinPi = Math.Sin(Angle.ToRadians(pi));
 
-            double A = Math.Cos(delta) * Math.Sin(H);
-            double B = Math.Cos(delta) * Math.Cos(H) - geo.RhoCosPhi * sinPi;
-            double C = Math.Sin(delta) - geo.RhoSinPhi * sinPi;
+            double sinDelta = Math.Sin(delta);
+            double cosDelta = Math.Cos(delta);
+
+            double A = cosDelta * Math.Sin(H);
+            double B = cosDelta * Math.Cos(H) - geo.RhoCosPhi * sinPi;
+            double C = sinDelta - geo.RhoSinPhi * sinPi;
 
             double q = Math.Sqrt(A * A + B * B + C * C);
 
@@ -314,8 +327,6 @@ namespace Astrarium.Algorithms
         /// </remarks>
         public static CrdsEquatorial ToEquatorial(this CrdsRectangular m, CrdsEquatorial planet, double P, double semidiameter)
         {
-            // TODO: optimize
-
             // convert rectangular planetocentrical coordinates to planetocentrical polar coordinates
 
             // radius-vector of moon, in planet's equatorial radii
@@ -327,13 +338,15 @@ namespace Astrarium.Algorithms
             // rotate with position angle of the planet
             theta += P;
 
+            theta = Angle.ToRadians(theta);
+
             // convert back to rectangular coordinates, but rotated with P angle:
-            double x = r * Math.Cos(Angle.ToRadians(theta));
-            double y = r * Math.Sin(Angle.ToRadians(theta));
+            double x = r * Math.Cos(theta);
+            double y = r * Math.Sin(theta);
 
             // delta of RA
-            double dAlpha = (1 / Math.Cos(Angle.ToRadians(planet.Delta))) * x * semidiameter / 3600;
-            
+            double dAlpha = 1 / Math.Cos(Angle.ToRadians(planet.Delta)) * x * semidiameter / 3600;
+
             // delta of Declination
             // negative sign because positive delta means southward direction
             double dDelta = -y * semidiameter / 3600;
