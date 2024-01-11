@@ -23,10 +23,8 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSetting("PlanetsLabels", true);
             DefineSetting("PlanetsLabelsMag", false);
 
-            DefineSetting("PlanetsTextures", true);
             DefineSetting("PlanetsSurfaceFeatures", true);
             DefineSetting("PlanetsMartianPolarCaps", true);
-            DefineSetting("ShowRotationAxis", true);
 
             DefineSetting("PlanetMoons", true);
             DefineSetting("JupiterMoonsShadowOutline", true);

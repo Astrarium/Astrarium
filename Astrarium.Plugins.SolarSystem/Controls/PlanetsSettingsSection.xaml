@@ -23,27 +23,9 @@
                 </MultiBinding>
             </CheckBox.IsEnabled>
         </CheckBox>
-        <CheckBox Content="{t:Text Settings.PlanetsTextures}" IsChecked="{Binding Settings.PlanetsTextures}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2">
-            <CheckBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
-                    <Binding Path="Settings.Planets" />
-                    <Binding Path="Settings.PlanetsTextures" />
-                </MultiBinding>
-            </CheckBox.IsEnabled>
-        </CheckBox>
-        <CheckBox Content="{t:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2">
-            <CheckBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
-                    <Binding Path="Settings.Planets" />
-                    <Binding Path="Settings.PlanetsTextures" />
-                </MultiBinding>
-            </CheckBox.IsEnabled>
-        </CheckBox>
-        <CheckBox Content="{t:Text Settings.ShowRotationAxis}" IsChecked="{Binding Settings.ShowRotationAxis}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
+        <CheckBox Content="{t:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
         <CheckBox Content="{t:Text Settings.PlanetMoons}" IsChecked="{Binding Settings.PlanetMoons}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
-
-
         <CheckBox Content="{t:Text Settings.JupiterMoonsShadowOutline}" IsChecked="{Binding Settings.JupiterMoonsShadowOutline}" Margin="2">
             <CheckBox.IsEnabled>
                 <MultiBinding Converter="{s:BooleanAndConverter}">
