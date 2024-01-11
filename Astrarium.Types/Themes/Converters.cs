@@ -131,11 +131,11 @@ namespace Astrarium.Types.Themes
 
         public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            string strValue = (string)value);
-            if (string.IsNullOrEmpty((string)value) || (string)value) == "-")
+            string strValue = (string)value;
+            if (string.IsNullOrEmpty(strValue) || strValue == "-")
                 return new object[] { 0 };
             else
-                return new object[] { decimal.Parse(value as string, NumberStyles.Float, CultureInfo.InvariantCulture) };
+                return new object[] { decimal.Parse(strValue, NumberStyles.Float, CultureInfo.InvariantCulture) };
         }
     }
 
