@@ -121,11 +121,7 @@ namespace Astrarium.Types.Themes
             {
                 decimal value = (decimal)values[0];
                 uint decimalPlaces = (uint)values[1];
-
-                if (value > 0)
-                    return string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)decimalPlaces)}}}", (decimal)value);
-                else
-                    return ((int)value).ToString();
+                return string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)decimalPlaces)}}}", (decimal)value);
             }
             else
             {
@@ -135,7 +131,8 @@ namespace Astrarium.Types.Themes
 
         public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty((string)value))
+            string strValue = (string)value);
+            if (string.IsNullOrEmpty((string)value) || (string)value) == "-")
                 return new object[] { 0 };
             else
                 return new object[] { decimal.Parse(value as string, NumberStyles.Float, CultureInfo.InvariantCulture) };
