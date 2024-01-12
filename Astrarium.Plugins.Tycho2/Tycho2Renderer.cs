@@ -2,6 +2,7 @@
 using Astrarium.Types;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -21,12 +22,18 @@ namespace Astrarium.Plugins.Tycho2
 
         public override RendererOrder Order => RendererOrder.Stars;
 
-        public Tycho2Renderer(ITycho2Catalog tycho2, ISettings settings)
+        private readonly ISkyMap map;
+        private readonly List<Tycho2Star> cache = new List<Tycho2Star>();
+        private readonly object locker = new object();
+        private bool isRequested = false;
+        private int requestHash;
+
+        public Tycho2Renderer(ISkyMap map, ITycho2Catalog tycho2, ISettings settings)
         {
+            this.map = map;
             this.tycho2 = tycho2;
             this.settings = settings;
         }
-
 
         public override void Render(ISkyMap map)
         {
@@ -51,43 +58,72 @@ namespace Astrarium.Plugins.Tycho2
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-                // J2000 equatorial coordinates of screen center
-                CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.WithoutRefraction(prj.CenterEquatorial), tycho2.PrecessionalElements0);
-
-                // years since initial catalogue epoch
-                double t = prj.Context.Get(tycho2.YearsSince2000);
-
                 float magLimit = prj.MagLimit;
-                magLimit = (float)(-1.44995 * Math.Log(0.000230685 * prj.Fov));
+                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) * 1.5;
+                CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+                CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, tycho2.PrecessionalElements0);
 
-                var stars = tycho2.GetStars(prj.Context, eq0, prj.Fov, m => m <= magLimit);
+                Func<float, bool> FilterByStarSize = (mag) =>
+                {
+                    if (mag > magLimit)
+                        return false;
+
+                    float size = prj.GetPointSize(mag) * starDimming;
+                    return size >= minStarSize;
+                };
+
+                var stars = GetStars(prj.Context, eqCenter0, fov, FilterByStarSize);
 
                 foreach (var star in stars)
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
+                    var p = prj.Project(star.Equatorial);
 
-                    if (size >= minStarSize)
+                    if (prj.IsInsideScreen(p))
                     {
-                        var p = prj.Project(star.Equatorial);
+                        GL.PointSize(size * starsScalingFactor);
+                        GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
 
-                        if (prj.IsInsideScreen(p))
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        map.AddDrawnObject(p, star, size);
+
+                        if (isLabels && prj.Fov < 1 && size > 3)
                         {
-                            GL.PointSize(size * starsScalingFactor);
-                            GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
-
-                            GL.Begin(PrimitiveType.Points);
-                            GL.Vertex2(p.X, p.Y);
-                            GL.End();
-
-                            map.AddDrawnObject(p, star, size);
-
-                            if (isLabels && prj.Fov < 1 && size > 3)
-                            {
-                                map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
-                            }
+                            map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
                         }
                     }
                 }
+            }
+        }
+
+        private List<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq0, double angle, Func<float, bool> magFilter)
+        {
+            _ = Task.Run(() =>
+            {
+                int hash = $"{eq0.Alpha}{eq0.Delta}{angle}".GetHashCode();
+                if (!isRequested && hash != requestHash)
+                {
+                    requestHash = hash;
+                    isRequested = true;
+                    var stars = tycho2.GetStars(context, eq0, angle, magFilter).ToList();
+
+                    lock (locker)
+                    {
+                        cache.Clear();
+                        cache.AddRange(stars);
+                        map.Invalidate();
+                    }
+
+                    isRequested = false;
+                }
+            });
+
+            lock (locker)
+            {
+                return new List<Tycho2Star>(cache);
             }
         }
 

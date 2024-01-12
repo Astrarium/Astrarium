@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.UCAC4
@@ -16,24 +17,20 @@ namespace Astrarium.Plugins.UCAC4
         private readonly UCAC4Catalog catalog;
         private readonly ISettings settings;
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
+        private readonly ISkyMap map;
+        private readonly List<UCAC4Star> cache = new List<UCAC4Star>();
+        private readonly object locker = new object();
+        private bool isRequested = false;
+        private int requestHash;
 
-        public UCAC4Renderer(UCAC4Catalog catalog, ISettings settings)
+        public override RendererOrder Order => RendererOrder.Stars;
+
+        public UCAC4Renderer(ISkyMap map, UCAC4Catalog catalog, ISettings settings)
         {
+            this.map = map;
             this.catalog = catalog;
             this.settings = settings;
             fontNames = new Font("Arial", 7);
-        }
-
-        private bool isDrag = false;
-        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
-        {
-            isDrag = mouseButton == MouseButton.Left;
-        }
-
-        public override void OnMouseUp(ISkyMap map, MouseButton mouseButton)
-        {
-            isDrag = false;
-            map.Invalidate();
         }
 
         public override void Render(ISkyMap map)
@@ -42,8 +39,6 @@ namespace Astrarium.Plugins.UCAC4
 
             // no stars if the Sun above horizon
             if (daylightFactor == 1) return;
-
-            //if (isDrag) return;
 
             var prj = map.Projection;
 
@@ -63,42 +58,74 @@ namespace Astrarium.Plugins.UCAC4
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
                 float magLimit = prj.MagLimit;
+                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) * 1.5;// + 0.2;
+                CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+                CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, catalog.PrecessionElements0);
 
-                // J2000 equatorial coordinates of screen center
-                CrdsEquatorial eq0 = Precession.GetEquatorialCoordinates(prj.WithoutRefraction(prj.CenterEquatorial), catalog.PrecessionElements0);
+                Func<float, bool> FilterByStarSize = (mag) =>
+                {
+                    if (mag > magLimit)
+                        return false;
 
-                var stars = catalog.GetStars(prj.Context, eq0, prj.Fov, m => m <= magLimit);
+                    float size = prj.GetPointSize(mag) * starDimming;
+                    return size >= minStarSize;
+                };
+
+                var stars = GetStars(prj.Context, eqCenter0, fov, FilterByStarSize);
 
                 foreach (var star in stars)
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
 
-                    if (size >= minStarSize)
+                    var p = prj.Project(star.Equatorial);
+
+                    if (prj.IsInsideScreen(p))
                     {
-                        var p = prj.Project(star.Equatorial);
+                        GL.PointSize(size * starsScalingFactor);
+                        GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
 
-                        if (prj.IsInsideScreen(p))
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        map.AddDrawnObject(p, star, size);
+
+                        if (isLabels && size > 2)
                         {
-                            GL.PointSize(size * starsScalingFactor);
-                            GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
-
-                            GL.Begin(PrimitiveType.Points);
-                            GL.Vertex2(p.X, p.Y);
-                            GL.End();
-
-                            map.AddDrawnObject(p, star, size);
-
-                            if (isLabels && size > 2)
-                            {
-                                map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
-                            }
+                            map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
                         }
                     }
                 }
             }
         }
 
-        public override RendererOrder Order => RendererOrder.Stars;
+        private List<UCAC4Star> GetStars(SkyContext context, CrdsEquatorial eq0, double angle, Func<float, bool> magFilter)
+        {
+            _ = Task.Run(() =>
+            {
+                int hash = $"{eq0.Alpha}{eq0.Delta}{angle}".GetHashCode();
+                if (!isRequested && hash != requestHash)
+                {
+                    requestHash = hash;
+                    isRequested = true;
+                    var stars = catalog.GetStars(context, eq0, angle, magFilter).ToList();
+
+                    lock (locker)
+                    {
+                        cache.Clear();
+                        cache.AddRange(stars);
+                        map.Invalidate();
+                    }
+
+                    isRequested = false;
+                }
+            });
+
+            lock (locker)
+            {
+                return new List<UCAC4Star>(cache);
+            }
+        }
 
         private Color GetColor(char spClass)
         {
