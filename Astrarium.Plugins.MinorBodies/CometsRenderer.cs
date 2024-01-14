@@ -44,9 +44,9 @@ namespace Astrarium.Plugins.MinorBodies
             decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             var font = settings.Get<Font>("CometsLabelsFont");
-            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
-
-            var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, a.Equatorial) < prj.Fov + Angle.Separation(a.Equatorial, a.TailEquatorial));
+            var eqCenter = prj.CenterEquatorial;
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, prj.WithRefraction(a.Equatorial)) < fov + Angle.Separation(prj.WithRefraction(a.Equatorial), prj.WithRefraction(a.TailEquatorial)) + a.Semidiameter / 3600);
 
             foreach (var c in comets)
             {
@@ -69,54 +69,56 @@ namespace Astrarium.Plugins.MinorBodies
 
                 double tail = p.Distance(t);
 
-                if (diam > 5 || tail > 10)
+                if (diam > 5 || tail > 50)
                 {
-                    if (!IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight)) continue;
-
-                    GL.Enable(EnableCap.Blend);
-                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-                    GL.Begin(PrimitiveType.TriangleFan);
-
-                    // center
-                    GL.Color4(colorComet.Tint(nightMode));
-                    GL.Vertex2(p.X, p.Y);
-
-                    bool drawTail = tail > 2 * diam;
-                    double steps = drawTail ? 32 : 64;
-                    double arc = drawTail ? 180 : 360;
-                    
-                    if (drawTail)
+                    if (IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight) ||
+                        Angle.Separation(prj.WithRefraction(c.Equatorial), eqCenter) < fov + c.Semidiameter / 3600)
                     {
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(t.X, t.Y);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                        GL.Begin(PrimitiveType.TriangleFan);
+
+                        // center
+                        GL.Color4(colorComet.Tint(nightMode));
+                        GL.Vertex2(p.X, p.Y);
+
+                        bool drawTail = tail > 2 * diam;
+                        double steps = drawTail ? 32 : 64;
+                        double arc = drawTail ? 180 : 360;
+
+                        if (drawTail)
+                        {
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(t.X, t.Y);
+                        }
+
+                        double r = diam / 2;
+                        double rotAxis = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
+                        for (int i = 0; i <= steps; i++)
+                        {
+                            double ang0 = Angle.ToRadians(i / steps * arc);
+                            double ang = ang0 + rotAxis;
+                            Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(v.X, v.Y);
+                        }
+
+                        if (drawTail)
+                        {
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(t.X, t.Y);
+                        }
+
+                        GL.End();
+
+                        if (drawLabels)
+                        {
+                            DrawLabel(c, font, brushNames, p, diam, drawLabelMag);
+                        }
+
+                        map.AddDrawnObject(p, c, diam);
                     }
-
-                    double r = diam / 2;
-                    double rotAxis = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
-                    for (int i = 0; i <= steps; i++)
-                    {
-                        double ang0 = Angle.ToRadians(i / steps * arc);
-                        double ang = ang0 + rotAxis;
-                        Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(v.X, v.Y);
-                    }
-
-                    if (drawTail)
-                    {
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(t.X, t.Y);
-                    }
-
-                    GL.End();
-
-                    if (drawLabels)
-                    {
-                        DrawLabel(c, font, brushNames, p, diam, drawLabelMag);
-                    }
-
-                    map.AddDrawnObject(p, c, diam);
                 }
                 else if ((int)size > 0 && prj.IsInsideScreen(p))
                 {

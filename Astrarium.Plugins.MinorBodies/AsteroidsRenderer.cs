@@ -38,7 +38,7 @@ namespace Astrarium.Plugins.MinorBodies
             decimal drawAllMagLimit = settings.Get<decimal>("AsteroidsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");
             var font = settings.Get<Font>("AsteroidsLabelsFont");
-            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var eqCenter = prj.CenterEquatorial;
             var asteroids = asteroidsCalc.Asteroids;
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             Color clrEdge = colorAsteroidEdge.Tint(nightMode);
@@ -46,9 +46,10 @@ namespace Astrarium.Plugins.MinorBodies
 
             foreach (var a in asteroids)
             {
-                double ad = Angle.Separation(a.Equatorial, eqCenter);
+                var eq = prj.WithRefraction(a.Equatorial);
+                double ad = Angle.Separation(eq, eqCenter);
 
-                if (ad < fov + a.Semidiameter / 3600 + 1e-2)
+                if (ad < fov + a.Semidiameter / 3600)
                 {
                     float diam = prj.GetDiskSize(a.Semidiameter);
                     float size = prj.GetPointSize(a.Magnitude);

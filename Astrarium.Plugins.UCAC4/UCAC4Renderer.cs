@@ -42,13 +42,16 @@ namespace Astrarium.Plugins.UCAC4
 
             var prj = map.Projection;
 
-            if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
+            double fov = Math.Max(0.2, prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+            float magLimit = Math.Min(float.MaxValue, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
+
+            if (magLimit > 10 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
                 float starDimming = 1 - daylightFactor;
                 float minStarSize = Math.Max(0.5f, daylightFactor * 3);
 
                 bool nightMode = settings.Get("NightMode");
-                bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
+                bool isLabels = settings.Get("StarsLabels") && fov < 1 / 60d;
                 Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(nightMode));
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
@@ -57,8 +60,6 @@ namespace Astrarium.Plugins.UCAC4
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-                float magLimit = prj.MagLimit;
-                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) * 1.5;// + 0.2;
                 CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
                 CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, catalog.PrecessionElements0);
 

@@ -48,7 +48,7 @@ namespace Astrarium.Plugins.DeepSky
             double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
-            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var eqCenter = prj.CenterEquatorial;
 
             // filter deep skies by:
             var deepSkies =
@@ -59,7 +59,7 @@ namespace Astrarium.Plugins.DeepSky
                 // do not draw dim objects (exceeding mag limit for current FOV)
                 ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
-                Angle.Separation(eqCenter, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
+                Angle.Separation(eqCenter, prj.WithRefraction(ds.Equatorial)) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
             foreach (var ds in deepSkies)
             {

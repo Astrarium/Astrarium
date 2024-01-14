@@ -38,7 +38,11 @@ namespace Astrarium.Plugins.Tycho2
         public override void Render(ISkyMap map)
         {
             Projection prj = map.Projection;
-            if (prj.MagLimit > 8 && settings.Get("Stars") && settings.Get("Tycho2"))
+
+            double fov = Math.Max(0, prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+            float magLimit = Math.Min(float.MaxValue, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
+
+            if (magLimit > 6 && settings.Get("Stars") && settings.Get("Tycho2"))
             {
                 float daylightFactor = map.DaylightFactor;
 
@@ -58,8 +62,6 @@ namespace Astrarium.Plugins.Tycho2
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-                float magLimit = prj.MagLimit;
-                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) * 1.5;
                 CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
                 CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, tycho2.PrecessionalElements0);
 

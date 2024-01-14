@@ -421,11 +421,12 @@ namespace Astrarium.Plugins.SolarSystem
             else if (diam >= data.MinimalDiskSize && diam >= data.MaximalPointSize)
             {
                 // do not draw if out of screen
-                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) + 1e-2;
+                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
-                var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
-                
-                if (Angle.Separation(eqCenter, data.Equatorial) > fov + body.Semidiameter / 3600) return false;
+                var eqCenter = prj.CenterEquatorial;
+                var eq = prj.WithRefraction(data.Equatorial);
+
+                if (Angle.Separation(eqCenter, eq) > fov + body.Semidiameter / 3600) return false;
 
                 GL.Enable(EnableCap.Texture2D);
 
@@ -689,11 +690,11 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
-            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var eqCenter = prj.CenterEquatorial;
 
             // do not draw if out of screen
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            if (Angle.Separation(eqCenter, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
+            if (Angle.Separation(eqCenter, prj.WithRefraction(sun.Equatorial)) > fov + sun.Semidiameter / 3600 * 2) return;
 
             float r = diam / 2;
             Vec2 p = prj.Project(sun.Equatorial);
