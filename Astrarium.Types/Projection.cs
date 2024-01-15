@@ -531,6 +531,11 @@ namespace Astrarium.Types
         /// </summary>
         public double RefractionPressure { get; set; } = 1010;
 
+        /// <summary>
+        /// Adds atmospheric refraction correction, if required, and returns visible equatorial coordinates.
+        /// </summary>
+        /// <param name="eq">True (geometric) coordinates, without refraction effect.</param>
+        /// <returns>Visible equatorial coordinates.</returns>
         public CrdsEquatorial WithRefraction(CrdsEquatorial eq)
         {
             if (UseRefraction)
@@ -545,6 +550,11 @@ namespace Astrarium.Types
             }
         }
 
+        /// <summary>
+        /// Withdraws atmospheric refraction correction, if applied, and returns true (geometric) equatorial coordinates.
+        /// </summary>
+        /// <param name="eq">Visible equatorial coordinates, with refraction effect (if applied).</param>
+        /// <returns>True (geometric) equatorial coordinates.</returns>
         public CrdsEquatorial WithoutRefraction(CrdsEquatorial eq)
         {
             if (UseRefraction)

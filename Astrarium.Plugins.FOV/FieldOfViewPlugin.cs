@@ -64,7 +64,7 @@ namespace Astrarium.Plugins.FOV
             {
                 double w = cameraFovFrame.Width;
                 double h = cameraFovFrame.Height;
-                fov = Math.Sqrt(w * w + h * h);
+                fov = Math.Sqrt(w * w + h * h) / 2;
             }
             else
             {

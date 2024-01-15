@@ -56,9 +56,6 @@ namespace Astrarium.Plugins.Novae
                 {
                     if ((int)size == 0) size = 1;
 
-                    // cartesian coordinates of a nova for J2000 epoch
-                    Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(star.Equatorial0.Alpha), Angle.ToRadians(star.Equatorial0.Delta));
-
                     // screen coordinates, for current epoch
                     Vec2 p = prj.Project(star.Equatorial);
 

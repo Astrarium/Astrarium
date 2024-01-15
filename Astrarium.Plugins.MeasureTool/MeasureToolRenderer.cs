@@ -76,8 +76,7 @@ namespace Astrarium.Plugins.MeasureTool
             {
                 var prj = map.Projection;
                 var nightMode = settings.Get("NightMode");
-                var m = map.MouseScreenCoordinates;
-                var mouse = prj.WithoutRefraction(prj.UnprojectEquatorial(m.X, m.Y));
+                var mouse = prj.WithoutRefraction(map.MouseEquatorialCoordinates);
                 const int segmentsCount = 32;
                 var color = Color.White.Tint(nightMode);
                 var brush = new SolidBrush(color);
@@ -114,7 +113,7 @@ namespace Astrarium.Plugins.MeasureTool
 
                 // draw text with angle separation value
                 double angle = Angle.Separation(mouse, MeasureOrigin);
-                textRenderer.Value.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, m);
+                textRenderer.Value.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, map.MouseScreenCoordinates);
             }
         }
     }

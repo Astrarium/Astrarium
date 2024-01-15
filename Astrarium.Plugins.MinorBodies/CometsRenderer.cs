@@ -44,9 +44,9 @@ namespace Astrarium.Plugins.MinorBodies
             decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             var font = settings.Get<Font>("CometsLabelsFont");
-            var eqCenter = prj.CenterEquatorial;
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, prj.WithRefraction(a.Equatorial)) < fov + Angle.Separation(prj.WithRefraction(a.Equatorial), prj.WithRefraction(a.TailEquatorial)) + a.Semidiameter / 3600);
+            var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, a.Equatorial) < fov + Angle.Separation(a.Equatorial, a.TailEquatorial) + a.Semidiameter / 3600);
 
             foreach (var c in comets)
             {
@@ -72,7 +72,7 @@ namespace Astrarium.Plugins.MinorBodies
                 if (diam > 5 || tail > 50)
                 {
                     if (IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight) ||
-                        Angle.Separation(prj.WithRefraction(c.Equatorial), eqCenter) < fov + c.Semidiameter / 3600)
+                        Angle.Separation(c.Equatorial, eqCenter) < fov + c.Semidiameter / 3600)
                     {
                         GL.Enable(EnableCap.Blend);
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

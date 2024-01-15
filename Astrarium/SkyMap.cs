@@ -457,17 +457,20 @@ namespace Astrarium
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);
 
-            GoToPoint(body.Equatorial, animationDuration, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, animationDuration, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, double viewAngleTarget)
         {
-            GoToPoint(body.Equatorial, TimeSpan.Zero, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, TimeSpan.Zero, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget)
         {
-            GoToPoint(body.Equatorial, animationDuration, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, animationDuration, viewAngleTarget);
         }
 
         public void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration)
