@@ -363,7 +363,7 @@ namespace Astrarium
 
             map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
             map.MouseScreenCoordinates = p;
-            var eq = map.MouseEquatorialCoordinates;
+            var eq = map.Projection.WithoutRefraction(map.MouseEquatorialCoordinates);
             var hor = map.MouseHorizontalCoordinates;
 
             map.RaiseMouseMove();

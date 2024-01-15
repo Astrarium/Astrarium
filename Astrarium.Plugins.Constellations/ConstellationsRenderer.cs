@@ -90,22 +90,19 @@ namespace Astrarium.Plugins.Constellations
             double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
 
-            // max angular distance from current vision vector
-            // 0.7 coeff is an empyrical
-            //fov = Angle.ToRadians(prj.Fov + 1);
-
             var color = settings.Get<Color>("ColorConstBorders").Tint(nightMode);
 
             GL.Color3(color);
 
-            CrdsEquatorial eqCenter = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, constellationsCalc.PrecessionElementsCurrentToB1950);
+            CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
 
             foreach (var block in constellationsCalc.Borders)
             {
                 for (int i = 0; i < block.Count - 1; i++)
                 {
-                    if (Angle.Separation(eqCenter, block[i]) < fov ||
-                        Angle.Separation(eqCenter, block[i + 1]) < fov)
+                    if (Angle.Separation(eqCenter0, block[i]) < fov ||
+                        Angle.Separation(eqCenter0, block[i + 1]) < fov)
                     {
                         var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsB1950ToCurrent);
                         var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsB1950ToCurrent);

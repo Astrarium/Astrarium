@@ -22,15 +22,30 @@ namespace Astrarium.Plugins.UCAC4
         private readonly object locker = new object();
         private bool isRequested = false;
         private int requestHash;
+        private double lastFov;
 
         public override RendererOrder Order => RendererOrder.Stars;
 
         public UCAC4Renderer(ISkyMap map, UCAC4Catalog catalog, ISettings settings)
         {
             this.map = map;
+            this.map.FovChanged += Map_FovChanged;
             this.catalog = catalog;
             this.settings = settings;
+            // TODO: move to settings
             fontNames = new Font("Arial", 7);
+        }
+
+        private void Map_FovChanged(double fov)
+        {
+            if (fov > lastFov)
+            {
+                lock (locker)
+                {
+                    cache.Clear();
+                }
+            }
+            lastFov = fov;
         }
 
         public override void Render(ISkyMap map)
@@ -42,7 +57,10 @@ namespace Astrarium.Plugins.UCAC4
 
             var prj = map.Projection;
 
-            double fov = Math.Max(0.2, prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
+
             float magLimit = Math.Min(float.MaxValue, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
 
             if (magLimit > 10 && settings.Get("Stars") && settings.Get("UCAC4"))

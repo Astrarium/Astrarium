@@ -218,6 +218,10 @@ namespace Astrarium
             var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
             int w = Projection?.ScreenWidth ?? 1;
             int h = Projection?.ScreenHeight ?? 1;
+            if (Projection != null) 
+            {
+                Projection.FovChanged -= Projection_FovChanged;
+            }
 
             Projection = (Projection)Activator.CreateInstance(type, context);
             Projection.Fov = fov;
@@ -229,8 +233,14 @@ namespace Astrarium
             Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
             Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
             Projection.SetScreenSize(w, h);
-            FovChanged?.Invoke(fov);
+            Projection.FovChanged += Projection_FovChanged;
+            Projection_FovChanged(Projection.Fov);
             Invalidate();
+        }
+
+        private void Projection_FovChanged(double fov)
+        {
+            FovChanged?.Invoke(fov);
         }
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
@@ -496,7 +506,6 @@ namespace Astrarium
             {
                 Projection.SetVision(eq);
                 Projection.Fov = viewAngleTarget;
-                FovChanged?.Invoke(viewAngleTarget);
                 Invalidate();
             }
             else
@@ -522,7 +531,6 @@ namespace Astrarium
                         Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
                         Thread.Sleep(1);
                         Invalidate();                        
-                        FovChanged?.Invoke(Projection.Fov);
                     }
                 });
             }

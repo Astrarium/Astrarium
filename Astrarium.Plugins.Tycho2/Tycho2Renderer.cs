@@ -17,7 +17,7 @@ namespace Astrarium.Plugins.Tycho2
         private readonly ITycho2Catalog tycho2;
         private readonly ISettings settings;
 
-        private readonly Font fontNames = new Font("Arial", 7);
+        private Font fontNames;
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public override RendererOrder Order => RendererOrder.Stars;
@@ -27,19 +27,38 @@ namespace Astrarium.Plugins.Tycho2
         private readonly object locker = new object();
         private bool isRequested = false;
         private int requestHash;
+        private double lastFov;
 
         public Tycho2Renderer(ISkyMap map, ITycho2Catalog tycho2, ISettings settings)
         {
             this.map = map;
+            this.map.FovChanged += Map_FovChanged;
             this.tycho2 = tycho2;
             this.settings = settings;
+            // TODO: move to settings
+            fontNames = new Font("Arial", 7);
+        }
+
+        private void Map_FovChanged(double fov)
+        {
+            if (fov > lastFov)
+            {
+                lock (locker)
+                {
+                    cache.Clear();
+                }
+            }
+            lastFov = fov;
         }
 
         public override void Render(ISkyMap map)
         {
             Projection prj = map.Projection;
 
-            double fov = Math.Max(0, prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
+
             float magLimit = Math.Min(float.MaxValue, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
 
             if (magLimit > 6 && settings.Get("Stars") && settings.Get("Tycho2"))
