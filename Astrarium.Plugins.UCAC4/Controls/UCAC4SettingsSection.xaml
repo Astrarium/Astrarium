@@ -11,7 +11,7 @@
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
-    <StackPanel Orientation="Vertical" Margin="6">
+    <StackPanel Orientation="Vertical" Margin="6" IsEnabled="{Binding IsEnabled}">
         <CheckBox Content="{t:Text Settings.UCAC4}" IsChecked="{Binding Settings.UCAC4}" Margin="2" />
 
         <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.UCAC4}">
@@ -20,14 +20,13 @@
 
 
             <StackPanel Orientation="Vertical" Visibility="{Binding Catalog.IsLoaded, Converter={s:InverseBoolToVisibilityConverter}}">
-                            
-                <TextBlock  Margin="2 8 2 2" TextWrapping="Wrap">            
-                    <Run Text="{t:Text Settings.UCAC4.NotFound}" />
-                    <LineBreak />
-                    <Hyperlink Command="{Binding OpenCatalogUrlCommand}"><Run Text="https://cdsarc.cds.unistra.fr/ftp/I/322A/UCAC4/" /></Hyperlink>
-                </TextBlock>
 
-                <Button Content="Download catalog..." Command="{Binding DownloadCatalogCommand}" MinWidth="100" Padding="8 0" Margin="0 8 0 0" Width="Auto" HorizontalAlignment="Left" />
+                <TextBlock  Margin="2 8 2 2" TextWrapping="Wrap" Text="{t:Text Settings.UCAC4.NotFound}" />
+
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{t:Text UCAC4.DownloadAutoButton}" Command="{Binding DownloadCatalogCommand}" MinWidth="100" Padding="8 0" Margin="0 8 0 0" Width="Auto" HorizontalAlignment="Left" />
+                    <Button Content="{t:Text UCAC4.DownloadManualButton}" Command="{Binding OpenCatalogUrlCommand}" MinWidth="100" Padding="8 0" Margin="4 8 0 0" Width="Auto" HorizontalAlignment="Left" />
+                </StackPanel>
 
             </StackPanel>
 
