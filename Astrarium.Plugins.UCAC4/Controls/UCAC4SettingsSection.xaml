@@ -21,7 +21,7 @@
 
             <StackPanel Orientation="Vertical" Visibility="{Binding Catalog.IsLoaded, Converter={s:InverseBoolToVisibilityConverter}}">
 
-                <TextBlock  Margin="2 8 2 2" TextWrapping="Wrap" Text="{t:Text Settings.UCAC4.NotFound}" />
+                <TextBlock Margin="2 8 2 2" TextWrapping="Wrap" Text="{t:Text Settings.UCAC4.NotFound}" />
 
                 <StackPanel Orientation="Horizontal">
                     <Button Content="{t:Text UCAC4.DownloadAutoButton}" Command="{Binding DownloadCatalogCommand}" MinWidth="100" Padding="8 0" Margin="0 8 0 0" Width="Auto" HorizontalAlignment="Left" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,8 @@ namespace Astrarium.Views
         {
             InitializeComponent();
         }
-        
-        public string Text 
+
+        public string Text
         {
             set
             {
@@ -101,12 +102,15 @@ namespace Astrarium.Views
             {
                 _Progress.ProgressChanged -= _Progress_ProgressChanged;
             }
+
+            _CancellationTokenSource?.Cancel();
+
             base.OnClosed(e);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            _CancellationTokenSource?.Cancel();          
+            _CancellationTokenSource?.Cancel();
         }
     }
 }
