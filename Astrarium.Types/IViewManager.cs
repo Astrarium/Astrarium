@@ -71,6 +71,15 @@ namespace Astrarium.Types
         void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null);
 
         /// <summary>
+        /// Shows window with progress bar
+        /// </summary>
+        /// <param name="caption">Window title</param>
+        /// <param name="textProgress">Progress instance to update the dialog text.</param>
+        /// <param name="tokenSource">Cancellation token source instance. Use <see cref="CancellationTokenSource.Cancel()"/> to close the window.</param>
+        /// <param name="progress">Progress instance. Can be null for indeterminate progress bar.</param>
+        void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null);
+
+        /// <summary>
         /// Shows save file dialog
         /// </summary>
         /// <param name="caption">Dialog title</param>

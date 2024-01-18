@@ -245,11 +245,25 @@ namespace Astrarium
         public void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null)
         {
             var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
-            dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+            dialog.Owner = owner ?? Application.Current.MainWindow;
             dialog.Topmost = true;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.CancellationTokenSource = tokenSource;
+            dialog.Progress = progress;
+            dialog.Show();
+        }
+
+        public void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null)
+        {
+            var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
+            var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+            dialog.Owner = owner ?? Application.Current.MainWindow;
+            dialog.Topmost = true;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
+            dialog.CancellationTokenSource = tokenSource;
+            dialog.TextProgress = textProgress;
             dialog.Progress = progress;
             dialog.Show();
         }

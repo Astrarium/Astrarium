@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -70,11 +71,21 @@ namespace Astrarium.Plugins.UCAC4.ViewModels
                     {
                         string u4bPath = Path.Combine(catalogLocalPath, "u4b");
                         var context = new FtpDownloadContext();
+                        context.OnBeginDownloadFile += (string filePath) =>
+                        {
+                            string fileName = Path.GetFileName(filePath);
+                            if (Regex.IsMatch(fileName, @"z\d{3}"))
+                            {
+                                int zoneNumber = int.Parse(fileName.Substring(1));
+                                string text = Text.Get("UCAC4.Downloader.WaitText.DownloadingZones", ("zoneNumber", zoneNumber.ToString()), ("zonesCount", "900"));
+                                context.ReportTextProgress(text);
+                            }
+                        };
 
                         try
                         {
                             Directory.CreateDirectory(u4bPath);
-                            ViewManager.ShowProgress("$UCAC4.Downloader.WaitTitle", "$UCAC4.Downloader.WaitText.DownloadingZones", context.CancelTokenSource, context.Progress);
+                            ViewManager.ShowProgress("$UCAC4.Downloader.WaitTitle", context.TextProgress, context.CancelTokenSource, context.Progress);
                             await DownloadFtpDirectory($"{FTP_ROOT}/u4b/", creds, u4bPath, context);
                         }
                         catch (Exception ex)
@@ -182,6 +193,8 @@ namespace Astrarium.Plugins.UCAC4.ViewModels
                         string size = line.Split(new[] { ' ' }, 9, StringSplitOptions.RemoveEmptyEntries)[4];
                         long fileSize = long.Parse(size);
 
+                        context.RaiseBeginDownloadFile(localFilePath);
+
                         if (File.Exists(localFilePath) && new FileInfo(localFilePath).Length == fileSize)
                         {
                             context.AddDownloadedCount(fileSize);
@@ -230,9 +243,14 @@ namespace Astrarium.Plugins.UCAC4.ViewModels
             private long downloaded;
 
             /// <summary>
-            /// Progress instance
+            /// Progress instance to update progress bar value
             /// </summary>
             public Progress<double> Progress { get; private set; }
+
+            /// <summary>
+            /// Progress instance to update wait dialog text
+            /// </summary>
+            public Progress<string> TextProgress { get; private set; }
 
             /// <summary>
             /// Cancellation token source
@@ -250,6 +268,11 @@ namespace Astrarium.Plugins.UCAC4.ViewModels
             public bool DownloadComplete { get; set; }
 
             /// <summary>
+            /// Fired when downloading new file begins
+            /// </summary>
+            public event Action<string> OnBeginDownloadFile;
+
+            /// <summary>
             /// Adds number of downloaded bytes and reports progress
             /// </summary>
             /// <param name="count"></param>
@@ -260,12 +283,29 @@ namespace Astrarium.Plugins.UCAC4.ViewModels
             }
 
             /// <summary>
+            /// Raises <see cref="OnBeginDownloadFile"/> event.
+            /// </summary>
+            public void RaiseBeginDownloadFile(string filePath)
+            {
+                OnBeginDownloadFile?.Invoke(filePath);
+            }
+
+            /// <summary>
+            /// Reports text progress
+            /// </summary>
+            public void ReportTextProgress(string text)
+            {
+                (TextProgress as IProgress<string>)?.Report(text);
+            }
+
+            /// <summary>
             /// Creates new context instance.
             /// </summary>
             public FtpDownloadContext()
             {
                 CancelTokenSource = new CancellationTokenSource();
                 Progress = new Progress<double>();
+                TextProgress = new Progress<string>();
             }
         }
     }

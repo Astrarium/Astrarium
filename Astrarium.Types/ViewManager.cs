@@ -83,6 +83,11 @@ namespace Astrarium.Types
             viewManager.ShowProgress(caption, text, tokenSource, progress);
         }
 
+        public static void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null)
+        {
+            viewManager.ShowProgress(caption, textProgress, tokenSource, progress);
+        }
+
         /// <summary>
         /// Shows file save dialog.
         /// </summary>
