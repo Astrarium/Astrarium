@@ -18,16 +18,12 @@
             <TextBlock Margin="2 8 2 2" Text="{t:Text Settings.UCAC4.RootDir.Title}" />
             <c:FilePathPicker Caption="{t:Text Settings.UCAC4.RootDir.DialogCaption}" Mode="Directory" SelectedPath="{Binding Settings.UCAC4RootDir}" Validator="{Binding ValidateCatalogPath}" />
 
-
             <StackPanel Orientation="Vertical" Visibility="{Binding Catalog.IsLoaded, Converter={s:InverseBoolToVisibilityConverter}}">
-
                 <TextBlock Margin="2 8 2 2" TextWrapping="Wrap" Text="{t:Text Settings.UCAC4.NotFound}" />
-
                 <StackPanel Orientation="Horizontal">
                     <Button Content="{t:Text UCAC4.DownloadAutoButton}" Command="{Binding DownloadCatalogCommand}" MinWidth="100" Padding="8 0" Margin="0 8 0 0" Width="Auto" HorizontalAlignment="Left" />
                     <Button Content="{t:Text UCAC4.DownloadManualButton}" Command="{Binding OpenCatalogUrlCommand}" MinWidth="100" Padding="8 0" Margin="4 8 0 0" Width="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
-
             </StackPanel>
 
             <TextBlock Visibility="{Binding Catalog.IsLoaded, Converter={s:BoolToVisibilityConverter}}" Margin="2 8 2 2" TextWrapping="Wrap">

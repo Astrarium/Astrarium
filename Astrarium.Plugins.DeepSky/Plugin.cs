@@ -1,4 +1,5 @@
 ﻿using Astrarium.Plugins.DeepSky.Controls;
+using Astrarium.Plugins.DeepSky.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace Astrarium.Plugins.DeepSky
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked")));
 
-            DefineSettingsSection<DeepSkySettingsSection, SettingsViewModel>();
+            DefineSettingsSection<DeepSkySettingsSection, DeepSkySettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
         }
