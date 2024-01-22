@@ -450,6 +450,11 @@ namespace Astrarium.Types
             return new Vec3(v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]);
         }
 
+        public static Vec3 operator -(Vec3 v1, Vec3 v2)
+        {
+            return new Vec3(v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]);
+        }
+
         public static Vec3 operator *(double s, Vec3 v)
         {
             return new Vec3(s * v[0], s * v[1], s * v[2]);
