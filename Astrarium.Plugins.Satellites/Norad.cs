@@ -73,7 +73,7 @@ namespace Astrarium.Plugins.Satellites
         /// Calculates satellite position with SGP4 algorithm
         /// </summary>
         /// <param name="tle">Tle orbit data</param>
-        public static Vec3 SGP4(TLE tle, double jd)
+        public static void SGP4(TLE tle, double jd, Vec3 posVector, Vec3 velVector)
         {
             double n0 = tle.MeanMotion * (2 * Math.PI) / 1440.0;
             double e0 = tle.Eccentricity;
@@ -83,7 +83,8 @@ namespace Astrarium.Plugins.Satellites
             double M0 = Angle.ToRadians(tle.MeanAnomaly);
             double OMEGA0 = Angle.ToRadians(tle.LongitudeAscNode);
 
-            double t_t0 = (jd - tle.Epoch) * 1440.0; // time since epoch, in minutes
+            // time since epoch, in minutes
+            double t_t0 = (jd - tle.Epoch) * 1440;
             double t_t0_2 = t_t0 * t_t0;
             double t_t0_3 = t_t0_2 * t_t0;
             double t_t0_4 = t_t0_3 * t_t0;
@@ -358,15 +359,21 @@ namespace Astrarium.Plugins.Satellites
             double sinuk = Math.Sin(uk);
             double cosuk = Math.Cos(uk);
 
+            double sinOmegaK = Math.Sin(OMEGAk);
+            double cosOmegaK = Math.Cos(OMEGAk);
+
+            double sinik = Math.Sin(ik);
+            double cosik = Math.Cos(ik);
+
             double[] M = new double[] {
-                             -Math.Sin(OMEGAk) * Math.Cos(ik),
-                             Math.Cos(OMEGAk) * Math.Cos(ik),
-                             Math.Sin(ik)
+                             -sinOmegaK * cosik,
+                             cosOmegaK * cosik,
+                             sinik
                          };
 
             double[] N = new double[] {
-                            Math.Cos(OMEGAk),
-                            Math.Sin(OMEGAk),
+                            cosOmegaK,
+                            sinOmegaK,
                             0
                          };
 
@@ -386,7 +393,13 @@ namespace Astrarium.Plugins.Satellites
                 velocity[i] = velocity[i] * EarthRadius / aE * 60.0;    // in km/s
             }
 
-            return new Vec3(position[0], position[1], position[2]);
+            posVector.X = position[0];
+            posVector.Y = position[1];
+            posVector.Z = position[2];
+
+            velVector.X = velocity[0];
+            velVector.Y = velocity[1];
+            velVector.Z = velocity[2];
         }
 
         public static Vec3 TopocentricLocationVector(CrdsGeographical location, double sideralTime)

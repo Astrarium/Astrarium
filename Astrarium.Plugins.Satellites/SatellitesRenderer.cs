@@ -41,20 +41,37 @@ namespace Astrarium.Plugins.Satellites
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
             // filter satellites
-            var satellites = calculator.Satellites.Where(n => /*n.Magnitude < prj.MagLimit &&*/ Angle.Separation(prj.CenterEquatorial, n.Equatorial) < fov);
+            var satellites = calculator.Satellites;
 
             GL.Enable(EnableCap.PointSmooth);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
+
+            Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(prj.Context.GeoLocation, prj.Context.SiderealTime);
+            double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
+
+            //Vec3 sunVector = new Vec3(Sun.Rectangular.X * AstroUtils.AU, Sun.Rectangular.Y * AstroUtils.AU, Sun.Rectangular.Z * AstroUtils.AU);
+
             foreach (var s in satellites)
             {
-                float size = 1;// prj.GetPointSize(star.Magnitude);
-                if (size > 0)
-                {
-                    if ((int)size == 0) size = 1;
+                var pos = s.Position + deltaTime * s.Velocity;
 
+                // topocentric vector
+                var t = Norad.TopocentricSatelliteVector(topocentricLocationVector, pos);
+                var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
+                s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
+
+                //bool isEclipsed = Norad.IsSatelliteEclipsed(pos,)
+
+                float size = prj.GetPointSize(s.Magnitude);
+
+                
+
+                if (Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
+                {
                     // screen coordinates, for current epoch
                     Vec2 p = prj.Project(s.Equatorial);
 
@@ -68,7 +85,7 @@ namespace Astrarium.Plugins.Satellites
 
                         if (drawLabels)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brushLabel, p, size);
+                            //map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brushLabel, p, size);
                         }
 
                         map.AddDrawnObject(p, s, size);

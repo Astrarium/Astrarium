@@ -17,6 +17,8 @@ namespace Astrarium.Plugins.Satellites
         /// <inheritdoc />
         public IEnumerable<Satellite> GetCelestialObjects() => Satellites;
 
+        public double JulianDay { get; private set; }
+
         /// <inheritdoc />
         public override void Initialize()
         {
@@ -24,22 +26,15 @@ namespace Astrarium.Plugins.Satellites
             Satellites = LoadSatellites(file);
         }
 
-        public SatellitesCalculator()
-        {
-
-        }
-
         public override void Calculate(SkyContext context)
         {
-            Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(context.GeoLocation, context.SiderealTime);
-
+            double deltaT = Date.DeltaT(context.JulianDay);
+            var jd = context.JulianDay - deltaT / 86400;
             foreach (var s in Satellites)
             {
-                s.Geocentric = Norad.SGP4(s.Tle, context.JulianDay);
-                s.Topocentric = Norad.TopocentricSatelliteVector(topocentricLocationVector, s.Geocentric);
-                var h = Norad.HorizontalCoordinates(context.GeoLocation, s.Topocentric, context.SiderealTime);
-                s.Equatorial = h.ToEquatorial(context.GeoLocation, context.SiderealTime);
+                Norad.SGP4(s.Tle, jd, s.Position, s.Velocity);
             }
+            JulianDay = context.JulianDay;
         }
 
         private ICollection<Satellite> LoadSatellites(string file)

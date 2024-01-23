@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Satellites
 {
-    public class Satellite : CelestialObject
+    public class Satellite : CelestialObject, IMagnitudeObject
     {
         public string Name { get; private set; }
         public TLE Tle { get; private set; }
@@ -26,7 +26,18 @@ namespace Astrarium.Plugins.Satellites
 
         public override string CommonName => "";
 
-        public Vec3 Geocentric { get; set; }
-        public Vec3 Topocentric { get; set; }
+        /// <summary>
+        /// Geocentric position vector
+        /// </summary>
+        public Vec3 Position { get; private set; } = new Vec3();
+
+        /// <summary>
+        /// Geocentric velocity vector
+        /// </summary>
+        public Vec3 Velocity { get; private set; } = new Vec3();
+
+        public float Magnitude { get; set; }
+
+        public float StdMag { get; set; }
     }
 }
