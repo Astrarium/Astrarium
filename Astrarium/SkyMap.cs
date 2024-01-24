@@ -21,6 +21,8 @@ namespace Astrarium
         // TODO: remove if not used
         public event Action<double> FovChanged;
 
+        public event Action ContextChanged;
+
         /// <summary>
         /// Stopwatch to measure rendering time
         /// </summary>
@@ -218,8 +220,9 @@ namespace Astrarium
             var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
             int w = Projection?.ScreenWidth ?? 1;
             int h = Projection?.ScreenHeight ?? 1;
-            if (Projection != null) 
+            if (Projection != null)
             {
+                Projection.Context.ContextChanged -= Projection_ContextChanged;
                 Projection.FovChanged -= Projection_FovChanged;
             }
 
@@ -234,8 +237,14 @@ namespace Astrarium
             Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
             Projection.SetScreenSize(w, h);
             Projection.FovChanged += Projection_FovChanged;
+            Projection.Context.ContextChanged += Projection_ContextChanged;
             Projection_FovChanged(Projection.Fov);
             Invalidate();
+        }
+
+        private void Projection_ContextChanged()
+        {
+            ContextChanged?.Invoke();
         }
 
         private void Projection_FovChanged(double fov)

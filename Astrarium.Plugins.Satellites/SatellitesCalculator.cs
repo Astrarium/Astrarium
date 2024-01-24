@@ -40,20 +40,25 @@ namespace Astrarium.Plugins.Satellites
 
         public override void Calculate(SkyContext context)
         {
-            double deltaT = Date.DeltaT(context.JulianDay);
-            var jd = context.JulianDay - deltaT / 86400;
-            foreach (var s in Satellites)
-            {
-                Norad.SGP4(s.Tle, jd, s.Position, s.Velocity);
-            }
-           
             // Calculate rectangular coordinates of the Sun
             var eq = SunEquatorial.Invoke(context);
             var ecl = eq.ToEcliptical(context.Epsilon);
             ecl.Distance = 1;
             SunRectangular = ecl.ToRectangular(context.Epsilon);
 
-            JulianDay = context.JulianDay;
+            // To reduce CPU load, it's enough to calculate
+            // satellites positions once in 5 minutes
+            if (Math.Abs(JulianDay - context.JulianDay) > TimeSpan.FromMinutes(5).TotalDays)
+            {
+                double deltaT = Date.DeltaT(context.JulianDay);
+                var jd = context.JulianDay - deltaT / 86400;
+                foreach (var s in Satellites)
+                {
+                    Norad.SGP4(s.Tle, jd, s.Position, s.Velocity);
+                }
+
+                JulianDay = context.JulianDay;
+            }
         }
 
         private ICollection<Satellite> LoadSatellites(string file)

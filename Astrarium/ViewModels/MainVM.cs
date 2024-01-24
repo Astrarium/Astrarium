@@ -202,19 +202,19 @@ namespace Astrarium.ViewModels
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
-            sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
+            map.ContextChanged += Map_ContextChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
 
             AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
             AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(IsCompactMenu)));
             AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(IsStatusBarVisible)));
 
-            Sky_ContextChanged();
+            Map_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
 
             var bindingViewModeHorizontal = new SimpleBinding(settings, "ViewMode", "IsChecked")
@@ -580,10 +580,12 @@ namespace Astrarium.ViewModels
             Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"Unable to check app updates: {ex.Message}"));
         }
 
-        private void Sky_ContextChanged()
+        private void Map_ContextChanged()
         {
+            double jd = map.Projection.Context.JulianDay;
+            double utcOffset = map.Projection.Context.GeoLocation.UtcOffset;
             var months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
-            var d = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+            var d = new Date(jd, utcOffset);
             DateString = $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year} {d.Hour:00}:{d.Minute:00}:{d.Second:00}";
             NotifyPropertyChanged(nameof(DateString));
         }

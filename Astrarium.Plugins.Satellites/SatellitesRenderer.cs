@@ -36,7 +36,9 @@ namespace Astrarium.Plugins.Satellites
             var nightMode = settings.Get("NightMode");
             bool drawLabels = settings.Get("SatellitesLabels");
             Color labelColor = settings.Get<Color>("ColorSatellitesLabels").Tint(nightMode);
+            Color eclipsedLabelColor = settings.Get<Color>("ColorEclipsedSatellitesLabels").Tint(nightMode);
             Brush brushLabel = new SolidBrush(labelColor);
+            Brush brushEclipsedLabel = new SolidBrush(eclipsedLabelColor);
             var fontNames = settings.Get<Font>("SatellitesLabelsFont");
 
             // real circular FOV with respect of screen borders
@@ -50,31 +52,34 @@ namespace Astrarium.Plugins.Satellites
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-
             Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(prj.Context.GeoLocation, prj.Context.SiderealTime);
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
-
-            Vec3 sunVector = AU * new Vec3(calculator.SunRectangular.X, calculator.SunRectangular.Y, calculator.SunRectangular.Z);
+            var sunR = calculator.SunRectangular;
+            Vec3 sunVector = AU * new Vec3(sunR.X, sunR.Y, sunR.Z);
 
             foreach (var s in satellites)
             {
+                // current satellite position vector
                 var pos = s.Position + deltaTime * s.Velocity;
+
+                // flag indicating satellite is eclipsed
+                bool isEclipsed = Norad.IsSatelliteEclipsed(pos, sunVector);
 
                 // topocentric vector
                 var t = Norad.TopocentricSatelliteVector(topocentricLocationVector, pos);
-                var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
-                s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+
+                // visible magnitude
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
 
-                var hor = s.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                // horizontal coordinates of satellite
+                var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
 
-                bool isEclipsed = Norad.IsSatelliteEclipsed(pos, sunVector);
+                // equatorial coordinates
+                s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
 
-                float size = prj.GetPointSize(s.Magnitude);                
+                float size = prj.GetPointSize(s.Magnitude);
 
-                if (!isEclipsed &&
-                    hor.Altitude > 0 &&
-                    Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
+                if (Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
                 {
                     // screen coordinates, for current epoch
                     Vec2 p = prj.Project(s.Equatorial);
@@ -89,7 +94,8 @@ namespace Astrarium.Plugins.Satellites
 
                         if (drawLabels)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brushLabel, p, size);
+                            var brush = isEclipsed ? brushEclipsedLabel : brushLabel;
+                            map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brush, p, size);
                         }
 
                         map.AddDrawnObject(p, s, size);

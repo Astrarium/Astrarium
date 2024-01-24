@@ -13,6 +13,8 @@ namespace Astrarium.Types
         // TODO: remove if not used
         event Action<double> FovChanged;
 
+        event Action ContextChanged;
+
         /// <summary>
         /// Value indicating sky darkness (daylight presence). 1 means Sun above horizon, 0 - totally dark sky.
         /// </summary>
