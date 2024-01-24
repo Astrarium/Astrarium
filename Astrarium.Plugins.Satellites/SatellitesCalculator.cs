@@ -14,14 +14,26 @@ namespace Astrarium.Plugins.Satellites
     {
         public ICollection<Satellite> Satellites { get; private set; }
 
+        public CrdsRectangular SunRectangular { get; private set; }
+
         /// <inheritdoc />
         public IEnumerable<Satellite> GetCelestialObjects() => Satellites;
 
         public double JulianDay { get; private set; }
 
+        private Func<SkyContext, CrdsEquatorial> SunEquatorial;
+
+        private readonly ISky sky;
+
+        public SatellitesCalculator (ISky sky)
+        {
+            this.sky = sky;
+        }
+
         /// <inheritdoc />
         public override void Initialize()
         {
+            SunEquatorial = sky.SunEquatorial;
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Brightest.tle");
             Satellites = LoadSatellites(file);
         }
@@ -34,6 +46,13 @@ namespace Astrarium.Plugins.Satellites
             {
                 Norad.SGP4(s.Tle, jd, s.Position, s.Velocity);
             }
+           
+            // Calculate rectangular coordinates of the Sun
+            var eq = SunEquatorial.Invoke(context);
+            var ecl = eq.ToEcliptical(context.Epsilon);
+            ecl.Distance = 1;
+            SunRectangular = ecl.ToRectangular(context.Epsilon);
+
             JulianDay = context.JulianDay;
         }
 

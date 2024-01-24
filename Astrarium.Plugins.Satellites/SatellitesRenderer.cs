@@ -12,6 +12,8 @@ namespace Astrarium.Plugins.Satellites
 {
     public class SatellitesRenderer : BaseRenderer
     {
+        private const double AU = 149597870.691;
+
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly ISettings settings;
@@ -52,7 +54,7 @@ namespace Astrarium.Plugins.Satellites
             Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(prj.Context.GeoLocation, prj.Context.SiderealTime);
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
 
-            //Vec3 sunVector = new Vec3(Sun.Rectangular.X * AstroUtils.AU, Sun.Rectangular.Y * AstroUtils.AU, Sun.Rectangular.Z * AstroUtils.AU);
+            Vec3 sunVector = AU * new Vec3(calculator.SunRectangular.X, calculator.SunRectangular.Y, calculator.SunRectangular.Z);
 
             foreach (var s in satellites)
             {
@@ -64,13 +66,15 @@ namespace Astrarium.Plugins.Satellites
                 s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
 
-                //bool isEclipsed = Norad.IsSatelliteEclipsed(pos,)
+                var hor = s.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
 
-                float size = prj.GetPointSize(s.Magnitude);
+                bool isEclipsed = Norad.IsSatelliteEclipsed(pos, sunVector);
 
-                
+                float size = prj.GetPointSize(s.Magnitude);                
 
-                if (Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
+                if (!isEclipsed &&
+                    hor.Altitude > 0 &&
+                    Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
                 {
                     // screen coordinates, for current epoch
                     Vec2 p = prj.Project(s.Equatorial);
@@ -85,7 +89,7 @@ namespace Astrarium.Plugins.Satellites
 
                         if (drawLabels)
                         {
-                            //map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brushLabel, p, size);
+                            map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brushLabel, p, size);
                         }
 
                         map.AddDrawnObject(p, s, size);

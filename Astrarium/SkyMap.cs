@@ -343,8 +343,7 @@ namespace Astrarium
             while (true)
             {
                 timeSyncResetEvent.WaitOne();
-                double rate = Math.Min(5000, Math.Max(100, Projection.Fov * 100));
-                
+                double rate = Math.Min(100, Math.Max(100, Projection.Fov * 100));
                 context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
 
                 if (LockedObject != null)
