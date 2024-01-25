@@ -227,32 +227,36 @@ namespace Astrarium
         public List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<Ephemerides> all = new List<Ephemerides>();
+            Type bodyType = body.GetType();
 
-            var config = EphemConfigs[body.GetType()];
-
-            var itemsToBeCalled = config.Filter(categories);
-
-            for (double jd = from; jd < to; jd += step)
+            if (EphemConfigs.ContainsKey(bodyType))
             {
-                if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                var config = EphemConfigs[bodyType];
+
+                var itemsToBeCalled = config.Filter(categories);
+
+                for (double jd = from; jd < to; jd += step)
                 {
-                    break;
+                    if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        progress?.Report((jd - from) / (to - from) * 100);
+                    }
+
+                    var context = new SkyContext(jd, Context.GeoLocation);
+
+                    Ephemerides ephemerides = new Ephemerides(body);
+
+                    foreach (var item in itemsToBeCalled)
+                    {
+                        ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                    }
+
+                    all.Add(ephemerides);
                 }
-                else
-                {
-                    progress?.Report((jd - from) / (to - from) * 100);
-                }
-
-                var context = new SkyContext(jd, Context.GeoLocation);
-
-                Ephemerides ephemerides = new Ephemerides(body);
-
-                foreach (var item in itemsToBeCalled)
-                {
-                    ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
-                }
-
-                all.Add(ephemerides);
             }
 
             return all;
@@ -276,7 +280,7 @@ namespace Astrarium
 
             if (InfoProviders.ContainsKey(bodyType))
             {
-                var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).First();
+                var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).FirstOrDefault();
 
                 var infoType = typeof(CelestialObjectInfo<>).MakeGenericType(bodyType);
                 var info = (CelestialObjectInfo)Activator.CreateInstance(infoType, Context, body, ephem);

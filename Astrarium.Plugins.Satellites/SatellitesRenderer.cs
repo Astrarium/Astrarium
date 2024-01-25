@@ -74,6 +74,8 @@ namespace Astrarium.Plugins.Satellites
                 // horizontal coordinates of satellite
                 var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
 
+                isEclipsed = isEclipsed || h.Altitude < 0;
+
                 // equatorial coordinates
                 s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
 
@@ -100,6 +102,13 @@ namespace Astrarium.Plugins.Satellites
 
                         map.AddDrawnObject(p, s, size);
                     }
+                }
+
+
+                if (map.SelectedObject == s)
+                {
+                    // show orbit
+
                 }
             }
         }
