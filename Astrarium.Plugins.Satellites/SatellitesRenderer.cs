@@ -53,7 +53,11 @@ namespace Astrarium.Plugins.Satellites
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
             Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(prj.Context.GeoLocation, prj.Context.SiderealTime);
+            
+            // diff, in hours
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
+            
+            
             var sunR = calculator.SunRectangular;
             Vec3 sunVector = AU * new Vec3(sunR.X, sunR.Y, sunR.Z);
 
@@ -104,11 +108,62 @@ namespace Astrarium.Plugins.Satellites
                     }
                 }
 
-
+                // show orbit for selected satellite
                 if (map.SelectedObject == s)
                 {
-                    // show orbit
+                    // period, in hours
+                    double period = s.Tle.Period / 60.0;
 
+                    var track = new List<CrdsEquatorial>();
+
+                    double deltaT = Date.DeltaT(prj.Context.JulianDay);
+
+                    for (double diff = -period / 2; diff <= period / 2; diff += period / 256.0)
+                    {
+                        double jd = prj.Context.JulianDay - deltaT / 86400.0 + diff / 24.0;
+
+                        Vec3 vel = new Vec3();
+                        Norad.SGP4(s.Tle, jd, pos, vel);
+
+                        // current satellite position vector
+                        //pos = s.Position + (deltaTime + diff) * s.Velocity;
+
+                        double siderealTime = prj.Context.SiderealTime + diff / period / 24.0 * 360 - deltaT / 86400.0 / 360.0;
+
+                        // topocentric location vector for current instant
+                        Vec3 tlv = Norad.TopocentricLocationVector(prj.Context.GeoLocation, siderealTime);
+
+                        // topocentric vector
+                        t = Norad.TopocentricSatelliteVector(tlv, pos);
+
+                        // horizontal coordinates of satellite
+                        h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, siderealTime);
+
+                        // equatorial coordinates
+                        var eq = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+
+                        track.Add(eq);
+                    }
+
+                    var color = Color.FromArgb(100, 100, 100).Tint(nightMode);
+
+                    GL.Color3(color);
+
+                    GL.Begin(PrimitiveType.LineStrip);
+                    for (int i = 0; i < track.Count; i++)
+                    {
+                        Vec2 p = prj.Project(track[i]);
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
+                    }
+                    GL.End();
                 }
             }
         }

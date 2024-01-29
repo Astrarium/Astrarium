@@ -48,7 +48,7 @@ namespace Astrarium.Plugins.Satellites
 
             // To reduce CPU load, it's enough to calculate
             // satellites positions once in 5 minutes
-            if (Math.Abs(JulianDay - context.JulianDay) > TimeSpan.FromMinutes(5).TotalDays)
+            //if (Math.Abs(JulianDay - context.JulianDay) > TimeSpan.FromMinutes(5).TotalDays)
             {
                 double deltaT = Date.DeltaT(context.JulianDay);
                 var jd = context.JulianDay - deltaT / 86400;

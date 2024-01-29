@@ -402,13 +402,13 @@ namespace Astrarium.Plugins.Satellites
             velVector.Z = velocity[2];
         }
 
-        public static Vec3 TopocentricLocationVector(CrdsGeographical location, double sideralTime)
+        public static Vec3 TopocentricLocationVector(CrdsGeographical location, double siderealTime)
         {
             double longitude = -Angle.ToRadians(location.Longitude);
             double latitude = Angle.ToRadians(location.Latitude);
             double altitude = location.Elevation / 1000.0;
 
-            double localMeanSiderealTime = (Angle.ToRadians(sideralTime) + longitude) % (2 * Math.PI);
+            double localMeanSiderealTime = (Angle.ToRadians(siderealTime) + longitude) % (2 * Math.PI);
 
             double sinLatitude = Math.Sin(latitude);
             double cosLatitude = Math.Cos(latitude);
