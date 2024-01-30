@@ -35,8 +35,13 @@ namespace Astrarium.Plugins.Satellites
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
             bool drawLabels = settings.Get("SatellitesLabels");
+            bool showEclipsed = settings.Get("SatellitesShowEclipsed");
+            bool showBelowHorizon = settings.Get("SatellitesShowBelowHorizon");
+            bool showOrbit = settings.Get("SatellitesShowOrbit");
+            Color satelliteColor = Color.White.Tint(nightMode);
             Color labelColor = settings.Get<Color>("ColorSatellitesLabels").Tint(nightMode);
             Color eclipsedLabelColor = settings.Get<Color>("ColorEclipsedSatellitesLabels").Tint(nightMode);
+            Color orbitColor = settings.Get<Color>("ColorSatellitesOrbit").Tint(nightMode);
             Brush brushLabel = new SolidBrush(labelColor);
             Brush brushEclipsedLabel = new SolidBrush(eclipsedLabelColor);
             var fontNames = settings.Get<Font>("SatellitesLabelsFont");
@@ -57,7 +62,6 @@ namespace Astrarium.Plugins.Satellites
             // diff, in hours
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
             
-            
             var sunR = calculator.SunRectangular;
             Vec3 sunVector = AU * new Vec3(sunR.X, sunR.Y, sunR.Z);
 
@@ -69,6 +73,8 @@ namespace Astrarium.Plugins.Satellites
                 // flag indicating satellite is eclipsed
                 bool isEclipsed = Norad.IsSatelliteEclipsed(pos, sunVector);
 
+                if (!showEclipsed && isEclipsed) continue;
+
                 // topocentric vector
                 var t = Norad.TopocentricSatelliteVector(topocentricLocationVector, pos);
 
@@ -77,6 +83,8 @@ namespace Astrarium.Plugins.Satellites
 
                 // horizontal coordinates of satellite
                 var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
+
+                if (!showBelowHorizon && h.Altitude < 0) continue;
 
                 isEclipsed = isEclipsed || h.Altitude < 0;
 
@@ -94,7 +102,7 @@ namespace Astrarium.Plugins.Satellites
                     {
                         GL.PointSize(size);
                         GL.Begin(PrimitiveType.Points);
-                        GL.Color3(Color.White.Tint(nightMode));
+                        GL.Color3(satelliteColor);
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 
@@ -109,7 +117,7 @@ namespace Astrarium.Plugins.Satellites
                 }
 
                 // show orbit for selected satellite
-                if (map.SelectedObject == s)
+                if (showOrbit && map.SelectedObject == s)
                 {
                     // period, in hours
                     double period = s.Tle.Period / 60.0;
@@ -145,9 +153,7 @@ namespace Astrarium.Plugins.Satellites
                         track.Add(eq);
                     }
 
-                    var color = Color.FromArgb(100, 100, 100).Tint(nightMode);
-
-                    GL.Color3(color);
+                    GL.Color3(orbitColor);
 
                     GL.Begin(PrimitiveType.LineStrip);
                     for (int i = 0; i < track.Count; i++)

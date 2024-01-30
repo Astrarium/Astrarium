@@ -97,6 +97,8 @@ namespace Astrarium.Plugins.Constellations
             CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
 
+            GL.Begin(PrimitiveType.Lines);
+
             foreach (var block in constellationsCalc.Borders)
             {
                 for (int i = 0; i < block.Count - 1; i++)
@@ -112,14 +114,15 @@ namespace Astrarium.Plugins.Constellations
 
                         if (p1 != null && p2 != null)
                         {
-                            GL.Begin(PrimitiveType.Lines);
+                         
                             GL.Vertex2(p1.X, p1.Y);
                             GL.Vertex2(p2.X, p2.Y);
-                            GL.End();
+                            
                         }
                     }
                 }
             }
+            GL.End();
         }
 
         /// <summary>

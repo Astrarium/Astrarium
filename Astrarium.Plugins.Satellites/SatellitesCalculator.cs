@@ -89,11 +89,21 @@ namespace Astrarium.Plugins.Satellites
             Satellite s = info.Body;
             SkyContext c = info.Context;
 
+            var hor = s.Equatorial.ToHorizontal(c.GeoLocation, c.SiderealTime);
+
             info
                 .SetTitle(string.Join(", ", s.Names))
-                .SetSubtitle(Text.Get("Satellite.Type"));
+                .SetSubtitle(Text.Get("Satellite.Type"))
 
-            //.AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Tle.SatelliteNumber), c.JulianDay))
+                .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
+
+                .AddHeader(Text.Get("Satellite.Equatorial"))
+                .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
+                .AddRow("Equatorial.Delta", s.Equatorial.Delta)
+
+                .AddHeader(Text.Get("Satellite.Horizontal"))
+                .AddRow("Horizontal.Azimuth", hor.Azimuth)
+                .AddRow("Horizontal.Altitude", hor.Altitude);
 
             //info
             //.SetTitle(string.Join(", ", s.Names))
