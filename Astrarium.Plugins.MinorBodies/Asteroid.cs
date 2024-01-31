@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.MinorBodies
 {
-    public class Asteroid : SizeableCelestialObject, IMovingObject, IMagnitudeObject
+    public class Asteroid : SizeableCelestialObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Name or readable designation of the minor planet

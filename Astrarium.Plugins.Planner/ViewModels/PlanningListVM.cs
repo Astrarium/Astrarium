@@ -393,7 +393,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void AddObject()
         {
-            var body = ViewManager.ShowSearchDialog(x => true);
+            var body = ViewManager.ShowSearchDialog(x => x is IObservableObject);
             if (body != null)
             {
                 AddObject(body);

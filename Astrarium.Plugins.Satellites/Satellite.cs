@@ -1,9 +1,4 @@
 ﻿using Astrarium.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Satellites
 {
@@ -24,7 +19,7 @@ namespace Astrarium.Plugins.Satellites
 
         public override string Type => "Satellite";
 
-        public override string CommonName => "";
+        public override string CommonName => Tle.SatelliteNumber;
 
         /// <summary>
         /// Geocentric position vector

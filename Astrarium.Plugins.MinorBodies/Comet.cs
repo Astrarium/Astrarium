@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.MinorBodies
 {
-    public class Comet : SizeableCelestialObject, IMovingObject, IMagnitudeObject
+    public class Comet : SizeableCelestialObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Name or readable designation of the comet

@@ -63,25 +63,7 @@ namespace Astrarium.Plugins.Satellites
 
         public void ConfigureEphemeris(EphemerisConfig<Satellite> e)
         {
-            /*
-            e["Constellation"] = (c, s) => Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s.Number).Alpha;
-            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s.Number).Delta;
-            e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s.Number).Azimuth;
-            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s.Number).Altitude;
-            e["Magnitude"] = (c, s) => s.Magnitude;
-            e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Rise);
-            e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Transit);
-            e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Set);
-            e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet, s.Number).Duration;
-            e["RTS.RiseAzimuth"] = (c, s) => c.Get(RiseTransitSet, s.Number).RiseAzimuth;
-            e["RTS.TransitAltitude"] = (c, s) => c.Get(RiseTransitSet, s.Number).TransitAltitude;
-            e["RTS.SetAzimuth"] = (c, s) => c.Get(RiseTransitSet, s.Number).SetAzimuth;
-            e["Visibility.Begin"] = (c, s) => c.GetDateFromTime(c.Get(VisibilityDetails, s.Number).Begin);
-            e["Visibility.End"] = (c, s) => c.GetDateFromTime(c.Get(VisibilityDetails, s.Number).End);
-            e["Visibility.Duration"] = (c, s) => c.Get(VisibilityDetails, s.Number).Duration;
-            e["Visibility.Period"] = (c, s) => c.Get(VisibilityDetails, s.Number).Period;
-            */
+            // Satellites does not provide epheremeris
         }
 
         public void GetInfo(CelestialObjectInfo<Satellite> info)
@@ -89,7 +71,9 @@ namespace Astrarium.Plugins.Satellites
             Satellite s = info.Body;
             SkyContext c = info.Context;
 
+            var eq = s.Equatorial;
             var hor = s.Equatorial.ToHorizontal(c.GeoLocation, c.SiderealTime);
+            //bool isEclipsed = Norad.IsSatelliteEclipsed(s)
 
             info
                 .SetTitle(string.Join(", ", s.Names))
@@ -98,12 +82,28 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
 
                 .AddHeader(Text.Get("Satellite.Equatorial"))
-                .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
-                .AddRow("Equatorial.Delta", s.Equatorial.Delta)
+                .AddRow("Equatorial.Alpha", eq.Alpha)
+                .AddRow("Equatorial.Delta", eq.Delta)
 
                 .AddHeader(Text.Get("Satellite.Horizontal"))
                 .AddRow("Horizontal.Azimuth", hor.Azimuth)
-                .AddRow("Horizontal.Altitude", hor.Altitude);
+                .AddRow("Horizontal.Altitude", hor.Altitude)
+
+
+                .AddHeader(Text.Get("Satellite.Characteristics"))
+                .AddRow("Magnitude", Formatters.Magnitude.Format(s.Magnitude) + " ()", Formatters.Simple)
+                ;
+            /*
+                AddText(Program.Language["FormObjectInfo.Magnitude"], s.IsEclipsed ? "В тени" : ((double)(s.Mag)).ToStringMagnitude());
+            AddText(Program.Language["FormObjectInfo.Distance"], s.Range.ToStringDistanceKm());
+            AddText(Program.Language["FormObjectInfo.SSOAngle"], s.SSOAngle.ToStringAngleShort());
+            AddText(Program.Language["FormObjectInfo.RevolutionPeriod"], (s.Tle.Period / 1440.0).ToStringTimeInterval());
+            AddText(Program.Language["FormObjectInfo.OrbitInclination"], s.Tle.Inclination.ToStringAngle());
+            AddText(Program.Language["FormObjectInfo.Eccentricity"], s.Tle.Eccentricity.ToStringEccentricity());
+            AddText(Program.Language["FormObjectInfo.Apsis.Apogee"], Norad.GetSatelliteApogee(s.Tle).ToStringDistanceKm());
+            AddText(Program.Language["FormObjectInfo.Apsis.Perigee"], Norad.GetSatellitePerigee(s.Tle).ToStringDistanceKm());
+            AddText(Program.Language["FormObjectInfo.DataAge"], (Sky.JulianDay - s.Tle.Epoch).ToStringTimeInterval());
+            */
 
             //info
             //.SetTitle(string.Join(", ", s.Names))
@@ -153,7 +153,19 @@ namespace Astrarium.Plugins.Satellites
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return new CelestialObject[0];
+            return Satellites
+                .Where(s => IsSatelliteNameMatch(s, searchString))
+                .Where(filterFunc)
+                .Take(maxCount)
+                .ToArray();
+        }
+
+        private bool IsSatelliteNameMatch(Satellite s, string searchString)
+        {
+            if (searchString.Equals(s.CommonName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return s.Names.Any(n => n.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private ICollection<Satellite> LoadSatellites(string file)

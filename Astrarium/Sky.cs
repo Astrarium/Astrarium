@@ -264,12 +264,17 @@ namespace Astrarium
 
         public Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories)
         {
-            var config = EphemConfigs[body.GetType()];
-            var itemsToBeCalled = config.Filter(categories);
             Ephemerides ephemerides = new Ephemerides(body);
-            foreach (var item in itemsToBeCalled)
+            Type bodyType = body.GetType();
+            if (EphemConfigs.ContainsKey(bodyType))
             {
-                ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                var config = EphemConfigs[bodyType];
+                var itemsToBeCalled = config.Filter(categories);
+
+                foreach (var item in itemsToBeCalled)
+                {
+                    ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                }
             }
             return ephemerides;
         }

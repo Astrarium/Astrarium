@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject
+    public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => "Sun";

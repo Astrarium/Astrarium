@@ -27,7 +27,7 @@ namespace Astrarium.Plugins.Planner
             this.sky = sky;
             this.map = map;
             this.settings = settings;
-            this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(HasSelectedObject));
+            this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(IsPlannerConstextMenuEnabled));
             this.planManagerFactory = planManagerFactory;
             this.recentPlansManager = recentPlansManager;
 
@@ -51,7 +51,7 @@ namespace Astrarium.Plugins.Planner
             /* Context menu */
 
             MenuItem contextMenu = new MenuItem("$Planner.ContextMenu.AddToObservationPlan");
-            contextMenu.AddBinding(new SimpleBinding(this, nameof(HasSelectedObject), nameof(MenuItem.IsEnabled)));
+            contextMenu.AddBinding(new SimpleBinding(this, nameof(IsPlannerConstextMenuEnabled), nameof(MenuItem.IsEnabled)));
             contextMenu.AddBinding(new SimpleBinding(this, nameof(ActivePlansMenuItems), nameof(MenuItem.SubItems)));
             MenuItems.Add(MenuItemPosition.ContextMenu, contextMenu);
         }
@@ -225,7 +225,7 @@ namespace Astrarium.Plugins.Planner
             }
         }
 
-        public bool HasSelectedObject => map.SelectedObject != null;
+        public bool IsPlannerConstextMenuEnabled => map.SelectedObject != null && map.SelectedObject is IObservableObject;
 
         public bool HasRecentPlans => RecentPlansMenuItems.Count > 0;
 

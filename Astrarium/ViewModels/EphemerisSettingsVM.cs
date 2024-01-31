@@ -20,6 +20,9 @@ namespace Astrarium.ViewModels
         public TimeSpan Step { get; set; } = TimeSpan.FromDays(1);
         public double UtcOffset { get; private set; }
 
+        // TODO: check object can provide ephemerides (IEphemeridable ?)
+        public Func<CelestialObject, bool> Filter { get; } = (x) => true;
+
         private CelestialObject _SelectedBody = null;
         public CelestialObject SelectedBody
         {

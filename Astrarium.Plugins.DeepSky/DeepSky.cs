@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Astrarium.Plugins.DeepSky
 {
-    public class DeepSky : SizeableCelestialObject, IMagnitudeObject
+    public class DeepSky : SizeableCelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";

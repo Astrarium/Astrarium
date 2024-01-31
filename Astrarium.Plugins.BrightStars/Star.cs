@@ -1,12 +1,11 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
+﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Astrarium.Plugins.BrightStars
 {
-    public class Star : CelestialObject, IMagnitudeObject
+    public class Star : CelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Greek alphabet abbreviations

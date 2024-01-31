@@ -30,7 +30,7 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.CelestialBody}" />
-        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" />
+        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter}" />
 
         <Label Grid.Row="1" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.StartDate}" />
         <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />

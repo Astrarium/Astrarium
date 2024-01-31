@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the Galilean moon of Jupiter for given instant of time.
     /// </summary>
-    public class JupiterMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject
+    public class JupiterMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject, IObservableObject
     {        
         public JupiterMoon(int number)
         {
