@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
+using System.Diagnostics;
 
 namespace Astrarium.ViewModels
 {
@@ -19,6 +20,7 @@ namespace Astrarium.ViewModels
 
         public ICommand CopyNameCommand { get; private set; }
         public ICommand LinkClickedCommand { get; private set; }
+        public ICommand UriClickedCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
         public ObjectInfoVM(CelestialObjectInfo info)
@@ -28,6 +30,7 @@ namespace Astrarium.ViewModels
             InfoElements = info.InfoElements;
             CopyNameCommand = new Command(CopyName);
             LinkClickedCommand = new Command<double>(SelectJulianDay);
+            UriClickedCommand = new Command<Uri>(NavigateToUri);
             CloseCommand = new Command(Close);
         }
 
@@ -35,6 +38,18 @@ namespace Astrarium.ViewModels
         {
             JulianDay = jd;
             Close(true);
+        }
+
+        private void NavigateToUri(Uri uri)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(uri.ToString()));
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unable to open browser: " + ex);
+            }
         }
 
         private void CopyName()

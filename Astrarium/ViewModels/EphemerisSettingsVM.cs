@@ -21,7 +21,12 @@ namespace Astrarium.ViewModels
         public double UtcOffset { get; private set; }
 
         // TODO: check object can provide ephemerides (IEphemeridable ?)
-        public Func<CelestialObject, bool> Filter { get; } = (x) => true;
+        public Func<CelestialObject, bool> Filter => filter;
+
+        private bool filter(CelestialObject obj)
+        {
+            return sky.GetEphemerisCategories(obj).Any();
+        }
 
         private CelestialObject _SelectedBody = null;
         public CelestialObject SelectedBody

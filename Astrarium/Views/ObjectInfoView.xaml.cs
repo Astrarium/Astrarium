@@ -32,7 +32,10 @@ namespace Astrarium.Views
             DependencyProperty.Register("HeaderBackground", typeof(Brush), typeof(ObjectInfoView), new PropertyMetadata(Brushes.Transparent));
 
         public static readonly DependencyProperty LinkCommandProperty =
-                    DependencyProperty.Register("LinkCommand", typeof(ICommand), typeof(ObjectInfoView));
+            DependencyProperty.Register("LinkCommand", typeof(ICommand), typeof(ObjectInfoView));
+
+        public static readonly DependencyProperty UriCommandProperty =
+            DependencyProperty.Register("UriCommand", typeof(ICommand), typeof(ObjectInfoView));
 
         public Thickness CellPadding
         {
@@ -56,6 +59,12 @@ namespace Astrarium.Views
         {
             get { return (ICommand)GetValue(LinkCommandProperty); }
             set { SetValue(LinkCommandProperty, value); }
+        }
+
+        public ICommand UriCommand
+        {
+            get { return (ICommand)GetValue(UriCommandProperty); }
+            set { SetValue(UriCommandProperty, value); }
         }
 
         public ObjectInfoView()
@@ -108,7 +117,7 @@ namespace Astrarium.Views
                             Grid.SetColumn(cellCaption, 0);
 
                             if (p.Value is Date date && date != null && !double.IsInfinity(date.Day) && !double.IsNaN(date.Day))
-                            { 
+                            {
                                 Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                                 link.Inlines.Add(formatter.Format(p.Value));
                                 link.Click += (s, e) => LinkClicked(date.ToJulianEphemerisDay());
@@ -127,6 +136,21 @@ namespace Astrarium.Views
                         }
                         break;
 
+                    case InfoElementLink L:
+                        {
+                            var cellCaption = new TextBlock() { Text = L.Caption, Padding = CellPadding };
+                            tblInfo.Children.Add(cellCaption);
+                            Grid.SetRow(cellCaption, r);
+                            Grid.SetColumn(cellCaption, 0);
+                            Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
+                            link.Inlines.Add(L.UriText);
+                            link.Click += (s, e) => UriClicked(L.Uri);
+                            var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
+                            tblInfo.Children.Add(cellValue);
+                            Grid.SetRow(cellValue, r);
+                            Grid.SetColumn(cellValue, 1);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -140,6 +164,11 @@ namespace Astrarium.Views
         private void LinkClicked(double jd)
         {
             LinkCommand?.Execute(jd);
+        }
+
+        private void UriClicked(Uri uri)
+        {
+            UriCommand?.Execute(uri);
         }
     }
 }

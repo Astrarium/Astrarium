@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Astrarium.Plugins.Satellites
 {
@@ -75,6 +76,12 @@ namespace Astrarium.Plugins.Satellites
             var hor = s.Equatorial.ToHorizontal(c.GeoLocation, c.SiderealTime);
             //bool isEclipsed = Norad.IsSatelliteEclipsed(s)
 
+            string heavensAboveBaseUri = "https://heavens-above.com/";
+            string heavensAboveQuery = "?satid=" + Uri.EscapeDataString(s.Tle.SatelliteNumber) + $"&lat={c.GeoLocation.Latitude.ToString(CultureInfo.InvariantCulture)}&lng={c.GeoLocation.Longitude.ToString(CultureInfo.InvariantCulture)}";
+
+            string n2yoBaseUri = "https://www.n2yo.com/";
+            string n2yoQuery = $"?s={s.Tle.SatelliteNumber}";
+
             info
                 .SetTitle(string.Join(", ", s.Names))
                 .SetSubtitle(Text.Get("Satellite.Type"))
@@ -92,6 +99,18 @@ namespace Astrarium.Plugins.Satellites
 
                 .AddHeader(Text.Get("Satellite.Characteristics"))
                 .AddRow("Magnitude", Formatters.Magnitude.Format(s.Magnitude) + " ()", Formatters.Simple)
+                
+                .AddHeader("Heavens Above")
+                .AddRow("Satellite info", new Uri(heavensAboveBaseUri + "satinfo.aspx" + heavensAboveQuery), "Show")
+                .AddRow("Orbit", new Uri(heavensAboveBaseUri + "orbit.aspx" + heavensAboveQuery), "Show")
+                .AddRow("Passes", new Uri(heavensAboveBaseUri + "PassSummary.aspx" + heavensAboveQuery), "Show")
+                .AddRow("Close encounters", new Uri(heavensAboveBaseUri + "CloseEncounters.aspx" + heavensAboveQuery), "Show")
+                //.AddRow("COSPAR ID", new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
+
+                .AddHeader("N2YO")
+                .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), "Show")
+                .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), "Show")
+                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), "Show")
                 ;
             /*
                 AddText(Program.Language["FormObjectInfo.Magnitude"], s.IsEclipsed ? "В тени" : ((double)(s.Mag)).ToStringMagnitude());
@@ -154,18 +173,10 @@ namespace Astrarium.Plugins.Satellites
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Satellites
-                .Where(s => IsSatelliteNameMatch(s, searchString))
+                .Where(s => s.Names.Any(n => n.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >=0 ))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
-        }
-
-        private bool IsSatelliteNameMatch(Satellite s, string searchString)
-        {
-            if (searchString.Equals(s.CommonName, StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            return s.Names.Any(n => n.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private ICollection<Satellite> LoadSatellites(string file)

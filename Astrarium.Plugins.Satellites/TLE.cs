@@ -71,17 +71,21 @@ namespace Astrarium.Plugins.Satellites
             try
             {
                 SatelliteNumber = line1.Substring(2, 5).Trim();
-                InternationalDesignator = line1.Substring(9, 8).Trim();
+
+                int launchYear = Convert.ToInt32(line1.Substring(9, 2));
+                if (launchYear >= 57 && launchYear <= 99) launchYear += 1900;
+                else launchYear += 2000;
+
+                InternationalDesignator = $"{launchYear}-{line1.Substring(11, 6).Trim()}";
 
                 // 57-99 correspond to 1957-1999 and those from 
                 // 00-56 correspond to 2000-2056
-                int year = Convert.ToInt32(line1.Substring(18, 2));
+                int epochYear = Convert.ToInt32(line1.Substring(18, 2));
+                if (epochYear >= 57 && epochYear <= 99) epochYear += 1900;
+                else epochYear += 2000;
+
                 double day = Convert.ToDouble(line1.Substring(20, 12).Trim(), CultureInfo.InvariantCulture);
-
-                if (year >= 57 && year <= 99) year += 1900;
-                else year += 2000;
-
-                Epoch = Date.JulianDay0(year) + day;
+                Epoch = Date.JulianDay0(epochYear) + day;
 
                 string bstar = line1.Substring(53, 8);
                 int bstar_sgn = (bstar[0] == '-') ? -1 : 1;

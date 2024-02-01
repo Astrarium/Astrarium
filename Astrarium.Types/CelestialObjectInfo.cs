@@ -97,6 +97,17 @@ namespace Astrarium.Types
             });
             return this;
         }
+
+        public CelestialObjectInfo<T> AddRow(string text, Uri uri, string uriText)
+        {
+            InfoElements.Add(new InfoElementLink()
+            {
+                Caption = text,
+                Uri = uri,
+                UriText = uriText
+            });
+            return this;
+        }
     }
 
     public abstract class InfoElement { }
@@ -112,5 +123,12 @@ namespace Astrarium.Types
         public string Caption { get; set; }
         public object Value { get; set; }
         public string StringValue { get { return Formatter.Format(Value); } }
+    }
+
+    public class InfoElementLink : InfoElement
+    {
+        public string Caption { get; set; }
+        public Uri Uri { get; set; }
+        public string UriText { get; set; }
     }
 }
