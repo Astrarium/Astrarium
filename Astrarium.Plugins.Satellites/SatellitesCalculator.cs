@@ -76,11 +76,13 @@ namespace Astrarium.Plugins.Satellites
             var hor = s.Equatorial.ToHorizontal(c.GeoLocation, c.SiderealTime);
             //bool isEclipsed = Norad.IsSatelliteEclipsed(s)
 
-            string heavensAboveBaseUri = "https://heavens-above.com/";
-            string heavensAboveQuery = "?satid=" + Uri.EscapeDataString(s.Tle.SatelliteNumber) + $"&lat={c.GeoLocation.Latitude.ToString(CultureInfo.InvariantCulture)}&lng={c.GeoLocation.Longitude.ToString(CultureInfo.InvariantCulture)}";
+            string haBaseUri = "https://heavens-above.com/";
+            string haQuery = "?satid=" + Uri.EscapeDataString(s.Tle.SatelliteNumber) + $"&lat={c.GeoLocation.Latitude.ToString(CultureInfo.InvariantCulture)}&lng={(-c.GeoLocation.Longitude).ToString(CultureInfo.InvariantCulture)}";
 
             string n2yoBaseUri = "https://www.n2yo.com/";
             string n2yoQuery = $"?s={s.Tle.SatelliteNumber}";
+
+            string openInBrowser = "Show 🡥";
 
             info
                 .SetTitle(string.Join(", ", s.Names))
@@ -96,21 +98,35 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Horizontal.Azimuth", hor.Azimuth)
                 .AddRow("Horizontal.Altitude", hor.Altitude)
 
-
                 .AddHeader(Text.Get("Satellite.Characteristics"))
-                .AddRow("Magnitude", Formatters.Magnitude.Format(s.Magnitude) + " ()", Formatters.Simple)
-                
+                .AddRow("Magnitude", s.Magnitude, Formatters.Magnitude)
+                .AddRow("Topocentric position vector", s.Position, Formatters.Simple) // TODO: calculate
+                .AddRow("Geocentric position vector", s.Position, Formatters.Simple)
+                .AddRow("Geocentric velocity vector", s.Velocity, Formatters.Simple)
+
+                .AddHeader("Alternate names")
+                .AddRow("Satellite number (SATCAT ID)", new Uri("https://celestrak.org/satcat/table-satcat.php?CATNR=" + Uri.EscapeDataString(s.Tle.SatelliteNumber)), s.Tle.SatelliteNumber)
+                .AddRow("Int. designator (COSPAR ID)", new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
+
+                .AddHeader("Orbital data")
+                .AddRow("Epoch", s.Tle.Epoch, Formatters.JulianDay)
+                .AddRow("Inclination", s.Tle.Inclination, Formatters.Inclination)
+                .AddRow("Eccentricity", s.Tle.Eccentricity, Formatters.Simple)
+                .AddRow("Argument of perigee", s.Tle.ArgumentOfPerigee, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
+                .AddRow("Longitude of ascending node", s.Tle.LongitudeAscNode, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
+                .AddRow("Mean anomaly", s.Tle.MeanAnomaly, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
+                .AddRow("Period", TimeSpan.FromMinutes(s.Tle.Period), Formatters.TimeSpan)
+
                 .AddHeader("Heavens Above")
-                .AddRow("Satellite info", new Uri(heavensAboveBaseUri + "satinfo.aspx" + heavensAboveQuery), "Show")
-                .AddRow("Orbit", new Uri(heavensAboveBaseUri + "orbit.aspx" + heavensAboveQuery), "Show")
-                .AddRow("Passes", new Uri(heavensAboveBaseUri + "PassSummary.aspx" + heavensAboveQuery), "Show")
-                .AddRow("Close encounters", new Uri(heavensAboveBaseUri + "CloseEncounters.aspx" + heavensAboveQuery), "Show")
-                //.AddRow("COSPAR ID", new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
+                .AddRow("Satellite info", new Uri(haBaseUri + "satinfo.aspx" + haQuery), openInBrowser)
+                .AddRow("Orbit", new Uri(haBaseUri + "orbit.aspx" + haQuery), openInBrowser)
+                .AddRow("Passes", new Uri(haBaseUri + "PassSummary.aspx" + haQuery), openInBrowser)
+                .AddRow("Close encounters", new Uri(haBaseUri + "CloseEncounters.aspx" + haQuery), openInBrowser)
 
                 .AddHeader("N2YO")
-                .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), "Show")
-                .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), "Show")
-                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), "Show")
+                .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), openInBrowser)
+                .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), openInBrowser)
+                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser)
                 ;
             /*
                 AddText(Program.Language["FormObjectInfo.Magnitude"], s.IsEclipsed ? "В тени" : ((double)(s.Mag)).ToStringMagnitude());

@@ -492,5 +492,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
         public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
+        public static readonly IEphemFormatter JulianDay = new UnsignedDoubleFormatter(6, " JDE");
+        public static readonly IEphemFormatter Inclination = new UnsignedDoubleFormatter(2, "\u00B0");
     }
 }

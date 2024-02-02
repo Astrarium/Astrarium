@@ -12,6 +12,23 @@
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="HoverPropertyStyle" x:Name="HoverPropertyStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Style.Setters>
+                    <Setter Property="Padding" Value="4" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -23,20 +40,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
+            <TextBlock Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding CopyNameCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
-                                <Setter Property="Cursor" Value="Hand" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
             </TextBlock>
         </StackPanel>
                 

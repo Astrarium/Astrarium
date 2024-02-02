@@ -86,6 +86,8 @@ namespace Astrarium.Views
             var fontFamily = new FontFamily("Lucida Console");
             var fontSize = 12;
 
+            var hoverStyle = this.FindResource("HoverPropertyStyle") as Style;
+
             tblInfo.RowDefinitions.Clear();
             tblInfo.Children.Clear();
             int r = 0;
@@ -128,7 +130,8 @@ namespace Astrarium.Views
                             }
                             else
                             {
-                                var cellValue = new TextBlock() { Text = formatter.Format(p.Value), Padding = CellPadding, FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center };
+                                var cellValue = new TextBlock() { ToolTip = Text.Get("ObjectInfoWindow.ObjectInfoWindow.CopyValueHint"), Text = formatter.Format(p.Value), FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center, Style = hoverStyle };
+                                cellValue.MouseLeftButtonDown += (s, o) => PropertyClicked(p.Value); 
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);
                                 Grid.SetColumn(cellValue, 1);
@@ -145,6 +148,7 @@ namespace Astrarium.Views
                             Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                             link.Inlines.Add(L.UriText);
                             link.Click += (s, e) => UriClicked(L.Uri);
+                            link.ToolTip = L.Uri;
                             var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
                             Grid.SetRow(cellValue, r);
@@ -169,6 +173,19 @@ namespace Astrarium.Views
         private void UriClicked(Uri uri)
         {
             UriCommand?.Execute(uri);
+        }
+
+        private void PropertyClicked(object value)
+        {
+            // TODO: move to VM
+            try
+            {
+                Clipboard.SetDataObject(value);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to copy object name. Reason: {ex.Message}");
+            }
         }
     }
 }

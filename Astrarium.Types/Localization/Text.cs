@@ -56,8 +56,10 @@ namespace Astrarium.Types
 
         public static CultureInfo GetCurrentLocale() => currentCulture;
 
-        public static void SetLocale(CultureInfo culture)
+        public static void SetLocale(CultureInfo locale)
         {
+            CultureInfo culture = new CultureInfo(locale.Name, true);
+            culture.NumberFormat = NumberFormatInfo.InvariantInfo;
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
 

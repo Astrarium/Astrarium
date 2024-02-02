@@ -480,6 +480,11 @@ namespace Astrarium.Types
         }
 
         public double Length => Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+
+        public override string ToString()
+        {
+            return $"{{ {v[0]:F2}, {v[1]:F2}, {v[2]:F2} }}";
+        }
     }
 
     public class Vec4
