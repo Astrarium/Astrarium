@@ -20,6 +20,8 @@ namespace Astrarium.ViewModels
         private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly ISettings settings;
+        // TODO: make an interface?
+        private readonly UIElementsIntegration uiIntegration;
         private readonly IAppUpdater appUpdater;
         private readonly IDonationsHelper donations;
 
@@ -160,6 +162,7 @@ namespace Astrarium.ViewModels
             this.sky = sky;
             this.map = map;
             this.settings = settings;
+            this.uiIntegration = uiIntegration;
             this.donations = donations;
             this.appUpdater = appUpdater;
 
@@ -952,6 +955,16 @@ namespace Astrarium.ViewModels
                 if (info != null)
                 {
                     var vm = new ObjectInfoVM(info);
+                    foreach (var ext in uiIntegration.ObjectInfoExtensions)
+                    {
+                        var content = ext.Invoke(body);
+                        if (content != null)
+                        {
+                            // TODO: take header from ObjectInfoExtensions
+                            vm.AddExtension("header", content);
+                        }
+                    }
+
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.SetDate(vm.JulianDay);

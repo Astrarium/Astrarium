@@ -2,18 +2,11 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Astrarium.Views
 {
@@ -22,38 +15,11 @@ namespace Astrarium.Views
     /// </summary>
     public partial class ObjectInfoView : UserControl
     {
-        public static readonly DependencyProperty CellPaddingProperty =
-            DependencyProperty.Register("CellPadding", typeof(Thickness), typeof(ObjectInfoView), new PropertyMetadata(new Thickness(4, 0, 8, 2)));
-
-        public static readonly DependencyProperty HeaderPaddingProperty =
-            DependencyProperty.Register("HeaderPadding", typeof(Thickness), typeof(ObjectInfoView), new PropertyMetadata(new Thickness(4, 16, 4, 4)));
-
-        public static readonly DependencyProperty HeaderBackgroundProperty =
-            DependencyProperty.Register("HeaderBackground", typeof(Brush), typeof(ObjectInfoView), new PropertyMetadata(Brushes.Transparent));
-
         public static readonly DependencyProperty LinkCommandProperty =
             DependencyProperty.Register("LinkCommand", typeof(ICommand), typeof(ObjectInfoView));
 
         public static readonly DependencyProperty UriCommandProperty =
             DependencyProperty.Register("UriCommand", typeof(ICommand), typeof(ObjectInfoView));
-
-        public Thickness CellPadding
-        {
-            get { return (Thickness)GetValue(CellPaddingProperty); }
-            set { SetValue(CellPaddingProperty, value); }
-        }
-
-        public Thickness HeaderPadding
-        {
-            get { return (Thickness)GetValue(HeaderPaddingProperty); }
-            set { SetValue(HeaderPaddingProperty, value); }
-        }
-
-        public Brush HeaderBackground
-        {
-            get { return (Brush)GetValue(HeaderBackgroundProperty); }
-            set { SetValue(HeaderBackgroundProperty, value); }
-        }
 
         public ICommand LinkCommand
         {
@@ -87,6 +53,8 @@ namespace Astrarium.Views
             var fontSize = 12;
 
             var hoverStyle = this.FindResource("HoverPropertyStyle") as Style;
+            var cellPadding = new Thickness(4, 0, 8, 2);
+            var headerMargin = new Thickness(4, 16, 4, 4);
 
             tblInfo.RowDefinitions.Clear();
             tblInfo.Children.Clear();
@@ -101,7 +69,7 @@ namespace Astrarium.Views
                 {
                     case InfoElementHeader h:
                         {
-                            var cell = new TextBlock() { Text = h.Text, Margin = HeaderPadding, FontWeight = FontWeights.Bold, Background = HeaderBackground };
+                            var cell = new TextBlock() { Text = h.Text, Margin = headerMargin, FontWeight = FontWeights.Bold, Background = Brushes.Transparent };
                             tblInfo.Children.Add(cell);
                             Grid.SetRow(cell, r);
                             Grid.SetColumn(cell, 0);
@@ -113,7 +81,7 @@ namespace Astrarium.Views
                         {
                             formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
 
-                            var cellCaption = new TextBlock() { Text = p.Caption, Padding = CellPadding };
+                            var cellCaption = new TextBlock() { Text = p.Caption, Padding = cellPadding };
                             tblInfo.Children.Add(cellCaption);
                             Grid.SetRow(cellCaption, r);
                             Grid.SetColumn(cellCaption, 0);
@@ -123,7 +91,7 @@ namespace Astrarium.Views
                                 Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                                 link.Inlines.Add(formatter.Format(p.Value));
                                 link.Click += (s, e) => LinkClicked(date.ToJulianEphemerisDay());
-                                var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
+                                var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);
                                 Grid.SetColumn(cellValue, 1);
@@ -141,7 +109,7 @@ namespace Astrarium.Views
 
                     case InfoElementLink L:
                         {
-                            var cellCaption = new TextBlock() { Text = L.Caption, Padding = CellPadding };
+                            var cellCaption = new TextBlock() { Text = L.Caption, Padding = cellPadding };
                             tblInfo.Children.Add(cellCaption);
                             Grid.SetRow(cellCaption, r);
                             Grid.SetColumn(cellCaption, 0);
@@ -149,7 +117,7 @@ namespace Astrarium.Views
                             link.Inlines.Add(L.UriText);
                             link.Click += (s, e) => UriClicked(L.Uri);
                             link.ToolTip = L.Uri;
-                            var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
+                            var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
                             Grid.SetRow(cellValue, r);
                             Grid.SetColumn(cellValue, 1);

@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:Astrarium.Views"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="{t:Text ObjectInfoWindow.Title}" 
         Width="600" Height="600"
@@ -33,7 +33,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -49,24 +48,46 @@
                 
         <Label FontSize="8" Grid.Row="1" Content="{Binding Subtitle}" />
         
-        <Separator Grid.Row="2" Height="1" />
+        <TabControl 
+            ItemsSource="{Binding Tabs}" 
+            SelectedIndex="0" Grid.Row="2" Margin="-2 0">
 
-        <ScrollViewer
-            Grid.Row="3"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Auto">
-            <v:ObjectInfoView 
-                DataContext="{Binding InfoElements}"
-                CellPadding="4 0 8 2"
-                HeaderPadding="4 16 4 4"
-                HeaderBackground="Transparent"
-                LinkCommand="{Binding DataContext.LinkClickedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type v:ObjectInfoWindow}}}"
-                UriCommand="{Binding DataContext.UriClickedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type v:ObjectInfoWindow}}}">
-            </v:ObjectInfoView>
-        </ScrollViewer>
+            <!-- Header -->
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Padding="2" Text="{Binding Header}" />
+                </DataTemplate>
+            </TabControl.ItemTemplate>
 
-        <Separator Grid.Row="4" Height="1" />
-        <StackPanel Grid.Row="5"                    
+            <!-- Header style: hide header by demand -->
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                    <Style.Setters>
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                    </Style.Setters>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsHeaderVisible}" Value="false">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.ItemContainerStyle>
+            
+            <!-- Tab content -->
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ScrollViewer
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Auto" 
+                        Content="{Binding Content}">
+                    </ScrollViewer>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+
+        <Separator Grid.Row="3" Height="1" />
+        <StackPanel Grid.Row="4"           
+                    Margin="0 4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button MinWidth="80" Command="{Binding CloseCommand}" Content="{t:Text Close}" />

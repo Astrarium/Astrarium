@@ -212,6 +212,9 @@ namespace Astrarium
                     // add menu items
                     uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
+                    // add object info extensions
+                    uiIntegration.ObjectInfoExtensions.AddRange(plugin.ObjectInfoExtensions);
+
                     plugins.Add(plugin);
                 }
                 catch (Exception ex)

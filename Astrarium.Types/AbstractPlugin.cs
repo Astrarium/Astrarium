@@ -29,7 +29,12 @@ namespace Astrarium.Types
         /// Gets configurations of menu items
         /// </summary>
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
-        
+
+        /// <summary>
+        /// Gets collection of extensions for Object Info Window.
+        /// </summary>
+        public List<Func<CelestialObject, FrameworkElement>> ObjectInfoExtensions { get; } = new List<Func<CelestialObject, FrameworkElement>>();
+
         /// <summary>
         /// Exports resource dictionaries to the application
         /// </summary>
@@ -43,13 +48,18 @@ namespace Astrarium.Types
             }
         }
 
+        protected void ExtendObjectInfo(Func<CelestialObject, FrameworkElement> extension)
+        {
+            ObjectInfoExtensions.Add(extension);
+        }
+
         /// <summary>
         /// Defines a setting with specified name and default value.
         /// </summary>
         /// <param name="name">Unique setting name.</param>
         /// <param name="defaultValue">Default setting name.</param>
         /// <param name="isPermanent">Flag indicating the setting should not be resetted.</param>
-        public void DefineSetting(string name, object defaultValue, bool isPermanent = false)
+        protected void DefineSetting(string name, object defaultValue, bool isPermanent = false)
         {
             SettingDefinitions.Add(new SettingDefinition(name, defaultValue, isPermanent));
         }
@@ -59,7 +69,7 @@ namespace Astrarium.Types
         /// </summary>
         /// <typeparam name="TSectionControl">Type of UI control responsive for displaying settings.</typeparam>
         /// <typeparam name="TViewModel">Type of ViewModel for the UI control.</typeparam>
-        public void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
+        protected void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
         {
             SettingSections.Add(new SettingSectionDefinition(typeof(TSectionControl), typeof(TViewModel)));
         }

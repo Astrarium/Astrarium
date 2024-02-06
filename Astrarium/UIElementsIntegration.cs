@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Astrarium
 {
@@ -18,6 +19,7 @@ namespace Astrarium
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
         public List<SettingDefinition> SettingDefinitions { get; } = new List<SettingDefinition>();
         public List<SettingSectionDefinition> SettingSections { get; } = new List<SettingSectionDefinition>();
+        public List<Func<CelestialObject, FrameworkElement>> ObjectInfoExtensions { get; } = new List<Func<CelestialObject, FrameworkElement>>();
 
         public UIElementsIntegration()
         {

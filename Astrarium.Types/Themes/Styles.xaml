@@ -76,7 +76,7 @@
     <!--#endregion-->
 
     <!--#region TabControl-->
-    <Style x:Key="NormalTabItem" TargetType="{x:Type TabItem}">
+    <Style TargetType="{x:Type TabItem}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource TabItemFocusVisual}"/>
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="Padding" Value="6 1 6 1"/>
