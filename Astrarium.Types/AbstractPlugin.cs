@@ -33,7 +33,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Gets collection of extensions for Object Info Window.
         /// </summary>
-        public List<Func<CelestialObject, FrameworkElement>> ObjectInfoExtensions { get; } = new List<Func<CelestialObject, FrameworkElement>>();
+        public List<ObjectInfoExtension> ObjectInfoExtensions { get; } = new List<ObjectInfoExtension>();
 
         /// <summary>
         /// Exports resource dictionaries to the application
@@ -48,9 +48,9 @@ namespace Astrarium.Types
             }
         }
 
-        protected void ExtendObjectInfo(Func<CelestialObject, FrameworkElement> extension)
+        protected void ExtendObjectInfo(string title, Func<CelestialObject, FrameworkElement> viewProvider)
         {
-            ObjectInfoExtensions.Add(extension);
+            ObjectInfoExtensions.Add(new ObjectInfoExtension(title, viewProvider));
         }
 
         /// <summary>

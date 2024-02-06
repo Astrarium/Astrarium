@@ -52,22 +52,6 @@ namespace Astrarium.Plugins.Planner
             contextMenu.AddBinding(new SimpleBinding(this, nameof(IsPlannerConstextMenuEnabled), nameof(MenuItem.IsEnabled)));
             contextMenu.AddBinding(new SimpleBinding(this, nameof(ActivePlansMenuItems), nameof(MenuItem.SubItems)));
             MenuItems.Add(MenuItemPosition.ContextMenu, contextMenu);
-
-            /* Object info window extensions */
-            ExtendObjectInfo((CelestialObject body) =>
-            {
-                if (body.Type == "Sun")
-                {
-                    var panel = new System.Windows.Controls.StackPanel() { Orientation = System.Windows.Controls.Orientation.Vertical };
-                    panel.Children.Add(new System.Windows.Controls.TextBlock() { Text = "Hello" });
-                    panel.Children.Add(new System.Windows.Controls.TextBlock() { Text = "from plugin" });
-                    return panel;
-                }
-                else
-                {
-                    return null;
-                }
-            });
         }
 
         public override void Initialize()

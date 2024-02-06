@@ -21,6 +21,9 @@ namespace Astrarium.Views
         public static readonly DependencyProperty UriCommandProperty =
             DependencyProperty.Register("UriCommand", typeof(ICommand), typeof(ObjectInfoView));
 
+        public static readonly DependencyProperty PropertyValueClickedCommandProperty =
+            DependencyProperty.Register("PropertyValueClickedCommand", typeof(ICommand), typeof(ObjectInfoView));
+
         public ICommand LinkCommand
         {
             get { return (ICommand)GetValue(LinkCommandProperty); }
@@ -31,6 +34,12 @@ namespace Astrarium.Views
         {
             get { return (ICommand)GetValue(UriCommandProperty); }
             set { SetValue(UriCommandProperty, value); }
+        }
+
+        public ICommand PropertyValueClickedCommand
+        {
+            get { return (ICommand)GetValue(PropertyValueClickedCommandProperty); }
+            set { SetValue(PropertyValueClickedCommandProperty, value); }
         }
 
         public ObjectInfoView()
@@ -98,8 +107,8 @@ namespace Astrarium.Views
                             }
                             else
                             {
-                                var cellValue = new TextBlock() { ToolTip = Text.Get("ObjectInfoWindow.ObjectInfoWindow.CopyValueHint"), Text = formatter.Format(p.Value), FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center, Style = hoverStyle };
-                                cellValue.MouseLeftButtonDown += (s, o) => PropertyClicked(p.Value); 
+                                var cellValue = new TextBlock() { ToolTip = Text.Get("ObjectInfoWindow.CopyValueHint"), Text = formatter.Format(p.Value), FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Style = hoverStyle };
+                                cellValue.MouseLeftButtonDown += (s, o) => PropertyClicked(p.Value);
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);
                                 Grid.SetColumn(cellValue, 1);
@@ -145,15 +154,7 @@ namespace Astrarium.Views
 
         private void PropertyClicked(object value)
         {
-            // TODO: move to VM
-            try
-            {
-                Clipboard.SetDataObject(value);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Unable to copy object name. Reason: {ex.Message}");
-            }
+            PropertyValueClickedCommand?.Execute(value);
         }
     }
 }

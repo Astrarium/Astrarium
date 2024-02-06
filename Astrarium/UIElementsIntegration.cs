@@ -19,7 +19,7 @@ namespace Astrarium
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
         public List<SettingDefinition> SettingDefinitions { get; } = new List<SettingDefinition>();
         public List<SettingSectionDefinition> SettingSections { get; } = new List<SettingSectionDefinition>();
-        public List<Func<CelestialObject, FrameworkElement>> ObjectInfoExtensions { get; } = new List<Func<CelestialObject, FrameworkElement>>();
+        public List<ObjectInfoExtension> ObjectInfoExtensions { get; } = new List<ObjectInfoExtension>();
 
         public UIElementsIntegration()
         {

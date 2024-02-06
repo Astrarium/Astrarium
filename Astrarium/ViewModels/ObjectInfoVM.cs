@@ -21,6 +21,7 @@ namespace Astrarium.ViewModels
         public ICommand CopyNameCommand { get; private set; }
         public ICommand LinkClickedCommand { get; private set; }
         public ICommand UriClickedCommand { get; private set; }
+        public ICommand PropertyValueClickedCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
         public IList<ObjectInfoTabViewModel> Tabs { get; private set; } = new List<ObjectInfoTabViewModel>();
@@ -30,13 +31,23 @@ namespace Astrarium.ViewModels
             Title = info.Title;
             Subtitle = info.Subtitle;
 
-            // add general info tab by default
-            Tabs.Add(new ObjectInfoTabViewModel("GENERAL", new ObjectInfoView() { DataContext = info.InfoElements }) { IsHeaderVisible = false });
-
             CopyNameCommand = new Command(CopyName);
             LinkClickedCommand = new Command<double>(SelectJulianDay);
             UriClickedCommand = new Command<Uri>(NavigateToUri);
+            PropertyValueClickedCommand = new Command<object>(PropertyValueClicked);
             CloseCommand = new Command(Close);
+
+            // add general info tab by default
+            Tabs.Add(new ObjectInfoTabViewModel(
+                Text.Get("ObjectInfoWindow.Tab.Info"),
+                new ObjectInfoView() { 
+                    DataContext = info.InfoElements,
+                    UriCommand = UriClickedCommand,
+                    LinkCommand = LinkClickedCommand,
+                    PropertyValueClickedCommand = PropertyValueClickedCommand
+                }) { IsHeaderVisible = false });
+
+            
         }
 
         public void AddExtension(string header, FrameworkElement extension)
@@ -60,6 +71,18 @@ namespace Astrarium.ViewModels
             catch (Exception ex)
             {
                 Log.Error("Unable to open browser: " + ex);
+            }
+        }
+
+        private void PropertyValueClicked(object value)
+        {
+            try
+            {
+                Clipboard.SetText(value.ToString(), TextDataFormat.UnicodeText);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to copy property value. Reason: {ex.Message}");
             }
         }
 

@@ -2,12 +2,14 @@
 using Astrarium.Plugins.Journal.Types;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
+using System.Data.Entity;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows;
 
 namespace Astrarium.Plugins.Journal
 {
@@ -44,6 +46,35 @@ namespace Astrarium.Plugins.Journal
             menuItemJournal.SubItems.Add(new MenuItem("Export to OAL file...", new Command(DoExport)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
+
+            /* Object info window extensions */
+            ExtendObjectInfo("Observations", (CelestialObject body) =>
+            {
+                var panel = new System.Windows.Controls.StackPanel() { Orientation = System.Windows.Controls.Orientation.Vertical };
+
+                Task.Run(() =>
+                {
+                    using (var db = new DatabaseContext())
+                    {
+                        var observations = db.Observations.Include(x => x.Target).Where(x =>
+                            x.Target.CommonName == body.CommonName &&
+                            x.Target.Type == body.Type
+                        ).ToArray();
+
+                        if (observations.Any())
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                panel.Children.Add(new System.Windows.Controls.TextBlock() { Text = "Count of observations of " + body.Names.First() });
+                                panel.Children.Add(new System.Windows.Controls.TextBlock() { Text = observations.Length.ToString() });
+                            });
+                        }
+
+                    }
+                });
+
+                return panel;
+            });
 
             // this will avoid first slow call
             Task.Run(() =>

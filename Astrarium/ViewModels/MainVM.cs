@@ -957,11 +957,10 @@ namespace Astrarium.ViewModels
                     var vm = new ObjectInfoVM(info);
                     foreach (var ext in uiIntegration.ObjectInfoExtensions)
                     {
-                        var content = ext.Invoke(body);
+                        var content = ext.ViewProvider.Invoke(body);
                         if (content != null)
                         {
-                            // TODO: take header from ObjectInfoExtensions
-                            vm.AddExtension("header", content);
+                            vm.AddExtension(ext.Title, content);
                         }
                     }
 
