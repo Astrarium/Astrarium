@@ -298,7 +298,7 @@ namespace Astrarium.Types
                 this.units = units;
             }
 
-            public string Format(object value)
+            public virtual string Format(object value)
             {
                 if (value == null) return null;
 
@@ -326,7 +326,7 @@ namespace Astrarium.Types
                 this.units = units;
             }
 
-            public string Format(object value)
+            public virtual string Format(object value)
             {
                 if ((value == null) ||
                     (value is DBNull) ||

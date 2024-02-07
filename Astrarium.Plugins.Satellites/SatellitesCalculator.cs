@@ -13,9 +13,11 @@ namespace Astrarium.Plugins.Satellites
 {
     public class SatellitesCalculator : BaseCalc, ICelestialObjectCalc<Satellite>
     {
+        private const double AU = 149597870.691;
+
         public ICollection<Satellite> Satellites { get; private set; }
 
-        public CrdsRectangular SunRectangular { get; private set; }
+        public Vec3 SunVector{ get; private set; }
 
         /// <inheritdoc />
         public IEnumerable<Satellite> GetCelestialObjects() => Satellites;
@@ -45,7 +47,8 @@ namespace Astrarium.Plugins.Satellites
             var eq = SunEquatorial.Invoke(context);
             var ecl = eq.ToEcliptical(context.Epsilon);
             ecl.Distance = 1;
-            SunRectangular = ecl.ToRectangular(context.Epsilon);
+            var r = ecl.ToRectangular(context.Epsilon);
+            SunVector = AU * new Vec3(r.X, r.Y, r.Z);
 
             // To reduce CPU load, it's enough to calculate
             // satellites positions once in 5 minutes
@@ -62,9 +65,26 @@ namespace Astrarium.Plugins.Satellites
             }
         }
 
+        public Vec3 GetTopocentricLocationVector(SkyContext context)
+        {
+            return Norad.TopocentricLocationVector(context.GeoLocation, context.SiderealTime);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<Satellite> e)
         {
             // Satellites does not provide epheremeris
+        }
+
+        private class SatelliteMagnitudeFormatter : Formatters.SignedDoubleFormatter
+        {
+            public SatelliteMagnitudeFormatter() : base(1, "ᵐ") { }
+            public override string Format(object value)
+            {
+                if (value == null)
+                    return "[В тени]";
+                else
+                    return base.Format(value);
+            }
         }
 
         public void GetInfo(CelestialObjectInfo<Satellite> info)
@@ -72,9 +92,20 @@ namespace Astrarium.Plugins.Satellites
             Satellite s = info.Body;
             SkyContext c = info.Context;
 
-            var eq = s.Equatorial;
-            var hor = s.Equatorial.ToHorizontal(c.GeoLocation, c.SiderealTime);
-            //bool isEclipsed = Norad.IsSatelliteEclipsed(s)
+            double deltaTime = (c.JulianDay - JulianDay) * 24;
+
+            // current satellite position vector
+            Vec3 vecGeocentric = s.Position + deltaTime * s.Velocity;
+
+            Vec3 topocentricLocationVector = GetTopocentricLocationVector(c);
+            Vec3 vecTopocentric = Norad.TopocentricSatelliteVector(topocentricLocationVector, vecGeocentric);
+
+            // coordinates of the satellite
+            var hor = Norad.HorizontalCoordinates(c.GeoLocation, vecTopocentric, c.SiderealTime);
+            var eq = hor.ToEquatorial(c.GeoLocation, c.SiderealTime);
+
+            bool isEclipsed = Norad.IsSatelliteEclipsed(vecGeocentric, SunVector);
+            double ssoAngle = Angle.ToDegrees((-1 * vecTopocentric).Angle(SunVector - vecTopocentric));
 
             string haBaseUri = "https://heavens-above.com/";
             string haQuery = "?satid=" + Uri.EscapeDataString(s.Tle.SatelliteNumber) + $"&lat={c.GeoLocation.Latitude.ToString(CultureInfo.InvariantCulture)}&lng={(-c.GeoLocation.Longitude).ToString(CultureInfo.InvariantCulture)}";
@@ -82,7 +113,7 @@ namespace Astrarium.Plugins.Satellites
             string n2yoBaseUri = "https://www.n2yo.com/";
             string n2yoQuery = $"?s={s.Tle.SatelliteNumber}";
 
-            string openInBrowser = "Show 🡥";
+            string openInBrowser = "Open";
 
             info
                 .SetTitle(string.Join(", ", s.Names))
@@ -99,9 +130,11 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Horizontal.Altitude", hor.Altitude)
 
                 .AddHeader(Text.Get("Satellite.Characteristics"))
-                .AddRow("Magnitude", s.Magnitude, Formatters.Magnitude)
-                .AddRow("Topocentric position vector", s.Position, Formatters.Simple) // TODO: calculate
-                .AddRow("Geocentric position vector", s.Position, Formatters.Simple)
+                .AddRow("Magnitude", isEclipsed ? (float?)null : s.Magnitude, new SatelliteMagnitudeFormatter())
+                .AddRow("Distance", 0) // TODO, distance from Earth in km
+                .AddRow("S-S-O angle", ssoAngle, new Formatters.UnsignedDoubleFormatter(1, "\u00B0"))
+                .AddRow("Topocentric position vector", vecTopocentric, Formatters.Simple)
+                .AddRow("Geocentric position vector", vecGeocentric, Formatters.Simple)
                 .AddRow("Geocentric velocity vector", s.Velocity, Formatters.Simple)
 
                 .AddHeader("Alternate names")
@@ -116,6 +149,9 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Longitude of ascending node", s.Tle.LongitudeAscNode, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
                 .AddRow("Mean anomaly", s.Tle.MeanAnomaly, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
                 .AddRow("Period", TimeSpan.FromMinutes(s.Tle.Period), Formatters.TimeSpan)
+                .AddRow("Apogee", Norad.GetSatelliteApogee(s.Tle))
+                .AddRow("Perigee", Norad.GetSatellitePerigee(s.Tle))
+                .AddRow("Orbital data age", TimeSpan.FromDays(c.JulianDay - s.Tle.Epoch), Formatters.TimeSpan)
 
                 .AddHeader("Heavens Above")
                 .AddRow("Satellite info", new Uri(haBaseUri + "satinfo.aspx" + haQuery), openInBrowser)
@@ -126,64 +162,7 @@ namespace Astrarium.Plugins.Satellites
                 .AddHeader("N2YO")
                 .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), openInBrowser)
                 .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), openInBrowser)
-                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser)
-                ;
-            /*
-                AddText(Program.Language["FormObjectInfo.Magnitude"], s.IsEclipsed ? "В тени" : ((double)(s.Mag)).ToStringMagnitude());
-            AddText(Program.Language["FormObjectInfo.Distance"], s.Range.ToStringDistanceKm());
-            AddText(Program.Language["FormObjectInfo.SSOAngle"], s.SSOAngle.ToStringAngleShort());
-            AddText(Program.Language["FormObjectInfo.RevolutionPeriod"], (s.Tle.Period / 1440.0).ToStringTimeInterval());
-            AddText(Program.Language["FormObjectInfo.OrbitInclination"], s.Tle.Inclination.ToStringAngle());
-            AddText(Program.Language["FormObjectInfo.Eccentricity"], s.Tle.Eccentricity.ToStringEccentricity());
-            AddText(Program.Language["FormObjectInfo.Apsis.Apogee"], Norad.GetSatelliteApogee(s.Tle).ToStringDistanceKm());
-            AddText(Program.Language["FormObjectInfo.Apsis.Perigee"], Norad.GetSatellitePerigee(s.Tle).ToStringDistanceKm());
-            AddText(Program.Language["FormObjectInfo.DataAge"], (Sky.JulianDay - s.Tle.Epoch).ToStringTimeInterval());
-            */
-
-            //info
-            //.SetTitle(string.Join(", ", s.Names))
-            //.SetSubtitle(Text.Get("Star.Type"))
-
-            //.AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
-
-            //.AddHeader(Text.Get("Star.Equatorial"))
-            //.AddRow("Equatorial.Alpha", c.Get(Equatorial, s.Number).Alpha)
-            //.AddRow("Equatorial.Delta", c.Get(Equatorial, s.Number).Delta)
-
-            //.AddHeader(Text.Get("Star.Equatorial0"))
-            //.AddRow("Equatorial0.Alpha", (double)s.Alpha0)
-            //.AddRow("Equatorial0.Delta", (double)s.Delta0)
-
-            //.AddHeader(Text.Get("Star.Horizontal"))
-            //.AddRow("Horizontal.Azimuth")
-            //.AddRow("Horizontal.Altitude")
-
-            //.AddHeader(Text.Get("Star.RTS"))
-            //.AddRow("RTS.Rise")
-            //.AddRow("RTS.Transit")
-            //.AddRow("RTS.Set")
-            //.AddRow("RTS.Duration")
-
-            //.AddHeader(Text.Get("Star.Visibility"))
-            //.AddRow("Visibility.Begin")
-            //.AddRow("Visibility.End")
-            //.AddRow("Visibility.Duration")
-            //.AddRow("Visibility.Period")
-
-            //.AddHeader(Text.Get("Star.Properties"))
-            //.AddRow("Magnitude", s.Magnitude)
-            //.AddRow("IsInfraredSource", details.IsInfraredSource)
-            //.AddRow("SpectralClass", details.SpectralClass);
-
-            //if (!string.IsNullOrEmpty(details.Pecularity))
-            //{
-            //    info.AddRow("Pecularity", details.Pecularity);
-            //}
-
-            //if (details.RadialVelocity != null)
-            //{
-            //    info.AddRow("RadialVelocity", details.RadialVelocity + " km/s");
-            //}
+                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser);
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)

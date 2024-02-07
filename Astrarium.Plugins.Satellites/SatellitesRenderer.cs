@@ -12,8 +12,6 @@ namespace Astrarium.Plugins.Satellites
 {
     public class SatellitesRenderer : BaseRenderer
     {
-        private const double AU = 149597870.691;
-
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly ISettings settings;
@@ -57,13 +55,10 @@ namespace Astrarium.Plugins.Satellites
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-            Vec3 topocentricLocationVector = Norad.TopocentricLocationVector(prj.Context.GeoLocation, prj.Context.SiderealTime);
-            
+            Vec3 topocentricLocationVector = calculator.GetTopocentricLocationVector(prj.Context);
+
             // diff, in hours
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
-            
-            var sunR = calculator.SunRectangular;
-            Vec3 sunVector = AU * new Vec3(sunR.X, sunR.Y, sunR.Z);
 
             foreach (var s in satellites)
             {
@@ -71,7 +66,7 @@ namespace Astrarium.Plugins.Satellites
                 var pos = s.Position + deltaTime * s.Velocity;
 
                 // flag indicating satellite is eclipsed
-                bool isEclipsed = Norad.IsSatelliteEclipsed(pos, sunVector);
+                bool isEclipsed = Norad.IsSatelliteEclipsed(pos, calculator.SunVector);
 
                 if (!showEclipsed && isEclipsed) continue;
 
