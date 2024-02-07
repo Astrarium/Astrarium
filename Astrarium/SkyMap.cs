@@ -191,7 +191,7 @@ namespace Astrarium
         /// <summary>
         /// Collection of celestial objects drawn on the map
         /// </summary>
-        private ICollection<Tuple<CelestialObject, PointF, float>> celestialObjects = new List<Tuple<CelestialObject, PointF, float>>();
+        private ICollection<Tuple<CelestialObject, PointF>> celestialObjects = new List<Tuple<CelestialObject, PointF>>();
 
         /// <summary>
         /// Application settings
@@ -417,6 +417,8 @@ namespace Astrarium
 
         private void DrawSelectedObject()
         {
+            bool isNightMode = settings.Get("NightMode");
+
             if (SelectedObject != null && celestialObjects.Any())
             {
                 var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(SelectedObject));
@@ -425,21 +427,44 @@ namespace Astrarium
                 {
                     PointF pos = bodyAndPosition.Item2;
                     CelestialObject body = bodyAndPosition.Item1;
-
-                    double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
-
-                    float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
-
-                    double diskSize = Projection.GetDiskSize(sd, 10);
-                    double pointSize = Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag);
-
-                    double size = Math.Max(diskSize, pointSize);
-
-                    Vec2 p = new Vec2(pos.X, pos.Y);
-
-                    Primitives.DrawEllipse(p, Pens.Red, (size + 8) / 2);
+                    DrawObjectOutline(body, pos, Color.Red);
                 }
             }
+
+            if (LockedObject != null && celestialObjects.Any())
+            {
+                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(LockedObject));
+
+                if (bodyAndPosition != null)
+                {
+                    PointF pos = bodyAndPosition.Item2;
+                    CelestialObject body = bodyAndPosition.Item1;
+                    DrawObjectOutline(body, pos, Color.LightGreen);
+                }
+            }
+        }
+
+        private void DrawObjectOutline(CelestialObject body, PointF pos, Color color)
+        {
+            bool isNightMode = settings.Get("NightMode");
+
+            double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
+
+            float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
+
+            // TODO: if object has complex shape, draw outline instead of circle
+            // body is IComplexShapeObject => ((IComplexShapeObject)body).Outline ( ICollection<CrdsEquatorial> )
+
+            double diskSize = Projection.GetDiskSize(sd, 10);
+            double pointSize = Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag);
+
+            double size = Math.Max(diskSize, pointSize);
+
+            Vec2 p = new Vec2(pos.X, pos.Y);
+
+            Pen penLocked = new Pen(color.Tint(isNightMode));
+
+            Primitives.DrawEllipse(p, penLocked, (size + 8) / 2);
         }
 
         public void Invalidate()
@@ -544,9 +569,10 @@ namespace Astrarium
             }
         }
 
+        // TODO: remove size argument
         public void AddDrawnObject(PointF p, CelestialObject obj, float size)
         {
-            celestialObjects.Add(new Tuple<CelestialObject, PointF, float>(obj, p, size));
+            celestialObjects.Add(new Tuple<CelestialObject, PointF>(obj, p));
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ namespace Astrarium.Plugins.Satellites
 
         public ICollection<Satellite> Satellites { get; private set; }
 
-        public Vec3 SunVector{ get; private set; }
+        public Vec3 SunVector { get; private set; }
 
         /// <inheritdoc />
         public IEnumerable<Satellite> GetCelestialObjects() => Satellites;
@@ -37,8 +37,12 @@ namespace Astrarium.Plugins.Satellites
         public override void Initialize()
         {
             SunEquatorial = sky.SunEquatorial;
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Brightest.tle");
-            Satellites = LoadSatellites(file);
+
+            string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string satellitesDataFile = Path.Combine(baseDir, "Data/Satellites.dat");
+            string tleFile = Path.Combine(baseDir, "Data/Brightest.tle");
+
+            Satellites = LoadSatellites(tleFile, satellitesDataFile);
         }
 
         public override void Calculate(SkyContext context)
@@ -87,6 +91,11 @@ namespace Astrarium.Plugins.Satellites
             }
         }
 
+        private IEphemFormatter distanceFormatter = new Formatters.UnsignedDoubleFormatter(0, " km");
+        private IEphemFormatter magnitudeFormatter = new SatelliteMagnitudeFormatter();
+        private IEphemFormatter angle4Formatter = new Formatters.UnsignedDoubleFormatter(4, "\u00B0");
+        private IEphemFormatter angle1Formatter = new Formatters.UnsignedDoubleFormatter(1, "\u00B0");
+
         public void GetInfo(CelestialObjectInfo<Satellite> info)
         {
             Satellite s = info.Body;
@@ -97,8 +106,14 @@ namespace Astrarium.Plugins.Satellites
             // current satellite position vector
             Vec3 vecGeocentric = s.Position + deltaTime * s.Velocity;
 
-            Vec3 topocentricLocationVector = GetTopocentricLocationVector(c);
-            Vec3 vecTopocentric = Norad.TopocentricSatelliteVector(topocentricLocationVector, vecGeocentric);
+            Vec3 vecTopoLocation = GetTopocentricLocationVector(c);
+            Vec3 vecTopocentric = Norad.TopocentricSatelliteVector(vecTopoLocation, vecGeocentric);
+
+            // distance from the observer, in km
+            double distance = vecTopocentric.Length;
+
+            // satellite magnitude
+            float magnitude = Norad.GetSatelliteMagnitude(s.StdMag, distance);
 
             // coordinates of the satellite
             var hor = Norad.HorizontalCoordinates(c.GeoLocation, vecTopocentric, c.SiderealTime);
@@ -107,12 +122,15 @@ namespace Astrarium.Plugins.Satellites
             bool isEclipsed = Norad.IsSatelliteEclipsed(vecGeocentric, SunVector);
             double ssoAngle = Angle.ToDegrees((-1 * vecTopocentric).Angle(SunVector - vecTopocentric));
 
+            double age = c.JulianDay - s.Tle.Epoch;
+
             string haBaseUri = "https://heavens-above.com/";
             string haQuery = "?satid=" + Uri.EscapeDataString(s.Tle.SatelliteNumber) + $"&lat={c.GeoLocation.Latitude.ToString(CultureInfo.InvariantCulture)}&lng={(-c.GeoLocation.Longitude).ToString(CultureInfo.InvariantCulture)}";
 
             string n2yoBaseUri = "https://www.n2yo.com/";
             string n2yoQuery = $"?s={s.Tle.SatelliteNumber}";
 
+            // TODO: localize
             string openInBrowser = "Open";
 
             info
@@ -130,9 +148,9 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Horizontal.Altitude", hor.Altitude)
 
                 .AddHeader(Text.Get("Satellite.Characteristics"))
-                .AddRow("Magnitude", isEclipsed ? (float?)null : s.Magnitude, new SatelliteMagnitudeFormatter())
-                .AddRow("Distance", 0) // TODO, distance from Earth in km
-                .AddRow("S-S-O angle", ssoAngle, new Formatters.UnsignedDoubleFormatter(1, "\u00B0"))
+                .AddRow("Magnitude", isEclipsed ? (float?)null : magnitude, magnitudeFormatter)
+                .AddRow("Distance", distance, distanceFormatter)
+                .AddRow("S-S-O angle", ssoAngle, angle1Formatter)
                 .AddRow("Topocentric position vector", vecTopocentric, Formatters.Simple)
                 .AddRow("Geocentric position vector", vecGeocentric, Formatters.Simple)
                 .AddRow("Geocentric velocity vector", s.Velocity, Formatters.Simple)
@@ -145,21 +163,21 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Epoch", s.Tle.Epoch, Formatters.JulianDay)
                 .AddRow("Inclination", s.Tle.Inclination, Formatters.Inclination)
                 .AddRow("Eccentricity", s.Tle.Eccentricity, Formatters.Simple)
-                .AddRow("Argument of perigee", s.Tle.ArgumentOfPerigee, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
-                .AddRow("Longitude of ascending node", s.Tle.LongitudeAscNode, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
-                .AddRow("Mean anomaly", s.Tle.MeanAnomaly, new Formatters.UnsignedDoubleFormatter(4, "\u00B0"))
+                .AddRow("Argument of perigee", s.Tle.ArgumentOfPerigee, angle4Formatter)
+                .AddRow("Longitude of ascending node", s.Tle.LongitudeAscNode, angle4Formatter)
+                .AddRow("Mean anomaly", s.Tle.MeanAnomaly, angle4Formatter)
                 .AddRow("Period", TimeSpan.FromMinutes(s.Tle.Period), Formatters.TimeSpan)
-                .AddRow("Apogee", Norad.GetSatelliteApogee(s.Tle))
-                .AddRow("Perigee", Norad.GetSatellitePerigee(s.Tle))
-                .AddRow("Orbital data age", TimeSpan.FromDays(c.JulianDay - s.Tle.Epoch), Formatters.TimeSpan)
+                .AddRow("Apogee", Norad.GetSatelliteApogee(s.Tle), distanceFormatter)
+                .AddRow("Perigee", Norad.GetSatellitePerigee(s.Tle), distanceFormatter)
+                .AddRow("Orbital data age", TimeSpan.FromDays(age), Formatters.TimeSpan)
 
-                .AddHeader("Heavens Above")
+                .AddHeader("heavens-above.com")
                 .AddRow("Satellite info", new Uri(haBaseUri + "satinfo.aspx" + haQuery), openInBrowser)
                 .AddRow("Orbit", new Uri(haBaseUri + "orbit.aspx" + haQuery), openInBrowser)
                 .AddRow("Passes", new Uri(haBaseUri + "PassSummary.aspx" + haQuery), openInBrowser)
                 .AddRow("Close encounters", new Uri(haBaseUri + "CloseEncounters.aspx" + haQuery), openInBrowser)
 
-                .AddHeader("N2YO")
+                .AddHeader("N2YO.com")
                 .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), openInBrowser)
                 .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), openInBrowser)
                 .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser);
@@ -168,24 +186,51 @@ namespace Astrarium.Plugins.Satellites
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Satellites
-                .Where(s => s.Names.Any(n => n.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >=0 ))
+                .Where(s => s.Names.Any(n => n.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
         }
 
-        private ICollection<Satellite> LoadSatellites(string file)
+        private ICollection<Satellite> LoadSatellites(string tleFile, string satellitesDataFile)
         {
             var satellites = new List<Satellite>();
 
-            using (var sr = new StreamReader(file, Encoding.UTF8))
+            Dictionary<string, float> magnitudes = new Dictionary<string, float>();
+
+            using (var sr = new StreamReader(satellitesDataFile, Encoding.UTF8))
+            {
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    if (line.Length < 37) continue;
+                    string number = line.Substring(0, 5);
+                    if (number == "00001" || number == "99999") continue;
+
+                    string mag = line.Substring(33, 4).Trim();
+                    if (!string.IsNullOrEmpty(mag))
+                    {
+                        magnitudes[number] = float.Parse(mag, CultureInfo.InvariantCulture);
+                    }
+                }
+                sr.Close();
+            }
+
+            using (var sr = new StreamReader(tleFile, Encoding.UTF8))
             {
                 while (!sr.EndOfStream)
                 {
                     string name = sr.ReadLine();
                     string line1 = sr.ReadLine();
                     string line2 = sr.ReadLine();
-                    satellites.Add(new Satellite(name.Trim(), new TLE(line1, line2)));
+                    var satellite = new Satellite(name.Trim(), new TLE(line1, line2));
+
+                    if (magnitudes.ContainsKey(satellite.Tle.SatelliteNumber))
+                    {
+                        satellite.StdMag = magnitudes[satellite.Tle.SatelliteNumber];
+                    }
+
+                    satellites.Add(satellite);
                 }
                 sr.Close();
             }

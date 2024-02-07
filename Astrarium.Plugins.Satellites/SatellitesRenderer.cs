@@ -76,6 +76,9 @@ namespace Astrarium.Plugins.Satellites
                 // visible magnitude
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
 
+                float size = prj.GetPointSize(s.Magnitude);
+                if (size == 0) continue;
+
                 // horizontal coordinates of satellite
                 var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
 
@@ -85,8 +88,6 @@ namespace Astrarium.Plugins.Satellites
 
                 // equatorial coordinates
                 s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
-
-                float size = prj.GetPointSize(s.Magnitude);
 
                 if (Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
                 {

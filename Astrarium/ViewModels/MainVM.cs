@@ -636,6 +636,11 @@ namespace Astrarium.ViewModels
                 // TODO: localize
                 Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage("Map is unlocked"));
             }
+            else
+            {
+                // TODO: localize
+                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage($"Map is locked on: {obj.Names.First()}"));
+            }
         }
 
         private void Zoom(int delta)

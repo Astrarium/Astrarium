@@ -135,7 +135,7 @@ namespace Astrarium.Types
             }
 
             GL.End();
-
+            GL.LineWidth(1);
             GL.Disable(EnableCap.LineStipple);
         }
     }
