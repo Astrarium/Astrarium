@@ -216,6 +216,8 @@ namespace Astrarium.Plugins.Satellites
                 sr.Close();
             }
 
+            float averageMag = magnitudes.Values.Average();
+
             using (var sr = new StreamReader(tleFile, Encoding.UTF8))
             {
                 while (!sr.EndOfStream)
@@ -228,6 +230,10 @@ namespace Astrarium.Plugins.Satellites
                     if (magnitudes.ContainsKey(satellite.Tle.SatelliteNumber))
                     {
                         satellite.StdMag = magnitudes[satellite.Tle.SatelliteNumber];
+                    }
+                    else
+                    {
+                        satellite.StdMag = averageMag;
                     }
 
                     satellites.Add(satellite);
