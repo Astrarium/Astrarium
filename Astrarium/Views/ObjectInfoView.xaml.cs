@@ -15,32 +15,9 @@ namespace Astrarium.Views
     /// </summary>
     public partial class ObjectInfoView : UserControl
     {
-        public static readonly DependencyProperty LinkCommandProperty =
-            DependencyProperty.Register("LinkCommand", typeof(ICommand), typeof(ObjectInfoView));
-
-        public static readonly DependencyProperty UriCommandProperty =
-            DependencyProperty.Register("UriCommand", typeof(ICommand), typeof(ObjectInfoView));
-
-        public static readonly DependencyProperty PropertyValueClickedCommandProperty =
-            DependencyProperty.Register("PropertyValueClickedCommand", typeof(ICommand), typeof(ObjectInfoView));
-
-        public ICommand LinkCommand
-        {
-            get { return (ICommand)GetValue(LinkCommandProperty); }
-            set { SetValue(LinkCommandProperty, value); }
-        }
-
-        public ICommand UriCommand
-        {
-            get { return (ICommand)GetValue(UriCommandProperty); }
-            set { SetValue(UriCommandProperty, value); }
-        }
-
-        public ICommand PropertyValueClickedCommand
-        {
-            get { return (ICommand)GetValue(PropertyValueClickedCommandProperty); }
-            set { SetValue(PropertyValueClickedCommandProperty, value); }
-        }
+        public event Action<double> JulianDateClicked;
+        public event Action<Uri> LinkClicked;
+        public event Action<object> PropertyValueClicked;
 
         public ObjectInfoView()
         {
@@ -99,7 +76,7 @@ namespace Astrarium.Views
                             {
                                 Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                                 link.Inlines.Add(formatter.Format(p.Value));
-                                link.Click += (s, e) => LinkClicked(date.ToJulianEphemerisDay());
+                                link.Click += (s, e) => JulianDateClicked(date.ToJulianEphemerisDay());
                                 var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);
@@ -108,7 +85,7 @@ namespace Astrarium.Views
                             else
                             {
                                 var cellValue = new TextBlock() { ToolTip = Text.Get("ObjectInfoWindow.CopyValueHint"), Text = formatter.Format(p.Value), FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Style = hoverStyle };
-                                cellValue.MouseLeftButtonDown += (s, o) => PropertyClicked(p.Value);
+                                cellValue.MouseLeftButtonDown += (s, o) => PropertyValueClicked?.Invoke(p.Value);
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);
                                 Grid.SetColumn(cellValue, 1);
@@ -124,7 +101,7 @@ namespace Astrarium.Views
                             Grid.SetColumn(cellCaption, 0);
                             Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                             link.Inlines.Add(L.UriText);
-                            link.Click += (s, e) => UriClicked(L.Uri);
+                            link.Click += (s, e) => LinkClicked?.Invoke(L.Uri);
                             link.ToolTip = L.Uri;
                             var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
@@ -140,21 +117,6 @@ namespace Astrarium.Views
             }
 
             tblInfo.InvalidateVisual();
-        }
-
-        private void LinkClicked(double jd)
-        {
-            LinkCommand?.Execute(jd);
-        }
-
-        private void UriClicked(Uri uri)
-        {
-            UriCommand?.Execute(uri);
-        }
-
-        private void PropertyClicked(object value)
-        {
-            PropertyValueClickedCommand?.Execute(value);
         }
     }
 }

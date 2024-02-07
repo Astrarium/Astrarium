@@ -47,7 +47,10 @@ namespace Astrarium.Plugins.Journal
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
 
+            // TODO: use this as a reference, implement this
+
             /* Object info window extensions */
+            /*
             ExtendObjectInfo("Observations", (CelestialObject body) =>
             {
                 var panel = new System.Windows.Controls.StackPanel() { Orientation = System.Windows.Controls.Orientation.Vertical };
@@ -75,6 +78,7 @@ namespace Astrarium.Plugins.Journal
 
                 return panel;
             });
+            */
 
             // this will avoid first slow call
             Task.Run(() =>

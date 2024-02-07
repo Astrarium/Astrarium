@@ -19,9 +19,6 @@ namespace Astrarium.ViewModels
         public double JulianDay { get; private set; }
 
         public ICommand CopyNameCommand { get; private set; }
-        public ICommand LinkClickedCommand { get; private set; }
-        public ICommand UriClickedCommand { get; private set; }
-        public ICommand PropertyValueClickedCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
         public IList<ObjectInfoTabViewModel> Tabs { get; private set; } = new List<ObjectInfoTabViewModel>();
@@ -32,22 +29,15 @@ namespace Astrarium.ViewModels
             Subtitle = info.Subtitle;
 
             CopyNameCommand = new Command(CopyName);
-            LinkClickedCommand = new Command<double>(SelectJulianDay);
-            UriClickedCommand = new Command<Uri>(NavigateToUri);
-            PropertyValueClickedCommand = new Command<object>(PropertyValueClicked);
             CloseCommand = new Command(Close);
 
-            // add general info tab by default
-            Tabs.Add(new ObjectInfoTabViewModel(
-                Text.Get("ObjectInfoWindow.Tab.Info"),
-                new ObjectInfoView() { 
-                    DataContext = info.InfoElements,
-                    UriCommand = UriClickedCommand,
-                    LinkCommand = LinkClickedCommand,
-                    PropertyValueClickedCommand = PropertyValueClickedCommand
-                }) { IsHeaderVisible = false });
+            var objectInfoView = new ObjectInfoView() { DataContext = info.InfoElements };
+            objectInfoView.LinkClicked += LinkClicked;
+            objectInfoView.JulianDateClicked += JulianDateClicked;
+            objectInfoView.PropertyValueClicked += PropertyValueClicked;
 
-            
+            // add general info tab by default
+            Tabs.Add(new ObjectInfoTabViewModel(Text.Get("ObjectInfoWindow.Tab.Info"), objectInfoView, isHeaderVisible: false));
         }
 
         public void AddExtension(string header, FrameworkElement extension)
@@ -56,13 +46,13 @@ namespace Astrarium.ViewModels
             Tabs[0].IsHeaderVisible = true;
         }
 
-        private void SelectJulianDay(double jd)
+        private void JulianDateClicked(double jd)
         {
             JulianDay = jd;
             Close(true);
         }
 
-        private void NavigateToUri(Uri uri)
+        private void LinkClicked(Uri uri)
         {
             try
             {
@@ -104,11 +94,11 @@ namespace Astrarium.ViewModels
             public string Header { get; protected set; }
             public FrameworkElement Content { get; protected set; }
 
-            public ObjectInfoTabViewModel(string header, FrameworkElement content)
+            public ObjectInfoTabViewModel(string header, FrameworkElement content, bool isHeaderVisible = true)
             {
                 Header = header;
                 Content = content;
-                IsHeaderVisible = true;
+                IsHeaderVisible = isHeaderVisible;
             }
         }
     }
