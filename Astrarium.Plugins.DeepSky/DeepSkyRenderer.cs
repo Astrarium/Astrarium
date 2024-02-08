@@ -32,7 +32,6 @@ namespace Astrarium.Plugins.DeepSky
             if (map.DaylightFactor == 1) return;
 
             bool drawLabels = settings.Get("DeepSkyLabels");
-            bool drawOutlines = settings.Get("DeepSkyOutlines");
             var nightMode = settings.Get("NightMode");
             Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(nightMode);
             Pen penOutline = new Pen(colorOutline);
@@ -128,7 +127,7 @@ namespace Astrarium.Plugins.DeepSky
                     }
                 }
 
-                if (drawOutlines && ds.Outline != null)
+                if (ds.Shape != null && ds.Shape.Any())
                 {
                     GL.Enable(EnableCap.Blend);
                     GL.Enable(EnableCap.LineSmooth);
@@ -136,7 +135,7 @@ namespace Astrarium.Plugins.DeepSky
                     GL.Color4(colorOutline);
                     GL.Begin(PrimitiveType.LineLoop);
 
-                    foreach (var oc in ds.Outline)
+                    foreach (var oc in ds.Shape)
                     {
                         Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(oc, prj.Context.PrecessionElements));
                         if (op != null)
@@ -149,7 +148,7 @@ namespace Astrarium.Plugins.DeepSky
 
                     if (drawLabels && sz > 20)
                     {
-                        var p0 = prj.Project(Precession.GetEquatorialCoordinates(ds.Outline.First(), prj.Context.PrecessionElements));
+                        var p0 = prj.Project(Precession.GetEquatorialCoordinates(ds.Shape.First(), prj.Context.PrecessionElements));
                         if (p0 != null)
                         {
                             map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p0, 5);
@@ -160,9 +159,9 @@ namespace Astrarium.Plugins.DeepSky
                 {
                     if (ds.Status == DeepSkyStatus.Galaxy)
                     {
-                        float rx = ds.LargeDiameter.HasValue ? prj.GetDiskSize(ds.LargeDiameter.Value / 2 * 60) / 2 : 0;
-                        float ry = ds.SmallDiameter.HasValue ? prj.GetDiskSize(ds.SmallDiameter.Value / 2 * 60) / 2 : 0;
-                        double rot = ds.PA.HasValue ? prj.GetAxisRotation(ds.Equatorial, 90 + ds.PA.Value) : 0;
+                        float rx = ds.LargeSemidiameter.HasValue ? prj.GetDiskSize(ds.LargeSemidiameter.Value) / 2 : 0;
+                        float ry = ds.SmallSemidiameter.HasValue ? prj.GetDiskSize(ds.SmallSemidiameter.Value) / 2 : 0;
+                        double rot = ds.PositionAngle.HasValue ? prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.Value) : 0;
                         Primitives.DrawEllipse(p, penOutline, rx, ry, rot);
                     }
                     else

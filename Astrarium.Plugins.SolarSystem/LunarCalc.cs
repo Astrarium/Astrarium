@@ -103,9 +103,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visible semidiameter of the Moon, in seconds of arc 
         /// </summary>
-        public double Semidiameter(SkyContext c)
+        public float Semidiameter(SkyContext c)
         {
-            return LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
+            return (float)LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
         }
 
         /// <summary>

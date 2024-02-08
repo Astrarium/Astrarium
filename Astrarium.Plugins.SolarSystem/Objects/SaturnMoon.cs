@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the major moon of Saturn for given instant of time.
     /// </summary>
-    public class SaturnMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject, IObservableObject
+    public class SaturnMoon : SizeableCelestialObject, ISolarSystemObject, IMagnitudeObject, IObservableObject
     {
         public SaturnMoon(int number)
         {
@@ -55,8 +55,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Apparent magnitude
         /// </summary>
         public float Magnitude { get; internal set; }
-
-        public bool IsEclipsedByPlanet => false;
 
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object

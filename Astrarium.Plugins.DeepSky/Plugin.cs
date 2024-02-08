@@ -18,7 +18,6 @@ namespace Astrarium.Plugins.DeepSky
         {
             DefineSetting("DeepSky", true);
             DefineSetting("DeepSkyLabels", true);
-            DefineSetting("DeepSkyOutlines", true);
             DefineSetting("DeepSkyImages", false);
             DefineSetting("DeepSkyImagesFolder", "");
 

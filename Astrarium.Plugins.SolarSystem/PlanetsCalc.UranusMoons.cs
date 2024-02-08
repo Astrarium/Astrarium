@@ -83,10 +83,10 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(UranusMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double UranusMoon_Semidiameter(SkyContext c, int m)
+        private float UranusMoon_Semidiameter(SkyContext c, int m)
         {
             var distance = c.Get(UranusMoon_Ecliptical, m).Distance;
-            return UranianMoons.Semidiameter(m, distance);
+            return (float)UranianMoons.Semidiameter(m, distance);
         }
 
         private float UranusMoon_Magnitude(SkyContext c, int m)

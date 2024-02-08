@@ -39,11 +39,11 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(GenericMoon_Equatorial, id).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double GenericMoon_Semidiameter(SkyContext c, int id)
+        private float GenericMoon_Semidiameter(SkyContext c, int id)
         {
             var ecl = c.Get(GenericMoon_Ecliptical, id);
             var radius = genericMoons.FirstOrDefault(gm => gm.Id == id).Data.radius;
-            return GenericSatellite.Semidiameter(ecl.Distance, radius);
+            return (float)GenericSatellite.Semidiameter(ecl.Distance, radius);
         }
 
         private float GenericMoon_Magnitude(SkyContext c, int id)

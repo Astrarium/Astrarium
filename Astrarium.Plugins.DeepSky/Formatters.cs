@@ -10,7 +10,7 @@ namespace Astrarium.Plugins.DeepSky
             if (value == null)
                 return null;
             else
-                return Formatters.Angle.Format(Convert.ToSingle(value) / 60);
+                return Formatters.Angle.Format(Convert.ToSingle(value) / 3600);
         }
     }
 

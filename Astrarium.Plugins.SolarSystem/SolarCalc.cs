@@ -80,9 +80,9 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(Equatorial).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        public double Semidiameter(SkyContext c)
+        public float Semidiameter(SkyContext c)
         {
-            return SolarEphem.Semidiameter(c.Get(Ecliptical).Distance);
+            return (float)SolarEphem.Semidiameter(c.Get(Ecliptical).Distance);
         }
 
         private double CarringtonNumber(SkyContext c)

@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class GenericMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject, IMagnitudeObject, IObservableObject
+    public class GenericMoon : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => "PlanetMoon";
@@ -56,10 +56,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public override string[] Names => new[] { Name };
 
+        /// <inheritdoc />
         public double DistanceFromEarth { get; internal set; }
 
-        public bool IsEclipsedByPlanet => false;
-
+        /// <inheritdoc />
         public double AverageDailyMotion => 0.006668;
 
         /// <summary>

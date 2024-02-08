@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the large moon of Uranus for given instant of time.
     /// </summary>
-    public class UranusMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject, IObservableObject
+    public class UranusMoon : SizeableCelestialObject, ISolarSystemObject, IMagnitudeObject, IObservableObject
     {
         public UranusMoon(int number)
         {
@@ -55,8 +55,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string[] Names => new[] { Name };
 
         public double DistanceFromEarth { get; internal set; }
-
-        public bool IsEclipsedByPlanet => false;
 
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object

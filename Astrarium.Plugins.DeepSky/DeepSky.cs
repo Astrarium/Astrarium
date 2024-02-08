@@ -24,14 +24,23 @@ namespace Astrarium.Plugins.DeepSky
         public bool IC { get => RecordNumber >= 9106; }
 
         /// <summary>
-        /// Catalog number
+        /// NGC/IC Catalog number
         /// </summary>
         public ushort Number { get; set; }
 
+        /// <summary>
+        /// NGC/IC component letter, if applicable
+        /// </summary>
         public char Letter { get; set; }
 
+        /// <summary>
+        /// NGC/IC component name, if applicable (A, B, etc.)
+        /// </summary>
         public char Component { get; set; }
 
+        /// <summary>
+        /// Messier catalog number
+        /// </summary>
         public byte Messier { get; set; }
 
         /// <summary>
@@ -48,21 +57,6 @@ namespace Astrarium.Plugins.DeepSky
         /// Visual (if present) or photographic magnitude
         /// </summary>
         public float Magnitude { get; set; }
-
-        /// <summary>
-        /// Larger diameter, in seconds of arc
-        /// </summary>
-        public float? LargeDiameter { get; set; }
-
-        /// <summary>
-        /// Smaller diameter, in seconds of arc
-        /// </summary>
-        public float? SmallDiameter { get; set; }
-
-        /// <summary>
-        /// Position angle
-        /// </summary>
-        public short? PA { get; set; }
 
         /// <summary>
         /// Proper name of NGC/IC object
@@ -112,9 +106,14 @@ namespace Astrarium.Plugins.DeepSky
             }
         }
 
-        public override double Semidiameter { get => Math.Max(LargeDiameter ?? 0, SmallDiameter ?? 0) * 30; }
+        /// <inheritdoc />
+        public override float Semidiameter => Math.Max(LargeSemidiameter ?? 0, SmallSemidiameter ?? 0);
 
-        public ICollection<CrdsEquatorial> Outline { get; set; }
+        /// <inheritdoc />
+        public override PosAngleOrigin? PositionAngleOrigin => PosAngleOrigin.EquatorialPole;
+
+        /// <inheritdoc />
+        public override double? ShapeEpoch => Date.EPOCH_J2000;
 
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object

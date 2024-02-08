@@ -448,7 +448,7 @@ namespace Astrarium
         {
             bool isNightMode = settings.Get("NightMode");
 
-            double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
+            float sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
 
             float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
 
@@ -479,10 +479,10 @@ namespace Astrarium
         {
             foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (point.Y - c.Item2.Y) * (point.Y - c.Item2.Y)))
             {
-                double sd = (x.Item1 is SizeableCelestialObject) ?
+                float sd = (x.Item1 is SizeableCelestialObject) ?
                     (x.Item1 as SizeableCelestialObject).Semidiameter : 0;
 
-                double size = Projection.GetDiskSize(sd, 10);
+                float size = Projection.GetDiskSize(sd, 10);
 
                 if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (x.Item2.Y - point.Y) * (x.Item2.Y - point.Y)) < size / 2)
                 {
@@ -495,7 +495,7 @@ namespace Astrarium
 
         public void GoToObject(CelestialObject body, TimeSpan animationDuration)
         {
-            double sd = (body is SizeableCelestialObject) ?
+            float sd = (body is SizeableCelestialObject) ?
                         (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);

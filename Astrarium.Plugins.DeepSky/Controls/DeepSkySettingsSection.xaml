@@ -14,7 +14,6 @@
     <StackPanel Orientation="Vertical" Margin="6" IsEnabled="{Binding IsEnabled}">
         <CheckBox Content="{t:Text Settings.DeepSky}" IsChecked="{Binding Settings.DeepSky}" Margin="2" />
         <CheckBox Content="{t:Text Settings.DeepSkyLabels}" IsChecked="{Binding Settings.DeepSkyLabels}" IsEnabled="{Binding Settings.DeepSky}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.DeepSkyOutlines}" IsChecked="{Binding Settings.DeepSkyOutlines}" IsEnabled="{Binding Settings.DeepSky}" Margin="2" />
         <CheckBox Content="{t:Text Settings.DeepSkyImages}" IsChecked="{Binding Settings.DeepSkyImages}" IsEnabled="{Binding Settings.DeepSky}" Margin="2" />
         <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.DeepSkyImages}">
             <TextBlock Margin="2 8 2 2" Text="{t:Text Settings.DeepSky.ImagesFolder.Title}" />

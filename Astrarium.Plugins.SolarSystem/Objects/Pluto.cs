@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for dwarf planet Pluto.
     /// </summary>
-    public class Pluto : SizeableCelestialObject, ISolarSystemObject, IPlanet, IMovingObject, IMagnitudeObject, IObservableObject
+    public class Pluto : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Pluto name

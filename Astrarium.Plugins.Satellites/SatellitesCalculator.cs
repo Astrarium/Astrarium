@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.Satellites
         public Vec3 SunVector { get; private set; }
 
         /// <inheritdoc />
-        public IEnumerable<Satellite> GetCelestialObjects() => Satellites;
+        public IEnumerable<Satellite> GetCelestialObjects() => new Satellite[0];
 
         public double JulianDay { get; private set; }
 
@@ -76,7 +76,7 @@ namespace Astrarium.Plugins.Satellites
 
         public void ConfigureEphemeris(EphemerisConfig<Satellite> e)
         {
-            // Satellites does not provide epheremeris
+            // Satellites do not provide epheremeris
         }
 
         private class SatelliteMagnitudeFormatter : Formatters.SignedDoubleFormatter

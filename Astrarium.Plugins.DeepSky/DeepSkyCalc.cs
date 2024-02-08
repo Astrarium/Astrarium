@@ -99,9 +99,9 @@ namespace Astrarium.Plugins.DeepSky
             e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
             e["Magnitude"] = (c, ds) => ds.Magnitude;
             e["ObjectType", Formatters.Simple] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.ObjectType;
-            e["PositionAngle", posAngleFormatter] = (c, ds) => ds.PA;
-            e["LargeDiameter", angularSizeFormatter] = (c, ds) => ds.LargeDiameter;
-            e["SmallDiameter", angularSizeFormatter] = (c, ds) => ds.SmallDiameter;
+            e["PositionAngle", posAngleFormatter] = (c, ds) => ds.PositionAngle;
+            e["LargeDiameter", angularSizeFormatter] = (c, ds) => ds.LargeSemidiameter * 2;
+            e["SmallDiameter", angularSizeFormatter] = (c, ds) => ds.SmallSemidiameter * 2;
             e["SurfaceBrightness", surfaceBrightnessFormatter] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.SurfaceBrightness;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
@@ -169,16 +169,16 @@ namespace Astrarium.Plugins.DeepSky
                 info.AddRow("SurfaceBrightness");
             }
 
-            if (ds.LargeDiameter != null)
+            if (ds.LargeSemidiameter != null)
             {
-                string size = angularSizeFormatter.Format(ds.LargeDiameter);
-                if (ds.SmallDiameter != null)
+                string size = angularSizeFormatter.Format(ds.LargeSemidiameter * 2);
+                if (ds.SmallSemidiameter != null)
                 {
-                    size += $" x {angularSizeFormatter.Format(ds.SmallDiameter)}";
+                    size += $" x {angularSizeFormatter.Format(ds.SmallSemidiameter * 2)}";
                 }
                 info.AddRow("AngularDiameter", size, Formatters.Simple);
             }
-            if (ds.PA != null)
+            if (ds.PositionAngle != null)
             {
                 info.AddRow("PositionAngle");
             }
@@ -269,9 +269,9 @@ namespace Astrarium.Plugins.DeepSky
                         Equatorial0 = new CrdsEquatorial(ra, dec),
                         Status = status,
                         Magnitude = string.IsNullOrWhiteSpace(mag) ? float.NaN : float.Parse(mag, CultureInfo.InvariantCulture),
-                        LargeDiameter = !string.IsNullOrWhiteSpace(sizeA) ? float.Parse(sizeA, CultureInfo.InvariantCulture) : (float?)null,
-                        SmallDiameter = !string.IsNullOrWhiteSpace(sizeB) ? float.Parse(sizeB, CultureInfo.InvariantCulture) : (float?)null,
-                        PA = !string.IsNullOrWhiteSpace(PA) ? short.Parse(PA) : (short?)null,
+                        LargeSemidiameter = !string.IsNullOrWhiteSpace(sizeA) ? float.Parse(sizeA, CultureInfo.InvariantCulture) * 30: (float?)null,
+                        SmallSemidiameter = !string.IsNullOrWhiteSpace(sizeB) ? float.Parse(sizeB, CultureInfo.InvariantCulture) * 30: (float?)null,
+                        PositionAngle = !string.IsNullOrWhiteSpace(PA) ? float.Parse(PA) : (float?)null,
                         Messier = messier,
                     };
 
@@ -314,7 +314,7 @@ namespace Astrarium.Plugins.DeepSky
                         var ds = deepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
                         if (ds != null && ds.Status != DeepSkyStatus.Galaxy)
                         {
-                            ds.Outline = outline;
+                            ds.Shape = outline;
                         }
 
                         continue;

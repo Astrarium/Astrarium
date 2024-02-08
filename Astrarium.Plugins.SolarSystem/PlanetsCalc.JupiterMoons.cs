@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(JupiterMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double JupiterMoon_Semidiameter(SkyContext c, int m)
+        private float JupiterMoon_Semidiameter(SkyContext c, int m)
         {
             // distance from Earth to Jupiter, in a.u.
             double r = c.Get(Planet_DistanceFromEarth, Planet.JUPITER);
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.SolarSystem
             double z = c.Get(JupiterMoon_Rectangular, m).Z;
 
             // visible moon semidiameter
-            return GalileanMoons.MoonSemidiameter(r, z, m - 1);
+            return (float)GalileanMoons.MoonSemidiameter(r, z, m - 1);
         }
 
         private double JupiterMoon_CentralMeridian(SkyContext c, int m)

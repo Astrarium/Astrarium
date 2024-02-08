@@ -1,14 +1,11 @@
 ﻿using Astrarium.Algorithms;
-using Newtonsoft.Json;
-using Astrarium.Plugins.SolarSystem;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
+    /// <summary>
+    /// Represents orbital data for generic planet moon along with moon/planet indices, names and absolute magnitude / radius.
+    /// </summary>
     public class GenericMoonData : GenericSatelliteOrbit
     {
         /// <summary>

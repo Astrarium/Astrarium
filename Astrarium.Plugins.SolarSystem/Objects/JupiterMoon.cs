@@ -6,8 +6,8 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the Galilean moon of Jupiter for given instant of time.
     /// </summary>
-    public class JupiterMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject, IObservableObject
-    {        
+    public class JupiterMoon : SizeableCelestialObject, ISolarSystemObject, IMagnitudeObject, IObservableObject
+    {
         public JupiterMoon(int number)
         {
             Number = number;
@@ -66,6 +66,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public float Magnitude { get; internal set; }
 
+        /// <summary>
+        /// Flag indicating moon is eclipsed by the Jupiter
+        /// </summary>
         public bool IsEclipsedByPlanet
         {
             get
