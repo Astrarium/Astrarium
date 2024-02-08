@@ -21,11 +21,9 @@ namespace Astrarium.Types
         public virtual float? SmallSemidiameter { get; set; }
 
         /// <summary>
-        /// Position angle of celestial object shape, measure from <see cref="PositionAngleOrigin"/>
+        /// Position angle of celestial object shape, measured from North Celestial pole
         /// </summary>
         public virtual float? PositionAngle { get; set; }
-
-        public virtual PosAngleOrigin? PositionAngleOrigin { get; }
 
         /// <summary>
         /// Gets Julian Date of epoch of coordinates describing complex object shape
@@ -36,12 +34,5 @@ namespace Astrarium.Types
         /// Gets or sets coordinates that define complex shape of the object
         /// </summary>
         public virtual IEnumerable<CrdsEquatorial> Shape { get; set; }
-    }
-
-    public enum PosAngleOrigin
-    {
-        EquatorialPole,
-        HorizontalPole,
-        EclipticPole
     }
 }

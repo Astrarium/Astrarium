@@ -447,24 +447,67 @@ namespace Astrarium
         private void DrawObjectOutline(CelestialObject body, PointF pos, Color color)
         {
             bool isNightMode = settings.Get("NightMode");
-
-            float sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
-
-            float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
-
-            // TODO: if object has complex shape, draw outline instead of circle
-            // body is IComplexShapeObject => ((IComplexShapeObject)body).Outline ( ICollection<CrdsEquatorial> )
-
-            double diskSize = Projection.GetDiskSize(sd, 10);
-            double pointSize = Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag);
-
-            double size = Math.Max(diskSize, pointSize);
-
+            var prj = Projection;
+            var clr = color.Tint(isNightMode);
+            Pen pen = new Pen(clr);
             Vec2 p = new Vec2(pos.X, pos.Y);
 
-            Pen penLocked = new Pen(color.Tint(isNightMode));
+            float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
+            float sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
+            double diskSize = Projection.GetDiskSize(sd, 0);
+            double pointSize = Math.Max(16, Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag));
 
-            Primitives.DrawEllipse(p, penLocked, (size + 8) / 2);
+            if (diskSize > pointSize && body is SizeableCelestialObject sizeableBody)
+            {
+                // has complex shape
+                if (sizeableBody.Shape != null && sizeableBody.Shape.Any())
+                {
+                    double epoch = sizeableBody.ShapeEpoch.GetValueOrDefault(prj.Context.JulianDay);
+                    var pe = Precession.ElementsFK5(epoch, prj.Context.JulianDay);
+
+                    GL.Enable(EnableCap.Blend);
+                    GL.Enable(EnableCap.LineSmooth);
+                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+                    GL.Color4(clr);
+                    GL.Begin(PrimitiveType.LineLoop);
+
+                    foreach (var sp in sizeableBody.Shape)
+                    {
+                        Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(sp, pe));
+                        if (op != null)
+                        {
+                            GL.Vertex2(op.X, op.Y);
+                        }
+                    }
+
+                    GL.End();
+                }
+                // no complex shape
+                else
+                {
+                    float lgSd = sizeableBody.LargeSemidiameter.GetValueOrDefault(sd);
+                    float smSd = sizeableBody.SmallSemidiameter.GetValueOrDefault(sd);
+
+                    // non-circular object
+                    if (lgSd != smSd)
+                    {
+                        float posAngle = sizeableBody.PositionAngle.GetValueOrDefault(0);
+                        float rx = prj.GetDiskSize(lgSd) / 2 + 4;
+                        float ry = prj.GetDiskSize(smSd) / 2 + 4;
+                        double rot = prj.GetAxisRotation(body.Equatorial, 90 + posAngle);
+                        Primitives.DrawEllipse(p, pen, rx, ry, rot);
+                    }
+                    // circular object
+                    else
+                    {
+                        Primitives.DrawEllipse(p, pen, (diskSize + 8) / 2);
+                    }
+                }
+            }
+            else
+            {
+                Primitives.DrawEllipse(p, pen, (pointSize + 8) / 2);
+            }
         }
 
         public void Invalidate()

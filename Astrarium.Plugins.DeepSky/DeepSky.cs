@@ -110,9 +110,6 @@ namespace Astrarium.Plugins.DeepSky
         public override float Semidiameter => Math.Max(LargeSemidiameter ?? 0, SmallSemidiameter ?? 0);
 
         /// <inheritdoc />
-        public override PosAngleOrigin? PositionAngleOrigin => PosAngleOrigin.EquatorialPole;
-
-        /// <inheritdoc />
         public override double? ShapeEpoch => Date.EPOCH_J2000;
 
         /// <summary>

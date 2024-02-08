@@ -157,18 +157,10 @@ namespace Astrarium.Plugins.DeepSky
                 }
                 else
                 {
-                    if (ds.Status == DeepSkyStatus.Galaxy)
-                    {
-                        float rx = ds.LargeSemidiameter.HasValue ? prj.GetDiskSize(ds.LargeSemidiameter.Value) / 2 : 0;
-                        float ry = ds.SmallSemidiameter.HasValue ? prj.GetDiskSize(ds.SmallSemidiameter.Value) / 2 : 0;
-                        double rot = ds.PositionAngle.HasValue ? prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.Value) : 0;
-                        Primitives.DrawEllipse(p, penOutline, rx, ry, rot);
-                    }
-                    else
-                    {
-                        float r = prj.GetDiskSize(ds.Semidiameter, 4) / 2;
-                        Primitives.DrawEllipse(p, penOutline, r);
-                    }
+                    float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                    float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                    double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
+                    Primitives.DrawEllipse(p, penOutline, rx, ry, rot);
 
                     if (drawLabels && sz > 20)
                     {

@@ -89,6 +89,15 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public PlanetAppearance Appearance { get; set; }
 
+        /// <inheritdoc />
+        public override float? PositionAngle => (float)Appearance.P - 90;
+
+        /// <inheritdoc />
+        public override float? LargeSemidiameter => Semidiameter;
+
+        /// <inheritdoc />
+        public override float? SmallSemidiameter => Semidiameter * (1 - Flattening);
+
         /// <summary>
         /// Mean daily motion of the planet, in degrees
         /// </summary>
