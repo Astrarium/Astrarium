@@ -130,8 +130,7 @@ namespace Astrarium.Plugins.Satellites
             string n2yoBaseUri = "https://www.n2yo.com/";
             string n2yoQuery = $"?s={s.Tle.SatelliteNumber}";
 
-            // TODO: localize
-            string openInBrowser = "Open";
+            string openInBrowser = Text.Get("Satellite.WebBrowser.OpenLink");
 
             info
                 .SetTitle(string.Join(", ", s.Names))
@@ -150,37 +149,37 @@ namespace Astrarium.Plugins.Satellites
                 .AddHeader(Text.Get("Satellite.Characteristics"))
                 .AddRow("Magnitude", isEclipsed ? (float?)null : magnitude, magnitudeFormatter)
                 .AddRow("Distance", distance, distanceFormatter)
-                .AddRow("S-S-O angle", ssoAngle, angle1Formatter)
-                .AddRow("Topocentric position vector", vecTopocentric, Formatters.Simple)
-                .AddRow("Geocentric position vector", vecGeocentric, Formatters.Simple)
-                .AddRow("Geocentric velocity vector", s.Velocity, Formatters.Simple)
+                .AddRow("SSOAngle", ssoAngle, angle1Formatter)
+                .AddRow("TopocentricPositionVector", vecTopocentric, Formatters.Simple)
+                .AddRow("GeocentricPositionVector", vecGeocentric, Formatters.Simple)
+                .AddRow("GeocentricVelocityVector", s.Velocity, Formatters.Simple)
 
-                .AddHeader("Alternate names")
-                .AddRow("Satellite number (SATCAT ID)", new Uri("https://celestrak.org/satcat/table-satcat.php?CATNR=" + Uri.EscapeDataString(s.Tle.SatelliteNumber)), s.Tle.SatelliteNumber)
-                .AddRow("Int. designator (COSPAR ID)", new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
+                .AddHeader(Text.Get("Satellite.AlternateNames"))
+                .AddRow(Text.Get("Satellite.SatcatId"), new Uri("https://celestrak.org/satcat/table-satcat.php?CATNR=" + Uri.EscapeDataString(s.Tle.SatelliteNumber)), s.Tle.SatelliteNumber)
+                .AddRow(Text.Get("Satellite.CosparId"), new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
 
-                .AddHeader("Orbital data")
+                .AddHeader(Text.Get("Satellite.OrbitalData"))
                 .AddRow("Epoch", s.Tle.Epoch, Formatters.JulianDay)
                 .AddRow("Inclination", s.Tle.Inclination, Formatters.Inclination)
                 .AddRow("Eccentricity", s.Tle.Eccentricity, Formatters.Simple)
-                .AddRow("Argument of perigee", s.Tle.ArgumentOfPerigee, angle4Formatter)
-                .AddRow("Longitude of ascending node", s.Tle.LongitudeAscNode, angle4Formatter)
-                .AddRow("Mean anomaly", s.Tle.MeanAnomaly, angle4Formatter)
+                .AddRow("ArgumentOfPerigee", s.Tle.ArgumentOfPerigee, angle4Formatter)
+                .AddRow("LongitudeOfAscendingNode", s.Tle.LongitudeAscNode, angle4Formatter)
+                .AddRow("MeanAnomaly", s.Tle.MeanAnomaly, angle4Formatter)
                 .AddRow("Period", TimeSpan.FromMinutes(s.Tle.Period), Formatters.TimeSpan)
                 .AddRow("Apogee", Norad.GetSatelliteApogee(s.Tle), distanceFormatter)
                 .AddRow("Perigee", Norad.GetSatellitePerigee(s.Tle), distanceFormatter)
-                .AddRow("Orbital data age", TimeSpan.FromDays(age), Formatters.TimeSpan)
+                .AddRow("OrbitalDataAge", TimeSpan.FromDays(age), Formatters.TimeSpan)
 
                 .AddHeader("heavens-above.com")
-                .AddRow("Satellite info", new Uri(haBaseUri + "satinfo.aspx" + haQuery), openInBrowser)
-                .AddRow("Orbit", new Uri(haBaseUri + "orbit.aspx" + haQuery), openInBrowser)
-                .AddRow("Passes", new Uri(haBaseUri + "PassSummary.aspx" + haQuery), openInBrowser)
-                .AddRow("Close encounters", new Uri(haBaseUri + "CloseEncounters.aspx" + haQuery), openInBrowser)
+                .AddRow(Text.Get("Satellite.HeavensAbove.Info"), new Uri(haBaseUri + "satinfo.aspx" + haQuery), openInBrowser)
+                .AddRow(Text.Get("Satellite.HeavensAbove.Orbit"), new Uri(haBaseUri + "orbit.aspx" + haQuery), openInBrowser)
+                .AddRow(Text.Get("Satellite.HeavensAbove.Passes"), new Uri(haBaseUri + "PassSummary.aspx" + haQuery), openInBrowser)
+                .AddRow(Text.Get("Satellite.HeavensAbove.CloseEncounters"), new Uri(haBaseUri + "CloseEncounters.aspx" + haQuery), openInBrowser)
 
                 .AddHeader("N2YO.com")
-                .AddRow("Satellite info", new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), openInBrowser)
-                .AddRow("Live tracking", new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), openInBrowser)
-                .AddRow("Passes", new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser);
+                .AddRow(Text.Get("Satellite.N2YO.Info"), new Uri(n2yoBaseUri + "satellite/" + n2yoQuery), openInBrowser)
+                .AddRow(Text.Get("Satellite.N2YO.LiveTracking"), new Uri(n2yoBaseUri + n2yoQuery + "&live=1"), openInBrowser)
+                .AddRow(Text.Get("Satellite.N2YO.Passes"), new Uri(n2yoBaseUri + "passes/" + n2yoQuery), openInBrowser);
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)

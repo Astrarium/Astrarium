@@ -15,6 +15,8 @@ namespace Astrarium.Plugins.Satellites
             DefineSetting("SatellitesShowOrbit", false);
             DefineSetting("SatellitesShowEclipsed", false);
             DefineSetting("SatellitesShowBelowHorizon", false);
+            DefineSetting("SatellitesUseMagFilter", false);
+            DefineSetting("SatellitesMagFilter", 4.0m);
 
             DefineSetting("ColorSatellitesOrbit", Color.FromArgb(255, 100, 0));
             DefineSetting("ColorSatellitesLabels", Color.FromArgb(255, 255, 0));

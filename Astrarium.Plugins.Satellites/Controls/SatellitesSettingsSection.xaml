@@ -18,7 +18,12 @@
             <CheckBox Content="{t:Text Settings.SatellitesLabels}" IsChecked="{Binding Settings.SatellitesLabels}" Margin="2" />
             <CheckBox Content="{t:Text Settings.SatellitesShowEclipsed}" IsChecked="{Binding Settings.SatellitesShowEclipsed}" Margin="2" />
             <CheckBox Content="{t:Text Settings.SatellitesShowBelowHorizon}" IsChecked="{Binding Settings.SatellitesShowBelowHorizon}" Margin="2" />
-            <CheckBox Content="{t:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2" />
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Content="Display satellites brighter than" IsChecked="{Binding Settings.SatellitesUseMagFilter}" Margin="2 2 8 2" />
+                <c:NumericUpDown Value="{Binding Settings.SatellitesMagFilter}" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Width="60" DecimalPlaces="0" Step="1" Minimum="-10" Maximum="20" />
+                <TextBlock Text="mag" VerticalAlignment="Center" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Margin="8 0 0 0" />
+            </StackPanel>
+            <CheckBox Content="{t:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2 0 2 2" />
         </StackPanel>
 
         

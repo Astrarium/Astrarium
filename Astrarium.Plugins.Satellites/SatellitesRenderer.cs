@@ -36,6 +36,8 @@ namespace Astrarium.Plugins.Satellites
             bool showEclipsed = settings.Get("SatellitesShowEclipsed");
             bool showBelowHorizon = settings.Get("SatellitesShowBelowHorizon");
             bool showOrbit = settings.Get("SatellitesShowOrbit");
+            bool useMagFilter = settings.Get("SatellitesUseMagFilter");
+            float magFilter = (float)settings.Get<decimal>("SatellitesMagFilter");
             Color satelliteColor = Color.White.Tint(nightMode);
             Color labelColor = settings.Get<Color>("ColorSatellitesLabels").Tint(nightMode);
             Color eclipsedLabelColor = settings.Get<Color>("ColorEclipsedSatellitesLabels").Tint(nightMode);
@@ -75,6 +77,8 @@ namespace Astrarium.Plugins.Satellites
 
                 // visible magnitude
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
+
+                if (useMagFilter && s.Magnitude > magFilter) continue;
 
                 float size = prj.GetPointSize(s.Magnitude);
                 if (size == 0) continue;
