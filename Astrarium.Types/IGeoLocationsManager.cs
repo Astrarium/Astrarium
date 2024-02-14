@@ -27,5 +27,11 @@ namespace Astrarium.Types
         /// <param name="maxCount">Maximal count of items to be returned.</param>
         /// <returns>Collection of geographical locations.</returns>
         ICollection<CrdsGeographical> Search(string searchString, int maxCount);
+
+        /// <summary>
+        /// Adds observer location to favorites list
+        /// </summary>
+        /// <param name="location">Geo location to add to favorites</param>
+        void AddToFavorites(CrdsGeographical location);
     }
 }

@@ -292,6 +292,13 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </GroupBox>
+
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="24" Height="24" Margin="4" Command="{Binding AddToFavoritesListCommand}">Star</Button>
+                    <Button Width="24" Height="24" Margin="4">Unstar</Button>
+                    <Button MinWidth="120" Margin="4" Command="{Binding EditFavoritesListCommand}">Edit favorites list...</Button>
+                </StackPanel>
+                
             </StackPanel>
             
 

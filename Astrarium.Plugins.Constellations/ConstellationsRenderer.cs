@@ -114,10 +114,8 @@ namespace Astrarium.Plugins.Constellations
 
                         if (p1 != null && p2 != null)
                         {
-                         
                             GL.Vertex2(p1.X, p1.Y);
                             GL.Vertex2(p2.X, p2.Y);
-                            
                         }
                     }
                 }

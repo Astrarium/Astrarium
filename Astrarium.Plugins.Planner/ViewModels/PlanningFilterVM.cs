@@ -141,7 +141,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public double JulianDay
         {
             get => GetValue<double>(nameof(JulianDay));
-            set => SetValue(nameof(JulianDay), value);
+            set
+            {
+                if (value > 0)
+                {
+                    Date date = new Date(value, UtcOffset);
+                    double midnight = value - (date.Day - Math.Truncate(date.Day));
+                    SetValue(nameof(JulianDay), midnight);
+                }
+            }
         }
 
         public double UtcOffset

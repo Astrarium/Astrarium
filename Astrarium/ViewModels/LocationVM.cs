@@ -141,6 +141,16 @@ namespace Astrarium.ViewModels
         /// </summary>
         public ICommand SelectNearestLocationCommand => new Command(SelectNearestLocation);
 
+        /// <summary>
+        /// Executed when user clicks on "Edit favorites" button
+        /// </summary>
+        public ICommand EditFavoritesListCommand => new Command(EditFavoritesList);
+
+        /// <summary>
+        /// Executed when user clicks on "Add to favorites" button
+        /// </summary>
+        public ICommand AddToFavoritesListCommand => new Command(AddToFavoritesList);
+
         #endregion Commands
 
         /// <summary>
@@ -741,6 +751,19 @@ namespace Astrarium.ViewModels
         private void SelectNearestLocation()
         {
             ObserverLocation = NearestLocation;
+        }
+
+        /// <summary>
+        /// Handler for <see cref="EditFavoritesListCommand"/>
+        /// </summary>
+        private void EditFavoritesList()
+        {
+
+        }
+
+        private void AddToFavoritesList()
+        {
+            locationsManager.AddToFavorites(new CrdsGeographical(ObserverLocation));
         }
 
         /// <summary>
