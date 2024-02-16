@@ -33,5 +33,11 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="location">Geo location to add to favorites</param>
         void AddToFavorites(CrdsGeographical location);
+
+        /// <summary>
+        /// Gets collection of favorite locations
+        /// </summary>
+        /// <returns></returns>
+        ICollection<CrdsGeographical> GetFavotites();
     }
 }

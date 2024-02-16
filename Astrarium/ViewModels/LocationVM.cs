@@ -333,6 +333,14 @@ namespace Astrarium.ViewModels
         }
 
         /// <summary>
+        /// Gets favorite locations
+        /// </summary>
+        public ICollection<CrdsGeographical> Favorites
+        {
+            get => locationsManager.GetFavotites();
+        }
+
+        /// <summary>
         /// Brush to draw location name on the map
         /// </summary>
         private Brush MapLocationNameBrush { get; set; } = Brushes.White;
@@ -761,9 +769,13 @@ namespace Astrarium.ViewModels
 
         }
 
+        /// <summary>
+        /// Handler for <see cref="AddToFavoritesListCommand"/>
+        /// </summary>
         private void AddToFavoritesList()
         {
             locationsManager.AddToFavorites(new CrdsGeographical(ObserverLocation));
+            NotifyPropertyChanged(nameof(Favorites));
         }
 
         /// <summary>

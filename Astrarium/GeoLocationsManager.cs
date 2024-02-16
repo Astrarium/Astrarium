@@ -125,6 +125,12 @@ namespace Astrarium
             }
         }
 
+        /// <inheritdoc />
+        public ICollection<CrdsGeographical> GetFavotites()
+        {
+            return settings.Get("FavoriteLocations", new List<CrdsGeographical>());
+        }
+
         /// <summary>
         /// Parses single city record
         /// </summary>
