@@ -2276,7 +2276,7 @@
     <!-- SubmenuItem -->
     <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
         <c:BorderFix x:Name="Border" BorderThickness="1" MinWidth="120">
-            <Grid VerticalAlignment="Center">
+            <Grid VerticalAlignment="Center" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
                     <ColumnDefinition Width="*" />
