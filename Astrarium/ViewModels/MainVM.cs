@@ -633,13 +633,11 @@ namespace Astrarium.ViewModels
         {
             if (obj == null)
             {
-                // TODO: localize
-                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage("Map is unlocked"));
+                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage("$MapIsUnlocked"));
             }
             else
             {
-                // TODO: localize
-                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage($"Map is locked on: {obj.Names.First()}"));
+                Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage(Text.Get("MapIsLockedOn", ("objectName", obj.Names.First()))));
             }
         }
 
@@ -834,8 +832,7 @@ namespace Astrarium.ViewModels
         {
             if (!CenterOnObject(body))
             {
-                // TODO: localize
-                ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky.");
+                ViewManager.ShowMessageBox("$Warning", "$ObjectNotFound");
             }
         }
 
