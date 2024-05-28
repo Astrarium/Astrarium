@@ -248,17 +248,17 @@
         <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MouseConstellation, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />
             <Separator />
-            <TextBlock Width="240" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
+            <TextBlock Width="Auto" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
             <Separator />
-            <TextBlock Width="240" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
+            <TextBlock Width="Auto" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
             <Separator />
-            <TextBlock Width="100" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" ToolTip="{t:Text StatusBar.ViewAngle}" />
+            <TextBlock Width="Auto" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" ToolTip="{t:Text StatusBar.ViewAngle}" />
             <Separator />
-            <TextBlock Width="80" Text="{Binding FPS, FallbackValue='FPS'}" />
-            <Separator />
+            <TextBlock Width="Auto" Text="{Binding FPS, FallbackValue='FPS'}" Visibility="{Binding DisplayFPS, Converter={s:BoolToVisibilityConverter}, Mode=OneTime}" />
+            <Separator Visibility="{Binding DisplayFPS, Converter={s:BoolToVisibilityConverter}, Mode=OneTime}" />
 
             <StatusBarItem>
-                <Menu Background="Transparent">
+                <Menu Background="Transparent" Margin="-8 0 0 0">
                     <MenuItem 
                         ItemsSource="{Binding SelectedObjectsMenuItems}" 
                         Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 

@@ -91,7 +91,7 @@ namespace Astrarium.ViewModels
         public System.Drawing.Size WindowSize
         {
             get => settings.Get("RememberWindowSize") ? settings.Get<System.Drawing.Size>("WindowSize") : System.Drawing.Size.Empty;
-            set 
+            set
             {
                 if (settings.Get("RememberWindowSize") && value != WindowSize)
                 {
@@ -120,6 +120,14 @@ namespace Astrarium.ViewModels
         {
             set => SetValue(nameof(FPS), value);
             get => GetValue<string>(nameof(FPS));
+        }
+
+        public bool DisplayFPS 
+        {
+            get
+            {
+                return Environment.GetCommandLineArgs().Contains("-fps", StringComparer.OrdinalIgnoreCase);
+            }
         }
 
         public string MouseConstellation
@@ -218,6 +226,7 @@ namespace Astrarium.ViewModels
             AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(IsStatusBarVisible)));
 
             Map_ContextChanged();
+            Map_ViewAngleChanged(map.Projection.Fov);
             Map_SelectedObjectChanged(map.SelectedObject);
 
             var bindingViewModeHorizontal = new SimpleBinding(settings, "ViewMode", "IsChecked")
