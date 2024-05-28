@@ -277,7 +277,27 @@
                     </MenuItem>
                 </Menu>
             </StatusBarItem>
+            <Separator />
 
+            <StatusBarItem>
+                <Menu Background="Transparent" Margin="-8 0 0 0">
+                    <MenuItem 
+                        ItemsSource="{Binding FavoriteLocationsMenuItems}" 
+                        Header="{Binding ObserverLocation, Converter={s:GeoLocationNameConverter}, FallbackValue='Observer Location'}" >
+                        <MenuItem.ItemContainerStyle>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="{Binding IsChecked}" />
+                                <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
+                                <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                                <Setter Property="Command" Value="{Binding Command}" />
+                                <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+                                <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+                </Menu>
+            </StatusBarItem>
             <Separator />
 
             <!-- Date and Time controls -->

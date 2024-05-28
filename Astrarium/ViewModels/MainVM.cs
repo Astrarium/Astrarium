@@ -44,6 +44,8 @@ namespace Astrarium.ViewModels
         public Command<PointF> MeasureToolCommand { get; private set; }
         public Command<CelestialObject> GoToHistoryItemCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
+        public Command<CrdsGeographical> SetLocationCommand { get; private set; }
+        public Command EditFavoriteLocationsCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
         public Command ShowAboutCommand { get; private set; }
         public Command CheckForUpdatesCommand { get; private set; }
@@ -54,9 +56,12 @@ namespace Astrarium.ViewModels
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
+        public ObservableCollection<MenuItem> FavoriteLocationsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
+
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
         public CelestialObject SelectedObject { get; private set; }
+        public CrdsGeographical ObserverLocation => settings.Get<CrdsGeographical>("ObserverLocation");
 
         public WindowState WindowState
         {
@@ -165,7 +170,7 @@ namespace Astrarium.ViewModels
             settings.SetAndSave("Projection", projectionType.Name);
         }
 
-        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, ISettings settings, UIElementsIntegration uiIntegration)
+        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, IGeoLocationsManager geoLocationsManager, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
             this.map = map;
@@ -206,6 +211,8 @@ namespace Astrarium.ViewModels
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             GoToHistoryItemCommand = new Command<CelestialObject>(GoToObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
+            SetLocationCommand = new Command<CrdsGeographical>(SetLocation);
+            EditFavoriteLocationsCommand = new Command(EditFavoriteLocations);
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
             CheckForUpdatesCommand = new Command(CheckForUpdates);
@@ -219,7 +226,7 @@ namespace Astrarium.ViewModels
             map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
             map.ContextChanged += Map_ContextChanged;
-            settings.SettingValueChanged += (s, v) => map.Invalidate();
+            settings.SettingValueChanged += Settings_SettingValueChanged;
 
             AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
             AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(IsCompactMenu)));
@@ -228,6 +235,7 @@ namespace Astrarium.ViewModels
             Map_ContextChanged();
             Map_ViewAngleChanged(map.Projection.Fov);
             Map_SelectedObjectChanged(map.SelectedObject);
+            FillLocationsList();
 
             var bindingViewModeHorizontal = new SimpleBinding(settings, "ViewMode", "IsChecked")
             {
@@ -608,6 +616,38 @@ namespace Astrarium.ViewModels
             NotifyPropertyChanged(nameof(MapViewAngleString));
         }
 
+        private void FillLocationsList()
+        {
+            FavoriteLocationsMenuItems.Clear();
+
+            var currentLocation = settings.Get<CrdsGeographical>("ObserverLocation");
+            FavoriteLocationsMenuItems.Add(new MenuItem(currentLocation.Name) { IsEnabled = false });
+            FavoriteLocationsMenuItems.Add(null);
+
+            var favorites = settings.Get("FavoriteLocations", new List<CrdsGeographical>());
+            if (favorites.Any())
+            {
+                foreach (var location in favorites)
+                {
+                    FavoriteLocationsMenuItems.Add(new MenuItem(location.Name, SetLocationCommand, location));
+                }
+                FavoriteLocationsMenuItems.Add(null);
+            }
+            // TODO: localization
+            FavoriteLocationsMenuItems.Add(new MenuItem("Edit favorite locations...", EditFavoriteLocationsCommand));
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        {
+            map.Invalidate();
+
+            if (settingName == "ObserverLocation" || settingName == "FavoriteLocations")
+            {
+                NotifyPropertyChanged(nameof(ObserverLocation));
+                FillLocationsList();
+            }
+        }
+
         private void Map_SelectedObjectChanged(CelestialObject body)
         {
             SelectedObject = body;
@@ -958,6 +998,20 @@ namespace Astrarium.ViewModels
             SelectedObjectsMenuItems.Clear();
         }
 
+        private void SetLocation(CrdsGeographical location)
+        {
+            sky.Context.GeoLocation = new CrdsGeographical(location);
+            settings.SetAndSave("ObserverLocation", location);
+            // TODO: localization
+            ViewManager.ShowPopupMessage("Location changed");
+            sky.Calculate();
+        }
+
+        private void EditFavoriteLocations()
+        {
+            //ViewManager.ShowDialog<>
+        }
+
         private void GetObjectInfo(CelestialObject body)
         {
             if (body != null)
@@ -998,9 +1052,7 @@ namespace Astrarium.ViewModels
             CrdsGeographical location = ViewManager.ShowLocationDialog(sky.Context.GeoLocation);
             if (location != null)
             {
-                sky.Context.GeoLocation = new CrdsGeographical(location);
-                settings.SetAndSave("ObserverLocation", location);
-                sky.Calculate();
+                SetLocation(location);
             }
         }
     }

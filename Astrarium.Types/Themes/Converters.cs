@@ -199,6 +199,15 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(Astrarium.Algorithms.CrdsGeographical), typeof(string))]
+    public class GeoLocationNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as Astrarium.Algorithms.CrdsGeographical).Name;
+        }
+    }
+
     public class LeftMarginMultiplierConverter : ValueConverterBase
     {
         public double Length { get; set; }
