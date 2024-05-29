@@ -113,24 +113,6 @@ namespace Astrarium
             }
         }
 
-        /// <inheritdoc />
-        public void AddToFavorites(CrdsGeographical location)
-        {
-            var favorites = settings.Get("FavoriteLocations", new List<CrdsGeographical>());
-            var existing = favorites.FirstOrDefault(x => x.Equals(location));
-            if (existing == null)
-            {
-                favorites.Add(location);
-                settings.SetAndSave("FavoriteLocations", favorites);
-            }
-        }
-
-        /// <inheritdoc />
-        public ICollection<CrdsGeographical> GetFavotites()
-        {
-            return settings.Get("FavoriteLocations", new List<CrdsGeographical>());
-        }
-
         /// <summary>
         /// Parses single city record
         /// </summary>

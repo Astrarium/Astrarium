@@ -476,13 +476,55 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class LongitudeConverter : ValueConverterBase
+    {
+        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double longitude = (double)value;
+            return $"{formatter.Format(Math.Abs(longitude))} {Text.Get(longitude <= 0 ? "LocationWindow.East" : "LocationWindow.West")}";
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LatitudeConverter : ValueConverterBase
+    {
+        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double latitude = (double)value;
+            return $"{formatter.Format(Math.Abs(latitude))} {Text.Get(latitude < 0 ? "LocationWindow.South" : "LocationWindow.North")}";
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class TimeZoneConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return null;
-            TimeSpan offset = (TimeSpan)value;
-            return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+            if (value is TimeSpan)
+            {
+                TimeSpan offset = (TimeSpan)value;
+                return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+            }
+            else if (value is double)
+            {
+                TimeSpan offset = TimeSpan.FromHours((double)value);
+                return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+            }
+            else
+                return null;
         }
 
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

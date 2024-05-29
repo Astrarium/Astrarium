@@ -141,16 +141,6 @@ namespace Astrarium.ViewModels
         /// </summary>
         public ICommand SelectNearestLocationCommand => new Command(SelectNearestLocation);
 
-        /// <summary>
-        /// Executed when user clicks on "Edit favorites" button
-        /// </summary>
-        public ICommand EditFavoritesListCommand => new Command(EditFavoritesList);
-
-        /// <summary>
-        /// Executed when user clicks on "Add to favorites" button
-        /// </summary>
-        public ICommand AddToFavoritesListCommand => new Command(AddToFavoritesList);
-
         #endregion Commands
 
         /// <summary>
@@ -330,14 +320,6 @@ namespace Astrarium.ViewModels
         {
             get => GetValue<bool>(nameof(IsDarkMode));
             protected set => SetValue(nameof(IsDarkMode), value);
-        }
-
-        /// <summary>
-        /// Gets favorite locations
-        /// </summary>
-        public ICollection<CrdsGeographical> Favorites
-        {
-            get => locationsManager.GetFavotites();
         }
 
         /// <summary>
@@ -759,23 +741,6 @@ namespace Astrarium.ViewModels
         private void SelectNearestLocation()
         {
             ObserverLocation = NearestLocation;
-        }
-
-        /// <summary>
-        /// Handler for <see cref="EditFavoritesListCommand"/>
-        /// </summary>
-        private void EditFavoritesList()
-        {
-
-        }
-
-        /// <summary>
-        /// Handler for <see cref="AddToFavoritesListCommand"/>
-        /// </summary>
-        private void AddToFavoritesList()
-        {
-            locationsManager.AddToFavorites(new CrdsGeographical(ObserverLocation));
-            NotifyPropertyChanged(nameof(Favorites));
         }
 
         /// <summary>

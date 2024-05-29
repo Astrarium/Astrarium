@@ -301,7 +301,6 @@ namespace System.Windows.Forms
         {
             get
             {
-
                 if (Layers[0].TileServer != null)
                 {
                     float x = NormalizeTileNumber(-(float)(Layers[0].OffsetX - Width / 2) / TILE_SIZE);

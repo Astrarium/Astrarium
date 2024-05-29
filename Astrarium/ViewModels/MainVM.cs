@@ -620,10 +620,6 @@ namespace Astrarium.ViewModels
         {
             FavoriteLocationsMenuItems.Clear();
 
-            var currentLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-            FavoriteLocationsMenuItems.Add(new MenuItem(currentLocation.Name) { IsEnabled = false });
-            FavoriteLocationsMenuItems.Add(null);
-
             var favorites = settings.Get("FavoriteLocations", new List<CrdsGeographical>());
             if (favorites.Any())
             {
@@ -632,9 +628,8 @@ namespace Astrarium.ViewModels
                     FavoriteLocationsMenuItems.Add(new MenuItem(location.Name, SetLocationCommand, location));
                 }
                 FavoriteLocationsMenuItems.Add(null);
-            }
-            // TODO: localization
-            FavoriteLocationsMenuItems.Add(new MenuItem("Edit favorite locations...", EditFavoriteLocationsCommand));
+            }    
+            FavoriteLocationsMenuItems.Add(new MenuItem("$StatusBar.EditFavoriteLocations", EditFavoriteLocationsCommand));
         }
 
         private void Settings_SettingValueChanged(string settingName, object settingValue)
@@ -1002,14 +997,13 @@ namespace Astrarium.ViewModels
         {
             sky.Context.GeoLocation = new CrdsGeographical(location);
             settings.SetAndSave("ObserverLocation", location);
-            // TODO: localization
-            ViewManager.ShowPopupMessage("Location changed");
+            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", location.Name)));
             sky.Calculate();
         }
 
         private void EditFavoriteLocations()
         {
-            //ViewManager.ShowDialog<>
+            ViewManager.ShowDialog<FavoriteLocationsVM>();
         }
 
         private void GetObjectInfo(CelestialObject body)
