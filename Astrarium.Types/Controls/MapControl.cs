@@ -250,9 +250,6 @@ namespace Astrarium.Types.Controls
         {
             mapControl.MouseEnter += (s, e) => IsMouseOverMap = true;
             mapControl.MouseLeave += (s, e) => { mapControl.Enabled = false; mapControl.Enabled = true; IsMouseOverMap = false; };
-            mapControl.MouseEnter += (s, e) => mapControl.Focus();
-            mapControl.MouseDown += (s, e) => mapControl.Focus();
-            mapControl.MouseUp += (s, e) => mapControl.Focus();
             mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnDoubleClick?.Execute(null); };
             mapControl.MouseClick += (s, e) => {
                 if (e.Button == MouseButtons.Right)
@@ -280,7 +277,7 @@ namespace Astrarium.Types.Controls
                 MaxZoomLevel = mapControl.MaxZoomLevel;
                 MapControl_Resize(mapControl, EventArgs.Empty);
             };
-
+          
             mapControl.CenterChanged += (s, e) => Center = mapControl.Center;
             mapControl.MouseChanged += (s, e) => Mouse = mapControl.Mouse;
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;
@@ -291,11 +288,6 @@ namespace Astrarium.Types.Controls
             mapControl.Resize += MapControl_Resize;
             Child = mapControl;
             mapControl.Focus();
-        }
-
-        private void MapControl_Paint(object sender, PaintEventArgs e)
-        {
-            e.Graphics.DrawLine(Pens.Red, 0, 0, 100, 100);
         }
 
         private void MapControl_Resize(object sender, System.EventArgs e)

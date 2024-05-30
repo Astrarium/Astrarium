@@ -345,7 +345,7 @@
             
         </controls:ExtendedDataGrid>
 
-        <StatusBar Grid.Row="3" Margin="4 0" BorderThickness="1">
+        <StatusBar Height="24" Grid.Row="3" Margin="4 0" BorderThickness="1">
             <StatusBarItem>
                 <StackPanel IsEnabled="False" Orientation="Horizontal">
                     <TextBlock Text="{t:Text PlanningListWindow.StatusBar.TotalObjects}" />

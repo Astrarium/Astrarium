@@ -4,21 +4,24 @@ using System.Windows.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using System.Security;
-using System.Reflection;
 using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System.Linq;
 using Astrarium.Algorithms;
+using System.Windows.Forms.Integration;
+using Astrarium.Types.Controls;
 
 namespace Astrarium
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, WF.IMessageFilter
+    public partial class MainWindow : MouseEventsInterceptableWindow
     {
+        private const uint WM_EXIT_SIZE_MOVE = 0x232;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+
         public static readonly DependencyProperty MouseEquatorialPositionProperty = DependencyProperty.RegisterAttached(
             "MouseEquatorialPosition", typeof(CrdsEquatorial), typeof(MainWindow), new PropertyMetadata(null));
 
@@ -140,7 +143,7 @@ namespace Astrarium
                         window.Left = bounds.Left;
                         window.Top = bounds.Top;
                         window.Width = bounds.Width;
-                        window.Height = bounds.Height;                        
+                        window.Height = bounds.Height;
                     }
 
                     WindowProperties.SetIsFullScreen(window, true);
@@ -184,112 +187,11 @@ namespace Astrarium
         private static readonly IntPtr HWND_TOPMOST = (IntPtr)(-1);
         private static readonly IntPtr HWND_NOTOPMOST = (IntPtr)(-2);
 
-        private const uint MK_LBUTTON = 0x0001;
-        private const uint MK_MBUTTON = 0x0010;
-        private const uint MK_RBUTTON = 0x0002;
-        private const uint MK_XBUTTON1 = 0x0020;
-        private const uint MK_XBUTTON2 = 0x0040;
-        private const uint WM_MOUSEWHEEL = 0x020A;
-        private const uint WM_EXIT_SIZE_MOVE = 0x232;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-
         private Rectangle SavedBounds;
         private WindowState SavedState;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
-
-        [DllImport("user32.dll"), SuppressUnmanagedCodeSecurity]
-        private static extern IntPtr WindowFromPoint(System.Drawing.Point point);
-
-        private MethodInfo onMouseWheelMethod = typeof(WF.Control).GetMethod("OnMouseWheel", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private System.Drawing.Point LocationFromLParam(IntPtr lParam)
-        {
-            short x = (short)((((long)lParam) >> 0) & 0xffff);
-            short y = (short)((((long)lParam) >> 16) & 0xffff);
-            return new System.Drawing.Point(x, y);
-        }
-
-        private bool ConsiderRedirect(WF.Integration.WindowsFormsHost host)
-        {
-            var control = host.Child;
-            return control != null &&
-                  !control.IsDisposed &&
-                   control.IsHandleCreated &&
-                   control.Visible &&
-                  !control.Focused;
-        }
-
-        private int DeltaFromWParam(IntPtr wParam)
-        {
-            return (short)((((long)wParam) >> 16) & 0xffff);
-        }
-
-        private WF.MouseButtons MouseButtonsFromWParam(IntPtr wParam)
-        {
-            int buttonFlags = (int)((((long)wParam) >> 0) & 0xffff);
-            var buttons = WF.MouseButtons.None;
-            if (buttonFlags != 0)
-            {
-                if ((buttonFlags & MK_LBUTTON) == MK_LBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Left;
-                }
-                if ((buttonFlags & MK_MBUTTON) == MK_MBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Middle;
-                }
-                if ((buttonFlags & MK_RBUTTON) == MK_RBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Right;
-                }
-                if ((buttonFlags & MK_XBUTTON1) == MK_XBUTTON1)
-                {
-                    buttons |= WF.MouseButtons.XButton1;
-                }
-                if ((buttonFlags & MK_XBUTTON2) == MK_XBUTTON2)
-                {
-                    buttons |= WF.MouseButtons.XButton2;
-                }
-            }
-            return buttons;
-        }
-
-        public bool PreFilterMessage(ref WF.Message m)
-        {
-            if (m.Msg == WM_MOUSEWHEEL)
-            {
-                var location = LocationFromLParam(m.LParam);
-                var hwnd = WindowFromPoint(location);
-                {
-                    if (ConsiderRedirect(Host)) 
-                    {
-                        if (hwnd == Host.Child.Handle)
-                        {
-                            var delta = DeltaFromWParam(m.WParam);
-
-                            // raise event for WPF control
-                            {
-                                var mouse = InputManager.Current.PrimaryMouseDevice;
-                                var args = new MouseWheelEventArgs(mouse, Environment.TickCount, delta);
-                                args.RoutedEvent = MouseWheelEvent;
-                                Host.RaiseEvent(args);
-                            }
-
-                            // raise event for winforms control
-                            {
-                                var buttons = MouseButtonsFromWParam(m.WParam);
-                                var args = new WF.MouseEventArgs(buttons, 0, location.X, location.Y, delta);
-                                onMouseWheelMethod.Invoke(Host.Child, new object[] { args });
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
 
         public static WF.Screen CurrentScreen(Window window)
         {
@@ -298,6 +200,8 @@ namespace Astrarium
 
         private readonly SkyView skyView;
         private readonly SkyMap map;
+
+        protected override WindowsFormsHost Host => MapHost;
 
         public MainWindow(ISettings settings, SkyMap map)
         {
@@ -419,11 +323,8 @@ namespace Astrarium
         private void SkyView_Paint(object sender, WF.PaintEventArgs e)
         {
             renderStopWatch.Restart();
-
             map.Render();
-
             renderStopWatch.Stop();
-
             int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
             SetFPS(this, $"FPS = {fps}");
         }

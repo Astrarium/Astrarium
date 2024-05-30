@@ -106,6 +106,10 @@ namespace Astrarium
                     Application.Current.MainWindow = window;
                 }
 
+
+                EventHandler activatedEventHandler = (s, e) => viewModel.OnActivated();
+                window.Activated += activatedEventHandler;
+
                 Action<bool?> viewModelClosingHandler = null;
                 viewModelClosingHandler = (dialogResult) =>
                 {
@@ -117,6 +121,7 @@ namespace Astrarium
                     window.Close();
 
                     viewModel.Closing -= viewModelClosingHandler;
+                    window.Activated -= activatedEventHandler;
 
                     if (needDisposeModel)
                     {
@@ -125,7 +130,7 @@ namespace Astrarium
 
                     Application.Current.Dispatcher.Invoke(() => window.Owner?.Activate());
                 };
-
+                
                 viewModel.Closing += viewModelClosingHandler;
 
                 if (isDialog)

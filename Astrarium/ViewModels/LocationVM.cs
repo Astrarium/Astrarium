@@ -79,6 +79,11 @@ namespace Astrarium.ViewModels
             SetValue(nameof(OverlayOpacity), settings.Get(OVERLAY_OPACITY_SETTING_NAME, 0.5f));
         }
 
+        public override void OnActivated()
+        {
+            SelectLocation();
+        }
+
         #region Commands
 
         /// <summary>
@@ -346,7 +351,6 @@ namespace Astrarium.ViewModels
             set
             {
                 SetValue(nameof(ObserverLocation), value);
-
                 var geoPoint = new GeoPoint(-(float)value.Longitude, (float)value.Latitude);
                 Markers.Clear();
                 Markers.Add(new Marker(geoPoint, value.Name));

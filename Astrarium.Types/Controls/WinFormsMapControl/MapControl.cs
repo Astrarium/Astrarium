@@ -572,7 +572,6 @@ namespace System.Windows.Forms
             InitializeComponent();
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
-
             Layers.Add(new Layer() { ZIndex = 0 });
             Layers.Add(new Layer() { ZIndex = 1 });
         }
@@ -615,15 +614,6 @@ namespace System.Windows.Forms
                 new LightPollutionVIIRS2013TileServer(userAgent),
                 new LightPollutionVIIRS2012TileServer(userAgent),
             };
-        }
-
-        /// <summary>
-        /// Called on creating control.
-        /// </summary>
-        protected override void OnCreateControl()
-        {
-            base.OnCreateControl();
-            Center = new GeoPoint(0, 0);
         }
 
         /// <summary>
@@ -722,7 +712,7 @@ namespace System.Windows.Forms
 
             AdjustMapBounds();
             Invalidate();
-            CenterChanged?.Invoke(this, EventArgs.Empty);
+            //CenterChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>

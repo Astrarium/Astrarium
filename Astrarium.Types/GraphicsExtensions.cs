@@ -14,34 +14,6 @@ namespace Astrarium.Types
     /// </summary>
     public static class GraphicsExtensions
     {
-        private static ImageAttributes RedImageAttributes = null;
-        private static ImageAttributes WhiteImageAttributes = null;
-
-        private static ImageAttributes GetImageAttributes(bool nightMode)
-        {
-            if (nightMode)
-            {
-                if (RedImageAttributes == null)
-                {
-                    float[][] matrix = {
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0, 0, 0, 1, 0},
-                        new float[] {0, 0, 0, 0, 0}
-                    };
-                    var colorMatrix = new ColorMatrix(matrix);
-                    RedImageAttributes = new ImageAttributes();
-                    RedImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                }
-                return RedImageAttributes;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static void DrawRoundedRectangle(this Graphics graphics, Pen pen, RectangleF bounds, float cornerRadius)
         {
             if (graphics == null)

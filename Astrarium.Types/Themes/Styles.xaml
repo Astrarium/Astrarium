@@ -1251,7 +1251,7 @@
 
     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderThickness" Value="1" />
     </Style>
 
     <Style x:Key="WindowTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type ButtonBase}}">

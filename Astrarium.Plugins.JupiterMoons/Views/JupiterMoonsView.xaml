@@ -20,6 +20,8 @@
         <ResourceDictionary>
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="Margin" Value="2" />
@@ -35,6 +37,8 @@
             </Style>
             <Style x:Key="DateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="Margin" Value="2" />
