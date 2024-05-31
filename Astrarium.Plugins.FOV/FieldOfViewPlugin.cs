@@ -95,9 +95,10 @@ namespace Astrarium.Plugins.FOV
             param.Frame.Enabled = param.MenuItem.IsChecked;
 
             settings.SetAndSave("FovFrames", fovFrames);
+            map.Invalidate();
 
             NotifyPropertyChanged(
-                nameof(FrameContextMenuItems), 
+                nameof(FrameContextMenuItems),
                 nameof(IsContextMenuVisible));
         }
 

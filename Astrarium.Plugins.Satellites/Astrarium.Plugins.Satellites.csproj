@@ -43,9 +43,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Data\Brightest.tle">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
 	  <None Update="Data\Satellites.dat">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

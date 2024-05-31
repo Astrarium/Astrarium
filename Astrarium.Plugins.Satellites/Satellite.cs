@@ -15,7 +15,7 @@ namespace Astrarium.Plugins.Satellites
         /// <summary>
         /// Orbital data in TLE (two lines elements) format
         /// </summary>
-        public TLE Tle { get; private set; }
+        public TLE Tle { get; set; }
         
         /// <summary>
         /// Creates new instance of satellite

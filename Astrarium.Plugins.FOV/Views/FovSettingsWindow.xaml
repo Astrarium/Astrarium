@@ -63,6 +63,8 @@
                     <Setter Property="Margin" Value="2" />
                     <Setter Property="Width" Value="18" />
                     <Setter Property="Height" Value="18" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                 </Style.Setters>
                 <Style.Triggers>
                     <Trigger Property="IsEnabled" Value="False">

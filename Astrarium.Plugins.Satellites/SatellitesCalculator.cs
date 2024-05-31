@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Net;
+using System.Threading;
 
 namespace Astrarium.Plugins.Satellites
 {
@@ -15,7 +17,8 @@ namespace Astrarium.Plugins.Satellites
     {
         private const double AU = 149597870.691;
 
-        public ICollection<Satellite> Satellites { get; private set; }
+        private List<Satellite> satellites = new List<Satellite>();
+        public ICollection<Satellite> Satellites => satellites;
 
         public Vec3 SunVector { get; private set; }
 
@@ -27,14 +30,16 @@ namespace Astrarium.Plugins.Satellites
         private Func<SkyContext, CrdsEquatorial> SunEquatorial;
 
         private readonly ISky sky;
+        private readonly ISettings settings;
 
-        public SatellitesCalculator (ISky sky)
+        public SatellitesCalculator (ISky sky, ISettings settings)
         {
             this.sky = sky;
+            this.settings = settings;
         }
 
         /// <inheritdoc />
-        public override void Initialize()
+        public override async void Initialize()
         {
             SunEquatorial = sky.SunEquatorial;
 
@@ -42,7 +47,104 @@ namespace Astrarium.Plugins.Satellites
             string satellitesDataFile = Path.Combine(baseDir, "Data/Satellites.dat");
             string tleFile = Path.Combine(baseDir, "Data/Brightest.tle");
 
-            Satellites = LoadSatellites(tleFile, satellitesDataFile);
+            // Load general satellites data (names, magnitude, sizes) 
+            LoadSatellitesData(satellitesDataFile);
+
+            // TLE sources from settings
+            List<TLESource> tleSources = settings.Get<List<TLESource>>("SatellitesOrbitalElements");
+
+            // use app data path to satellites data (downloaded by user)
+            string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
+
+            // user directory for satellites data exists and contains TLE files
+            if (Directory.Exists(directory) && 
+                Directory.EnumerateFiles(directory, "*.tle").Any())
+            {
+                // load TLE files that match settings
+                var tleFiles = Directory.EnumerateFiles(directory, "*.tle")
+                    .Where(fileName => tleSources.Any(x => x.IsEnabled && x.FileName == Path.GetFileNameWithoutExtension(fileName)));
+
+                foreach (string file in tleFiles)
+                {
+                    LoadSatellites(file);
+                }
+            }
+
+            // update TLEs
+            foreach (var tleSource in tleSources)
+            {
+                if (tleSource.IsEnabled &&
+                   (tleSource.LastUpdated == null || DateTime.Now.Subtract(tleSource.LastUpdated.Value).TotalDays >= 1))
+                {
+                    Log.Info($"Obital elements of satellites ({tleSource.FileName}) needs to be updated, updating...");
+                    await Task.Run(() =>
+                    {
+                        UpdateOrbitalElements(tleSource, silent: true);
+                        tleSource.LastUpdated = DateTime.Now;
+                        settings.SetAndSave("SatellitesOrbitalElements", tleSources);
+                        string path = Path.Combine(directory, tleSource.FileName + ".tle");
+                        LoadSatellites(path);
+                    });
+                }
+            }
+        }
+
+        private const int BUFFER_SIZE = 1024;
+
+        public void UpdateOrbitalElements(TLESource tleSource, bool silent)
+        {
+            string tempFile = Path.GetTempFileName();
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            try
+            {
+                ServicePointManager.SecurityProtocol =
+                                SecurityProtocolType.Tls |
+                                SecurityProtocolType.Tls11 |
+                                SecurityProtocolType.Tls12 |
+                                SecurityProtocolType.Ssl3;
+
+                // use app data path to satellites data (downloaded by user)
+                string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
+
+                string targetPath = Path.Combine(directory, tleSource.FileName + ".tle");
+
+                WebRequest request = WebRequest.Create(tleSource.Url);
+                WebResponse response = request.GetResponse();
+                using (Stream responseStream = response.GetResponseStream())
+                using (Stream fileStream = new FileStream(tempFile, FileMode.OpenOrCreate))
+                using (BinaryWriter streamWriter = new BinaryWriter(fileStream))
+                {
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    int bytesRead = 0;
+                    StringBuilder remainder = new StringBuilder();
+
+                    do
+                    {
+                        if (tokenSource.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
+                        bytesRead = responseStream.Read(buffer, 0, BUFFER_SIZE);
+                        streamWriter.Write(buffer, 0, bytesRead);
+                    }
+                    while (bytesRead > 0);
+
+                    File.Copy(tempFile, targetPath, overwrite: true);
+                }
+            }
+            catch 
+            {
+                
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
+                }
+            }
         }
 
         public override void Calculate(SkyContext context)
@@ -85,6 +187,7 @@ namespace Astrarium.Plugins.Satellites
             public override string Format(object value)
             {
                 if (value == null)
+                    // TODO: localize
                     return "[В тени]";
                 else
                     return base.Format(value);
@@ -159,7 +262,7 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow(Text.Get("Satellite.CosparId"), new Uri("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + Uri.EscapeDataString(s.Tle.InternationalDesignator)), s.Tle.InternationalDesignator)
 
                 .AddHeader(Text.Get("Satellite.OrbitalData"))
-                .AddRow("Epoch", s.Tle.Epoch, Formatters.JulianDay)
+                .AddRow("Epoch", new Date(s.Tle.Epoch, c.GeoLocation.UtcOffset), Formatters.DateTime)
                 .AddRow("Inclination", s.Tle.Inclination, Formatters.Inclination)
                 .AddRow("Eccentricity", s.Tle.Eccentricity, Formatters.Simple)
                 .AddRow("ArgumentOfPerigee", s.Tle.ArgumentOfPerigee, angle4Formatter)
@@ -184,19 +287,23 @@ namespace Astrarium.Plugins.Satellites
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return Satellites
+            var satellites = Satellites
                 .Where(s => s.Names.Any(n => n.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0))
                 .Where(filterFunc)
                 .Take(maxCount)
-                .ToArray();
+                .ToList();
+
+            // TODO: calculate equatorial position
+            // satellites.ForEach(x => x.Equatorial = Eq)
+
+            return satellites;
         }
 
-        private ICollection<Satellite> LoadSatellites(string tleFile, string satellitesDataFile)
+        private Dictionary<string, float> stdMagnitudes = new Dictionary<string, float>();
+        private float averageStdMagnitude;
+
+        private void LoadSatellitesData(string satellitesDataFile)
         {
-            var satellites = new List<Satellite>();
-
-            Dictionary<string, float> magnitudes = new Dictionary<string, float>();
-
             using (var sr = new StreamReader(satellitesDataFile, Encoding.UTF8))
             {
                 while (!sr.EndOfStream)
@@ -209,14 +316,31 @@ namespace Astrarium.Plugins.Satellites
                     string mag = line.Substring(33, 4).Trim();
                     if (!string.IsNullOrEmpty(mag))
                     {
-                        magnitudes[number] = float.Parse(mag, CultureInfo.InvariantCulture);
+                        stdMagnitudes[number] = float.Parse(mag, CultureInfo.InvariantCulture);
                     }
                 }
                 sr.Close();
             }
 
-            float averageMag = magnitudes.Values.Average();
+            averageStdMagnitude = stdMagnitudes.Values.Average();
+        }
 
+        private float GetStdMagnitude(string satNumber)
+        {
+            if (stdMagnitudes.ContainsKey(satNumber))
+            {
+                return stdMagnitudes[satNumber];
+            }
+            else
+            {
+                return averageStdMagnitude;
+            }
+        }
+
+        private void LoadSatellites(string tleFile)
+        {
+            int totalCount = 0;
+            int newCount = 0;
             using (var sr = new StreamReader(tleFile, Encoding.UTF8))
             {
                 while (!sr.EndOfStream)
@@ -224,23 +348,34 @@ namespace Astrarium.Plugins.Satellites
                     string name = sr.ReadLine();
                     string line1 = sr.ReadLine();
                     string line2 = sr.ReadLine();
-                    var satellite = new Satellite(name.Trim(), new TLE(line1, line2));
+                    var tle = new TLE(line1, line2);
 
-                    if (magnitudes.ContainsKey(satellite.Tle.SatelliteNumber))
+                    // check satellite already exists
+                    var existing = satellites.FirstOrDefault(x => x.Tle.SatelliteNumber == tle.SatelliteNumber);
+
+                    totalCount++;
+
+                    // update TLE if newer
+                    if (existing != null)
                     {
-                        satellite.StdMag = magnitudes[satellite.Tle.SatelliteNumber];
+                        if (existing.Tle.Epoch < tle.Epoch)
+                        {
+                            existing.Tle = tle;
+                        }
                     }
+                    // add new satellite instance
                     else
                     {
-                        satellite.StdMag = averageMag;
+                        var satellite = new Satellite(name.Trim(), tle);
+                        satellite.StdMag = GetStdMagnitude(satellite.Tle.SatelliteNumber);
+                        satellites.Add(satellite);
+                        newCount++;
                     }
-
-                    satellites.Add(satellite);
                 }
                 sr.Close();
             }
 
-            return satellites;
+            Log.Debug($"Loaded {newCount} satellites from file {tleFile} (total records in file: {totalCount})");
         }
     }
 }
