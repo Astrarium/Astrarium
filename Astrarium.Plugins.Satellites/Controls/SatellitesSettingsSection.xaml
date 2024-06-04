@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     Title="{t:Text Section.Satellites}"
     mc:Ignorable="d"
@@ -23,6 +24,97 @@
                 <TextBlock Text="{t:Text Settings.SatellitesUseMagFilter.Mag}" VerticalAlignment="Center" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Margin="8 0 0 0" />
             </StackPanel>
             <CheckBox Content="{t:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2 0 2 2" />
+
+            <GroupBox 
+                Header="Orbital elements sources"
+                Margin="2"
+                Padding="0 8">
+
+                <DataGrid 
+                    
+                    ItemsSource="{Binding Settings.SatellitesOrbitalElements}"
+                    AutoGenerateColumns="False"
+                    RowHeight="28"
+                    
+                    >
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCellStyle}">
+                            <Style.Setters>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                            <Grid Background="{TemplateBinding Background}">
+                                                <ContentPresenter x:Name="ContentPresenter" VerticalAlignment="Center" Margin="0" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style.Setters>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Enabled">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="File name">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="6 0" Text="{Binding FileName}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Margin="1" Text="{Binding FileName}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="URL">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="6 0" Text="{Binding Url}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Margin="1" Text="{Binding Url}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Last Updated">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="6 0" Text="{Binding LastUpdated, Converter={s:DateTimeToStringConverter}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="U" Margin="2" />
+                                        <Button Content="D" Margin="2" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid
+            </GroupBox>
+            
+            
+            
         </StackPanel>
 
         

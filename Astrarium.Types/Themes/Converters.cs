@@ -476,6 +476,19 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class DateTimeToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Formatters.DateTime.Format(value);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class LongitudeConverter : ValueConverterBase
     {
         private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
