@@ -57,7 +57,7 @@ namespace Astrarium.Plugins.Satellites
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-            Vec3 topocentricLocationVector = calculator.GetTopocentricLocationVector(prj.Context);
+            Vec3 topocentricLocationVector = calculator.TopocentricLocationVector(prj.Context);
 
             // diff, in hours
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;

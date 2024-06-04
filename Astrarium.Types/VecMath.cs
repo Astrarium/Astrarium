@@ -40,7 +40,6 @@ namespace Astrarium.Types
             );
         }
 
-
         public static Vec4 operator *(Mat4 m, Vec4 a)
         {
             return new Vec4(
@@ -189,7 +188,6 @@ namespace Astrarium.Types
             }
 
             det = 1.0 / det;
-
 
             inv[1] = -r[1] * r[10] * r[15] +
                       r[1] * r[11] * r[14] +

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
-    public class Primitives
+    public static class Primitives
     {
         public static void DrawLine(Vec2 p1, Vec2 p2, Pen pen)
         {
@@ -50,7 +50,6 @@ namespace Astrarium.Types
                 GL.Disable(EnableCap.LineStipple);
             }
         }
-
 
         public static void DrawString(string text, Font font, Brush brush, PointF point, StringAlignment horizontalAlign = StringAlignment.Near, StringAlignment verticalAlign = StringAlignment.Near)
         {
@@ -137,6 +136,19 @@ namespace Astrarium.Types
             GL.End();
             GL.LineWidth(1);
             GL.Disable(EnableCap.LineStipple);
+        }
+
+        public static Color Tint(this Color color, bool nightMode)
+        {
+            if (nightMode)
+            {
+                byte r = new byte[] { color.R, color.G, color.B }.Max();
+                return Color.FromArgb(color.A, r, 0, 0);
+            }
+            else
+            {
+                return color;
+            }
         }
     }
 }

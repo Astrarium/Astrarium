@@ -57,8 +57,7 @@ namespace Astrarium.Plugins.Satellites
             string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
 
             // user directory for satellites data exists and contains TLE files
-            if (Directory.Exists(directory) && 
-                Directory.EnumerateFiles(directory, "*.tle").Any())
+            if (Directory.Exists(directory) && Directory.EnumerateFiles(directory, "*.tle").Any())
             {
                 // load TLE files that match settings
                 var tleFiles = Directory.EnumerateFiles(directory, "*.tle")
@@ -79,11 +78,12 @@ namespace Astrarium.Plugins.Satellites
                     Log.Info($"Obital elements of satellites ({tleSource.FileName}) needs to be updated, updating...");
                     await Task.Run(() =>
                     {
-                        UpdateOrbitalElements(tleSource, silent: true);
-                        tleSource.LastUpdated = DateTime.Now;
-                        settings.SetAndSave("SatellitesOrbitalElements", tleSources);
-                        string path = Path.Combine(directory, tleSource.FileName + ".tle");
-                        LoadSatellites(path);
+                        if (UpdateOrbitalElements(tleSource, silent: true))
+                        {
+                            tleSource.LastUpdated = DateTime.Now;
+                            settings.SetAndSave("SatellitesOrbitalElements", tleSources);
+                            LoadSatellites(Path.Combine(directory, $"{tleSource.FileName}.tle"));
+                        }
                     });
                 }
             }
@@ -91,10 +91,11 @@ namespace Astrarium.Plugins.Satellites
 
         private const int BUFFER_SIZE = 1024;
 
-        public void UpdateOrbitalElements(TLESource tleSource, bool silent)
+        public bool UpdateOrbitalElements(TLESource tleSource, bool silent)
         {
             string tempFile = Path.GetTempFileName();
             CancellationTokenSource tokenSource = new CancellationTokenSource();
+            bool result = true;
 
             try
             {
@@ -106,7 +107,6 @@ namespace Astrarium.Plugins.Satellites
 
                 // use app data path to satellites data (downloaded by user)
                 string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
-
                 string targetPath = Path.Combine(directory, tleSource.FileName + ".tle");
 
                 WebRequest request = WebRequest.Create(tleSource.Url);
@@ -121,22 +121,20 @@ namespace Astrarium.Plugins.Satellites
 
                     do
                     {
-                        if (tokenSource.IsCancellationRequested)
-                        {
-                            return;
-                        }
-
+                        if (tokenSource.IsCancellationRequested) return false;
                         bytesRead = responseStream.Read(buffer, 0, BUFFER_SIZE);
                         streamWriter.Write(buffer, 0, bytesRead);
                     }
                     while (bytesRead > 0);
-
-                    File.Copy(tempFile, targetPath, overwrite: true);
                 }
+
+                Directory.CreateDirectory(directory);
+                File.Copy(tempFile, targetPath, overwrite: true);
             }
-            catch 
+            catch (Exception ex)
             {
-                
+                Log.Error($"Unable to download orbital elements of satellites ({tleSource.FileName}). Reason: {ex}");
+                result = false;   
             }
             finally
             {
@@ -145,6 +143,8 @@ namespace Astrarium.Plugins.Satellites
                     File.Delete(tempFile);
                 }
             }
+
+            return result;
         }
 
         public override void Calculate(SkyContext context)
@@ -171,7 +171,7 @@ namespace Astrarium.Plugins.Satellites
             }
         }
 
-        public Vec3 GetTopocentricLocationVector(SkyContext context)
+        public Vec3 TopocentricLocationVector(SkyContext context)
         {
             return Norad.TopocentricLocationVector(context.GeoLocation, context.SiderealTime);
         }
@@ -199,28 +199,55 @@ namespace Astrarium.Plugins.Satellites
         private IEphemFormatter angle4Formatter = new Formatters.UnsignedDoubleFormatter(4, "\u00B0");
         private IEphemFormatter angle1Formatter = new Formatters.UnsignedDoubleFormatter(1, "\u00B0");
 
+        private CrdsHorizontal Horizontal(SkyContext c, Satellite s)
+        {
+            var vecTopocentric = c.Get(TopocentricSatelliteVector, s);
+            return Norad.HorizontalCoordinates(c.GeoLocation, vecTopocentric, c.SiderealTime);
+        }
+
+        private CrdsEquatorial Equatorial(SkyContext c, Satellite s)
+        {
+            var hor = c.Get(Horizontal, s);
+            return hor.ToEquatorial(c.GeoLocation, c.SiderealTime);
+        }
+
+        private Vec3 GeocentricSatelliteVector(SkyContext c, Satellite s)
+        {
+            double deltaTime = (c.JulianDay - JulianDay) * 24;
+            return s.Position + deltaTime * s.Velocity;
+        }
+
+        public Vec3 TopocentricSatelliteVector(SkyContext c, Satellite s)
+        {
+            Vec3 vecTopoLocation = c.Get(TopocentricLocationVector);
+            Vec3 vecGeocentric = c.Get(GeocentricSatelliteVector, s);
+            return Norad.TopocentricSatelliteVector(vecTopoLocation, vecGeocentric);
+        }
+
+        public float Magnitude(SkyContext c, Satellite s)
+        {
+            var vecTopocentric = c.Get(TopocentricSatelliteVector, s);
+            var distance = vecTopocentric.Length;
+            return Norad.GetSatelliteMagnitude(s.StdMag, distance);
+        }
+
         public void GetInfo(CelestialObjectInfo<Satellite> info)
         {
             Satellite s = info.Body;
             SkyContext c = info.Context;
 
-            double deltaTime = (c.JulianDay - JulianDay) * 24;
-
-            // current satellite position vector
-            Vec3 vecGeocentric = s.Position + deltaTime * s.Velocity;
-
-            Vec3 vecTopoLocation = GetTopocentricLocationVector(c);
-            Vec3 vecTopocentric = Norad.TopocentricSatelliteVector(vecTopoLocation, vecGeocentric);
+            var vecGeocentric = c.Get(GeocentricSatelliteVector, s);
+            var vecTopocentric = c.Get(TopocentricSatelliteVector, s);
 
             // distance from the observer, in km
             double distance = vecTopocentric.Length;
 
             // satellite magnitude
-            float magnitude = Norad.GetSatelliteMagnitude(s.StdMag, distance);
+            float magnitude = c.Get(Magnitude, s);
 
             // coordinates of the satellite
-            var hor = Norad.HorizontalCoordinates(c.GeoLocation, vecTopocentric, c.SiderealTime);
-            var eq = hor.ToEquatorial(c.GeoLocation, c.SiderealTime);
+            var hor = c.Get(Horizontal, s);
+            var eq = c.Get(Equatorial, s);
 
             bool isEclipsed = Norad.IsSatelliteEclipsed(vecGeocentric, SunVector);
             double ssoAngle = Angle.ToDegrees((-1 * vecTopocentric).Angle(SunVector - vecTopocentric));
@@ -242,8 +269,8 @@ namespace Astrarium.Plugins.Satellites
                 .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
 
                 .AddHeader(Text.Get("Satellite.Equatorial"))
-                .AddRow("Equatorial.Alpha", eq.Alpha)
-                .AddRow("Equatorial.Delta", eq.Delta)
+                .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
+                .AddRow("Equatorial.Delta", s.Equatorial.Delta)
 
                 .AddHeader(Text.Get("Satellite.Horizontal"))
                 .AddRow("Horizontal.Azimuth", hor.Azimuth)
@@ -293,8 +320,7 @@ namespace Astrarium.Plugins.Satellites
                 .Take(maxCount)
                 .ToList();
 
-            // TODO: calculate equatorial position
-            // satellites.ForEach(x => x.Equatorial = Eq)
+            satellites.ForEach(x => x.Equatorial = context.Get(Equatorial, x as Satellite));
 
             return satellites;
         }
