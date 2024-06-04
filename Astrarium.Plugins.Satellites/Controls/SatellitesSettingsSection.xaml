@@ -32,7 +32,7 @@
 
                 <DataGrid 
                     
-                    ItemsSource="{Binding Settings.SatellitesOrbitalElements}"
+                    ItemsSource="{Binding TLESources}"
                     AutoGenerateColumns="False"
                     RowHeight="28"
                     
@@ -103,14 +103,14 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Content="U" Margin="2" />
-                                        <Button Content="D" Margin="2" />
+                                        <Button Content="D" Margin="2" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.DeleteCommand}" CommandParameter="{Binding}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
                     </DataGrid.Columns>
-                </DataGrid
+                </DataGrid>
             </GroupBox>
             
             
