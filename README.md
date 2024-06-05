@@ -4,6 +4,9 @@
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Astrarium/Astrarium)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Astrarium/Astrarium)
 
+<a href="https://yoomoney.ru/to/410011844668094"><img src="https://img.shields.io/badge/Donate-YooMoney-590df2"/></a>
+<a href="https://pay.cloudtips.ru/p/465ec2c2"><img src="https://img.shields.io/badge/Donate-CloudTips-6496dc"/></a>
+
 <p align="center">
   <img src="https://github.com/Astrarium/Astrarium/blob/master/Screenshot.png?raw=true">
 </p>
