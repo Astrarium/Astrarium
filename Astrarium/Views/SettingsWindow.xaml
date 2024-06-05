@@ -8,11 +8,11 @@
         mc:Ignorable="d"
         Title="{t:Text SettingsWindow.Title}" 
         Width="800" Height="600"
-        MinWidth="300" MinHeight="300"
+        MinWidth="600" MinHeight="400"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="4">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -21,12 +21,13 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" MinWidth="100" />
+                <ColumnDefinition Width="220" MinWidth="100" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <ListView 
+                Padding="4"
                 Grid.Column="0"
                 ItemsSource="{Binding Path=SettingsSections, Mode=OneWay}"                               
                 DisplayMemberPath="Title"
@@ -41,7 +42,8 @@
 
             <GridSplitter 
                 Grid.Column="1" 
-                ShowsPreview="False"   
+                ShowsPreview="False"
+                Width="5"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Stretch" />
             
@@ -50,13 +52,13 @@
                 Grid.Column="2" 
                 VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Auto">
-                <ContentControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{Binding SelectedSection}" />
+                <ContentControl Margin="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{Binding SelectedSection}" />
             </ScrollViewer>
         </Grid>
 
         <Separator Grid.Row="1" Margin="0" />
 
-        <Grid Grid.Row="2" Margin="0 4 0 0">
+        <Grid Grid.Row="2" Margin="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />

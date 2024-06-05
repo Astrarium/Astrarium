@@ -33,5 +33,17 @@ namespace Astrarium.Types
         /// In combination with object type (<see cref="Type"/>) should give a unique object identifier on the sky.
         /// </summary>
         public abstract string CommonName { get; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is CelestialObject celestialObject)
+            {
+                return celestialObject.Type == Type && celestialObject.CommonName == CommonName;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

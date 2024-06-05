@@ -584,7 +584,8 @@ namespace Astrarium.ViewModels
                 {
                     try
                     {
-                        System.Diagnostics.Process.Start("https://astrarium.space/donate");
+                        string lang = Text.GetCurrentLocale().TwoLetterISOLanguageName.ToLower();
+                        System.Diagnostics.Process.Start($"https://astrarium.space/{lang}/donate");
                     }
                     catch (Exception ex)
                     {

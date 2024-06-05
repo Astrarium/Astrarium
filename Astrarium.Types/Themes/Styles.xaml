@@ -1613,40 +1613,35 @@
     <Style x:Key="GridViewColumnHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
         <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
         <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-        <Setter Property="Padding" Value="4,0,0,0"/>
-        <Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushControlDarkBackground}"/>
-        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
                     <Grid SnapsToDevicePixels="true">
-                        <Border x:Name="HeaderBorder" BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="0,1,0,1" Background="{TemplateBinding Background}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition MaxHeight="7" />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <Border Padding="{TemplateBinding Padding}" Grid.RowSpan="2">
+                        <c:BorderFix 
+                            x:Name="HeaderBorder" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" Background="{TemplateBinding Background}">
+                            <c:BorderFix BorderBrush="{TemplateBinding BorderBrush}" Padding="{TemplateBinding Padding}">
                                     <ContentPresenter x:Name="HeaderContent"
                                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                      Margin="0,0,0,1"
+                                                      Margin="6 4"
                                                       RecognizesAccessKey="True"
                                                       SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                </Border>
-                            </Grid>
-                        </Border>
+                                </c:BorderFix>
+                        </c:BorderFix>
                         <Canvas>
                             <Thumb x:Name="PART_HeaderGripper" Style="{StaticResource GridViewColumnHeaderGripper}"/>
                         </Canvas>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushWindowBackground}"/>
-                            <Setter Property="Background" TargetName="PART_HeaderGripper" Value="Transparent"/>
+                            <!--<Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushWindowBackground}"/>-->
+                            <!--<Setter Property="Background" TargetName="PART_HeaderGripper" Value="red"/>-->
                             <!--<Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
                             <Setter Property="Foreground" Value="Black"/>-->
                         </Trigger>
@@ -1654,7 +1649,7 @@
                             <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                             <Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushSelection}"/>
                             <Setter Property="Visibility" TargetName="PART_HeaderGripper" Value="Hidden"/>
-                            <Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>
+                            <!--<Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>-->
                         </Trigger>
                         <Trigger Property="Height" Value="Auto">
                             <Setter Property="MinHeight" Value="20"/>

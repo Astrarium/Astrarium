@@ -1,0 +1,38 @@
+﻿<Window x:Class="Astrarium.Plugins.Satellites.Views.EditTleSourceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}"
+        Title="EditTleSourceWindow" 
+        MinWidth="300"
+        MinHeight="300"
+        Height="450" Width="800">
+    <Grid Margin="4" SnapsToDevicePixels="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+
+            <CheckBox Margin="4" IsChecked="{Binding IsEnabled}" Content="Use data from this source" />
+
+            <Label Content="File name (without extension)" />
+            <TextBox Text="{Binding FileName}" />
+
+            <Label Content="URL" />
+            <TextBox Text="{Binding Url}" />
+        </StackPanel>
+
+        <Separator Grid.Row="1" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+        </StackPanel>
+    </Grid>
+</Window>

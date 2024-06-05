@@ -42,7 +42,6 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSetting("Moon", true);
             DefineSetting("MoonLabel", true);
             DefineSetting("MoonPhase", true);
-            DefineSetting("MoonTexture", true);
             DefineSetting("MoonTextureQuality", TextureQuality.Normal);
             DefineSetting("MoonSurfaceFeatures", true);
             DefineSetting("EarthShadowOutline", false);

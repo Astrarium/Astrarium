@@ -29,11 +29,13 @@ namespace Astrarium.Plugins.Satellites
 
         private Func<SkyContext, CrdsEquatorial> SunEquatorial;
 
+        private readonly IOrbitalElementsUpdater updater;
         private readonly ISky sky;
         private readonly ISettings settings;
 
-        public SatellitesCalculator (ISky sky, ISettings settings)
+        public SatellitesCalculator (IOrbitalElementsUpdater updater, ISky sky, ISettings settings)
         {
+            this.updater = updater;
             this.sky = sky;
             this.settings = settings;
         }
@@ -76,76 +78,18 @@ namespace Astrarium.Plugins.Satellites
                    (tleSource.LastUpdated == null || DateTime.Now.Subtract(tleSource.LastUpdated.Value).TotalDays >= 1))
                 {
                     Log.Info($"Obital elements of satellites ({tleSource.FileName}) needs to be updated, updating...");
-                    await Task.Run(() =>
+                    
+                    if (await updater.UpdateOrbitalElements(tleSource, silent: true))
                     {
-                        if (UpdateOrbitalElements(tleSource, silent: true))
-                        {
-                            tleSource.LastUpdated = DateTime.Now;
-                            settings.SetAndSave("SatellitesOrbitalElements", tleSources);
-                            LoadSatellites(Path.Combine(directory, $"{tleSource.FileName}.tle"));
-                        }
-                    });
-                }
-            }
-        }
-
-        private const int BUFFER_SIZE = 1024;
-
-        public bool UpdateOrbitalElements(TLESource tleSource, bool silent)
-        {
-            string tempFile = Path.GetTempFileName();
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            bool result = true;
-
-            try
-            {
-                ServicePointManager.SecurityProtocol =
-                                SecurityProtocolType.Tls |
-                                SecurityProtocolType.Tls11 |
-                                SecurityProtocolType.Tls12 |
-                                SecurityProtocolType.Ssl3;
-
-                // use app data path to satellites data (downloaded by user)
-                string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
-                string targetPath = Path.Combine(directory, tleSource.FileName + ".tle");
-
-                WebRequest request = WebRequest.Create(tleSource.Url);
-                WebResponse response = request.GetResponse();
-                using (Stream responseStream = response.GetResponseStream())
-                using (Stream fileStream = new FileStream(tempFile, FileMode.OpenOrCreate))
-                using (BinaryWriter streamWriter = new BinaryWriter(fileStream))
-                {
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    int bytesRead = 0;
-                    StringBuilder remainder = new StringBuilder();
-
-                    do
-                    {
-                        if (tokenSource.IsCancellationRequested) return false;
-                        bytesRead = responseStream.Read(buffer, 0, BUFFER_SIZE);
-                        streamWriter.Write(buffer, 0, bytesRead);
+                        tleSource.LastUpdated = DateTime.Now;
+                        settings.SetAndSave("SatellitesOrbitalElements", tleSources);
+                        LoadSatellites(Path.Combine(directory, $"{tleSource.FileName}.tle"));
                     }
-                    while (bytesRead > 0);
-                }
-
-                Directory.CreateDirectory(directory);
-                File.Copy(tempFile, targetPath, overwrite: true);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Unable to download orbital elements of satellites ({tleSource.FileName}). Reason: {ex}");
-                result = false;   
-            }
-            finally
-            {
-                if (File.Exists(tempFile))
-                {
-                    File.Delete(tempFile);
                 }
             }
-
-            return result;
         }
+
+        
 
         public override void Calculate(SkyContext context)
         {

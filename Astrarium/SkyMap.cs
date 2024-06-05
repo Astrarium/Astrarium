@@ -419,7 +419,7 @@ namespace Astrarium
         {
             bool isNightMode = settings.Get("NightMode");
 
-            if (SelectedObject != null && celestialObjects.Any())
+            if (SelectedObject != null && celestialObjects.Any() && !SelectedObject.Equals(LockedObject))
             {
                 var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(SelectedObject));
 
