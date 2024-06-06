@@ -6,14 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
-using System.Net;
-using System.Threading;
 
 namespace Astrarium.Plugins.Satellites
 {
-    public class SatellitesCalculator : BaseCalc, ICelestialObjectCalc<Satellite>
+    public class SatellitesCalculator : BaseCalc, ICelestialObjectCalc<Satellite>, ISatellitesCalculator
     {
         private const double AU = 149597870.691;
 
@@ -29,67 +26,24 @@ namespace Astrarium.Plugins.Satellites
 
         private Func<SkyContext, CrdsEquatorial> SunEquatorial;
 
-        private readonly IOrbitalElementsUpdater updater;
         private readonly ISky sky;
-        private readonly ISettings settings;
 
-        public SatellitesCalculator (IOrbitalElementsUpdater updater, ISky sky, ISettings settings)
+        public SatellitesCalculator(ISky sky)
         {
-            this.updater = updater;
             this.sky = sky;
-            this.settings = settings;
         }
 
         /// <inheritdoc />
-        public override async void Initialize()
+        public override void Initialize()
         {
             SunEquatorial = sky.SunEquatorial;
 
             string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string satellitesDataFile = Path.Combine(baseDir, "Data/Satellites.dat");
-            string tleFile = Path.Combine(baseDir, "Data/Brightest.tle");
+            string satellitesDataFile = Path.Combine(baseDir, "Data", "Satellites.dat");
 
             // Load general satellites data (names, magnitude, sizes) 
             LoadSatellitesData(satellitesDataFile);
-
-            // TLE sources from settings
-            List<TLESource> tleSources = settings.Get<List<TLESource>>("SatellitesOrbitalElements");
-
-            // use app data path to satellites data (downloaded by user)
-            string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
-
-            // user directory for satellites data exists and contains TLE files
-            if (Directory.Exists(directory) && Directory.EnumerateFiles(directory, "*.tle").Any())
-            {
-                // load TLE files that match settings
-                var tleFiles = Directory.EnumerateFiles(directory, "*.tle")
-                    .Where(fileName => tleSources.Any(x => x.IsEnabled && x.FileName == Path.GetFileNameWithoutExtension(fileName)));
-
-                foreach (string file in tleFiles)
-                {
-                    LoadSatellites(file);
-                }
-            }
-
-            // update TLEs
-            foreach (var tleSource in tleSources)
-            {
-                if (tleSource.IsEnabled &&
-                   (tleSource.LastUpdated == null || DateTime.Now.Subtract(tleSource.LastUpdated.Value).TotalDays >= 1))
-                {
-                    Log.Info($"Obital elements of satellites ({tleSource.FileName}) needs to be updated, updating...");
-                    
-                    if (await updater.UpdateOrbitalElements(tleSource, silent: true))
-                    {
-                        tleSource.LastUpdated = DateTime.Now;
-                        settings.SetAndSave("SatellitesOrbitalElements", tleSources);
-                        LoadSatellites(Path.Combine(directory, $"{tleSource.FileName}.tle"));
-                    }
-                }
-            }
         }
-
-        
 
         public override void Calculate(SkyContext context)
         {
@@ -131,8 +85,7 @@ namespace Astrarium.Plugins.Satellites
             public override string Format(object value)
             {
                 if (value == null)
-                    // TODO: localize
-                    return "[В тени]";
+                    return Text.Get("Satellite.Magnitude.Eclipsed");
                 else
                     return base.Format(value);
             }
@@ -307,7 +260,7 @@ namespace Astrarium.Plugins.Satellites
             }
         }
 
-        private void LoadSatellites(string tleFile)
+        public void LoadSatellites(string tleFile)
         {
             int totalCount = 0;
             int newCount = 0;

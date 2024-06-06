@@ -7,10 +7,10 @@
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
-        Title="EditTleSourceWindow" 
+        Title="{t:Text EditTLESourceWindow.Title}" 
         MinWidth="300"
         MinHeight="300"
-        Height="450" Width="800">
+        Height="400" Width="600">
     <Grid Margin="4" SnapsToDevicePixels="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -20,12 +20,12 @@
 
         <StackPanel Orientation="Vertical" Grid.Row="0">
 
-            <CheckBox Margin="4" IsChecked="{Binding IsEnabled}" Content="Use data from this source" />
+            <CheckBox Margin="4" IsChecked="{Binding IsEnabled}" Content="{t:Text Settings.SatellitesOrbitalElementsSources.IsEnabled}" />
 
-            <Label Content="File name (without extension)" />
+            <Label Content="{t:Text Settings.SatellitesOrbitalElementsSources.Name}" />
             <TextBox Text="{Binding FileName}" />
 
-            <Label Content="URL" />
+            <Label Content="{t:Text Settings.SatellitesOrbitalElementsSources.Url}" />
             <TextBox Text="{Binding Url}" />
         </StackPanel>
 

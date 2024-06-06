@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Satellites.ViewModels
@@ -73,24 +71,20 @@ namespace Astrarium.Plugins.Satellites.ViewModels
         {
             try
             {
-                // TODO: validation
-                
                 if (string.IsNullOrWhiteSpace(FileName))
-                    throw new Exception("Please specify FileName");
+                    throw new Exception("$TLESource.Validator.EmptyName");
 
                 if (FileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                    throw new Exception("File name contains invalid characters.");
+                    throw new Exception("$TLESource.Validator.InvalidName");
 
                 if (tleSources.Any(x => x != tleSource && x.FileName.Equals(FileName, StringComparison.OrdinalIgnoreCase)))
-                    throw new Exception("File name already used.");
+                    throw new Exception("$TLESource.Validator.NameAlreadyUsed");
 
                 if (string.IsNullOrWhiteSpace(Url))
-                    throw new Exception("Please specify URL");
+                    throw new Exception("$TLESource.Validator.EmptyUrl");
 
                 if (!RemoteFileExists(Url))
-                    throw new Exception("URL unreachable");
-
-
+                    throw new Exception("$TLESource.Validator.UnavailableUrl");
 
                 Close(true);
             }

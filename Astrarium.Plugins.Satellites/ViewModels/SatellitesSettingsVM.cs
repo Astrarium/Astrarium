@@ -40,8 +40,7 @@ namespace Astrarium.Plugins.Satellites.ViewModels
 
         private void DeleteSource(TLESource tleSource)
         {
-            // TODO: localize
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete TLE source?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$Warning", "$Settings.SatellitesOrbitalElementsSources.ButtonDelete.Confirm", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 Sources.Remove(tleSource);
             }
@@ -63,12 +62,7 @@ namespace Astrarium.Plugins.Satellites.ViewModels
 
         private async void UpdateSource(TLESource tleSource)
         {
-            bool result = await updater.UpdateOrbitalElements(tleSource, silent: false);
-            if (result)
-            {
-                tleSource.LastUpdated = DateTime.Now;
-                settings.SetAndSave("SatellitesOrbitalElements", Sources.ToList());
-            }
+            await updater.UpdateOrbitalElements(tleSource, silent: false);
         }
     }
 }

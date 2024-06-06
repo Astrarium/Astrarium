@@ -283,6 +283,7 @@ namespace Astrarium
 
             foreach (var plugin in plugins)
             {
+                progress.Report($"Initializing plugin {plugin.GetType().Name}");
                 plugin.Initialize();
             }
         }

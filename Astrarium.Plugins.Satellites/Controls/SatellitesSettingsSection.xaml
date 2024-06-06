@@ -56,12 +56,10 @@
             <CheckBox Content="{t:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2 0 2 2" />
 
             <GroupBox 
-                Header="Orbital elements sources"
-                Margin="2"
+                Header="{t:Text Settings.SatellitesOrbitalElementsSources}"
+                Margin="2 8 2 2"
                 HorizontalAlignment="Stretch">
-
-                <StackPanel Orientation="Vertical">
-
+                <StackPanel Margin="0 4 0 0" Orientation="Vertical">
                     <c:BindableListView 
                         Margin="0 4 0 4"
                         ItemsSource="{Binding Sources}"
@@ -74,13 +72,10 @@
                         ScrollViewer.CanContentScroll="False">
 
                         <ListView.Resources>
-
                             <Style TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
                                 <Setter Property="ItemContainerStyle">
                                     <Setter.Value>
-                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}">
-
-                                        </Style>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}" />
                                     </Setter.Value>
                                 </Setter>
                             </Style>
@@ -90,25 +85,16 @@
                             <GridView 
                                 ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                                 <GridView.Columns>
-                                    <GridViewColumn Width="30">
 
+                                    <GridViewColumn Width="100" Header="{t:Text Settings.SatellitesOrbitalElementsSources.Name}">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox Margin="0 7" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center" />
+                                                <CheckBox Margin="0 4" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center" Content="{Binding FileName}" ToolTip="{Binding FileName}" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="100" Header="File name">
-
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding FileName}" Margin="0 4" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-
-                                    <GridViewColumn Header="URL" Width="180">
+                                    <GridViewColumn Header="{t:Text Settings.SatellitesOrbitalElementsSources.Url}" Width="180">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock ToolTip="{Binding Url}" Text="{Binding Url}" Margin="0 4" />
@@ -116,20 +102,21 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="Last updated" Width="130">
+                                    <GridViewColumn Header="{t:Text Settings.SatellitesOrbitalElementsSources.LastUpdated}" Width="130">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock  Text="{Binding LastUpdated, Converter={s:DateTimeToStringConverter}}" Margin="0 4" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
+                                    
                                     <GridViewColumn Width="90">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Margin="-8 0">
-                                                    <Button Content="{StaticResource BtnUpdate}" Style="{StaticResource ImageButton}"  Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.UpdateSourceCommand}" CommandParameter="{Binding}" />
-                                                    <Button Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}"  Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.EditSourceCommand}" CommandParameter="{Binding}" />
-                                                    <Button Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.DeleteSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonUpdate}" Content="{StaticResource BtnUpdate}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.UpdateSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonEdit}" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}"  Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.EditSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonDelete}" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.DeleteSourceCommand}" CommandParameter="{Binding}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -140,8 +127,19 @@
                         </ListView.View>
                     </c:BindableListView>
                     <Separator />
-                    <Button Padding="8 0 8 0" Margin="0 8" Height="26" MinWidth="80" HorizontalAlignment="Right" Content="Add new source..." />
 
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" Margin="10" >
+                            <CheckBox IsChecked="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Content="{t:Text Settings.SatellitesAutoUpdateOrbitalElements}" Margin="4 4 4 4" />
+                            <c:NumericUpDown IsEnabled="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.SatellitesAutoUpdateOrbitalElementsPeriod}" Minimum="1" Maximum="365" />
+                            <TextBlock Margin="4" VerticalAlignment="Center" Text="{t:Text Settings.SatellitesAutoUpdateOrbitalElements.Days}" />
+                        </StackPanel>
+
+                        <Button Padding="8 0 8 0" Margin="8" Height="26" MinWidth="80" HorizontalAlignment="Right" Content="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonAdd}" Command="{Binding AddSourceCommand}" />
+
+                    </DockPanel>
+                    
+                    
                 </StackPanel>
 
 

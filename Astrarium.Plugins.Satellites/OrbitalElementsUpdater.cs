@@ -15,14 +15,15 @@ namespace Astrarium.Plugins.Satellites
     {
         private const int BUFFER_SIZE = 1024;
 
+        public event Action<TLESource> OrbitalElementsUpdated;
+
         public async Task<bool> UpdateOrbitalElements(TLESource tleSource, bool silent)
         {
             var tokenSource = new CancellationTokenSource();
 
             if (!silent)
             {
-                // TODO: localize
-                ViewManager.ShowProgress("Title", "Please wait", tokenSource);
+                ViewManager.ShowProgress("$Satellites.Downloader.WaitTitle", "$Satellites.Downloader.WaitText", tokenSource);
             }
 
             bool result = await UpdateOrbitalElements(tokenSource, tleSource);
@@ -31,14 +32,17 @@ namespace Astrarium.Plugins.Satellites
             {
                 if (result)
                 {
-                    // TODO: localize
-                    ViewManager.ShowMessageBox("$Success", "Data has been updated");
+                    ViewManager.ShowMessageBox("$Success", "$Satellites.Downloader.Success");
                 }
                 else
                 {
-                    // TODO: localize
-                    ViewManager.ShowMessageBox("$Error", "Err mess");
+                    ViewManager.ShowMessageBox("$Error", $"Satellites.Downloader.Fail");
                 }
+            }
+
+            if (result)
+            {
+                OrbitalElementsUpdated?.Invoke(tleSource);
             }
 
             return result;
