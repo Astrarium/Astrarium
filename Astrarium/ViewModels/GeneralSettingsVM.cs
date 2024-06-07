@@ -44,7 +44,7 @@ namespace Astrarium.ViewModels
         {
             Settings = settings;
             Languages = Text.GetLocales();
-            Themes = new string[] { "DeepBlue", "Graphite" };
+            Themes = new string[] { "DeepBlue", "Graphite", "Marsh" };
             NotifyPropertyChanged(nameof(SelectedLanguage));
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SelectedLanguage));
         }

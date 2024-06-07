@@ -1215,7 +1215,7 @@
                             Stroke="{TemplateBinding BorderBrush}"
                             Height="{TemplateBinding Height}"
                             StrokeThickness="{TemplateBinding BorderThickness}" />
-                        <ContentPresenter 
+                            <ContentPresenter 
                             x:Name="contentPresenter" 
                             Content="{TemplateBinding Content}"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"				
@@ -1230,6 +1230,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
@@ -1267,6 +1268,7 @@
                         <SolidColorBrush Color="{DynamicResource ColorControlBackground}" Opacity="1" />
                     </Setter.Value>
                 </Setter>
+                <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"  />
                 <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
             </Trigger>
         </Style.Triggers>
@@ -1277,6 +1279,7 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#D40000"/>
                 <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
+                <Setter Property="BorderBrush" Value="#D40000" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -1327,6 +1330,7 @@
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

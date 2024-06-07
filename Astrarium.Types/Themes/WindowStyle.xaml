@@ -189,7 +189,10 @@
                     </Setter.Value>
                 </Setter>
             </DataTrigger>
-
+            <Trigger Property="IsActive" Value="True">
+                <Setter  Property="t:WindowProperties.WindowBorderBrush" Value="{StaticResource BrushSelection}" />
+            </Trigger>
+            
         </Style.Triggers>
     </Style>
 

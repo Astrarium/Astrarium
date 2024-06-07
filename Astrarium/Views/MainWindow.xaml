@@ -181,10 +181,11 @@
                 DisplayMember="Names[0]"
                 BorderThickness="0"
                 HorizontalAlignment="Right" 
-                IconPlacement="Right"                
-                Height="22"
+                IconPlacement="Right"
+                Width="300"
+                Height="24"
                 Margin="4"
-                Width="150"                                
+                                                
                 SelectionCommit="{Binding QuickSearchCommand}"
                 Provider="{Binding SearchProvider}">
                 <c:AutoCompleteTextBox.ItemTemplate>
