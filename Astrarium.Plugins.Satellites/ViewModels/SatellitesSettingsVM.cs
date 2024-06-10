@@ -53,9 +53,15 @@ namespace Astrarium.Plugins.Satellites.ViewModels
             if (ViewManager.ShowDialog(vm) == true)
             {
                 int index = Sources.IndexOf(tleSource);
-                Sources.Insert(index, vm.GetTleSource());
-                Sources.Remove(tleSource);
-
+                if (index >= 0)
+                {
+                    Sources.Insert(index, vm.GetTleSource());
+                    Sources.Remove(tleSource);
+                }
+                else
+                {
+                    Sources.Add(vm.GetTleSource());
+                }
                 settings.Set("SatellitesOrbitalElements", Sources.ToList());
             }
         }
