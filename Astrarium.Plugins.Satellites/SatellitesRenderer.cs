@@ -112,7 +112,7 @@ namespace Astrarium.Plugins.Satellites
                             map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brush, p, size);
                         }
 
-                        map.AddDrawnObject(p, s, size);
+                        map.AddDrawnObject(p, s);
                     }
                 }
 

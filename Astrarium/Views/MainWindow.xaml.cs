@@ -241,8 +241,6 @@ namespace Astrarium
         private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
         {
             map.Projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
-            // TODO: check it
-            map.TimeSync = map.TimeSync;
             map.Invalidate();
         }
 

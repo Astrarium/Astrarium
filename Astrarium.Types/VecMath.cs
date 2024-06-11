@@ -377,6 +377,9 @@ namespace Astrarium.Types
 
         public static implicit operator System.Drawing.PointF(Vec2 v) =>
             new System.Drawing.PointF((float)v.X, (float)v.Y);
+
+        public static implicit operator Vec2(System.Drawing.PointF p) =>
+            new Vec2(p.X, p.Y);
     }
 
     public class Vec3

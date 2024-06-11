@@ -72,7 +72,7 @@ namespace Astrarium.Plugins.Novae
                             map.DrawObjectLabel(textRenderer.Value, star.ProperName, fontStarNames, brushLabel, p, size);
                         }
 
-                        map.AddDrawnObject(p, star, size);
+                        map.AddDrawnObject(p, star);
                     }
                 }
             }

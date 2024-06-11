@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.MinorBodies
                             DrawLabel(c, font, brushNames, p, diam, drawLabelMag);
                         }
 
-                        map.AddDrawnObject(p, c, diam);
+                        map.AddDrawnObject(p, c);
                     }
                 }
                 else if ((int)size > 0 && prj.IsInsideScreen(p))
@@ -138,7 +138,7 @@ namespace Astrarium.Plugins.MinorBodies
                         DrawLabel(c, font, brushNames, p, size, drawLabelMag);
                     }
 
-                    map.AddDrawnObject(p, c, size);
+                    map.AddDrawnObject(p, c);
                 }
             }
         }

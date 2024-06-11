@@ -10,6 +10,7 @@ namespace Astrarium.Types
         SkyContext Context { get; }
         event Action Calculated;
         event Action<bool> TimeSyncChanged;
+
         void SetDate(double jd);
         void Calculate();
         bool TimeSync { get; set; }
@@ -17,7 +18,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Gets ephemerides of specified celestial object
         /// </summary>
-        List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
+        ICollection<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
         Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories);
         ICollection<string> GetEphemerisCategories(CelestialObject body);
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null);

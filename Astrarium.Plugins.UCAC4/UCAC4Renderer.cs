@@ -93,7 +93,7 @@ namespace Astrarium.Plugins.UCAC4
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 
-                        map.AddDrawnObject(p, star, size);
+                        map.AddDrawnObject(p, star);
 
                         if (isLabels && size > 2)
                         {

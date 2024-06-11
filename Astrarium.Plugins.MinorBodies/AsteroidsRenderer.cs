@@ -88,7 +88,7 @@ namespace Astrarium.Plugins.MinorBodies
                             DrawLabel(a, font, brushNames, p, diam, drawLabelMag);
                         }
 
-                        map.AddDrawnObject(p, a, diam);
+                        map.AddDrawnObject(p, a);
                     }
                     // asteroid should be rendered as point
                     else if (size > 0)
@@ -115,7 +115,7 @@ namespace Astrarium.Plugins.MinorBodies
                                 DrawLabel(a, font, brushNames, p, size, drawLabelMag);
                             }
 
-                            map.AddDrawnObject(p, a, size);
+                            map.AddDrawnObject(p, a);
                             continue;
                         }
                     }

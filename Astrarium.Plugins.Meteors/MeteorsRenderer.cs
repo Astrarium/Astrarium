@@ -69,7 +69,7 @@ namespace Astrarium.Plugins.Meteors
                         map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, 10);
                     }
 
-                    map.AddDrawnObject(p, meteor, 1);
+                    map.AddDrawnObject(p, meteor);
                 }
             }
         }

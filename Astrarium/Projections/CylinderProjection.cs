@@ -14,7 +14,7 @@ namespace Astrarium.Projections
             Vec3 v = mat * vec;
 
             double r = Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-            bool rval = (-r < v[1] && v[1] < r);
+            bool rval = -r < v[1] && v[1] < r;
 
             if (v[2] > 0.5) return null;
             if (!rval) return null;

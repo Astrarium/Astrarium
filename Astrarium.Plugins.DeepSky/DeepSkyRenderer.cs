@@ -168,7 +168,7 @@ namespace Astrarium.Plugins.DeepSky
                     }
                 }
 
-                map.AddDrawnObject(p, ds, sz);
+                map.AddDrawnObject(p, ds);
             }
         }
 

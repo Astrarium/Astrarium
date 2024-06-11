@@ -7,10 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -121,8 +118,6 @@ namespace Astrarium
                 {
                     LockedObject = null;
                 }
-
-
             }
 
             Invalidate();
@@ -191,7 +186,7 @@ namespace Astrarium
         /// <summary>
         /// Collection of celestial objects drawn on the map
         /// </summary>
-        private ICollection<Tuple<CelestialObject, PointF>> celestialObjects = new List<Tuple<CelestialObject, PointF>>();
+        private ICollection<CelestialObject> celestialObjects = new List<CelestialObject>();
 
         /// <summary>
         /// Application settings
@@ -367,9 +362,6 @@ namespace Astrarium
             }
         }
 
-        private long rendersCount = 0;
-        private long meanRenderTime = 0;
-
         public void Render()
         {
             renderStopWatch.Restart();
@@ -381,8 +373,7 @@ namespace Astrarium
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(0, Projection.ScreenWidth,
-                        0, Projection.ScreenHeight, -1, 1);
+            GL.Ortho(0, Projection.ScreenWidth, 0, Projection.ScreenHeight, -1, 1);
 
             textureManager.Cleanup();
             celestialObjects.Clear();
@@ -404,53 +395,37 @@ namespace Astrarium
 
             GL.PopMatrix();
 
-
             renderStopWatch.Stop();
-
-            rendersCount++;
-
-            // Calculate mean time of rendering with Cumulative Moving Average formula
-            meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
-
-            //Debug.WriteLine("Mean render time: " + meanRenderTime);
         }
 
         private void DrawSelectedObject()
         {
-            bool isNightMode = settings.Get("NightMode");
-
             if (SelectedObject != null && celestialObjects.Any() && !SelectedObject.Equals(LockedObject))
             {
-                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(SelectedObject));
-
-                if (bodyAndPosition != null)
+                var body = celestialObjects.FirstOrDefault(x => x.Equals(SelectedObject));
+                if (body != null)
                 {
-                    PointF pos = bodyAndPosition.Item2;
-                    CelestialObject body = bodyAndPosition.Item1;
-                    DrawObjectOutline(body, pos, Color.Red);
+                    DrawObjectOutline(body, Color.Red);
                 }
             }
 
             if (LockedObject != null && celestialObjects.Any())
             {
-                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(LockedObject));
-
-                if (bodyAndPosition != null)
+                var body = celestialObjects.FirstOrDefault(x => x.Equals(LockedObject));
+                if (body != null)
                 {
-                    PointF pos = bodyAndPosition.Item2;
-                    CelestialObject body = bodyAndPosition.Item1;
-                    DrawObjectOutline(body, pos, Color.LightGreen);
+                    DrawObjectOutline(body, Color.LightGreen);
                 }
             }
         }
 
-        private void DrawObjectOutline(CelestialObject body, PointF pos, Color color)
+        private void DrawObjectOutline(CelestialObject body, Color color)
         {
             bool isNightMode = settings.Get("NightMode");
             var prj = Projection;
+            Vec2 p = prj.Project(body.Equatorial);
             var clr = color.Tint(isNightMode);
             Pen pen = new Pen(clr);
-            Vec2 p = new Vec2(pos.X, pos.Y);
 
             float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
             float sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
@@ -520,16 +495,14 @@ namespace Astrarium
 
         public CelestialObject FindObject(PointF point)
         {
-            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (point.Y - c.Item2.Y) * (point.Y - c.Item2.Y)))
+            foreach (var x in celestialObjects.OrderBy(c => Projection.Project(c.Equatorial).Distance(point)))
             {
-                float sd = (x.Item1 is SizeableCelestialObject) ?
-                    (x.Item1 as SizeableCelestialObject).Semidiameter : 0;
-
+                var p = Projection.Project(x.Equatorial);
+                float sd = (x is SizeableCelestialObject) ? (x as SizeableCelestialObject).Semidiameter : 0;
                 float size = Projection.GetDiskSize(sd, 10);
-
-                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (x.Item2.Y - point.Y) * (x.Item2.Y - point.Y)) < size / 2)
+                if (p.Distance(point) < size / 2)
                 {
-                    return x.Item1;
+                    return x;
                 }
             }
 
@@ -539,7 +512,7 @@ namespace Astrarium
         public void GoToObject(CelestialObject body, TimeSpan animationDuration)
         {
             float sd = (body is SizeableCelestialObject) ?
-                        (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
+                       (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);
 
@@ -612,10 +585,9 @@ namespace Astrarium
             }
         }
 
-        // TODO: remove size argument
-        public void AddDrawnObject(PointF p, CelestialObject obj, float size)
+        public void AddDrawnObject(PointF p, CelestialObject obj)
         {
-            celestialObjects.Add(new Tuple<CelestialObject, PointF>(obj, p));
+            celestialObjects.Add(obj);
         }
 
         /// <summary>

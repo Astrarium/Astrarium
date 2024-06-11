@@ -224,7 +224,7 @@ namespace Astrarium
         }
 
         // TODO: add ability to specify location and preferFast flag
-        public List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        public ICollection<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<Ephemerides> all = new List<Ephemerides>();
             Type bodyType = body.GetType();

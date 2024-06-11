@@ -10,7 +10,6 @@ namespace Astrarium.Types
     /// </summary>
     public interface ISkyMap : INotifyPropertyChanged
     {
-        // TODO: remove if not used
         event Action<double> FovChanged;
 
         event Action ContextChanged;
@@ -21,21 +20,14 @@ namespace Astrarium.Types
         float DaylightFactor { get; set; }
 
         /// <summary>
-        /// Gets or sets selected celestial object
+        /// Gets or sets selected celestial object.
         /// </summary>
         CelestialObject SelectedObject { get; set; }
 
         /// <summary>
-        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// Gets or sets celestial object the map is locked on (synchronized with visible daily motion). 
         /// </summary>
         CelestialObject LockedObject { get; set; }
-
-        /// <summary>
-        /// Moves map from one point to another (screen positions used)
-        /// </summary>
-        /// <param name="screenPosOld">Old screen position</param>
-        /// <param name="screenPosNew">New screen position</param>
-        void Move(Vec2 screenPosOld, Vec2 screenPosNew);
 
         /// <summary>
         /// Gets mouse position in equatorial coordinates
@@ -55,8 +47,6 @@ namespace Astrarium.Types
 
         void Invalidate();
 
-        void Render();
-
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, double viewAngleTarget);
@@ -66,7 +56,7 @@ namespace Astrarium.Types
         void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration);
         void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration, double viewAngleTarget);
 
-        void AddDrawnObject(PointF p, CelestialObject obj, float size);
+        void AddDrawnObject(PointF p, CelestialObject obj);
 
         void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF point, float size);
 
@@ -75,8 +65,9 @@ namespace Astrarium.Types
         /// </summary>
         event Action<CelestialObject> SelectedObjectChanged;
 
-        event Action OnInvalidate;
-
+        /// <summary>
+        /// Occurs when locked celestial object is changed
+        /// </summary>
         event Action<CelestialObject> LockedObjectChanged;
     }
 }

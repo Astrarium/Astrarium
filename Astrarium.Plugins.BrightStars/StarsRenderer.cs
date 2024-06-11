@@ -119,7 +119,7 @@ namespace Astrarium.Plugins.BrightStars
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 
-                            map.AddDrawnObject(p, star, size);
+                            map.AddDrawnObject(p, star);
 
                             DrawStarName(prj, fontStarNames, brushStarNames, properNames, p, star, size);
                         }

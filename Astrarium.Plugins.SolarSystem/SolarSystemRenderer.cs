@@ -671,7 +671,7 @@ namespace Astrarium.Plugins.SolarSystem
                 return false;
             }
 
-            map.AddDrawnObject(p, body, diam);
+            map.AddDrawnObject(p, body);
 
             if (data.DrawLabel)
             {
@@ -771,7 +771,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.Disable(EnableCap.Texture2D);
 
-            map.AddDrawnObject(p, sun, diam);
+            map.AddDrawnObject(p, sun);
 
             if (settings.Get("SunLabel"))
             {
@@ -1153,45 +1153,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (pShadow.Distance(pMoon) <= sd + sdMoon)
             {
-                // TODO: get brush from settings
-                map.DrawObjectLabel(textRenderer.Value, Text.Get("EclipsedByJupiter"), fontShadowLabel, Brushes.Brown, pMoon, 2 * sdMoon);
+                bool isNightMode = settings.Get("NightMode");
+                Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
+                map.DrawObjectLabel(textRenderer.Value, Text.Get("EclipsedByJupiter"), fontShadowLabel, brushLabel, pMoon, 2 * sdMoon);
             }
-
-            // Draw Jupiter shadow outline
-            // TODO: add setting to display outline
-
-            GL.PushMatrix();
-            GL.Translate(pShadow.X, pShadow.Y, 0);
-
-            // TODO: change color!
-            GL.Color3(Color.Brown);
-            GL.Begin(PrimitiveType.LineLoop);
-            for (int i = 0; i <= 64; i++)
-            {
-                double ang = i / 64.0 * 2 * Math.PI;
-
-                Vec2 v = new Vec2(sd * Math.Cos(ang), sd * Math.Sin(ang));
-
-                // body flattening
-                {
-                    double rotAxis = Angle.ToRadians(rot);
-                    var mat = Mat4.ZRotation(rotAxis) * Mat4.StretchY(1 - jupiter.Flattening) * Mat4.ZRotation(-rotAxis);
-                    v = mat * v;
-                }
-
-                // refraction flattening
-                if (prj.UseRefraction)
-                {
-                    double rotZenith = Angle.ToRadians(data.RotationZenith);
-                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                    v = matRefraction * v;
-                }
-
-                GL.Vertex2(v.X, v.Y);
-            }
-            GL.End();
-
-            GL.PopMatrix();
         }
 
         private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, double refraction, double rotZenith)
@@ -1407,8 +1372,9 @@ namespace Astrarium.Plugins.SolarSystem
 
                         if (pShadow.Distance(pBody) <= radiusBody + radiusUmbra)
                         {
-                            // TODO: get brush from settings
-                            map.DrawObjectLabel(textRenderer.Value, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, Brushes.Brown, pShadow, 2 * radiusUmbra);
+                            bool isNightMode = settings.Get("NightMode");
+                            Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
+                            map.DrawObjectLabel(textRenderer.Value, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, brushLabel, pShadow, 2 * radiusUmbra);
                         }
                     }
                 }
