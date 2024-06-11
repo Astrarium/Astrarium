@@ -19,6 +19,12 @@ namespace Astrarium.Plugins.Eclipses
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Map.Dispose();
+        }
+
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             var scrollViewer = (ScrollViewer)sender;

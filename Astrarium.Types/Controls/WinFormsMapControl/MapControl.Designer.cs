@@ -19,6 +19,8 @@
             }
 
             base.Dispose(disposing);
+
+            _WorkerWaitHandle.Set();
         }
 
         #region Component Designer generated code

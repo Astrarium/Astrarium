@@ -15,6 +15,12 @@ namespace Astrarium.Views
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Map.Dispose();
+        }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);

@@ -290,6 +290,12 @@ namespace Astrarium.Types.Controls
             mapControl.Focus();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            mapControl.Dispose();
+        }
+
         private void MapControl_Resize(object sender, System.EventArgs e)
         {
             mapControl.MinZoomLevel = mapControl.Height / 256;
