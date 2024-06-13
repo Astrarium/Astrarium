@@ -400,5 +400,16 @@ namespace Astrarium
                 window.popup.Show();
             }
         }
+
+        public void ShowTooltipMessage(PointF mouse, string message)
+        {
+            if (Application.Current?.MainWindow is MainWindow window)
+            {
+                window.skyToolTip.Content = message;
+                window.skyToolTip.PlacementRectangle = new Rect(mouse.X, mouse.Y, 0, 0);
+                window.skyToolTip.IsOpen = true;
+                window.skyToolTip.Tag = (window.skyToolTip.Tag as long? ?? 0) + 1;
+            }
+        }
     }
 }

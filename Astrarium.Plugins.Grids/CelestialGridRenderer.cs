@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using WF = System.Windows.Forms;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -14,15 +15,18 @@ namespace Astrarium.Plugins.Grids
         private readonly CelestialGridCalculator calc;
         private readonly ISettings settings;
 
-        private Font fontNodeLabel = new Font("Arial", 10);
-        private Font fontEquinoxLabel = new Font("Arial", 10);
+        private Font fontLabel = new Font("Arial", 10);
 
         private string[] nodesLabels = new string[] { "\u260A", "\u260B" };
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
-        private string[] horizontalLabels = new string[] { Text.Get("CelestialGridRenderer.Zenith"), Text.Get("CelestialGridRenderer.Nadir") };
-        private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
+        private string[] horizontalLabels = new string[] { "CelestialGridRenderer.Zenith", "CelestialGridRenderer.Nadir" };
+        private string[] equatorialLabels = new string[] { "CelestialGridRenderer.NCP", "CelestialGridRenderer.SCP" };
+        private string[] equatorialTooltips = new string[] { "CelestialGridRenderer.NCP.Tooltip", "CelestialGridRenderer.SCP.Tooltip" };
+        private string[] equinoxTooltips = new string[] { "CelestialGridRenderer.VernalEquinox.Tooltip", "CelestialGridRenderer.AutumnalEquinox.Tooltip" };
+        private string[] nodesTooltips = new string[] { "CelestialGridRenderer.LunarAscendingNode.Tooltip", "CelestialGridRenderer.LunarDescendingNode.Tooltip" };
 
         private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(64, 64));
+        private List<Tuple<Vec2, string>> labels = new List<Tuple<Vec2, string>>();
 
         public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
         {
@@ -34,6 +38,8 @@ namespace Astrarium.Plugins.Grids
         {
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
+
+            labels.Clear();
 
             Color colorGridEquatorial = settings.Get<Color>("ColorEquatorialGrid").Tint(nightMode);
             Color colorGridHorizontal = settings.Get<Color>("ColorHorizontalGrid").Tint(nightMode);
@@ -61,8 +67,6 @@ namespace Astrarium.Plugins.Grids
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            // TODO: refactor below code in order to support refraction
-
             if (settings.Get("GalacticEquator"))
             {
                 int segments = prj.Fov < 45 ? 128 : 64;
@@ -75,7 +79,7 @@ namespace Astrarium.Plugins.Grids
                     return prj.Project(eq);
                 };
 
-                DrawLine(prj, colorLineGalactic, segments, project);
+                DrawLine(colorLineGalactic, segments, project);
             }
 
             if (settings.Get("EclipticLine"))
@@ -88,16 +92,24 @@ namespace Astrarium.Plugins.Grids
                     return prj.Project(ecl.ToEquatorial(prj.Context.Epsilon));
                 };
 
-                DrawLine(prj, colorLineEcliptic, segments, project);
+                DrawLine(colorLineEcliptic, segments, project);
 
                 if (settings.Get("LabelEquinoxPoints"))
                 {
-                    // DrawLabels(prj, i => Math.PI * i, i => 0, mat, equinoxLabels, fontEquinoxLabel, brushEcliptic);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsEcliptical(i * 180, 0).ToEquatorial(prj.Context.Epsilon);
+                        DrawLabel(prj, eq, equinoxLabels[i], Text.Get(equinoxTooltips[i]), brushEcliptic);
+                    }
                 }
 
                 if (settings.Get("LabelLunarNodes"))
                 {
-                    // DrawLabels(prj, i => calc.LunarAscendingNodeLongitude + i * Math.PI, i => 0, mat, nodesLabels, fontNodeLabel, brushEcliptic);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsEcliptical(calc.LunarAscendingNodeLongitude + i * 180, 0).ToEquatorial(prj.Context.Epsilon);
+                        DrawLabel(prj, eq, nodesLabels[i], Text.Get(nodesTooltips[i]), brushEcliptic);
+                    }
                 }
             }
 
@@ -107,7 +119,11 @@ namespace Astrarium.Plugins.Grids
 
                 if (settings.Get("LabelHorizontalPoles"))
                 {
-                    DrawLabels(prj, i => 0, i => Math.PI / 2 * (1 - 2 * i), prj.MatHorizontalToVision, horizontalLabels, SystemFonts.DefaultFont, brushHorizontal);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsHorizontal(0, 90 * (i == 0 ? 1 : -1)).ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                        DrawLabel(prj, eq, Text.Get(horizontalLabels[i]), Text.Get(horizontalLabels[i]), brushHorizontal);
+                    }
                 }
             }
 
@@ -123,17 +139,27 @@ namespace Astrarium.Plugins.Grids
 
                 DrawGrid(prj, colorGridEquatorial, project);
 
-                //DrawGridLines(prj, prj.MatEquatorialToVision, colorGridEquatorial);
-
-                //if (settings.Get("LabelEquatorialPoles"))
-                //{
-                //    DrawLabels(prj, i => 0, i => Math.PI / 2 * (1 - 2 * i), prj.MatEquatorialToVision, equatorialLabels, SystemFonts.DefaultFont, brushEquatorial);
-                //}
+                if (settings.Get("LabelEquatorialPoles"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        eq = new CrdsEquatorial(0, 90 * (i == 0 ? 1 : -1));
+                        DrawLabel(prj, eq, Text.Get(equatorialLabels[i]), Text.Get(equatorialTooltips[i]), brushEquatorial);
+                    }
+                }
             }
 
             if (settings.Get("MeridianLine"))
             {
-                DrawLine(prj, prj.MatHorizontalToVision * calc.MatMeridian, colorLineMeridian);
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsHorizontal hor = new CrdsHorizontal(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    hor.Altitude = (double)i / segments * 360;
+                    return prj.Project(hor);
+                };
+
+                DrawLine(colorLineMeridian, segments, project);
             }
 
             GL.Disable(EnableCap.Blend);
@@ -143,25 +169,34 @@ namespace Astrarium.Plugins.Grids
             GL.Disable(EnableCap.CullFace);
         }
 
-        private void DrawLabels(Projection prj, Func<int, double> lon, Func<int, double> lat, Mat4 mat, string[] labels, Font font, SolidBrush brush)
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
-            for (int i = 0; i < 2; i++)
+            if (labels.Any(x => x.Item1.Distance(map.MouseScreenCoordinates) < 5))
             {
-                Vec3 v = Projection.SphericalToCartesian(lon(i), lat(i));
-                Vec2 p = prj.Project(v, mat);
-                if (prj.IsInsideScreen(p))
+                var label = labels.FirstOrDefault(x => x.Item1.Distance(map.MouseScreenCoordinates) < 5);
+                if (label != null)
                 {
-                    GL.Color3(brush.Color);
-                    GL.PointSize(5);
-                    GL.Begin(PrimitiveType.Points);
-                    GL.Vertex2(p.X, p.Y);
-                    GL.End();
-                    textRenderer.Value.DrawString(labels[i], font, brush, new Vec2(p.X + 3, p.Y - 3));
+                    ViewManager.ShowTooltipMessage(label.Item1, label.Item2);
                 }
             }
         }
 
-        private void DrawLine(Projection prj, Color color, int segments, Func<int, Vec2> projectPoint)
+        private void DrawLabel(Projection prj, CrdsEquatorial eq, string label, string tooltip, SolidBrush brush)
+        {
+            Vec2 p = prj.Project(eq);
+            if (prj.IsInsideScreen(p))
+            {
+                GL.Color3(brush.Color);
+                GL.PointSize(5);
+                GL.Begin(PrimitiveType.Points);
+                GL.Vertex2(p.X, p.Y);
+                GL.End();
+                textRenderer.Value.DrawString(label, fontLabel, brush, new Vec2(p.X + 3, p.Y - 3));
+                labels.Add(new Tuple<Vec2, string>(p, tooltip));
+            }
+        }
+
+        private void DrawLine(Color color, int segments, Func<int, Vec2> projectPoint)
         {
             GL.Color3(color);
             GL.LineStipple(1, 0xAAAA);
@@ -172,33 +207,6 @@ namespace Astrarium.Plugins.Grids
             {
                 var p = projectPoint(i);
 
-                if (p != null)
-                {
-                    GL.Vertex2(p.X, p.Y);
-                }
-                else
-                {
-                    GL.End();
-                    GL.Begin(PrimitiveType.LineStrip);
-                }
-            }
-
-            GL.End();
-        }
-
-        private void DrawLine(Projection prj, Mat4 mat, Color color)
-        {
-            int segments = prj.Fov < 45 ? 128 : 64;
-
-            GL.Color3(color);
-            GL.LineStipple(1, 0xAAAA);
-
-            GL.Begin(PrimitiveType.LineStrip);
-
-            for (int i = 0; i <= segments; i++)
-            {
-                Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), 0);
-                var p = prj.Project(v, mat);
                 if (p != null)
                 {
                     GL.Vertex2(p.X, p.Y);

@@ -261,6 +261,8 @@ namespace Astrarium
 
         private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
+            long tooltipTag = skyToolTip.Tag as long? ?? 0;
+
             var p = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
 
             map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
@@ -299,13 +301,11 @@ namespace Astrarium
                     }
                     skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
                     skyToolTip.IsOpen = true;
-                }
-                else
-                {
-                    skyToolTip.IsOpen = false;
+                    skyToolTip.Tag = tooltipTag + 1;
                 }
             }
-            else
+
+            if (skyToolTip.Tag as long? <= tooltipTag)
             {
                 skyToolTip.IsOpen = false;
             }

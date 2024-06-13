@@ -161,5 +161,12 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="message">Popup message text</param>
         void ShowPopupMessage(string message);
+
+        /// <summary>
+        /// Shows tooltip message over main application window
+        /// </summary>
+        /// <param name="mouse">Current coordinates</param>
+        /// <param name="message">Message text</param>
+        void ShowTooltipMessage(PointF mouse, string message);
     }
 }

@@ -166,5 +166,10 @@ namespace Astrarium.Types
         {
             viewManager.ShowPopupMessage(message);
         }
+
+        public static void ShowTooltipMessage(PointF mouse, string message)
+        {
+            viewManager.ShowTooltipMessage(mouse, message);
+        }
     }
 }
