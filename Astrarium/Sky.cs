@@ -37,7 +37,7 @@ namespace Astrarium
         private bool timeSync = false;
         public bool TimeSync
         {
-            get { return timeSync; }
+            get => timeSync;
             set
             {
                 if (timeSync != value)

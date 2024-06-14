@@ -115,7 +115,15 @@ namespace Astrarium.Plugins.Grids
 
             if (settings.Get("HorizontalGrid"))
             {
-                DrawGridLines(prj, prj.MatHorizontalToVision, colorGridHorizontal);
+                CrdsHorizontal h = new CrdsHorizontal();
+                Func<double, double, Vec2> project = (double lon, double lat) =>
+                {
+                    h.Azimuth = lon;
+                    h.Altitude = lat;
+                    return prj.Project(h);
+                };
+
+                DrawGrid(prj, colorGridHorizontal, project);
 
                 if (settings.Get("LabelHorizontalPoles"))
                 {
@@ -267,64 +275,6 @@ namespace Astrarium.Plugins.Grids
                         double lat = alt;
 
                         var p = projectPoint(lon, lat);
-                        if (p != null)
-                        {
-                            GL.Vertex2(p.X, p.Y);
-                        }
-                        else
-                        {
-                            GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
-                        }
-                    }
-
-                    GL.End();
-                }
-            }
-        }
-
-        private void DrawGridLines(Projection prj, Mat4 mat, Color color)
-        {
-            int segments = prj.Fov < 45 ? 128 : 64;
-
-            GL.Color3(color);
-            GL.LineStipple(1, 0xAAAA);
-
-            // HOR. GRID
-            {
-                // parallels
-                for (int alt = -80; alt <= 80; alt += 10)
-                {
-                    GL.Begin(PrimitiveType.LineStrip);
-
-                    for (int i = 0; i <= segments; i++)
-                    {
-                        Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), Angle.ToRadians(alt));
-                        var p = prj.Project(v, mat);
-
-                        if (p != null)
-                        {
-                            GL.Vertex2(p.X, p.Y);
-                        }
-                        else
-                        {
-                            GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
-                        }
-                    }
-
-                    GL.End();
-                }
-
-                // meridians
-                for (int i = 0; i < 24; i++)
-                {
-                    GL.Begin(PrimitiveType.LineStrip);
-
-                    for (int alt = -80; alt <= 80; alt += 2)
-                    {
-                        Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / 24.0 * 360), Angle.ToRadians(alt));
-                        var p = prj.Project(v, mat);
                         if (p != null)
                         {
                             GL.Vertex2(p.X, p.Y);

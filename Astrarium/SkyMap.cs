@@ -35,13 +35,13 @@ namespace Astrarium
         /// </summary>
         private readonly RenderersCollection renderers = new RenderersCollection();
 
-        private bool dateTimeSync = false;
+        private bool timeSync = false;
         public bool TimeSync
         {
-            get => dateTimeSync;
+            get => timeSync;
             set
             {
-                dateTimeSync = value;
+                timeSync = value;
                 timeSyncWaitEvent.Set();
 
                 if (value)
@@ -177,6 +177,7 @@ namespace Astrarium
         // <inheritdoc />
         public event Action<CelestialObject> LockedObjectChanged;
 
+        // <inheritdoc />
         public Projection Projection { get; private set; }
 
         public event Action OnInvalidate;

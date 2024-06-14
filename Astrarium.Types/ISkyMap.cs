@@ -39,8 +39,15 @@ namespace Astrarium.Types
         /// </summary>
         PointF MouseScreenCoordinates { get; }
 
+        /// <summary>
+        /// Gets map projection
+        /// </summary>
         Projection Projection { get; }
 
+        /// <summary>
+        /// Sets map projection by its type
+        /// </summary>
+        /// <param name="type"></param>
         void SetProjection(Type type);
 
         bool TimeSync { get; set; }

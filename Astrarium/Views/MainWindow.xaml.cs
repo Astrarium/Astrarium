@@ -198,7 +198,7 @@ namespace Astrarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
-        private readonly SkyView skyView;
+        internal readonly SkyView skyView;
         private readonly SkyMap map;
 
         protected override WindowsFormsHost Host => MapHost;
@@ -301,6 +301,7 @@ namespace Astrarium
                     }
                     skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
                     skyToolTip.IsOpen = true;
+                    skyView.Cursor = WF.Cursors.Help;
                     skyToolTip.Tag = tooltipTag + 1;
                 }
             }
@@ -308,6 +309,7 @@ namespace Astrarium
             if (skyToolTip.Tag as long? <= tooltipTag)
             {
                 skyToolTip.IsOpen = false;
+                skyView.Cursor = WF.Cursors.Cross;
             }
         }
 

@@ -58,29 +58,29 @@ namespace Astrarium.Types
         /// <summary>
         /// Projection matrix
         /// </summary>
-        public Mat4 MatProjection { get; private set; } = new Mat4();
+        protected Mat4 MatProjection { get; private set; } = new Mat4();
 
         #region Vision matrices
 
         /// <summary>
         /// Matrix for Equatorial projection
         /// </summary>
-        public Mat4 MatEquatorialToVision { get; private set; } = new Mat4();
+        private Mat4 MatEquatorialToVision = new Mat4();
 
         /// <summary>
         /// Matrix for Horizontal projection
         /// </summary>
-        public Mat4 MatHorizontalToVision { get; private set; } = new Mat4();
+        private Mat4 MatHorizontalToVision = new Mat4();
 
         /// <summary>
         /// Invsered matrix for Equatorial projection
         /// </summary>
-        private Mat4 MatEquatorialToVisionInverse { get; set; } = new Mat4();
+        private Mat4 MatEquatorialToVisionInverse = new Mat4();
 
         /// <summary>
         /// Invsered matrix for Horizontal projection
         /// </summary>
-        private Mat4 MatHorizontalToVisionInverse { get; set; } = new Mat4();
+        private Mat4 MatHorizontalToVisionInverse = new Mat4();
 
         #endregion Vision matrices
 
@@ -101,12 +101,12 @@ namespace Astrarium.Types
         /// <summary>
         /// Vision vector in horizontal coordinates
         /// </summary>
-        public Vec3 VecHorizontalVision { get; private set; }
+        private Vec3 VecHorizontalVision;
 
         /// <summary>
         /// Vision vector in equatorial coordinates
         /// </summary>
-        public Vec3 VecEquatorialVision { get; private set; }
+        private Vec3 VecEquatorialVision;
 
         /// <summary>
         /// Backing field for <see cref="ViewMode"/>
@@ -148,8 +148,6 @@ namespace Astrarium.Types
         /// <returns>Size (diameter) of a disk in screen pixels</returns>
         public float GetDiskSize(double semidiameter, double minSize = 0)
         {
-            // TODO: check it!
-
             return (float)Math.Max(minSize, (float)(Math.Min(ScreenWidth, ScreenHeight) / Fov * (2 * semidiameter / 3600)));
         }
 
@@ -196,7 +194,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Gets body axis rotation angle respect to screen coordinates 
         /// </summary>
-        /// <param name="h">Horizontal coordinates of body</param>
+        /// <param name="h">Horizontal coordinates of the body</param>
         /// <param name="posAngle">Position angle, in degrees</param>
         /// <returns>Axis rotation angle, in degrees</returns>
         public double GetAxisRotation(CrdsHorizontal h, double posAngle)
@@ -207,6 +205,11 @@ namespace Astrarium.Types
             return (FlipVertical ? 1 : -1) * (90 + (FlipHorizontal ? 1 : -1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 
+        /// <summary>
+        /// Gets terminator rotation angle respect to screen coordinates 
+        /// </summary>
+        /// <param name="ecl">Ecliptical coordinats of the body</param>
+        /// <returns>Rotation angle, in degrees</returns>
         public double GetPhaseRotation(CrdsEcliptical ecl)
         {
             Vec2 p = Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(Context.Epsilon));
@@ -227,7 +230,7 @@ namespace Astrarium.Types
                 p.Y >= 0 && p.Y <= ScreenHeight;
         }
 
-        public Projection(SkyContext context)
+        protected Projection(SkyContext context)
         {
             Context = context;
             Context.ContextChanged += UpdateMatrices;
@@ -238,6 +241,9 @@ namespace Astrarium.Types
             fov = 90;
         }
 
+        /// <summary>
+        /// Updates projection matrices
+        /// </summary>
         private void UpdateMatrices()
         {
             UpdateProjectionMatrix();
@@ -249,6 +255,11 @@ namespace Astrarium.Types
             UpdateVisionMatrices();
         }
 
+        /// <summary>
+        /// Sets screen size in pixels
+        /// </summary>
+        /// <param name="width">Screen width, in pixels</param>
+        /// <param name="height">Screen height, in pixels</param>
         public void SetScreenSize(int width, int height)
         {
             ScreenWidth = width;
@@ -258,8 +269,14 @@ namespace Astrarium.Types
             UpdateProjectionMatrix();
         }
 
+        /// <summary>
+        /// Gets screen width in pixels
+        /// </summary>
         public int ScreenWidth { get; private set; }
 
+        /// <summary>
+        /// Gets screen height in pixels
+        /// </summary>
         public int ScreenHeight { get; private set; }
 
         private void UpdateScreenScalingFactor()
@@ -335,9 +352,9 @@ namespace Astrarium.Types
             return new CrdsEquatorial(Angle.To360(Angle.ToDegrees(ra)), Angle.ToDegrees(dec));
         }
 
-        public abstract Vec2 Project(Vec3 v, Mat4 mat);
+        protected abstract Vec2 Project(Vec3 v, Mat4 mat);
 
-        public abstract Vec3 Unproject(Vec2 s, Mat4 m);
+        protected abstract Vec3 Unproject(Vec2 s, Mat4 m);
 
         public void SetVision(CrdsHorizontal hor)
         {
@@ -457,7 +474,7 @@ namespace Astrarium.Types
             UpdateVisionMatrices();
         }
 
-        public void UpdateVisionMatrices()
+        private void UpdateVisionMatrices()
         {
             double raCenter = 0, decCenter = 0;
             CartesianToSpherical(ref raCenter, ref decCenter, VecEquatorialVision);
@@ -499,7 +516,7 @@ namespace Astrarium.Types
             MatEquatorialToVisionInverse = (MatProjection * MatEquatorialToVision).Inverse();
         }
 
-        public static Vec3 SphericalToCartesian(double lng, double lat)
+        private Vec3 SphericalToCartesian(double lng, double lat)
         {
             double cosLat = Math.Cos(lat);
             return new Vec3(
@@ -508,7 +525,7 @@ namespace Astrarium.Types
                 Math.Sin(lat));
         }
 
-        public static void CartesianToSpherical(ref double lng, ref double lat, Vec3 v)
+        private void CartesianToSpherical(ref double lng, ref double lat, Vec3 v)
         {
             double r = v.Length;
             if (r != 0)

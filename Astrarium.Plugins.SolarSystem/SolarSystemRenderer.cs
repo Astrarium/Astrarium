@@ -134,7 +134,6 @@ namespace Astrarium.Plugins.SolarSystem
                     };
 
                     bool isRendered = RenderSolarSystemObject(planet, data);
-
                     if (isRendered && planet.Number == Planet.JUPITER)
                     {
                         // draw moon shadows over Jupiter
@@ -400,6 +399,8 @@ namespace Astrarium.Plugins.SolarSystem
             Vec2 p = prj.Project(data.Equatorial);
             if (p == null) return false;
 
+            bool renderResult = false;
+
             // DRAW AS POINT
             if (size >= diam && size >= data.MinimalPointSize && size > 0 && data.MaximalPointSize > 0 && map.DaylightFactor < 1)
             {
@@ -426,6 +427,8 @@ namespace Astrarium.Plugins.SolarSystem
                 var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
                 if (Angle.Separation(eqCenter, data.Equatorial) > fov + body.Semidiameter / 3600) return false;
+
+                renderResult = true;
 
                 GL.Enable(EnableCap.Texture2D);
 
@@ -681,7 +684,7 @@ namespace Astrarium.Plugins.SolarSystem
                 map.DrawObjectLabel(textRenderer.Value, label, fontLabel, brushLabel, p, Math.Max(size, diam));
             }
 
-            return true;
+            return renderResult;
         }
 
         private void RenderSun(SphereParameters data)

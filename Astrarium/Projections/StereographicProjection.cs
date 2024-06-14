@@ -13,7 +13,7 @@ namespace Astrarium.Projections
 
         public override double MaxFov => 210;
 
-        public override Vec2 Project(Vec3 v, Mat4 mat)
+        protected override Vec2 Project(Vec3 v, Mat4 mat)
         {
             Vec3 vec = mat * v;
             double r = vec.Length;
@@ -29,7 +29,7 @@ namespace Astrarium.Projections
                 ScreenHeight / 2 + (FlipVertical ? -1 : 1) * vec[1] * f);
         }
 
-        public override Vec3 Unproject(Vec2 s, Mat4 m)
+        protected override Vec3 Unproject(Vec2 s, Mat4 m)
         {
             double x = (FlipHorizontal ? -1 : 1) * (s[0] - ScreenWidth / 2) / (ScreenScalingFactor * 2);
             double y = (FlipVertical ? -1 : 1) * (s[1] - ScreenHeight / 2) / (ScreenScalingFactor * 2);

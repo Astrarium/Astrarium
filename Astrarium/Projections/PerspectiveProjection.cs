@@ -1,10 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Projections
 {
@@ -28,7 +24,7 @@ namespace Astrarium.Projections
                             0, 0, 2 * zFar * zNear / (zNear - zFar), 0);
         }
 
-        public override Vec2 Project(Vec3 v, Mat4 mat)
+        protected override Vec2 Project(Vec3 v, Mat4 mat)
         {
             Vec3 win = new Vec3();
             if (!gluProject(v, mat, MatProjection, ref win))
@@ -37,7 +33,7 @@ namespace Astrarium.Projections
                 return win[2] < 1 ? new Vec2(win[0], win[1]) : null;
         }
 
-        public override Vec3 Unproject(Vec2 s, Mat4 m)
+        protected override Vec3 Unproject(Vec2 s, Mat4 m)
         {
             return m * new Vec3(
                 s[0] * 2.0 / ScreenWidth - 1.0,
