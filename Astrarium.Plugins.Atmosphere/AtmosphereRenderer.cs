@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 
 namespace Astrarium.Plugins.Atmosphere

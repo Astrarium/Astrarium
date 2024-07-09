@@ -1,5 +1,4 @@
 ﻿using Astrarium.Types;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -165,7 +164,7 @@ namespace Astrarium
         {
             texture.TextureId = GL.GenTexture();
             var internalFormat = texture.AlphaChannel ? PixelInternalFormat.Rgba : PixelInternalFormat.Rgb;
-            var pixelFormat = texture.AlphaChannel ? OpenTK.Graphics.OpenGL.PixelFormat.Bgra : OpenTK.Graphics.OpenGL.PixelFormat.Bgr;
+            var pixelFormat = texture.AlphaChannel ? Astrarium.Types.PixelFormat.Bgra : Astrarium.Types.PixelFormat.Bgr;
 
             GL.BindTexture(TextureTarget.Texture2D, texture.TextureId);
             GL.TexImage2D(TextureTarget.Texture2D, 0, internalFormat,

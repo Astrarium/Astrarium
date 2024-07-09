@@ -1,11 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using WF = System.Windows.Forms;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 
 namespace Astrarium.Plugins.Grids

@@ -211,7 +211,7 @@ namespace Astrarium
             this.StateChanged += MainWindow_StateChanged;
 
             skyView = new SkyView();
-            skyView.Paint += SkyView_Paint;
+            skyView.Render += SkyView_Render;
             skyView.Resize += SkyView_Resize;
             skyView.MouseDown += SkyView_MouseDown;
             skyView.MouseUp += SkyView_MouseUp;
@@ -231,6 +231,15 @@ namespace Astrarium
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        private void SkyView_Render(object sender, EventArgs e)
+        {
+            renderStopWatch.Restart();
+            map.Render();
+            renderStopWatch.Stop();
+            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+            SetFPS(this, $"FPS = {fps}");
         }
 
         private void SkyView_MouseDoubleClick(object sender, WF.MouseEventArgs e)
@@ -319,15 +328,6 @@ namespace Astrarium
         }
 
         private System.Diagnostics.Stopwatch renderStopWatch = new System.Diagnostics.Stopwatch();
-
-        private void SkyView_Paint(object sender, WF.PaintEventArgs e)
-        {
-            renderStopWatch.Restart();
-            map.Render();
-            renderStopWatch.Stop();
-            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-            SetFPS(this, $"FPS = {fps}");
-        }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

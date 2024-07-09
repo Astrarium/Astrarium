@@ -1,11 +1,5 @@
-﻿using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -108,7 +102,8 @@ namespace Astrarium.Types
                 {
                     bmp.Dispose();
                     gfx.Dispose();
-                    if (GraphicsContext.CurrentContext != null)
+                    // TODO: check this
+                    //if (GraphicsContext.CurrentContext != null)
                     {
                         GL.DeleteTexture(texture);
                     }

@@ -1,15 +1,12 @@
 ﻿using Astrarium.Algorithms;
-using OpenTK.Graphics.OpenGL;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
+    // TODO: move to GL
     public static class Primitives
     {
         public static void DrawLine(Vec2 p1, Vec2 p2, Pen pen)

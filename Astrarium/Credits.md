@@ -16,10 +16,6 @@ licensed under [MIT license](https://github.com/JamesNK/Newtonsoft.Json/blob/mas
 by Enkari, Ltd and the Ninject project contributors  
 [dual-licensed](https://github.com/ninject/Ninject/blob/master/LICENSE.txt) under Apache License Version 2.0 or the Microsoft Public License (Ms-PL)
 
-- [OpenTK](https://opentk.net/)
-by [Open Toolkit Team](https://github.com/opentk/opentk/graphs/contributors)  
-distributed under the permissive MIT/X11 license
-
 - **Books**  
 Most of implementations are based on algorithms and formulae given in the following books:
   - *Jean Meeus*, [Astronomical Algorithms](https://www.willbell.com/math/mc1.htm), 2nd Edition, published by Willman-Bell, Inc. 1999. 

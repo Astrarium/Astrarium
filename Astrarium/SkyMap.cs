@@ -1,7 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Projections;
 using Astrarium.Types;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -365,8 +364,6 @@ namespace Astrarium
 
         public void Render()
         {
-            renderStopWatch.Restart();
-
             GL.ClearColor(Color.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.Clear(ClearBufferMask.StencilBufferBit);
@@ -395,8 +392,6 @@ namespace Astrarium
             DrawSelectedObject();
 
             GL.PopMatrix();
-
-            renderStopWatch.Stop();
         }
 
         private void DrawSelectedObject()

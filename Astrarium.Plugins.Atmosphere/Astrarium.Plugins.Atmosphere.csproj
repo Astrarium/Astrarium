@@ -21,10 +21,6 @@
 	</Target>
 
 	<ItemGroup>
-		<PackageReference Include="OpenTK" Version="3.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Remove="Text.ini" />
 		<EmbeddedResource Include="Text.ini" />
 	</ItemGroup>

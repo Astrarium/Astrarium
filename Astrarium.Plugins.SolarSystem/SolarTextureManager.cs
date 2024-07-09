@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -115,7 +114,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                data.Width, data.Height, 0, Astrarium.Types.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 
             if (FallbackAction != null)
             {
