@@ -49,7 +49,6 @@ namespace Astrarium.Types
                 m.r[3] * a[0] + m.r[7] * a[1] + m.r[11] * a[2] + m.r[15] * a[3]);
         }
 
-
         public static Vec3 operator *(Mat4 m, Vec3 a)
         {
             return new Vec3(

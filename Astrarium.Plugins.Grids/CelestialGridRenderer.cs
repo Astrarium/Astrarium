@@ -22,7 +22,6 @@ namespace Astrarium.Plugins.Grids
         private string[] equinoxTooltips = new string[] { "CelestialGridRenderer.VernalEquinox.Tooltip", "CelestialGridRenderer.AutumnalEquinox.Tooltip" };
         private string[] nodesTooltips = new string[] { "CelestialGridRenderer.LunarAscendingNode.Tooltip", "CelestialGridRenderer.LunarDescendingNode.Tooltip" };
 
-        private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(64, 64));
         private List<Tuple<Vec2, string>> labels = new List<Tuple<Vec2, string>>();
 
         public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
@@ -48,20 +47,20 @@ namespace Astrarium.Plugins.Grids
             SolidBrush brushEquatorial = new SolidBrush(colorGridEquatorial);
             SolidBrush brushEcliptic = new SolidBrush(colorLineEcliptic);
 
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.Blend);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.Enable(EnableCap.PointSmooth);
-            GL.Enable(EnableCap.LineStipple);
-            GL.Enable(EnableCap.CullFace);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.BLEND);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.LINE_STIPPLE);
+            GL.Enable(GL.CULL_FACE);
 
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
             if (settings.Get("GalacticEquator"))
@@ -167,11 +166,11 @@ namespace Astrarium.Plugins.Grids
                 DrawLine(colorLineMeridian, segments, project);
             }
 
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.LineSmooth);
-            GL.Disable(EnableCap.PointSmooth);
-            GL.Disable(EnableCap.LineStipple);
-            GL.Disable(EnableCap.CullFace);
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.LINE_SMOOTH);
+            GL.Disable(GL.POINT_SMOOTH);
+            GL.Disable(GL.LINE_STIPPLE);
+            GL.Disable(GL.CULL_FACE);
         }
 
         public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
@@ -193,10 +192,10 @@ namespace Astrarium.Plugins.Grids
             {
                 GL.Color3(brush.Color);
                 GL.PointSize(5);
-                GL.Begin(PrimitiveType.Points);
+                GL.Begin(GL.POINTS);
                 GL.Vertex2(p.X, p.Y);
                 GL.End();
-                textRenderer.Value.DrawString(label, fontLabel, brush, new Vec2(p.X + 3, p.Y - 3));
+                GL.DrawString(label, fontLabel, brush, new Vec2(p.X + 3, p.Y - 3));
                 labels.Add(new Tuple<Vec2, string>(p, tooltip));
             }
         }
@@ -206,7 +205,7 @@ namespace Astrarium.Plugins.Grids
             GL.Color3(color);
             GL.LineStipple(1, 0xAAAA);
 
-            GL.Begin(PrimitiveType.LineStrip);
+            GL.Begin(GL.LINE_STRIP);
 
             for (int i = 0; i <= segments; i++)
             {
@@ -219,7 +218,7 @@ namespace Astrarium.Plugins.Grids
                 else
                 {
                     GL.End();
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
                 }
             }
 
@@ -238,7 +237,7 @@ namespace Astrarium.Plugins.Grids
                 // parallels
                 for (int alt = -80; alt <= 80; alt += 10)
                 {
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
 
                     for (int i = 0; i <= segments; i++)
                     {
@@ -254,7 +253,7 @@ namespace Astrarium.Plugins.Grids
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
+                            GL.Begin(GL.LINE_STRIP);
                         }
                     }
 
@@ -264,7 +263,7 @@ namespace Astrarium.Plugins.Grids
                 // meridians
                 for (int i = 0; i < 24; i++)
                 {
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
 
                     for (int alt = -80; alt <= 80; alt += 2)
                     {
@@ -279,7 +278,7 @@ namespace Astrarium.Plugins.Grids
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
+                            GL.Begin(GL.LINE_STRIP);
                         }
                     }
 

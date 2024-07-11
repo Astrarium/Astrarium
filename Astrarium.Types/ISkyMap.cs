@@ -65,7 +65,15 @@ namespace Astrarium.Types
 
         void AddDrawnObject(PointF p, CelestialObject obj);
 
-        void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF point, float size);
+        /// <summary>
+        /// Draws celestial object label
+        /// </summary>
+        /// <param name="label">Object label</param>
+        /// <param name="font">Font for rendering label</param>
+        /// <param name="brush">Brush for rendering label</param>
+        /// <param name="p">Center of the body, in screen coordinates</param>
+        /// <param name="size">Object size, in pixels</param>
+        void DrawObjectLabel(string label, Font font, Brush brush, PointF point, float size);
 
         /// <summary>
         /// Occurs when selected celestial object is changed

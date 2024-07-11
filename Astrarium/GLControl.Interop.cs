@@ -9,14 +9,14 @@ namespace Astrarium
         private const string OPENGL32 = "opengl32";
         private const string USER32 = "user32";
 
-        private const int WGL_CONTEXT_MAJOR_VERSION_ARB = 0x2091;
-        private const int WGL_CONTEXT_MINOR_VERSION_ARB = 0x2092;
+        private const int WCONTEXT_MAJOR_VERSION_ARB = 0x2091;
+        private const int WCONTEXT_MINOR_VERSION_ARB = 0x2092;
 
-        private const int WGL_CONTEXT_PROFILE_MASK_ARB = 0x9126;
-        private const int WGL_CONTEXT_CORE_PROFILE_BIT_ARB = 0x00000001;
-        private const int WGL_CONTEXT_FLAGS_ARB = 0x2094;
-        private const int WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB = 0x00000002;
-        private const int WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB = 0x00000002;
+        private const int WCONTEXT_PROFILE_MASK_ARB = 0x9126;
+        private const int WCONTEXT_CORE_PROFILE_BIT_ARB = 0x00000001;
+        private const int WCONTEXT_FLAGS_ARB = 0x2094;
+        private const int WCONTEXT_FORWARD_COMPATIBLE_BIT_ARB = 0x00000002;
+        private const int WCONTEXT_COMPATIBILITY_PROFILE_BIT_ARB = 0x00000002;
 
         [DllImport(USER32, CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
         private static extern IntPtr GetDC(IntPtr hWnd);
@@ -40,7 +40,13 @@ namespace Astrarium
         private static extern bool wglDeleteContext(IntPtr hrc);
 
         [DllImport(OPENGL32)]
-        public static extern IntPtr wglGetProcAddress(string name);
+        private static extern IntPtr wglGetProcAddress(string name);
+
+        [DllImport(OPENGL32)]
+        private static extern void glViewport(int x, int y, int width, int height);
+
+        [DllImport(OPENGL32, CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
+        private static extern IntPtr glGetString(uint name);
 
         private delegate IntPtr wglCreateContextAttribsARB(IntPtr hDC, IntPtr hShareContext, int[] attribs);
 

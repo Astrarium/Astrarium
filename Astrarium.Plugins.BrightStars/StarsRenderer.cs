@@ -14,8 +14,6 @@ namespace Astrarium.Plugins.BrightStars
         private readonly StarsCalc starsCalc;
         private readonly ISettings settings;
 
-        private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
-
         private const int limitBayerNames = 20;
         private const int limitProperNames = 20;
         private const int limitFlamsteedNames = 10;
@@ -34,21 +32,21 @@ namespace Astrarium.Plugins.BrightStars
             var prj = map.Projection;
             bool nightMode = settings.Get("NightMode");
 
-            GL.Enable(EnableCap.PointSmooth);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
-            GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            GL.Enable(EnableCap.CullFace);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+            GL.Enable(GL.CULL_FACE);
 
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
             var allStars = starsCalc.Stars;
@@ -77,7 +75,7 @@ namespace Astrarium.Plugins.BrightStars
                         var p2 = prj.Project(s2.Equatorial);
                         if (p1 != null && p2 != null)
                         {
-                            Primitives.DrawLine(p1, p2, linePen);
+                            GL.DrawLine(p1, p2, linePen);
                         }
                     }
                 }
@@ -114,7 +112,7 @@ namespace Astrarium.Plugins.BrightStars
                             GL.PointSize(size * starsScalingFactor);
                             GL.Color3(GetColor(star.Color).Tint(nightMode));
 
-                            GL.Begin(PrimitiveType.Points);
+                            GL.Begin(GL.POINTS);
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 
@@ -126,10 +124,10 @@ namespace Astrarium.Plugins.BrightStars
                 }
             }
 
-            GL.Disable(EnableCap.PointSmooth);
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.CullFace);
-        }        
+            GL.Disable(GL.POINT_SMOOTH);
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.CULL_FACE);
+        }
 
         private Color GetColor(char spClass)
         {
@@ -170,7 +168,7 @@ namespace Astrarium.Plugins.BrightStars
             // Star has proper name
             if (properNames && s.ProperName != null && prj.Fov < limitProperNames)
             {
-                map.DrawObjectLabel(textRenderer.Value, s.ProperName, font, brush, point, diam);
+                map.DrawObjectLabel(s.ProperName, font, brush, point, diam);
                 return;
             }
 
@@ -180,7 +178,7 @@ namespace Astrarium.Plugins.BrightStars
                 string bayerName = s.BayerName;
                 if (bayerName != null)
                 {
-                    map.DrawObjectLabel(textRenderer.Value, bayerName, font, brush, point, diam);
+                    map.DrawObjectLabel(bayerName, font, brush, point, diam);
                     return;
                 }
             }
@@ -191,7 +189,7 @@ namespace Astrarium.Plugins.BrightStars
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    map.DrawObjectLabel(textRenderer.Value, flamsteedNumber, font, brush, point, diam);
+                    map.DrawObjectLabel(flamsteedNumber, font, brush, point, diam);
                     return;
                 }
             }
@@ -202,7 +200,7 @@ namespace Astrarium.Plugins.BrightStars
                 string varName = s.VariableName.Split(' ')[0];
                 if (!varName.All(char.IsDigit))
                 {
-                    map.DrawObjectLabel(textRenderer.Value, varName, font, brush, point, diam);
+                    map.DrawObjectLabel(varName, font, brush, point, diam);
                     return;
                 }
             }
@@ -210,7 +208,7 @@ namespace Astrarium.Plugins.BrightStars
             // Star doesn't have any names
             if (prj.Fov < 2)
             {
-                map.DrawObjectLabel(textRenderer.Value, $"HR {s.Number}", font, brush, point, diam);
+                map.DrawObjectLabel($"HR {s.Number}", font, brush, point, diam);
             }
         }
 

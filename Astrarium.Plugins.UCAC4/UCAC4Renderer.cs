@@ -13,7 +13,6 @@ namespace Astrarium.Plugins.UCAC4
         private Font fontNames;
         private readonly UCAC4Catalog catalog;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
         private readonly ISkyMap map;
         private readonly List<UCAC4Star> cache = new List<UCAC4Star>();
         private readonly object locker = new object();
@@ -56,10 +55,10 @@ namespace Astrarium.Plugins.UCAC4
                 Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(nightMode));
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
-                GL.Enable(EnableCap.PointSmooth);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+                GL.Enable(GL.POINT_SMOOTH);
+                GL.Enable(GL.BLEND);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
                 CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
                 CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, catalog.PrecessionElements0);
@@ -86,7 +85,7 @@ namespace Astrarium.Plugins.UCAC4
                         GL.PointSize(size * starsScalingFactor);
                         GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
 
-                        GL.Begin(PrimitiveType.Points);
+                        GL.Begin(GL.POINTS);
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 
@@ -94,7 +93,7 @@ namespace Astrarium.Plugins.UCAC4
 
                         if (isLabels && size > 2)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
+                            map.DrawObjectLabel(star.Names.First(), fontNames, brushNames, p, size);
                         }
                     }
                 }

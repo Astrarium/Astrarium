@@ -1,5 +1,4 @@
-﻿using Astrarium.Types;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,18 +7,20 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 
-namespace Astrarium
+namespace Astrarium.Types
 {
-    public class TextureManager : ITextureManager
+    internal class TextureManager
     {
+        /// <summary>
+        /// Holds texture info
+        /// </summary>
         private class Texture
         {
             public string Path { get; set; }
             public int TextureId { get; set; }
             public bool IsPermanent { get; set; }
             public int UsageCounter { get; set; }
-            public bool AlphaChannel { get; set; }
-            public Action Action { get; set; }
+            public Action ReadyCallback { get; set; }
 
             public static bool operator ==(Texture t1, Texture t2)
             {
@@ -47,9 +48,7 @@ namespace Astrarium
             disposer.Start();
         }
 
-        public Action FallbackAction { get; set; }
-
-        public int GetTexture(string path, string fallbackPath = null, bool permanent = false, Action action = null, bool alphaChannel = false)
+        public int GetTexture(string path, string fallbackPath = null, bool permanent = false, Action readyCallback = null)
         {
             lock (locker)
             {
@@ -72,8 +71,7 @@ namespace Astrarium
                     {
                         Path = path,
                         IsPermanent = permanent,
-                        Action = action,
-                        AlphaChannel = alphaChannel
+                        ReadyCallback = readyCallback,
                     });
                     autoReset.Set();
                 }
@@ -81,7 +79,7 @@ namespace Astrarium
                 // has fallback?
                 if (fallbackPath != null)
                 {
-                    return GetTexture(fallbackPath, null, permanent = true, action: null, alphaChannel);
+                    return GetTexture(fallbackPath, permanent: true);
                 }
 
                 return 0;
@@ -151,8 +149,7 @@ namespace Astrarium
                 {
                     using (Bitmap bmp = (Bitmap)Image.FromFile(texture.Path))
                     {
-                        System.Drawing.Imaging.PixelFormat pixeFormat = texture.AlphaChannel ? System.Drawing.Imaging.PixelFormat.Format32bppArgb : System.Drawing.Imaging.PixelFormat.Format24bppRgb;
-                        BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, pixeFormat);
+                        BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, bmp.PixelFormat);
                         Application.Current.Dispatcher.Invoke(() => BindTexture(texture, data));
                         bmp.UnlockBits(data);
                     }
@@ -163,19 +160,19 @@ namespace Astrarium
         private void BindTexture(Texture texture, BitmapData data)
         {
             texture.TextureId = GL.GenTexture();
-            var internalFormat = texture.AlphaChannel ? PixelInternalFormat.Rgba : PixelInternalFormat.Rgb;
-            var pixelFormat = texture.AlphaChannel ? Astrarium.Types.PixelFormat.Bgra : Astrarium.Types.PixelFormat.Bgr;
 
-            GL.BindTexture(TextureTarget.Texture2D, texture.TextureId);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, internalFormat,
-                data.Width, data.Height, 0, pixelFormat, PixelType.UnsignedByte, data.Scan0);
+            bool hasAlphaChannel = Image.IsAlphaPixelFormat(data.PixelFormat);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            int internalFormat = hasAlphaChannel ? GL.RGBA : GL.RGB;
+            int pixelFormat = hasAlphaChannel ? GL.BGRA : GL.BGR;
 
-            texture.Action?.Invoke();
+            GL.BindTexture(GL.TEXTURE_2D, texture.TextureId);
+            GL.TexImage2D(GL.TEXTURE_2D, 0, internalFormat, data.Width, data.Height, 0, pixelFormat, GL.UNSIGNED_BYTE, data.Scan0);
 
-            FallbackAction?.Invoke();
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+
+            texture.ReadyCallback?.Invoke();
         }
     }
 }

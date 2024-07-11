@@ -19,8 +19,6 @@ namespace Astrarium.Plugins.ASCOM
         private readonly IAscomProxy ascom;
         private readonly ISkyMap map;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
-
         public override RendererOrder Order => RendererOrder.Foreground;
        
         public TelescopeRenderer(ISkyMap map, ISettings settings)
@@ -66,10 +64,10 @@ namespace Astrarium.Plugins.ASCOM
                         double y0 = p.Y + r / 2 * (float)Math.Sin(a + a0);
                         double x1 = p.X + r * (float)Math.Cos(a + a0);
                         double y1 = p.Y + r * (float)Math.Sin(a + a0);
-                        Primitives.DrawLine(new Vec2(x0, y0), new Vec2(x1, y1), marker);
+                        GL.DrawLine(new Vec2(x0, y0), new Vec2(x1, y1), marker);
                     }
 
-                    Primitives.DrawEllipse(p, marker, r);
+                    GL.DrawEllipse(p, marker, r);
 
                     if (settings.Get("TelescopeMarkerLabel"))
                     {
@@ -77,7 +75,7 @@ namespace Astrarium.Plugins.ASCOM
                         var font = settings.Get<Font>("TelescopeMarkerFont");
                         var labelSize = WF.TextRenderer.MeasureText(label, font, Size.Empty);
                         var brush = new SolidBrush(color);
-                        textRenderer.Value.DrawString(label, font, brush, new PointF((float)(p.X - labelSize.Width / 2), (float)(p.Y - r - labelSize.Height / 2)));                       
+                        GL.DrawString(label, font, brush, new PointF((float)(p.X - labelSize.Width / 2), (float)(p.Y - r - labelSize.Height / 2)));
                     }
                 }
                 catch (Exception ex)

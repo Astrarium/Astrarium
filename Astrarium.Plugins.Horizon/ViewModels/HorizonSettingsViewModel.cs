@@ -14,7 +14,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 {
     public class HorizonSettingsViewModel : SettingsViewModel
     {
-        private readonly ITextureManager textureManager;
         private readonly ILandscapesManager landscapesManager;
 
         public ICommand OpenURLCommand { get; private set; }
@@ -22,9 +21,8 @@ namespace Astrarium.Plugins.Horizon.ViewModels
         public ICommand EditLandscapeCommand { get; private set; }
         public ICommand DeleteLandscapeCommand { get; private set; }
 
-        public HorizonSettingsViewModel(ISettings settings, ITextureManager textureManager, ILandscapesManager landscapesManager) : base(settings)
+        public HorizonSettingsViewModel(ISettings settings, ILandscapesManager landscapesManager) : base(settings)
         {
-            this.textureManager = textureManager;
             this.landscapesManager = landscapesManager;
 
             OpenURLCommand = new Command(() =>
@@ -143,7 +141,7 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
                     if (oldLandscape != null)
                     {
-                        textureManager.RemoveTexture(oldLandscape.Path);
+                        GL.RemoveTexture(oldLandscape.Path);
                     }
 
                     Settings.Set("Landscape", value.Title);

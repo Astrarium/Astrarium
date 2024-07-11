@@ -12,7 +12,6 @@ namespace Astrarium.Plugins.Constellations
         private readonly ConstellationsCalc constellationsCalc;
         private readonly ISettings settings;
         private readonly ISky sky;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(512, 64));
 
         public override RendererOrder Order => RendererOrder.Grids;
 
@@ -71,7 +70,7 @@ namespace Astrarium.Plugins.Constellations
                     }
 
                     var size = WF.TextRenderer.MeasureText(label, font, Size.Empty, formatFlags);
-                    textRenderer.Value.DrawString(label, font, brushLabel, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
+                    GL.DrawString(label, font, brushLabel, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
                 }
             }
         }
@@ -81,9 +80,9 @@ namespace Astrarium.Plugins.Constellations
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
 
-            GL.Enable(EnableCap.Blend);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(GL.BLEND);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
             double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
@@ -96,7 +95,7 @@ namespace Astrarium.Plugins.Constellations
             CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
 
-            GL.Begin(PrimitiveType.Lines);
+            GL.Begin(GL.LINES);
 
             foreach (var block in constellationsCalc.Borders)
             {

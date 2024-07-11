@@ -11,7 +11,6 @@ namespace Astrarium.Plugins.MinorBodies
         private readonly ISkyMap map;
         private readonly AsteroidsCalc asteroidsCalc;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly Color colorAsteroid = Color.FromArgb(100, 100, 100);
         private readonly Color colorAsteroidEdge = Color.FromArgb(50, 50, 50);
@@ -63,10 +62,10 @@ namespace Astrarium.Plugins.MinorBodies
                     {
                         Vec2 p = prj.Project(a.Equatorial);
 
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Enable(GL.BLEND);
+                        GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
-                        GL.Begin(PrimitiveType.TriangleFan);
+                        GL.Begin(GL.TRIANGLE_FAN);
 
                         // center
                         GL.Color3(clrCenter);
@@ -98,13 +97,13 @@ namespace Astrarium.Plugins.MinorBodies
 
                         if (prj.IsInsideScreen(p))
                         {
-                            GL.Enable(EnableCap.PointSmooth);
-                            GL.Enable(EnableCap.Blend);
-                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+                            GL.Enable(GL.POINT_SMOOTH);
+                            GL.Enable(GL.BLEND);
+                            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
                             GL.PointSize(size);
-                            GL.Begin(PrimitiveType.Points);
+                            GL.Begin(GL.POINTS);
                             GL.Color3(clrCenter);
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
@@ -126,7 +125,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             string name = body.Names.First();
             string label = drawMagInLabel ? $"{name} {Formatters.Magnitude.Format(body.Magnitude)}" : name;
-            map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, size);
+            map.DrawObjectLabel(label, font, brush, p, size);
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;

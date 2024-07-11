@@ -8,8 +8,6 @@ namespace Astrarium.Plugins.Satellites
 {
     public class SatellitesRenderer : BaseRenderer
     {
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
-
         private readonly ISettings settings;
         private readonly SatellitesCalculator calculator;
 
@@ -48,12 +46,14 @@ namespace Astrarium.Plugins.Satellites
             // filter satellites
             var satellites = calculator.Satellites;
 
-            GL.Enable(EnableCap.PointSmooth);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
             Vec3 topocentricLocationVector = calculator.TopocentricLocationVector(prj.Context);
+
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             // diff, in hours
             double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.Satellites
                 // equatorial coordinates
                 s.Equatorial = h.ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
 
-                if (Angle.Separation(prj.CenterEquatorial, s.Equatorial) < fov)
+                if (Angle.Separation(eqCenter, s.Equatorial) < fov)
                 {
                     // screen coordinates, for current epoch
                     Vec2 p = prj.Project(s.Equatorial);
@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.Satellites
                     if (prj.IsInsideScreen(p))
                     {
                         GL.PointSize(size);
-                        GL.Begin(PrimitiveType.Points);
+                        GL.Begin(GL.POINTS);
                         GL.Color3(satelliteColor);
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
@@ -105,7 +105,7 @@ namespace Astrarium.Plugins.Satellites
                         if (drawLabels)
                         {
                             var brush = isEclipsed ? brushEclipsedLabel : brushLabel;
-                            map.DrawObjectLabel(textRenderer.Value, s.Name, fontNames, brush, p, size);
+                            map.DrawObjectLabel(s.Name, fontNames, brush, p, size);
                         }
 
                         map.AddDrawnObject(p, s);
@@ -151,7 +151,7 @@ namespace Astrarium.Plugins.Satellites
 
                     GL.Color3(orbitColor);
 
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
                     for (int i = 0; i < track.Count; i++)
                     {
                         Vec2 p = prj.Project(track[i]);
@@ -162,7 +162,7 @@ namespace Astrarium.Plugins.Satellites
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
+                            GL.Begin(GL.LINE_STRIP);
                         }
                     }
                     GL.End();

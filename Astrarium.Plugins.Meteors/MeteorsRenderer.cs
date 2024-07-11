@@ -15,7 +15,6 @@ namespace Astrarium.Plugins.Meteors
 
         private readonly MeteorsCalculator calc;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public MeteorsRenderer(MeteorsCalculator calc, ISettings settings)
         {
@@ -60,13 +59,13 @@ namespace Astrarium.Plugins.Meteors
                     var p2 = new Vec2(p.X - 5, p.Y + 5);
                     var p4 = new Vec2(p.X + 5, p.Y - 5);
 
-                    Primitives.DrawLine(p1, p3, pen);
-                    Primitives.DrawLine(p2, p4, pen);
+                    GL.DrawLine(p1, p3, pen);
+                    GL.DrawLine(p2, p4, pen);
 
                     if (showLabels)
                     {
                         string label = labelsType == MeteorLabelType.Name ? meteor.Name : meteor.Code;
-                        map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, 10);
+                        map.DrawObjectLabel(label, font, brush, p, 10);
                     }
 
                     map.AddDrawnObject(p, meteor);

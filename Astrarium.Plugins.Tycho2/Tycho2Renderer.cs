@@ -14,7 +14,6 @@ namespace Astrarium.Plugins.Tycho2
         private readonly ISettings settings;
 
         private Font fontNames;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public override RendererOrder Order => RendererOrder.Stars;
 
@@ -72,10 +71,10 @@ namespace Astrarium.Plugins.Tycho2
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
                 Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(nightMode));
 
-                GL.Enable(EnableCap.PointSmooth);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+                GL.Enable(GL.POINT_SMOOTH);
+                GL.Enable(GL.BLEND);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
                 CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
                 CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, tycho2.PrecessionalElements0);
@@ -101,7 +100,7 @@ namespace Astrarium.Plugins.Tycho2
                         GL.PointSize(size * starsScalingFactor);
                         GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
 
-                        GL.Begin(PrimitiveType.Points);
+                        GL.Begin(GL.POINTS);
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 
@@ -109,7 +108,7 @@ namespace Astrarium.Plugins.Tycho2
 
                         if (isLabels && prj.Fov < 1 && size > 3)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
+                            map.DrawObjectLabel(star.Names.First(), fontNames, brushNames, p, size);
                         }
                     }
                 }

@@ -15,15 +15,13 @@ namespace Astrarium.Plugins.MilkyWay
         private readonly MilkyWayCalc milkyWayCalc;
         private readonly ISky sky;
         private readonly ISettings settings;
-        private readonly ITextureManager textureManager;
         private readonly string texturePath;
 
         public override RendererOrder Order => RendererOrder.Background;
 
-        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ITextureManager textureManager, ISky sky, ISettings settings)
+        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ISky sky, ISettings settings)
         {
             this.milkyWayCalc = milkyWayCalc;
-            this.textureManager = textureManager;
             this.sky = sky;
             this.settings = settings;
 
@@ -64,23 +62,26 @@ namespace Astrarium.Plugins.MilkyWay
 
             if (alpha < minAlpha) return;
 
+            int texture = GL.GetTexture(texturePath, readyCallback: map.Invalidate);
+            if (texture <= 0) return;
+
             var nightMode = settings.Get("NightMode");
 
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(GL.TEXTURE_2D);
+            GL.Enable(GL.CULL_FACE);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(texturePath));
+            GL.BindTexture(GL.TEXTURE_2D, texture);
 
             const int steps = 32;
 
@@ -88,7 +89,7 @@ namespace Astrarium.Plugins.MilkyWay
 
             for (double lat = -80; lat <= 90; lat += 10)
             {
-                GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Begin(GL.TRIANGLE_STRIP);
 
                 for (int i = 0; i <= steps; i++)
                 {
@@ -115,7 +116,7 @@ namespace Astrarium.Plugins.MilkyWay
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.TriangleStrip);
+                            GL.Begin(GL.TRIANGLE_STRIP);
                             break;
                         }
                     }
@@ -123,9 +124,9 @@ namespace Astrarium.Plugins.MilkyWay
                 GL.End();
             }
 
-            GL.Disable(EnableCap.Texture2D);
-            GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.Blend);
+            GL.Disable(GL.TEXTURE_2D);
+            GL.Disable(GL.CULL_FACE);
+            GL.Disable(GL.BLEND);
         }
     }
 }

@@ -11,14 +11,10 @@ namespace Astrarium.Plugins.DeepSky
     {
         private readonly DeepSkyCalc deepSkyCalc;
         private readonly ISettings settings;
-        private readonly ITextureManager textureManager;
 
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
-
-        public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ITextureManager textureManager, ISettings settings)
+        public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ISettings settings)
         {
             this.deepSkyCalc = deepSkyCalc;
-            this.textureManager = textureManager;
             this.settings = settings;
         }
 
@@ -69,7 +65,7 @@ namespace Astrarium.Plugins.DeepSky
 
                     if (File.Exists(path))
                     {
-                        int textureId = textureManager.GetTexture(path);
+                        int textureId = GL.GetTexture(path);
 
                         if (textureId > 0)
                         {
@@ -83,12 +79,12 @@ namespace Astrarium.Plugins.DeepSky
 
                             if (p0 != null && p1 != null && p2 != null && p3 != null)
                             {
-                                GL.Enable(EnableCap.Texture2D);
-                                GL.Enable(EnableCap.Blend);
-                                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                                GL.Enable(GL.TEXTURE_2D);
+                                GL.Enable(GL.BLEND);
+                                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
-                                GL.BindTexture(TextureTarget.Texture2D, textureId);
-                                GL.Begin(PrimitiveType.TriangleFan);
+                                GL.BindTexture(GL.TEXTURE_2D, textureId);
+                                GL.Begin(GL.TRIANGLE_FAN);
 
                                 GL.TexCoord2(0.5, 0.5);
                                 GL.Color4(Color.FromArgb((int)(100 * (1 - map.DaylightFactor)), 255, 255, 255).Tint(nightMode));
@@ -116,8 +112,8 @@ namespace Astrarium.Plugins.DeepSky
 
                                 GL.End();
 
-                                GL.Disable(EnableCap.Texture2D);
-                                GL.Disable(EnableCap.Blend);
+                                GL.Disable(GL.TEXTURE_2D);
+                                GL.Disable(GL.BLEND);
                             }
                         }
                     }
@@ -125,11 +121,11 @@ namespace Astrarium.Plugins.DeepSky
 
                 if (ds.Shape != null && ds.Shape.Any())
                 {
-                    GL.Enable(EnableCap.Blend);
-                    GL.Enable(EnableCap.LineSmooth);
-                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+                    GL.Enable(GL.BLEND);
+                    GL.Enable(GL.LINE_SMOOTH);
+                    GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
                     GL.Color4(colorOutline);
-                    GL.Begin(PrimitiveType.LineLoop);
+                    GL.Begin(GL.LINE_LOOP);
 
                     foreach (var oc in ds.Shape)
                     {
@@ -147,7 +143,7 @@ namespace Astrarium.Plugins.DeepSky
                         var p0 = prj.Project(Precession.GetEquatorialCoordinates(ds.Shape.First(), prj.Context.PrecessionElements));
                         if (p0 != null)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p0, 5);
+                            map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p0, 5);
                         }
                     }
                 }
@@ -156,11 +152,11 @@ namespace Astrarium.Plugins.DeepSky
                     float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
                     float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
                     double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
-                    Primitives.DrawEllipse(p, penOutline, rx, ry, rot);
+                    GL.DrawEllipse(p, penOutline, rx, ry, rot);
 
                     if (drawLabels && sz > 20)
                     {
-                        map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p, sz);
+                        map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p, sz);
                     }
                 }
 

@@ -16,7 +16,6 @@ namespace Astrarium.Plugins.Tracks
 
         // TODO: move to settings
         private readonly Font fontLabel = new Font("Arial", 8);
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public TrackRenderer(TrackCalc trackCalc, ISettings settings)
         {
@@ -30,10 +29,10 @@ namespace Astrarium.Plugins.Tracks
             var nightMode = settings.Get("NightMode");
             var tracks = trackCalc.Tracks;
 
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Enable(GL.POINT_SMOOTH);
 
             foreach (var track in tracks)
             {
@@ -43,7 +42,7 @@ namespace Astrarium.Plugins.Tracks
 
                     GL.Color3(color);
 
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
 
                     for (int i = 0; i < track.Points.Count; i++)
                     {
@@ -55,7 +54,7 @@ namespace Astrarium.Plugins.Tracks
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.LineStrip);
+                            GL.Begin(GL.LINE_STRIP);
                         }
                     }
 
@@ -82,13 +81,13 @@ namespace Astrarium.Plugins.Tracks
                                 var p = prj.Project(tp);
                                 if (prj.IsInsideScreen(p))
                                 {
-                                    GL.Begin(PrimitiveType.Points);
+                                    GL.Begin(GL.POINTS);
                                     GL.Color3(color);
                                     GL.Vertex2(p.X, p.Y);
                                     GL.End();
 
                                     var label = Formatters.DateTime.Format(new Date(jd, prj.Context.GeoLocation.UtcOffset));
-                                    map.DrawObjectLabel(textRenderer.Value, label, fontLabel, brush, p, 4);
+                                    map.DrawObjectLabel(label, fontLabel, brush, p, 4);
                                 }
                             }
 

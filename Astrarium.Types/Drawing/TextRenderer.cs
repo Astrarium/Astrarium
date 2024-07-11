@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace Astrarium.Types
 {
-    public class TextRenderer : IDisposable
+    internal class TextRenderer : IDisposable
     {
         private Bitmap bmp;
         private Graphics gfx;
@@ -19,15 +19,13 @@ namespace Astrarium.Types
         {
             bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             gfx = Graphics.FromImage(bmp);
-            //gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
-            //gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             texture = GL.GenTexture();
 
-            GL.BindTexture(TextureTarget.Texture2D, texture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.BindTexture(GL.TEXTURE_2D, texture);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+            GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, IntPtr.Zero);
         }
 
         #region Public Members
@@ -35,28 +33,46 @@ namespace Astrarium.Types
         /// <summary>
         /// Draws the specified string to the backing store.
         /// </summary>
-        /// <param name="text">The <see cref="System.String"/> to draw.</param>
-        /// <param name="font">The <see cref="System.Drawing.Font"/> that will be used.</param>
-        /// <param name="brush">The <see cref="System.Drawing.Brush"/> that will be used.</param>
+        /// <param name="text">The <see cref="String"/> to draw.</param>
+        /// <param name="font">The <see cref="Font"/> that will be used.</param>
+        /// <param name="brush">The <see cref="Brush"/> that will be used.</param>
         /// <param name="point">The location of the text on the backing store, in 2d pixel coordinates.
         /// The origin (0, 0) lies at the top-left corner of the backing store.</param>
-        public void DrawString(string text, Font font, Brush brush, PointF point)
+        public void DrawString(string text, Font font, Brush brush, PointF point, bool antiAlias = false)
         {
             gfx.Clear(Color.Transparent);
+            
+
+            if (antiAlias)
+            {
+                gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            }
+            else
+            {
+                gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
+                gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+            }
+
             gfx.DrawString(text, font, brush, new Point());
 
             GL.Color3(Color.Transparent);
-            GL.Enable(EnableCap.Blend);
+            GL.Enable(GL.BLEND);
 
-            // this needed for proper texture overlapping
-            //GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.BlendFunc(BlendingFactor.One, BlendingFactor.One);
+            if (antiAlias)
+            {
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            }
+            else
+            {
+                GL.BlendFunc(GL.ONE, GL.ONE);
+            }
 
-            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(GL.TEXTURE_2D);
 
             GetBitmapData();
 
-            GL.Begin(PrimitiveType.Quads);
+            GL.Begin(GL.QUADS);
 
             GL.TexCoord2(0, 1); GL.Vertex2(point.X, point.Y - bmp.Height);
             GL.TexCoord2(1, 1); GL.Vertex2(point.X + bmp.Width, point.Y - bmp.Height);
@@ -65,12 +81,11 @@ namespace Astrarium.Types
             GL.TexCoord2(0, 0); GL.Vertex2(point.X, point.Y);
 
             GL.End();
-            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(GL.TEXTURE_2D);
 
             // revert to "default" blending func
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
         }
-
 
         #endregion
 
@@ -82,10 +97,9 @@ namespace Astrarium.Types
                 System.Drawing.Imaging.ImageLockMode.ReadOnly,
                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            GL.BindTexture(TextureTarget.Texture2D, texture);
+            GL.BindTexture(GL.TEXTURE_2D, texture);
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0,
-                PixelInternalFormat.Rgba, bmp.Width, bmp.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, bmp.Width, bmp.Height, 0, GL.BGRA, GL.UNSIGNED_BYTE, data.Scan0);
 
             bmp.UnlockBits(data);
         }

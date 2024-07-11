@@ -11,7 +11,6 @@ namespace Astrarium.Plugins.FOV
     {
         private readonly ISkyMap map;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private Font font = new Font("Arial", 8);
         public override RendererOrder Order => RendererOrder.Foreground;
@@ -50,11 +49,11 @@ namespace Astrarium.Plugins.FOV
 
                                 var v1 = new Vec2(p.X, p.Y - diam / 2);
                                 var v2 = new Vec2(p.X, p.Y + diam / 2);
-                                Primitives.DrawLine(v1, v2, pen);
+                                GL.DrawLine(v1, v2, pen);
 
                                 var h1 = new Vec2(p.X - diam / 2, p.Y);
                                 var h2 = new Vec2(p.X + diam / 2, p.Y);
-                                Primitives.DrawLine(h1, h2, pen);
+                                GL.DrawLine(h1, h2, pen);
                             }
                         }
 
@@ -104,12 +103,12 @@ namespace Astrarium.Plugins.FOV
                         GL.Translate(p.X, p.Y, 0);
                         GL.Rotate(rotAngle, 0, 0, 1);
 
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                        GL.Enable(EnableCap.LineSmooth);
+                        GL.Enable(GL.BLEND);
+                        GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                        GL.Enable(GL.LINE_SMOOTH);
                         GL.LineWidth(1);
 
-                        GL.Begin(PrimitiveType.LineLoop);
+                        GL.Begin(GL.LINE_LOOP);
                         GL.Color3(color);
                         GL.Vertex2(-width / 2, height / 2);
                         GL.Vertex2(width / 2, height / 2);
@@ -131,7 +130,7 @@ namespace Astrarium.Plugins.FOV
             if (labelSize.Width <= width * 2)
             {
                 var brush = new SolidBrush(color);
-                textRenderer.Value.DrawString(frame.Label, font, brush, new PointF((float)(-labelSize.Width / 2), (float)(-height / 2 - labelSize.Height / 2)));
+                GL.DrawString(frame.Label, font, brush, new PointF(-labelSize.Width / 2, -height / 2 - labelSize.Height / 2), antiAlias: true);
             }
         }
 
@@ -156,7 +155,7 @@ namespace Astrarium.Plugins.FOV
                 GL.PushMatrix();
                 GL.Translate(p.X, p.Y, 0);
 
-                Primitives.DrawEllipse(new Vec2(), new Pen(color), size / 2);
+                GL.DrawEllipse(new Vec2(), new Pen(color), size / 2);
 
                 if (isOuter)
                 {
@@ -174,19 +173,19 @@ namespace Astrarium.Plugins.FOV
             int h = prj.ScreenHeight;
             const int gap = 5;
 
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.StencilTest);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.STENCIL_TEST);
 
             GL.ClearStencil(0);
-            GL.Clear(ClearBufferMask.StencilBufferBit);
+            GL.Clear(GL.STENCIL_BUFFER_BIT);
 
             GL.ColorMask(false, false, false, false);
             GL.DepthMask(false);
-            GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
-            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+            GL.StencilFunc(GL.ALWAYS, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 
-            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Begin(GL.TRIANGLE_FAN);
             for (int i = 0; i <= 64; i++)
             {
                 double ang = i / 64.0 * 2 * Math.PI;
@@ -197,17 +196,17 @@ namespace Astrarium.Plugins.FOV
 
             GL.ColorMask(true, true, true, true);
             GL.DepthMask(true);
-            GL.StencilFunc(StencilFunction.Notequal, 1, 0xFF);
-            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+            GL.StencilFunc(GL.NOTEQUAL, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.KEEP, GL.KEEP);
 
-            GL.Begin(PrimitiveType.LineLoop);
+            GL.Begin(GL.LINE_LOOP);
             GL.Vertex2(-gap, -gap);
             GL.Vertex2(-gap, h + gap);
             GL.Vertex2(w + gap, h + gap);
             GL.Vertex2(w + gap, -gap);
             GL.End();
 
-            GL.Begin(PrimitiveType.Quads);
+            GL.Begin(GL.QUADS);
             GL.Color4(Color.FromArgb((byte)(shading / 100f * 255), 0, 0, 0));
             GL.Vertex2(-gap, -gap);
             GL.Vertex2(-gap, h + gap);
@@ -215,8 +214,8 @@ namespace Astrarium.Plugins.FOV
             GL.Vertex2(w + gap, -gap);
             GL.End();
 
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.StencilTest);
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.STENCIL_TEST);
         }
     }
 }

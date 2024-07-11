@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Astrarium.Types;
 
 namespace Astrarium
 {
@@ -32,15 +27,18 @@ namespace Astrarium
         }
 
         /// <summary>
-        /// Device context handle
+        /// Device context handle.
         /// </summary>
         private IntPtr hDC;
 
         /// <summary>
-        /// Render context handle
+        /// Render context handle.
         /// </summary>
         private IntPtr hRC;
 
+        /// <summary>
+        /// Reset event to manage rendering cycle.
+        /// </summary>
         private AutoResetEvent renderResetEvent = new AutoResetEvent(true);
 
         /// <summary>
@@ -57,10 +55,22 @@ namespace Astrarium
         /// </summary>
         protected virtual bool RenderContinuous { get; } = false;
 
-        protected virtual bool UseSpecificOpenGLVersion { get; } = true;
+        /// <summary>
+        /// Flag indicating specific OpenGL version should be used.
+        /// If set to true, you must specify <see cref="MajorOpenGLVersion" /> and <see cref="MinorOpenGLVersion"/> values.
+        /// Default value is false.
+        /// </summary>
+        protected virtual bool UseSpecificOpenGLVersion { get; } = false;
 
-        protected virtual int MajorOpenGLVersion { get; } = 3;
-        protected virtual int MinorOpenGLVersion { get; } = 0;
+        /// <summary>
+        /// Specifies major OpenGL verion to be requested.
+        /// </summary>
+        protected virtual uint MajorOpenGLVersion { get; } = 0;
+
+        /// <summary>
+        /// Specifies minor OpenGL verion to be requested.
+        /// </summary>
+        protected virtual uint MinorOpenGLVersion { get; } = 0;
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
@@ -98,7 +108,7 @@ namespace Astrarium
 
         private void OnRender()
         {
-            GL.Viewport(0, 0, Width, Height);
+            glViewport(0, 0, Width, Height);
             Render?.Invoke(this, EventArgs.Empty);
             SwapBuffers(hDC);
         }
@@ -132,21 +142,25 @@ namespace Astrarium
             var pfd = new PixelFormatDescriptor();
             pfd.Init();
 
-            //	Match an appropriate pixel format 
+            // Match an appropriate pixel format 
             int iPixelformat;
             if ((iPixelformat = ChoosePixelFormat(hDC, ref pfd)) == 0)
             {
                 throw new Exception("Error on choosing pixel format.");
             }
 
-            //	Sets the pixel format
+            // Sets the pixel format
             if (SetPixelFormat(hDC, iPixelformat, ref pfd) == false)
             {
                 throw new Exception("Error on setting pixel format.");
             }
-
+            
+            // Need to request context with specific OpenGL version
             if (UseSpecificOpenGLVersion)
             {
+                if (MajorOpenGLVersion == 0)
+                    throw new Exception("You must specify valid MajorOpenGLVersion.");
+
                 // Create the dummy render context
                 var hrc = wglCreateContext(hDC);
                 if (hrc == IntPtr.Zero)
@@ -167,15 +181,15 @@ namespace Astrarium
                 // Set specific OpenGL version
                 int[] attributes =
                 {
-                    WGL_CONTEXT_MAJOR_VERSION_ARB, MajorOpenGLVersion,
-                    WGL_CONTEXT_MINOR_VERSION_ARB, MinorOpenGLVersion,
+                    WCONTEXT_MAJOR_VERSION_ARB, (int)MajorOpenGLVersion,
+                    WCONTEXT_MINOR_VERSION_ARB, (int)MinorOpenGLVersion,
 
                     // Uncomment this for forward compatibility mode
-                    // WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    // WCONTEXT_FLAGS_ARB, WCONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                     // Uncomment this for Compatibility profile
-                    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+                    WCONTEXT_PROFILE_MASK_ARB, WCONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
                     // We are using Core profile here
-                    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    WCONTEXT_PROFILE_MASK_ARB, WCONTEXT_CORE_PROFILE_BIT_ARB,
                 };
 
                 // Create render context with attributes
@@ -204,7 +218,7 @@ namespace Astrarium
             }
 
             // Get version to make sure it's ok
-            OpenGLVersion = GL.GetString(GL.GL_VERSION);
+            OpenGLVersion = Marshal.PtrToStringAnsi(glGetString(0x1F02));
 
             if (string.IsNullOrEmpty(OpenGLVersion))
             {

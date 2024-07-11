@@ -13,17 +13,13 @@ namespace Astrarium.Plugins.Horizon
         private readonly ISkyMap map;
         private readonly ISettings settings;
         private readonly ILandscapesManager landscapesManager;
-        private readonly ITextureManager textureManager;
-
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
 
-        public GroundRenderer(ISkyMap map, ILandscapesManager landscapesManager, ITextureManager textureManager, ISettings settings)
+        public GroundRenderer(ISkyMap map, ILandscapesManager landscapesManager, ISettings settings)
         {
             this.map = map;
             this.landscapesManager = landscapesManager;
-            this.textureManager = textureManager;
             this.settings = settings;
         }
 
@@ -43,13 +39,13 @@ namespace Astrarium.Plugins.Horizon
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
 
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.LINE_SMOOTH);
             GL.LineWidth(5);
 
-            GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            GL.Begin(PrimitiveType.LineStrip);
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+            GL.Begin(GL.LINE_STRIP);
             GL.Color4(settings.Get<Color>("ColorHorizon").Tint(nightMode));
 
             const int steps = 64;
@@ -65,14 +61,14 @@ namespace Astrarium.Plugins.Horizon
                 else
                 {
                     GL.End();
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(GL.LINE_STRIP);
                 }
             }
 
             GL.End();
 
             GL.LineWidth(1);
-            GL.Disable(EnableCap.Blend);
+            GL.Disable(GL.BLEND);
         }
 
         private void RenderGround()
@@ -83,18 +79,18 @@ namespace Astrarium.Plugins.Horizon
             double aziShift = 0;
             var labels = new LandscapeLabel[0];
 
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(GL.TEXTURE_2D);
+            GL.Enable(GL.CULL_FACE);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
             if (settings.Get("UseLandscape"))
@@ -107,13 +103,13 @@ namespace Astrarium.Plugins.Horizon
                     string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
                     aziShift = landscape.AzimuthShift;
                     labels = landscape.Labels;
-                    textureId = textureManager.GetTexture(landscape.Path, fallbackPath: null, permanent: true, action: null, alphaChannel: true);
-                    GL.BindTexture(TextureTarget.Texture2D, textureId);
+                    textureId = GL.GetTexture(landscape.Path, permanent: true, readyCallback: map.Invalidate);
+                    GL.BindTexture(GL.TEXTURE_2D, textureId);
                 }
             }
             else
             {
-                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(GL.TEXTURE_2D);
             }
 
             int steps = prj.Fov < 90 ? 32 : 128;
@@ -146,7 +142,7 @@ namespace Astrarium.Plugins.Horizon
 
             for (double lat = -80; lat <= latStop; lat += 10)
             {
-                GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Begin(GL.TRIANGLE_STRIP);
 
                 for (int i = 0; i <= steps; i++)
                 {
@@ -165,7 +161,7 @@ namespace Astrarium.Plugins.Horizon
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.TriangleStrip);
+                            GL.Begin(GL.TRIANGLE_STRIP);
                             break;
                         }
                     }
@@ -173,9 +169,9 @@ namespace Astrarium.Plugins.Horizon
                 GL.End();
             }
 
-            GL.Disable(EnableCap.Texture2D);
-            GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.Blend);
+            GL.Disable(GL.TEXTURE_2D);
+            GL.Disable(GL.CULL_FACE);
+            GL.Disable(GL.BLEND);
 
             if (settings.Get("LandscapeLabels"))
             {
@@ -186,9 +182,8 @@ namespace Astrarium.Plugins.Horizon
                     {
                         var p1 = new Vec2(p.X, p.Y + 30);
                         var p0 = new Vec2(p.X + 5, p.Y + 30);
-                        Primitives.DrawLine(p1, p, Pens.Red);
-
-                        textRenderer.Value.DrawString(label.Title, SystemFonts.DefaultFont, Brushes.Red, p0);
+                        GL.DrawLine(p1, p, Pens.Red);
+                        GL.DrawString(label.Title, SystemFonts.DefaultFont, Brushes.Red, p0);
                     }
                 }
             }
@@ -216,7 +211,7 @@ namespace Astrarium.Plugins.Horizon
                     string label = Text.Get($"CardinalDirections.{cardinalDirections[i]}");
                     var font = i % 2 == 0 ? fontMajor : fontMinor;
                     var size = WF.TextRenderer.MeasureText(label, font);
-                    textRenderer.Value.DrawString(label, font, brush, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
+                    GL.DrawString(label, font, brush, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
                 }
             }
         }

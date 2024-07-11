@@ -10,7 +10,6 @@ namespace Astrarium.Plugins.Novae
     {
         public override RendererOrder Order => RendererOrder.Stars;
 
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
         private NovaeCalculator calc;
         private ISettings settings;
 
@@ -40,10 +39,10 @@ namespace Astrarium.Plugins.Novae
             // filter novae by magnitude and FOV
             var novae = calc.Novae.Where(n => n.Magnitude < prj.MagLimit && Angle.Separation(prj.CenterEquatorial, n.Equatorial) < fov);
 
-            GL.Enable(EnableCap.PointSmooth);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
             foreach (var star in novae)
             {
@@ -58,14 +57,14 @@ namespace Astrarium.Plugins.Novae
                     if (prj.IsInsideScreen(p))
                     {
                         GL.PointSize(size);
-                        GL.Begin(PrimitiveType.Points);
+                        GL.Begin(GL.POINTS);
                         GL.Color3(Color.White.Tint(nightMode));
                         GL.Vertex2(p.X, p.Y);
                         GL.End();
 
                         if (drawLabels)
                         {
-                            map.DrawObjectLabel(textRenderer.Value, star.ProperName, fontStarNames, brushLabel, p, size);
+                            map.DrawObjectLabel(star.ProperName, fontStarNames, brushLabel, p, size);
                         }
 
                         map.AddDrawnObject(p, star);

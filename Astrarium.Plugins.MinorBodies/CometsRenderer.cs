@@ -11,7 +11,6 @@ namespace Astrarium.Plugins.MinorBodies
         private readonly ISkyMap map;
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
         private readonly Color colorComet = Color.FromArgb(120, 28, 255, 186);
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -67,10 +66,10 @@ namespace Astrarium.Plugins.MinorBodies
                     if (IsSegmentIntersectScreen(p, t, prj.ScreenWidth, prj.ScreenHeight) ||
                         Angle.Separation(c.Equatorial, eqCenter) < fov + c.Semidiameter / 3600)
                     {
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Enable(GL.BLEND);
+                        GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
-                        GL.Begin(PrimitiveType.TriangleFan);
+                        GL.Begin(GL.TRIANGLE_FAN);
 
                         // center
                         GL.Color4(colorComet.Tint(nightMode));
@@ -115,13 +114,13 @@ namespace Astrarium.Plugins.MinorBodies
                 }
                 else if ((int)size > 0 && prj.IsInsideScreen(p))
                 {
-                    GL.Enable(EnableCap.PointSmooth);
-                    GL.Enable(EnableCap.Blend);
-                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                    GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+                    GL.Enable(GL.POINT_SMOOTH);
+                    GL.Enable(GL.BLEND);
+                    GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                    GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
                     GL.PointSize(size);
-                    GL.Begin(PrimitiveType.Points);
+                    GL.Begin(GL.POINTS);
                     GL.Color3(colorComet.Tint(nightMode));
                     GL.Vertex2(p.X, p.Y);
                     GL.End();
@@ -140,7 +139,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             string name = body.Names.First();
             string label = drawMagInLabel ? $"{name} {Formatters.Magnitude.Format(body.Magnitude)}" : name;
-            map.DrawObjectLabel(textRenderer.Value, label, font, brush, p, size);
+            map.DrawObjectLabel(label, font, brush, p, size);
         }
 
         private bool IsSegmentIntersectScreen(Vec2 p1, Vec2 p2, double width, double height)

@@ -19,8 +19,6 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly ISkyMap map;
         private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
-        private readonly ITextureManager textureManager;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly Sun sun;
         private readonly Moon moon;
@@ -37,11 +35,10 @@ namespace Astrarium.Plugins.SolarSystem
 
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
-        public SolarSystemRenderer(ISkyMap map, LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ITextureManager textureManager, ISettings settings)
+        public SolarSystemRenderer(ISkyMap map, LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
         {
             this.map = map;
             this.planetsCalc = planetsCalc;
-            this.textureManager = textureManager;
             this.settings = settings;
 
             sun = solarCalc.Sun;
@@ -56,9 +53,7 @@ namespace Astrarium.Plugins.SolarSystem
             martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
 
             solarTextureManager = new SolarTextureManager();
-            solarTextureManager.FallbackAction += () => map.Invalidate();
-
-            textureManager.FallbackAction += () => map.Invalidate();
+            solarTextureManager.OnRequestComplete += () => map.Invalidate();
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -373,10 +368,16 @@ namespace Astrarium.Plugins.SolarSystem
             public string Label { get; set; }
         }
 
-        private void SetPolarCapTextureParameters()
+        private void OnPolarCapTextureReady()
         {
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.MirroredRepeat);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.MirroredRepeat);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.MIRRORED_REPEAT);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.MIRRORED_REPEAT);
+            map.Invalidate();
+        }
+
+        private void OnBodyTextureReady()
+        {
+            map.Invalidate();
         }
 
         private bool RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
@@ -406,13 +407,13 @@ namespace Astrarium.Plugins.SolarSystem
                 // out of screen
                 if (!prj.IsInsideScreen(p)) return false;
 
-                GL.Enable(EnableCap.PointSmooth);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+                GL.Enable(GL.POINT_SMOOTH);
+                GL.Enable(GL.BLEND);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
                 GL.PointSize(size * starsScalingFactor);
-                GL.Begin(PrimitiveType.Points);
+                GL.Begin(GL.POINTS);
                 GL.Color3(data.Color.Tint(nightMode));
                 GL.Vertex2(p.X, p.Y);
                 GL.End();
@@ -429,7 +430,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 renderResult = true;
 
-                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(GL.TEXTURE_2D);
 
                 float[] zero = new float[4] { 0, 0, 0, 0 };
                 float[] one = new float[4] { 1, 1, 1, 1 };
@@ -451,23 +452,23 @@ namespace Astrarium.Plugins.SolarSystem
                     ambient = new float[4] { 0.2f, 0.2f, 0.2f, 0f };
                 }
 
-                GL.Light(LightName.Light0, LightParameter.Diffuse, diffuse);
-                GL.Light(LightName.Light0, LightParameter.Ambient, zero);
-                GL.Light(LightName.Light0, LightParameter.Specular, zero);
+                GL.Light(GL.LIGHT0, GL.DIFFUSE, diffuse);
+                GL.Light(GL.LIGHT0, GL.AMBIENT, zero);
+                GL.Light(GL.LIGHT0, GL.SPECULAR, zero);
 
-                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, one);
-                GL.Material(MaterialFace.Front, MaterialParameter.Ambient, ambient);
-                GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
-                GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
-                GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
+                GL.Material(GL.FRONT, GL.DIFFUSE, one);
+                GL.Material(GL.FRONT, GL.AMBIENT, ambient);
+                GL.Material(GL.FRONT, GL.EMISSION, zero);
+                GL.Material(GL.FRONT, GL.SHININESS, zero);
+                GL.Material(GL.FRONT, GL.SPECULAR, zero);
 
-                GL.Enable(EnableCap.Light0);
-                GL.Enable(EnableCap.Lighting);
-                GL.Enable(EnableCap.CullFace);
-                GL.Enable(EnableCap.Blend);
-                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(GL.LIGHT0);
+                GL.Enable(GL.LIGHTING);
+                GL.Enable(GL.CULL_FACE);
+                GL.Enable(GL.BLEND);
+                GL.Enable(GL.TEXTURE_2D);
 
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
 
                 GL.PushMatrix();
                 GL.Translate(p.X, p.Y, 0);
@@ -550,33 +551,33 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (layer == LAYER_PLANET)
                     {
-                        texture = textureManager.GetTexture(data.TextureName, data.FallbackTextureName, permanent: data.FallbackTextureName != null);
+                        texture = GL.GetTexture(data.TextureName, data.FallbackTextureName, readyCallback: OnBodyTextureReady, permanent: data.FallbackTextureName != null);
                     }
                     else if (layer == LAYER_POLAR_CAP)
                     {
-                        texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters, alphaChannel: true);
+                        texture = GL.GetTexture(Path.Combine(dataPath, "PolarCap.png"), readyCallback: OnPolarCapTextureReady);
                     }
 
                     if (texture > 0)
                     {
-                        GL.Enable(EnableCap.Texture2D);
-                        GL.BindTexture(TextureTarget.Texture2D, texture);
+                        GL.Enable(GL.TEXTURE_2D);
+                        GL.BindTexture(GL.TEXTURE_2D, texture);
                     }
                     else
                     {
                         float r = data.Color.R / 255f;
                         float g = data.Color.G / 255f;
                         float b = data.Color.B / 255f;
-                        GL.Disable(EnableCap.Texture2D);
-                        GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { r, g, b, 0.5f });
-                        GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
+                        GL.Disable(GL.TEXTURE_2D);
+                        GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });
+                        GL.Light(GL.LIGHT0, GL.DIFFUSE, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
                     }
 
-                    GL.ShadeModel(ShadingModel.Smooth);
+                    GL.ShadeModel(GL.SMOOTH);
 
                     for (i = 0; i < segments; i++)
                     {
-                        GL.Begin(PrimitiveType.QuadStrip);
+                        GL.Begin(GL.QUAD_STRIP);
 
                         s = 0;
 
@@ -651,11 +652,11 @@ namespace Astrarium.Plugins.SolarSystem
 
                 GL.PopMatrix();
 
-                GL.Disable(EnableCap.Light0);
-                GL.Disable(EnableCap.Lighting);
-                GL.Disable(EnableCap.CullFace);
-                GL.Disable(EnableCap.Blend);
-                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(GL.LIGHT0);
+                GL.Disable(GL.LIGHTING);
+                GL.Disable(GL.CULL_FACE);
+                GL.Disable(GL.BLEND);
+                GL.Disable(GL.TEXTURE_2D);
 
                 if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null &&
                     Angle.Separation(eqCenter, data.EarthShadowCoordinates) < fov + moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter / 3600)
@@ -679,8 +680,7 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 string label = data.Label ?? body.Names.First();
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-
-                map.DrawObjectLabel(textRenderer.Value, label, fontLabel, brushLabel, p, Math.Max(size, diam));
+                map.DrawObjectLabel(label, fontLabel, brushLabel, p, Math.Max(size, diam));
             }
 
             return renderResult;
@@ -708,9 +708,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (settings.Get("SunTexture") && r > 5)
             {
-                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(GL.TEXTURE_2D);
                 textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
-                GL.BindTexture(TextureTarget.Texture2D, textureId);
+                GL.BindTexture(GL.TEXTURE_2D, textureId);
             }
 
             GL.PushMatrix();
@@ -742,7 +742,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
             }
 
-            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Begin(GL.TRIANGLE_FAN);
 
             for (int i = 0; i <= 64; i++)
             {
@@ -771,14 +771,14 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.PopMatrix();
 
-            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(GL.TEXTURE_2D);
 
             map.AddDrawnObject(p, sun);
 
             if (settings.Get("SunLabel"))
             {
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                textRenderer.Value.DrawString(sun.Name, fontLabel, brushLabel, p + (0.7f * r));
+                map.DrawObjectLabel(sun.Name, fontLabel, brushLabel, p, 2 * r);
             }
         }
 
@@ -848,11 +848,11 @@ namespace Astrarium.Plugins.SolarSystem
                     Color clrShadowOutline = Color.FromArgb(100, 50, 0);
                     var pen = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
 
-                    Primitives.DrawEllipse(pShadow, pen, sdPenumbraPixels, sdPenumbraPixels * data.Refraction, data.RotationZenith);
-                    Primitives.DrawEllipse(pShadow, pen, sdUmbraPixels, sdUmbraPixels * data.Refraction, data.RotationZenith);
+                    GL.DrawEllipse(pShadow, pen, sdPenumbraPixels, sdPenumbraPixels * data.Refraction, data.RotationZenith);
+                    GL.DrawEllipse(pShadow, pen, sdUmbraPixels, sdUmbraPixels * data.Refraction, data.RotationZenith);
 
                     var brush = new SolidBrush(clrShadowOutline);
-                    map.DrawObjectLabel(textRenderer.Value, Text.Get("EarthShadow.Label"), fontShadowLabel, brush, pShadow, (float)sdPenumbraPixels * 2);
+                    map.DrawObjectLabel(Text.Get("EarthShadow.Label"), fontShadowLabel, brush, pShadow, (float)sdPenumbraPixels * 2);
                 }
             }
         }
@@ -928,14 +928,14 @@ namespace Astrarium.Plugins.SolarSystem
                                     // rotation of a feature outline
                                     double rot = 90 + Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X));
 
-                                    Primitives.DrawEllipse(pFeature, pen, fr, fr * f, rot);
-                                    textRenderer.Value.DrawString(feature.Name, fontLabel, brush, pFeature);
+                                    GL.DrawEllipse(pFeature, pen, fr, fr * f, rot);
+                                    GL.DrawString(feature.Name, fontLabel, brush, pFeature);
                                 }
                                 else if (centeredFeatures.Contains(feature.TypeCode))
                                 {
                                     string label = feature.Name.Contains("Mare") || feature.TypeCode == "MA" || feature.TypeCode == "OC" ? feature.Name.ToUpper() : feature.Name;
                                     var size = System.Windows.Forms.TextRenderer.MeasureText(label, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
-                                    textRenderer.Value.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
+                                    GL.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
                                 }
 
                                 GL.PopMatrix();
@@ -959,22 +959,22 @@ namespace Astrarium.Plugins.SolarSystem
 
             var prj = map.Projection;
 
-            GL.Disable(EnableCap.Lighting);
-            int textureId = textureManager.GetTexture(Path.Combine(dataPath, "Rings.png"), fallbackPath: null, permanent: false, action: null, alphaChannel: true);
+            GL.Disable(GL.LIGHTING);
+            int textureId = GL.GetTexture(Path.Combine(dataPath, "Rings.png"), readyCallback: OnBodyTextureReady);
             if (textureId > 0)
             {
-                GL.Enable(EnableCap.Texture2D);
-                GL.BindTexture(TextureTarget.Texture2D, textureId);
+                GL.Enable(GL.TEXTURE_2D);
+                GL.BindTexture(GL.TEXTURE_2D, textureId);
             }
             else
             {
                 float r = data.Color.R / 255f;
                 float g = data.Color.G / 255f;
                 float b = data.Color.B / 255f;
-                GL.Disable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Lighting);
-                GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { r, g, b, 0.5f });
-                GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
+                GL.Disable(GL.TEXTURE_2D);
+                GL.Enable(GL.LIGHTING);
+                GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });
+                GL.Light(GL.LIGHT0, GL.DIFFUSE, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
             }
 
             if (settings.Get("NightMode"))
@@ -986,7 +986,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.Color3(Color.White);
             }
 
-            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Begin(GL.TRIANGLE_FAN);
 
             GL.TexCoord2(1, 0);
             GL.Vertex3(0, 0, 0);
@@ -1018,7 +1018,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
             GL.End();
 
-            GL.Enable(EnableCap.Lighting);
+            GL.Enable(GL.LIGHTING);
         }
 
         private Color GradientColor(Color color1, Color color2, double percent)
@@ -1157,7 +1157,7 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 bool isNightMode = settings.Get("NightMode");
                 Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
-                map.DrawObjectLabel(textRenderer.Value, Text.Get("EclipsedByJupiter"), fontShadowLabel, brushLabel, pMoon, 2 * sdMoon);
+                map.DrawObjectLabel(Text.Get("EclipsedByJupiter"), fontShadowLabel, brushLabel, pMoon, 2 * sdMoon);
             }
         }
 
@@ -1169,17 +1169,17 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Translate(pBody.X, pBody.Y, 0);
 
             // initiate stencil
-            GL.Enable(EnableCap.StencilTest);
-            GL.Clear(ClearBufferMask.StencilBufferBit);
+            GL.Enable(GL.STENCIL_TEST);
+            GL.Clear(GL.STENCIL_BUFFER_BIT);
             GL.StencilMask(0xFF);
             GL.ColorMask(false, false, false, false);
 
-            GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
-            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+            GL.StencilFunc(GL.ALWAYS, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 
             // draw stencil pattern (body outline)
 
-            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Begin(GL.TRIANGLE_FAN);
 
             for (int i = 0; i <= 64; i++)
             {
@@ -1209,23 +1209,23 @@ namespace Astrarium.Plugins.SolarSystem
 
             // draw shadow
 
-            GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
-            GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+            GL.StencilFunc(GL.EQUAL, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.REPLACE, GL.REPLACE);
             GL.ColorMask(true, true, true, true);
 
             GL.PushMatrix();
             GL.Translate(pShadow.X, pShadow.Y, 0);
 
             // enable blending because shadow is semitransparent
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             // rotation angle of the shadow
             double rot = Angle.ToRadians(rotAngle);
 
             for (int i = 0; i < shadowRadii.Length; i++)
             {
-                GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Begin(GL.TRIANGLE_STRIP);
 
                 for (int j = 0; j <= 63; j++)
                 {
@@ -1301,8 +1301,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             // disable stencil
 
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.StencilTest);
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.STENCIL_TEST);
 
             GL.PopMatrix();
         }
@@ -1376,7 +1376,7 @@ namespace Astrarium.Plugins.SolarSystem
                         {
                             bool isNightMode = settings.Get("NightMode");
                             Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
-                            map.DrawObjectLabel(textRenderer.Value, Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, brushLabel, pShadow, 2 * radiusUmbra);
+                            map.DrawObjectLabel(Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, brushLabel, pShadow, 2 * radiusUmbra);
                         }
                     }
                 }

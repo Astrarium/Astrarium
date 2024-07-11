@@ -44,19 +44,19 @@ namespace Astrarium.Plugins.Atmosphere
             byte g = (byte)(fogIntensity * referenceColor.G);
             byte b = (byte)(fogIntensity * referenceColor.B);
 
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(GL.CULL_FACE);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             var prj = map.Projection;
 
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
             const int steps = 5;
@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.Atmosphere
                 double alt = GetAltitude(i);
                 double alt0 = GetAltitude(i - 1);
 
-                GL.Begin(PrimitiveType.QuadStrip);
+                GL.Begin(GL.QUAD_STRIP);
 
                 for (double azi = 0; azi <= 360; azi += 10)
                 {
@@ -87,7 +87,7 @@ namespace Astrarium.Plugins.Atmosphere
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.QuadStrip);
+                            GL.Begin(GL.QUAD_STRIP);
                             break;
                         }
                     }
@@ -96,8 +96,8 @@ namespace Astrarium.Plugins.Atmosphere
                 GL.End();
             }
 
-            GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.Blend);
+            GL.Disable(GL.CULL_FACE);
+            GL.Disable(GL.BLEND);
         }
     }
 }

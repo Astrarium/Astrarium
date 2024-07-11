@@ -193,14 +193,8 @@ namespace Astrarium
         /// </summary>
         private ISettings settings = null;
 
-        /// <summary>
-        /// Texture manager instance
-        /// </summary>
-        private ITextureManager textureManager = null;
-
-        public SkyMap(ITextureManager textureManager, ISettings settings)
+        public SkyMap(ISettings settings)
         {
-            this.textureManager = textureManager;
             this.settings = settings;
         }
 
@@ -365,15 +359,14 @@ namespace Astrarium
         public void Render()
         {
             GL.ClearColor(Color.Black);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.Clear(ClearBufferMask.StencilBufferBit);
+            GL.Clear(GL.COLOR_BUFFER_BIT);
+            GL.Clear(GL.STENCIL_BUFFER_BIT);
 
-            GL.MatrixMode(MatrixMode.Projection);
+            GL.MatrixMode(GL.PROJECTION);
             GL.PushMatrix();
             GL.LoadIdentity();
             GL.Ortho(0, Projection.ScreenWidth, 0, Projection.ScreenHeight, -1, 1);
 
-            textureManager.Cleanup();
             celestialObjects.Clear();
             labels.Clear();
 
@@ -392,6 +385,7 @@ namespace Astrarium
             DrawSelectedObject();
 
             GL.PopMatrix();
+            GL.Flush();
         }
 
         private void DrawSelectedObject()
@@ -436,11 +430,11 @@ namespace Astrarium
                     double epoch = sizeableBody.ShapeEpoch.GetValueOrDefault(prj.Context.JulianDay);
                     var pe = Precession.ElementsFK5(epoch, prj.Context.JulianDay);
 
-                    GL.Enable(EnableCap.Blend);
-                    GL.Enable(EnableCap.LineSmooth);
-                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+                    GL.Enable(GL.BLEND);
+                    GL.Enable(GL.LINE_SMOOTH);
+                    GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
                     GL.Color4(clr);
-                    GL.Begin(PrimitiveType.LineLoop);
+                    GL.Begin(GL.LINE_LOOP);
 
                     foreach (var sp in sizeableBody.Shape)
                     {
@@ -466,18 +460,18 @@ namespace Astrarium
                         float rx = prj.GetDiskSize(lgSd) / 2 + 4;
                         float ry = prj.GetDiskSize(smSd) / 2 + 4;
                         double rot = prj.GetAxisRotation(body.Equatorial, 90 + posAngle);
-                        Primitives.DrawEllipse(p, pen, rx, ry, rot);
+                        GL.DrawEllipse(p, pen, rx, ry, rot);
                     }
                     // circular object
                     else
                     {
-                        Primitives.DrawEllipse(p, pen, (diskSize + 8) / 2);
+                        GL.DrawEllipse(p, pen, (diskSize + 8) / 2);
                     }
                 }
             }
             else
             {
-                Primitives.DrawEllipse(p, pen, (pointSize + 8) / 2);
+                GL.DrawEllipse(p, pen, (pointSize + 8) / 2);
             }
         }
 
@@ -586,16 +580,8 @@ namespace Astrarium
             celestialObjects.Add(obj);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="textRenderer"></param>
-        /// <param name="label"></param>
-        /// <param name="font"></param>
-        /// <param name="brush"></param>
-        /// <param name="p"></param>
-        /// <param name="size">Object size, in pixels</param>
-        public void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF p, float size) 
+        /// <inheritdoc />
+        public void DrawObjectLabel(string label, Font font, Brush brush, PointF p, float size)
         {
             SizeF b = System.Windows.Forms.TextRenderer.MeasureText(label, font);
 
@@ -609,7 +595,7 @@ namespace Astrarium
                     RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
                     if (!labels.Any(l => l.IntersectsWith(r)))
                     {
-                        textRenderer.DrawString(label, font, brush, r.Location);
+                        GL.DrawString(label, font, brush, r.Location);
                         labels.Add(r);
                         return;
                     }

@@ -12,7 +12,6 @@ namespace Astrarium.Plugins.MeasureTool
     {
         private readonly ISkyMap map;
         private readonly ISettings settings;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         /// <summary>
         /// Font to print angular separation value
@@ -75,16 +74,16 @@ namespace Astrarium.Plugins.MeasureTool
                 var color = Color.White.Tint(nightMode);
                 var brush = new SolidBrush(color);
 
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                GL.Enable(EnableCap.LineSmooth);
-                GL.Enable(EnableCap.LineStipple);
+                GL.Enable(GL.BLEND);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                GL.Enable(GL.LINE_SMOOTH);
+                GL.Enable(GL.LINE_STIPPLE);
 
                 GL.Color3(color);
                 GL.LineWidth(2);
                 GL.LineStipple(1, 0xAAAA);
 
-                GL.Begin(PrimitiveType.LineStrip);
+                GL.Begin(GL.LINE_STRIP);
 
                 for (int i = 0; i <= segmentsCount; i++)
                 {
@@ -97,17 +96,17 @@ namespace Astrarium.Plugins.MeasureTool
                     else
                     {
                         GL.End();
-                        GL.Begin(PrimitiveType.LineStrip);
+                        GL.Begin(GL.LINE_STRIP);
                     }
                 }
 
                 GL.End();
                 GL.LineWidth(1);
-                GL.Disable(EnableCap.LineStipple);
+                GL.Disable(GL.LINE_STIPPLE);
 
                 // draw text with angle separation value
                 double angle = Angle.Separation(mouse, MeasureOrigin);
-                textRenderer.Value.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, map.MouseScreenCoordinates);
+                GL.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, map.MouseScreenCoordinates);
             }
         }
     }

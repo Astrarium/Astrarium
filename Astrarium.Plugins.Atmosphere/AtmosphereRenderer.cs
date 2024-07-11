@@ -23,19 +23,19 @@ namespace Astrarium.Plugins.Atmosphere
 
             var prj = map.Projection;
 
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
-            GL.Disable(EnableCap.Texture2D);
-            GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcColor);
+            GL.Enable(GL.CULL_FACE);
+            GL.Enable(GL.BLEND);
+            GL.Disable(GL.TEXTURE_2D);
+            GL.BlendFunc(GL.ONE, GL.ONE_MINUS_SRC_COLOR);
 
             // if only one of the flipping enabled
             if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                GL.CullFace(CullFaceMode.Back);
+                GL.CullFace(GL.BACK);
             }
             else
             {
-                GL.CullFace(CullFaceMode.Front);
+                GL.CullFace(GL.FRONT);
             }
 
             double stepAlt = 10;
@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.Atmosphere
 
             for (double alt = -80; alt <= 90; alt += stepAlt)
             {
-                GL.Begin(PrimitiveType.QuadStrip);
+                GL.Begin(GL.QUAD_STRIP);
 
                 for (double azi = 0; azi <= 360; azi += stepAzi)
                 {
@@ -69,7 +69,7 @@ namespace Astrarium.Plugins.Atmosphere
                         else
                         {
                             GL.End();
-                            GL.Begin(PrimitiveType.QuadStrip);
+                            GL.Begin(GL.QUAD_STRIP);
                             break;
                         }
                     }
@@ -92,12 +92,12 @@ namespace Astrarium.Plugins.Atmosphere
                 Color color = Color.FromArgb(regGreenComponent, regGreenComponent, blueComponent).Tint(settings.Get("NightMode"));
                 double intensity = (1 - map.DaylightFactor) * (lightPollutionIntensity / 100);
 
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
                 stepAlt = lightPollutionAltitude / 9;
                 for (double alt = stepAlt; alt <= lightPollutionAltitude + 1e-6; alt += stepAlt)
                 {
-                    GL.Begin(PrimitiveType.QuadStrip);
+                    GL.Begin(GL.QUAD_STRIP);
 
                     for (double azi = 0; azi <= 360; azi += stepAzi)
                     {
@@ -114,7 +114,7 @@ namespace Astrarium.Plugins.Atmosphere
                             else
                             {
                                 GL.End();
-                                GL.Begin(PrimitiveType.QuadStrip);
+                                GL.Begin(GL.QUAD_STRIP);
                                 break;
                             }
                         }
