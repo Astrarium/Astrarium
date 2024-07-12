@@ -21,7 +21,11 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
   set "DEL=%%a"
 )
 
-set /p Version="Enter deployment version: "
+if "%~1"=="" (
+  set /p Version="Enter deployment version: "
+) else (
+  set Version="%~1"
+)
 
 rmdir /s /q "Deploy"
 

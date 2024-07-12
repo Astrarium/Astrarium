@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.Horizon
@@ -77,7 +78,7 @@ namespace Astrarium.Plugins.Horizon
             if (!settings.Get<bool>("Ground")) return;
             int textureId = 0;
             double aziShift = 0;
-            var labels = new LandscapeLabel[0];
+            var landmarks = new Landmark[0];
 
             GL.Enable(GL.TEXTURE_2D);
             GL.Enable(GL.CULL_FACE);
@@ -102,7 +103,7 @@ namespace Astrarium.Plugins.Horizon
                     string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
                     string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
                     aziShift = landscape.AzimuthShift;
-                    labels = landscape.Labels;
+                    landmarks = landscape.Landmarks;
                     textureId = GL.GetTexture(landscape.Path, permanent: true, readyCallback: map.Invalidate);
                     GL.BindTexture(GL.TEXTURE_2D, textureId);
                 }
@@ -123,7 +124,10 @@ namespace Astrarium.Plugins.Horizon
             // blackout coeff
             int c = nc + (int)((255 - nc) * map.DaylightFactor);
 
-            if (settings.Get("NightMode"))
+            // night mode flag
+            bool nightMode = settings.Get("NightMode");
+
+            if (nightMode)
             {
                 // night vision tint
                 GL.Color4(Color.FromArgb((int)(c * 0.6), 0, 0));
@@ -137,8 +141,6 @@ namespace Astrarium.Plugins.Horizon
             }
 
             double latStop = textureId > 0 ? 90 : 0;
-
-
 
             for (double lat = -80; lat <= latStop; lat += 10)
             {
@@ -173,17 +175,51 @@ namespace Astrarium.Plugins.Horizon
             GL.Disable(GL.CULL_FACE);
             GL.Disable(GL.BLEND);
 
-            if (settings.Get("LandscapeLabels"))
+            if (landmarks != null && settings.Get("Landmarks"))
             {
-                foreach (var label in labels)
+                foreach (var landmark in landmarks)
                 {
-                    var p = prj.Project(new CrdsHorizontal(label.Azimuth, label.Altitude));
-                    if (prj.IsInsideScreen(p))
+                    if (landmark.FOV == null || prj.Fov <= landmark.FOV.Value)
                     {
-                        var p1 = new Vec2(p.X, p.Y + 30);
-                        var p0 = new Vec2(p.X + 5, p.Y + 30);
-                        GL.DrawLine(p1, p, Pens.Red);
-                        GL.DrawString(label.Title, SystemFonts.DefaultFont, Brushes.Red, p0);
+                        var color = (landmark.Color ?? Color.Black).Tint(nightMode);
+
+                        // starting point
+                        var p = prj.Project(new CrdsHorizontal(landmark.Azimuth, landmark.Altitude));
+
+                        // wide object landmark
+                        if (landmark.Width != null)
+                        {
+                            var pen = new Pen(color);
+                            for (int i = 0; i < 12; i++)
+                            {
+                                var p0 = prj.Project(new CrdsHorizontal(landmark.Azimuth + i / 12.0 * landmark.Width.Value, landmark.Altitude));
+                                var p1 = prj.Project(new CrdsHorizontal(landmark.Azimuth + (i + 1) / 12.0 * landmark.Width.Value, landmark.Altitude));
+
+                                if (p0 != null && p1 != null)
+                                {
+                                    GL.DrawLine(p0, p1, pen);
+                                }
+                            }
+
+                            // central point
+                            var pc = prj.Project(new CrdsHorizontal(landmark.Azimuth + landmark.Width.Value / 2, landmark.Altitude));
+
+                            if (prj.IsInsideScreen(pc))
+                            {
+                                GL.DrawString($"{landmark.Label} ", System.Drawing.SystemFonts.DefaultFont, new SolidBrush(color), new Vec2(pc.X, pc.Y + 10), verticalAlign: StringAlignment.Center, horizontalAlign: StringAlignment.Center, antiAlias: true);
+                            } 
+                        }
+                        // single-point landmark
+                        else
+                        {
+                            if (prj.IsInsideScreen(p))
+                            {
+                                var p1 = new Vec2(p.X, p.Y + 30);
+                                var p0 = new Vec2(p.X + 5, p.Y + 30);
+                                GL.DrawLine(p1, p, new Pen(color));
+                                GL.DrawString($"{landmark.Label} ", System.Drawing.SystemFonts.DefaultFont, new SolidBrush(color), p0, antiAlias: true);
+                            }
+                        }
                     }
                 }
             }

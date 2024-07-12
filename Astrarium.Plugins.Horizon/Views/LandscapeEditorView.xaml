@@ -32,9 +32,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Label Content="{t:Text LandscapeEditorView.Landscape.Title}" Grid.Column="0" />
@@ -46,15 +43,6 @@
                     <c:NumericUpDown Width="80" Minimum="-360" Maximum="360" Step="1" DecimalPlaces="2" Value="{Binding AzimuthShift}"   />
                     <TextBlock Margin="8 0" Text="{t:Text LandscapeEditorView.Landscape.AzimuthShift.Comments}" IsEnabled="False" VerticalAlignment="Center" />
                 </StackPanel>
-
-                <Label Content="{t:Text LandscapeEditorView.Landscape.Author}" Grid.Column="0" Grid.Row="2" />
-                <TextBox Text="{Binding Author}" Grid.Column="1" Grid.Row="2" />
-
-                <Label Content="{t:Text LandscapeEditorView.Landscape.Copyright}" Grid.Column="0" Grid.Row="3" />
-                <TextBox Text="{Binding Copyright}" Grid.Column="1" Grid.Row="3" />
-
-                <Label Content="{t:Text LandscapeEditorView.Landscape.URL}" Grid.Column="0" Grid.Row="4" />
-                <TextBox Text="{Binding URL}" Grid.Column="1" Grid.Row="4" />
             </Grid>
 
             <Label Grid.Row="1" Content="{t:Text LandscapeEditorView.Landscape.Description}" />

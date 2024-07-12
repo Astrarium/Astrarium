@@ -10,11 +10,8 @@ namespace Astrarium.Plugins.Horizon.ViewModels
         public ICommand CancelCommand { get; }
 
         public string Title { get; set; }
-        public string Author { get; set; }
         public decimal AzimuthShift { get; set; }
-        public string Copyright { get; set; }
         public string Description { get; set; }
-        public string URL { get; set; }
 
         public LandscapeEditorViewModel()
         {
@@ -28,11 +25,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(Title))
                     throw new Exception(Text.Get("LandscapeEditorView.Validator.EmptyTitle"));
-
-                Uri uriResult;
-                if (!string.IsNullOrWhiteSpace(URL) && !(Uri.TryCreate(URL, UriKind.Absolute, out uriResult) && 
-                    (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)))
-                    throw new Exception(Text.Get("LandscapeEditorView.Validator.InvalidUrl"));
             }
             catch (Exception ex)
             {

@@ -14,7 +14,7 @@
 
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Ground}" IsChecked="{Binding Settings.Ground}" Margin="2" />
-        
+
         <StackPanel IsEnabled="{Binding Settings.Ground}" Orientation="Horizontal" Margin="-2 0 0 0">
             <Label Content="{t:Text Settings.GroundTextureNightDimming}" />
             <c:NumericUpDown Minimum="0" Width="60" Maximum="100" DecimalPlaces="0" Value="{Binding Settings.GroundTextureNightDimming, UpdateSourceTrigger=PropertyChanged}" />
@@ -40,22 +40,15 @@
 
                 <StackPanel MaxWidth="500"  Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock Padding="0 8 0 0" HorizontalAlignment="Stretch" IsEnabled="False" FontSize="12" Margin="2" TextWrapping="Wrap" Text="{Binding SelectedLandscape.Description}" Visibility="{Binding SelectedLandscape.Description, Converter={s:NotNullToVisibilityConverter}}" />
-                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.Author, Converter={s:NotNullToVisibilityConverter}}">
-                        <TextBlock IsEnabled="True" FontSize="12" Margin="2" Text="Author" />
-                        <TextBlock IsEnabled="False" FontSize="12" Margin="2" Text="{Binding SelectedLandscape.Author}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0" Visibility="{Binding SelectedLandscape.Copyright, Converter={s:NotNullToVisibilityConverter}}">
-                        <TextBlock IsEnabled="True" FontSize="12" Margin="2" Text="Copyright" />
-                        <TextBlock IsEnabled="False" FontSize="12" Margin="2" Text="{Binding SelectedLandscape.Copyright}" />
-                    </StackPanel>
-                    <TextBlock FontSize="12" Margin="2 8 0 0" Visibility="{Binding SelectedLandscape.URL, Converter={s:NotNullToVisibilityConverter}}">
-                        <Hyperlink Command="{Binding OpenURLCommand}"><Run Text="{Binding SelectedLandscape.URL}" /></Hyperlink>
-                    </TextBlock>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
 
-        <CheckBox Content="{t:Text Settings.HorizonLine}" IsChecked="{Binding Settings.HorizonLine}" Margin="2 8 2 2" />
+        <StackPanel IsEnabled="{Binding Settings.Ground}">
+            <CheckBox Content="{t:Text Settings.Landmarks}" IsChecked="{Binding Settings.Landmarks}" IsEnabled="{Binding Settings.UseLandscape}" Margin="2 8 2 2" />
+        </StackPanel>
+        
+        <CheckBox Content="{t:Text Settings.HorizonLine}" IsChecked="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.LabelCardinalDirections}" IsChecked="{Binding Settings.LabelCardinalDirections}" IsEnabled="{Binding Settings.HorizonLine}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MeasureAzimuthFromNorth}" IsChecked="{Binding Settings.MeasureAzimuthFromNorth}" Margin="2" />
 

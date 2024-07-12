@@ -2,40 +2,92 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
 namespace Astrarium.Plugins.Horizon
 {
+    /// <summary>
+    /// Defines landscape image used for rendering local horizon
+    /// </summary>
     public class Landscape
     {
+        /// <summary>
+        /// Path to the image. Not serialized.
+        /// </summary>
         [JsonIgnore]
         public string Path { get; set; }
 
+        /// <summary>
+        /// Flag indicating landscape is user-defined (i.e. can be edited and deleted). Not serialized.
+        /// </summary>
         [JsonIgnore]
         public bool UserDefined { get; set; }
 
+        /// <summary>
+        /// Landscape shift relative to South direction, in degrees
+        /// </summary>
         public double AzimuthShift { get; set; }
+
+        /// <summary>
+        /// Landscape title, should be unique.
+        /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Optional description, can include author name, copyrights, place of taken, external links and so on.
+        /// </summary>
         public string Description { get; set; }
-        public string Copyright { get; set; }
-        public string Author { get; set; }
-        public string URL { get; set; }
-        public LandscapeLabel[] Labels { get; set; }
+
+        /// <summary>
+        /// Optional array of landmarks.
+        /// </summary>
+        public Landmark[] Landmarks { get; set; }
     }
 
-    public class LandscapeLabel
+    /// <summary>
+    /// Label to be rendered above landscape point.
+    /// Used for mark
+    /// </summary>
+    public class Landmark
     {
-        public string Title { get; set; }
+        /// <summary>
+        /// Landmark label
+        /// </summary>
+        public string Label { get; set; }
+
+        /// <summary>
+        /// Landmark altitude. For wide-length objects it's a starting point
+        /// </summary>
         public double Altitude { get; set; }
+
+        /// <summary>
+        /// Landmark azimuth. For wide-length objects it's a starting point
+        /// </summary>
         public double Azimuth { get; set; }
+
+        /// <summary>
+        /// Optional width of the landmark, in degrees. If set, the landmark object supposed to be a wide-length.
+        /// </summary>
+        public double? Width { get; set; }
+
+        /// <summary>
+        /// Optional color of the landmark label. Default is black.
+        /// </summary>
+        public Color? Color { get; set; }
+
+        /// <summary>
+        /// FOV to display the landmark. If not set, the landmark is displayed always.
+        /// If set, the landmark will be displayed if current FOV is less or equal than specified value.
+        /// </summary>
+        public double? FOV { get; set; }
     }
 
     public interface ILandscapesManager
     {
         ICollection<Landscape> Landscapes { get; }
-
         Landscape CreateLandscape(string filePath);
         void SaveLandscapeMetadata(Landscape landscape);
     }

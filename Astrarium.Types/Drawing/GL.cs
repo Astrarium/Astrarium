@@ -257,9 +257,17 @@ namespace Astrarium.Types
             {
                 formatFlags |= System.Windows.Forms.TextFormatFlags.HorizontalCenter;
             }
+            if (horizontalAlign == StringAlignment.Far)
+            {
+                formatFlags |= System.Windows.Forms.TextFormatFlags.Right;
+            }
             if (verticalAlign == StringAlignment.Center)
             {
                 formatFlags |= System.Windows.Forms.TextFormatFlags.VerticalCenter;
+            }
+            if (verticalAlign == StringAlignment.Far)
+            {
+                formatFlags |= System.Windows.Forms.TextFormatFlags.Bottom;
             }
 
             var size = System.Windows.Forms.TextRenderer.MeasureText(text, font, Size.Empty, formatFlags);
@@ -275,6 +283,14 @@ namespace Astrarium.Types
                 if (formatFlags.HasFlag(System.Windows.Forms.TextFormatFlags.VerticalCenter))
                 {
                     y += size.Height / 2;
+                }
+                if (formatFlags.HasFlag(System.Windows.Forms.TextFormatFlags.Bottom))
+                {
+                    y += size.Height;
+                }
+                if (formatFlags.HasFlag(System.Windows.Forms.TextFormatFlags.Right))
+                {
+                    x += size.Width;
                 }
 
                 textRenderer.DrawString(text, font, brush, new Vec2(x, y), antiAlias);

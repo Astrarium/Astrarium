@@ -16,7 +16,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
     {
         private readonly ILandscapesManager landscapesManager;
 
-        public ICommand OpenURLCommand { get; private set; }
         public ICommand AddLandscapeCommand { get; private set; }
         public ICommand EditLandscapeCommand { get; private set; }
         public ICommand DeleteLandscapeCommand { get; private set; }
@@ -24,18 +23,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
         public HorizonSettingsViewModel(ISettings settings, ILandscapesManager landscapesManager) : base(settings)
         {
             this.landscapesManager = landscapesManager;
-
-            OpenURLCommand = new Command(() =>
-            {
-                try
-                {
-                    Process.Start(new ProcessStartInfo(SelectedLandscape.URL));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Unable to open browser: " + ex);
-                }
-            });
 
             AddLandscapeCommand = new Command(() =>
             {
@@ -81,20 +68,14 @@ namespace Astrarium.Plugins.Horizon.ViewModels
                 var vm = ViewManager.CreateViewModel<LandscapeEditorViewModel>();
 
                 vm.Title = landscape.Title;
-                vm.Author = landscape.Author;
                 vm.AzimuthShift = (decimal)landscape.AzimuthShift;
-                vm.Copyright = landscape.Copyright;
                 vm.Description = landscape.Description;
-                vm.URL = landscape.URL;
 
                 if (ViewManager.ShowDialog(vm) == true)
                 {
                     landscape.Title = NullIfEmpty(vm.Title);
-                    landscape.Author = NullIfEmpty(vm.Author);
                     landscape.AzimuthShift = (double)vm.AzimuthShift;
-                    landscape.Copyright = NullIfEmpty(vm.Copyright);
                     landscape.Description = NullIfEmpty(vm.Description);
-                    landscape.URL = NullIfEmpty(vm.URL);
 
                     landscapesManager.SaveLandscapeMetadata(landscape);
                     SelectedLandscape = landscape;
