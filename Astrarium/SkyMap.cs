@@ -504,7 +504,7 @@ namespace Astrarium
             float sd = (body is SizeableCelestialObject) ?
                        (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
-            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, 1 / 1024.0);
+            double viewAngleTarget = sd == 0 ? 1 / 1024.0 : Math.Max(sd * 10, 1 / 1024.0);
 
             var eq = Projection.WithRefraction(body.Equatorial);
             GoToPoint(eq, animationDuration, viewAngleTarget);
@@ -552,10 +552,9 @@ namespace Astrarium
                 CrdsEquatorial centerOriginal = new CrdsEquatorial(Projection.CenterEquatorial);
                 double ad = Angle.Separation(eq, centerOriginal);
 
-                // TODO: calculate steps by more suitable formula
-                double steps = animationDuration.TotalMilliseconds;
-                
-                double[] x = new double[] { 0, steps / 2, steps };
+                double duration = animationDuration.TotalMilliseconds;
+
+                double[] x = new double[] { 0, duration / 2, duration };
                 double[] y = (ad < Projection.Fov) ?
                     // linear zooming if body is already on the screen:
                     new double[] { Projection.Fov, (Projection.Fov + viewAngleTarget) / 2, viewAngleTarget } :
@@ -564,13 +563,20 @@ namespace Astrarium
 
                 Task.Run(() =>
                 {
-                    for (int i = 0; i <= steps; i++)
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+
+                    double fraction;
+                    do
                     {
-                        Projection.SetVision(Angle.Intermediate(centerOriginal, eq, i / steps));
-                        Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, i));
-                        Thread.Sleep(1);
-                        Invalidate();                        
+                        fraction = Math.Min(1, sw.ElapsedMilliseconds / duration);
+                        Projection.SetVision(Angle.Intermediate(centerOriginal, eq, fraction));
+                        Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, Math.Min(duration, sw.ElapsedMilliseconds)));
+                        Invalidate();
                     }
+                    while (fraction < 1);
+
+                    sw.Stop();
                 });
             }
         }

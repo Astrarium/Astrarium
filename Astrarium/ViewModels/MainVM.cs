@@ -938,8 +938,7 @@ namespace Astrarium.ViewModels
         private void CenterOnPoint()
         {
             CrdsEquatorial eq = SelectedObject != null ? SelectedObject.Equatorial : MouseEquatorialCoordinates;
-            map.Projection.SetVision(map.Projection.WithRefraction(eq));
-            map.Invalidate();
+            CenterOnPoint(map.Projection.WithRefraction(eq), map.Projection.Fov);
         }
 
         public void CenterOnPoint(CrdsEquatorial eq, double targetViewAngle)
