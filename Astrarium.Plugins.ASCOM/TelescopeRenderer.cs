@@ -75,7 +75,7 @@ namespace Astrarium.Plugins.ASCOM
                         var font = settings.Get<Font>("TelescopeMarkerFont");
                         var labelSize = WF.TextRenderer.MeasureText(label, font, Size.Empty);
                         var brush = new SolidBrush(color);
-                        GL.DrawString(label, font, brush, new PointF((float)(p.X - labelSize.Width / 2), (float)(p.Y - r - labelSize.Height / 2)));
+                        GL.DrawString(label, font, brush, new PointF((float)p.X, (float)(p.Y - r - font.Size)), horizontalAlign: StringAlignment.Center, antiAlias: true);
                     }
                 }
                 catch (Exception ex)
