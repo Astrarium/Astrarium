@@ -95,6 +95,11 @@ namespace Astrarium.Config
             return Get<bool>(settingName, defaultValue);
         }
 
+        public Color GetColor(string settingName)
+        {
+            return Get<Color>(settingName).Tint(Get("NightMode"));
+        }
+
         public T Get<T>(string settingName, T defaultValue = default(T))
         {
             if (SettingsValues.ContainsKey(settingName))

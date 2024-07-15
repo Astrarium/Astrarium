@@ -19,6 +19,13 @@ namespace Astrarium.Types
         bool Get(string settingName, bool defaultValue = false);
 
         /// <summary>
+        /// Gets color setting optionally tinted if dark (night) mode is on.
+        /// </summary>
+        /// <param name="color">Color name to get.</param>
+        /// <returns>Setting value</returns>
+        Color GetColor(string color);
+
+        /// <summary>
         /// Gets setting with specified name and casts its value to desired type.
         /// </summary>
         /// <typeparam name="T">Type of setting value</typeparam>

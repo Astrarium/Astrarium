@@ -1,8 +1,12 @@
 <Project>
-  <PropertyGroup>
-    <Version>$(DeploymentVersion)</Version>
-    <ProductVersion>$(DeploymentVersion)</ProductVersion>
-    <InformationalVersion>$(DeploymentVersion)</InformationalVersion>
-    <Copyright>© Alexander Krutov, 2018-2022</Copyright>
+	<PropertyGroup Condition="'$(DeploymentVersion)' == ''">
+		<DeploymentVersion>$([System.DateTime]::Now.ToString('yy')).$([System.DateTime]::Now.ToString('%M'))</DeploymentVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+		<Version>$(DeploymentVersion)</Version>
+		<ProductVersion>$(DeploymentVersion)</ProductVersion>
+		<InformationalVersion>$(DeploymentVersion)</InformationalVersion>
+		<Copyright>© Alexander Krutov, 2018-$([System.DateTime]::Now.ToString('yyyy'))</Copyright>
   </PropertyGroup>
 </Project>

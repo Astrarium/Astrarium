@@ -1,8 +1,8 @@
 ﻿# Credits #
 
-- [log4net](https://logging.apache.org/log4net/)  
-by Apache Software Foundation  
-licensed under [Apache License, Version 2.0](https://logging.apache.org/log4net/license.html)
+- [NLog](https://nlog-project.org/)  
+by Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen
+licensed under [BSD-3 license](https://github.com/NLog/NLog/blob/master/LICENSE.txt)
   
 - [Markdown.XAML](https://github.com/theunrepentantgeek/Markdown.XAML)  
 by Bevan Arps  

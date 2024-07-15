@@ -1,6 +1,8 @@
 ﻿using Astrarium.Types.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 
 namespace Astrarium.Types
@@ -78,5 +80,10 @@ namespace Astrarium.Types
         /// Called when the plugin is ready to be initialized
         /// </summary>
         public virtual void Initialize() { }
+
+        /// <summary>
+        /// Gets plugin name
+        /// </summary>
+        public static string GetName(Type pluginType) => FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(pluginType).Location).ProductName;
     }
 }

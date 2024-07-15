@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using NLog;
+using System.Threading;
 
 namespace Astrarium
 {
@@ -191,7 +192,7 @@ namespace Astrarium
 
             foreach (Type pluginType in pluginTypes)
             {
-                progress.Report($"Creating plugin {pluginType}");
+                progress.Report($"Creating plugin {AbstractPlugin.GetName(pluginType)}");
 
                 try
                 {
@@ -282,7 +283,7 @@ namespace Astrarium
 
             foreach (var plugin in plugins)
             {
-                progress.Report($"Initializing plugin {plugin.GetType().Name}");
+                progress.Report($"Initializing plugin {AbstractPlugin.GetName(plugin.GetType())}");
                 plugin.Initialize();
             }
         }
