@@ -327,6 +327,14 @@ namespace Astrarium.Types
             return Math.Acos(dot / (Length * b.Length));
         }
 
+        public void Normalize()
+        {
+            double len = Length;
+            if (len == 0) return;
+            v[0] /= len;
+            v[1] /= len;
+        }
+
         /// <summary>
         /// Gets length of the vector
         /// </summary>

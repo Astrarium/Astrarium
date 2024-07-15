@@ -3,6 +3,7 @@ using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -668,6 +669,11 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     RenderPlanetFeatures(body, data);
                 }
+
+                if (body is Moon)
+                {
+                    RenderLibrationPoint(data);
+                }
             }
             else
             {
@@ -912,7 +918,7 @@ namespace Astrarium.Plugins.SolarSystem
                             double fr = (feature.Diameter > 0 ? feature.Diameter : data.BodyPhysicalDiameter / 6) / data.BodyPhysicalDiameter * r;
 
                             // distance, in pixels, between center of the feature and current mouse position
-                            double d = Math.Sqrt(Math.Pow(map.MouseScreenCoordinates.X - pFeature.X - p.X, 2) + Math.Pow(map.MouseScreenCoordinates.Y - pFeature.Y - p.Y, 2));
+                            double d = (p + pFeature).Distance(map.MouseScreenCoordinates);
 
                             if (fr > 100 || d < fr)
                             {
@@ -945,6 +951,66 @@ namespace Astrarium.Plugins.SolarSystem
                 }
             }
         }
+
+        private void RenderLibrationPoint(SphereParameters data)
+        {
+            librationPoint = null;
+
+            if (!settings.Get("MoonMaxLibrationPoint")) return;
+
+            var prj = map.Projection;
+            double r = prj.GetDiskSize(moon.Semidiameter) / 2;
+            if (prj.Fov > 1) return;
+
+            var p = prj.Project(data.Equatorial);
+            if (p == null) return;
+
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+            double rotZenith = Angle.ToRadians(data.RotationZenith);
+
+            Vec2 vecLibration = new Vec2(moon.Libration.l, moon.Libration.b);
+            vecLibration.Normalize();
+
+            double librationWeight = (Math.Abs(moon.Libration.l) + Math.Abs(moon.Libration.b));
+            double librationDirection = Math.Atan2(vecLibration.Y, vecLibration.X);
+
+            double ax = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(librationDirection);
+            double ay = (prj.FlipVertical ? -1 : 1) * Math.Sin(librationDirection);
+
+            librationDirection = Math.Atan2(ay, ax);
+            double ang = librationDirection + rotAxis;
+
+            const double lineLen = 15;
+
+            Vec2[] v = new Vec2[2];
+            for (int i = 0; i < 2; i++)
+            {
+                v[i] = new Vec2((r + i * lineLen) * Math.Cos(ang), (r + i * lineLen) * Math.Sin(ang));
+
+                if (prj.UseRefraction)
+                {
+                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
+                    v[i] = matRefraction * v[i];
+                }
+            }
+
+            // TODO: move color to settings
+            Color labelColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
+
+            GL.PushMatrix();
+            GL.Translate(p.X, p.Y, 0);
+            GL.DrawLine(v[0], v[1], new Pen(labelColor));
+            GL.PointSize((float)librationWeight);
+            GL.Begin(GL.POINTS);
+            GL.Vertex2(v[1].X, v[1].Y);
+            GL.End();
+
+            GL.PopMatrix();
+
+            librationPoint = v[1] + p;
+        }
+
+        private Vec2 librationPoint;
 
         private void RenderSaturnRings(SphereParameters data, int sign)
         {
@@ -1030,6 +1096,34 @@ namespace Astrarium.Plugins.SolarSystem
             return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
+        private bool drawLunarFeatures = false;
+        private bool DrawLunarFeatures
+        {
+            get => drawLunarFeatures;
+            set
+            {
+                if (value || value != drawLunarFeatures)
+                {
+                    drawLunarFeatures = value;
+                    map.Invalidate();
+                }
+            }
+        }
+
+        private bool drawMartianFeatures = false;
+        private bool DrawMartianFeatures
+        {
+            get => drawMartianFeatures;
+            set
+            {
+                if (value || value != drawMartianFeatures)
+                {
+                    drawMartianFeatures = value;
+                    map.Invalidate();
+                }
+            }
+        }
+
         public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
             if (mouseButton == MouseButton.None)
@@ -1042,11 +1136,7 @@ namespace Astrarium.Plugins.SolarSystem
                     if (p != null)
                     {
                         double r = map.Projection.GetDiskSize(moon.Semidiameter) / 2;
-                        bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
-                        if (needDraw)
-                        {
-                            map.Invalidate();
-                        }
+                        DrawLunarFeatures = p.Distance(mouse) <= r + 50;
                     }
                 }
 
@@ -1056,12 +1146,13 @@ namespace Astrarium.Plugins.SolarSystem
                     if (p != null)
                     {
                         double r = map.Projection.GetDiskSize(mars.Semidiameter) / 2;
-                        bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
-                        if (needDraw)
-                        {
-                            map.Invalidate();
-                        }
+                        DrawMartianFeatures = p.Distance(mouse) <= r + 50;
                     }
+                }
+
+                if (librationPoint != null && librationPoint.Distance(mouse) < 5)
+                {
+                    ViewManager.ShowTooltipMessage(mouse, Text.Get("Moon.MaxLibrationPoint"));
                 }
             }
         }

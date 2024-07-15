@@ -15,8 +15,8 @@
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Moon}" IsChecked="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MoonLabel}" IsChecked="{Binding Settings.MoonLabel}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.MoonPhase}" IsChecked="{Binding Settings.MoonPhase}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{t:Text Settings.MoonSurfaceFeatures}" IsChecked="{Binding Settings.MoonSurfaceFeatures}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.MoonMaxLibrationPoint}" IsChecked="{Binding Settings.MoonMaxLibrationPoint}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{t:Text Settings.EarthShadowOutline}" IsChecked="{Binding Settings.EarthShadowOutline}" Margin="2" />
         <GroupBox IsEnabled="{Binding Settings.Moon}" Header="{t:Text Settings.MoonTextureQuality}" Margin="6 0">
             <StackPanel Orientation="Vertical" Margin="2">
