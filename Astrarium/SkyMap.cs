@@ -20,9 +20,9 @@ namespace Astrarium
         public event Action ContextChanged;
 
         /// <summary>
-        /// Stopwatch to measure rendering time
+        /// Flag indicating rendering is in progress
         /// </summary>
-        private Stopwatch renderStopWatch = new Stopwatch();
+        private bool isRendering = false;
 
         /// <summary>
         /// Collection of bounding rectangles of labels displayed on the map
@@ -358,6 +358,8 @@ namespace Astrarium
 
         public void Render()
         {
+            isRendering = true;
+
             GL.ClearColor(Color.Black);
             GL.Clear(GL.COLOR_BUFFER_BIT);
             GL.Clear(GL.STENCIL_BUFFER_BIT);
@@ -386,6 +388,8 @@ namespace Astrarium
 
             GL.PopMatrix();
             GL.Flush();
+
+            isRendering = false;
         }
 
         private void DrawSelectedObject()
@@ -477,7 +481,7 @@ namespace Astrarium
 
         public void Invalidate()
         {
-            if (!renderStopWatch.IsRunning)
+            if (!isRendering)
             {
                 OnInvalidate?.Invoke();
             }
