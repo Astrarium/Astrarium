@@ -3133,14 +3133,28 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:FontPicker}">
-                    <TextBox Name="TextBox"
-                        Grid.Column="0" 
-                        IsReadOnly="True" 
-                        Cursor="Hand"
-                        Foreground="{TemplateBinding Foreground}"
-                        VerticalContentAlignment="Center"
-                        Text="{TemplateBinding SelectedFont, Converter={t:FontToStringConverter}}"                                  
-                        FontFamily="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name}" />
+                    <Grid Name="Container" IsHitTestVisible="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox 
+                            Name="TextBox"
+                            Cursor="Hand"
+                            Grid.Column="0" 
+                            IsReadOnly="True" 
+                            Foreground="{TemplateBinding Foreground}"
+                            VerticalContentAlignment="Center"
+                            Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name, Mode=OneWay}"                                  
+                            FontFamily="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name, Mode=OneWay}"
+                            FontWeight="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Style, Converter={t:FontWeightConverter}, Mode=OneWay}"
+                            FontStyle="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Style, Converter={t:FontStyleConverter}, Mode=OneWay}"
+                            TextDecorations="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont, Converter={t:FontDecorationsConverter}, Mode=OneWay}" />
+                        <StackPanel IsEnabled="False" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+                            <Label Padding="2" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Size, Mode=OneWay}" />
+                            <Label Padding="2 2 6 2" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Content="pt" />
+                        </StackPanel>
+                    </Grid> 
+                    
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="TextBox" Property="Foreground" Value="{StaticResource BrushHighlight}" />

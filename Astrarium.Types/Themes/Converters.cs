@@ -309,12 +309,41 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class FontToStringConverter : ValueConverterBase
+    public class FontStyleConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var font = (System.Drawing.Font)value;
-            return $"{font.Name} - {font.Style} - {font.Size} pt";
+            var fontStyle = (System.Drawing.FontStyle)value;
+            if (fontStyle.HasFlag(System.Drawing.FontStyle.Italic))
+                return FontStyles.Italic;
+            else
+                return FontStyles.Normal;
+        }
+    }
+
+    public class FontWeightConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var fontStyle = (System.Drawing.FontStyle)value;
+            if (fontStyle.HasFlag(System.Drawing.FontStyle.Bold))
+                return FontWeights.Bold;
+            else
+                return FontWeights.Normal;
+        }
+    }
+
+    public class FontDecorationsConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var font = (Font)value;
+            var decorations = new TextDecorationCollection();
+            if (font.Underline)
+                decorations.Add(TextDecorations.Underline);
+            if (font.Strikeout)
+                decorations.Add(TextDecorations.Strikethrough);
+            return decorations;
         }
     }
 
