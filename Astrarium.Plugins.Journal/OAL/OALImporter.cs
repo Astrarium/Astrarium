@@ -17,6 +17,7 @@ using Astrarium.Types;
 using System.IO;
 using System.IO.Compression;
 using Astrarium.Algorithms;
+using Astrarium.Types.Utils;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -322,7 +323,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 // delete temp directory, if required
                 if (!string.IsNullOrEmpty(tempDirectory))
                 {
-                    Utils.SafeDirectoryDelete(tempDirectory);
+                    FileSystem.DeleteDirectory(tempDirectory);
                 }
             }
         }

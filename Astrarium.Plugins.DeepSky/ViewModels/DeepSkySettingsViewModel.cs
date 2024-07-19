@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,13 +78,21 @@ namespace Astrarium.Plugins.DeepSky.ViewModels
                     {
                         var cancelTokenSource = new CancellationTokenSource();
                         ViewManager.ShowProgress("$DeepSkyImages.Downloader.WaitTitle", "$DeepSkyImages.Downloader.WaitText.Downloading", cancelTokenSource, progress);
+
                         try
                         {
-                            await DownloadFile(imagesUri, zipPath, cancelTokenSource, progress);
+                            await Task.Run(() => Downloader.Download(imagesUri, zipPath, cancelTokenSource, progress));
+                            if (cancelTokenSource.IsCancellationRequested) return;
                         }
-                        catch { }
-                        if (cancelTokenSource.IsCancellationRequested) return;
-                        cancelTokenSource.Cancel();
+                        catch (Exception ex)
+                        {
+                            ViewManager.ShowMessageBox("$Error", Text.Get("DeepSkyImages.Downloader.DownloadErrorText", ("error", ex.Message)));
+                            return;
+                        }
+                        finally
+                        {
+                            cancelTokenSource.Cancel();
+                        }
                     }
 
                     // extracting images from zip
@@ -115,23 +124,6 @@ namespace Astrarium.Plugins.DeepSky.ViewModels
             }
         }
 
-        private Task DownloadFile(Uri uri, string localPath, CancellationTokenSource cancelTokenSource, Progress<double> progress)
-        {
-            using (WebClient wc = new WebClient())
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                wc.DownloadProgressChanged += (s, e) =>
-                {
-                    if (cancelTokenSource.IsCancellationRequested)
-                    {
-                        wc.CancelAsync();
-                    }
-                    (progress as IProgress<double>).Report(e.ProgressPercentage);
-                };
-                return wc.DownloadFileTaskAsync(uri, localPath);
-            }
-        }
-
         private Task ExtractZip(string zipPath, string destinationFolder, CancellationTokenSource cancelTokenSource, Progress<double> progress)
         {
             return Task.Run(() =>
@@ -154,7 +146,7 @@ namespace Astrarium.Plugins.DeepSky.ViewModels
                 }
                 finally
                 {
-                    File.Delete(zipPath);
+                    FileSystem.DeleteFile(zipPath);
                 }
             });
         }

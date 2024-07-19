@@ -596,9 +596,14 @@ namespace Astrarium.ViewModels
             });
         }
 
+        private void OnAppUpdateNotFound()
+        {
+            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Information", "$AppUpdateWindow.OnAppUpdateNotFound"));
+        }
+
         private void OnAppUpdateError(Exception ex)
         {
-            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"Unable to check app updates: {ex.Message}"));
+            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.OnAppUpdateError")}: {ex.Message}"));
         }
 
         private void Map_ContextChanged()
@@ -861,7 +866,7 @@ namespace Astrarium.ViewModels
 
         private async void CheckForUpdates()
         {
-            await Task.Run(() => appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x)));
+            await Task.Run(() => appUpdater.CheckUpdates(OnAppUpdateFound, OnAppUpdateNotFound, OnAppUpdateError));
         }
 
         private void OpenDonationDialog()

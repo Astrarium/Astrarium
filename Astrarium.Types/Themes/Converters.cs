@@ -421,16 +421,24 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string bodyType = value as string;
-            if (bodyType != null)
+            string key = null;
+            if (value is string bodyType)
             {
-                string key = $"Icon{bodyType.Split('.').First()}";
-                if (Application.Current.Resources.Contains(key))
-                {
-                    return Application.Current.Resources[key];
-                }
+                key = $"Icon{bodyType.Split('.').First()}";
             }
-            return null;
+            else if (value is Type type)
+            {
+                key = $"Icon{type.Name}";
+            }
+
+            if (key != null && Application.Current.Resources.Contains(key))
+            {
+                return Application.Current.Resources[key];
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -464,13 +472,17 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string type)
+            if (value is string strType)
             {
-                return Text.Get($"{type}.Type");
+                return Text.Get($"{strType}.Type");
             }
             else if (value is CelestialObject body)
             {
                 return Text.Get($"{body.Type}.Type");
+            }
+            else if (value is Type type)
+            {
+                return Text.Get($"{type.Name}.Type");
             }
             else
             {

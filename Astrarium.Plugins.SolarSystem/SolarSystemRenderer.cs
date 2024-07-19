@@ -31,6 +31,7 @@ namespace Astrarium.Plugins.SolarSystem
         private Font fontShadowLabel = new Font("Arial", 8);
         private Brush brushLabel;
         private readonly SolarTextureManager solarTextureManager;
+        private readonly SolarRegionSummaryManager solarRegionSummaryManager;
         private readonly ICollection<SurfaceFeature> lunarFeatures;
         private readonly ICollection<SurfaceFeature> martianFeatures;
 
@@ -55,6 +56,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             solarTextureManager = new SolarTextureManager();
             solarTextureManager.OnRequestComplete += () => map.Invalidate();
+
+            solarRegionSummaryManager = new SolarRegionSummaryManager();
+            solarRegionSummaryManager.OnRequestComplete += () => map.Invalidate();
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -248,7 +252,17 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (body is Sun)
                 {
-                    RenderSun(new SphereParameters() { Refraction = mu, RotationZenith = rotZenith });
+                    var data = new SphereParameters()
+                    {
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon),
+                        LatitudeShift = -sun.CenterDisk.Latitude,
+                        LongitudeShift = 0
+                    };
+
+                    RenderSun(data);
+                    RenderSunspots(data);
                 }
                 else if (body is Moon)
                 {
@@ -707,7 +721,7 @@ namespace Astrarium.Plugins.SolarSystem
             Vec2 p = prj.Project(sun.Equatorial);
             if (p == null) return;
 
-            double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
             double rotZenith = Angle.ToRadians(data.RotationZenith);
 
             int textureId = -1;
@@ -946,6 +960,61 @@ namespace Astrarium.Plugins.SolarSystem
 
                                 GL.PopMatrix();
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        string sunspotFile = null;
+        ICollection<SolarRegionI> sunspots = null;
+
+        private void RenderSunspots(SphereParameters data)
+        {
+            var prj = map.Projection;
+
+            // radius of sun disk, in pixels
+            float r = prj.GetDiskSize(sun.Semidiameter) / 2;
+
+            if (r > 100)
+            {
+                // center of the sun in screen coordinates
+                var p = prj.Project(sun.Equatorial);
+
+                // TODO: move color to settings
+                Color featureColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
+
+                Brush brush = new SolidBrush(featureColor);
+                Pen pen = new Pen(featureColor);
+
+                // TODO: create separate setting for feature labels font
+                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+
+                // TODO: move to another place
+                //Date date = new Date(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
+                //string file = Path.Combine(appFolder, "SRS", $"{date.Month:00}{(int)date.Day:00}SRS.txt");
+
+                var srs = solarRegionSummaryManager.GetSRSForJulianDate(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
+                if (srs != null)
+                {
+                    sunspots = srs.RegionsI;
+
+                    foreach (var feature in sunspots)
+                    {
+                        // visible coordinates of the feature relative to sun disk center
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(feature.Location.Latitude, -feature.Location.Longitude, data);
+
+                        // cartesian coordinates of the feature (relative to sun disk center)
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            GL.PushMatrix();
+                            GL.Translate(p.X, p.Y, 0);
+                            string label = feature.Nmbr.ToString();
+                            var size = System.Windows.Forms.TextRenderer.MeasureText(label, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
+                            GL.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
+                            GL.PopMatrix();
                         }
                     }
                 }

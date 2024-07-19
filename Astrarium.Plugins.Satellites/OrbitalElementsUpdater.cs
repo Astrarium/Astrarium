@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +14,6 @@ namespace Astrarium.Plugins.Satellites
     [Singleton(typeof(IOrbitalElementsUpdater))]
     public class OrbitalElementsUpdater : IOrbitalElementsUpdater
     {
-        private const int BUFFER_SIZE = 1024;
-
         public event Action<TLESource> OrbitalElementsUpdated;
 
         public async Task<bool> UpdateOrbitalElements(TLESource tleSource, bool silent)
@@ -36,7 +35,7 @@ namespace Astrarium.Plugins.Satellites
                 }
                 else
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Satellites.Downloader.Fail");
+                    ViewManager.ShowMessageBox("$Error", "$Satellites.Downloader.Fail");
                 }
             }
 
@@ -52,61 +51,36 @@ namespace Astrarium.Plugins.Satellites
         {
             return Task.Run(() =>
             {
-                bool result = true;
                 string tempFile = Path.GetTempFileName();
 
                 try
                 {
-                    ServicePointManager.SecurityProtocol =
-                                    SecurityProtocolType.Tls |
-                                    SecurityProtocolType.Tls11 |
-                                    SecurityProtocolType.Tls12 |
-                                    SecurityProtocolType.Ssl3;
+                    // download to temp dir
+                    Downloader.Download(new Uri(tleSource.Url), tempFile, tokenSource);
 
                     // use app data path to satellites data (downloaded by user)
                     string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Satellites");
                     string targetPath = Path.Combine(directory, tleSource.FileName + ".tle");
 
-                    WebRequest request = WebRequest.Create(tleSource.Url);
-                    WebResponse response = request.GetResponse();
-                    using (Stream responseStream = response.GetResponseStream())
-                    using (Stream fileStream = new FileStream(tempFile, FileMode.OpenOrCreate))
-                    using (BinaryWriter streamWriter = new BinaryWriter(fileStream))
-                    {
-                        byte[] buffer = new byte[BUFFER_SIZE];
-                        int bytesRead = 0;
-                        StringBuilder remainder = new StringBuilder();
-
-                        do
-                        {
-                            if (tokenSource.IsCancellationRequested) return false;
-                            bytesRead = responseStream.Read(buffer, 0, BUFFER_SIZE);
-                            streamWriter.Write(buffer, 0, bytesRead);
-                        }
-                        while (bytesRead > 0);
-                    }
-
+                    // move to cache folder
                     Directory.CreateDirectory(directory);
                     File.Copy(tempFile, targetPath, overwrite: true);
 
-                    tokenSource.Cancel();
+                    return true;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Log.Error($"Unable to download orbital elements of satellites ({tleSource.FileName}). Reason: {ex}");
-                    result = false;
+                    return false;
                 }
                 finally
                 {
+                    tokenSource.Cancel();
+
                     if (File.Exists(tempFile))
                     {
                         File.Delete(tempFile);
                     }
-
-
                 }
-
-                return result;
             });
         }
     }

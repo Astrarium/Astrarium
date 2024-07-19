@@ -147,11 +147,18 @@ namespace Astrarium.Types
 
                 foreach (var texture in pending)
                 {
-                    using (Bitmap bmp = (Bitmap)Image.FromFile(texture.Path))
+                    try
                     {
-                        BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, bmp.PixelFormat);
-                        Application.Current.Dispatcher.Invoke(() => BindTexture(texture, data));
-                        bmp.UnlockBits(data);
+                        using (Bitmap bmp = (Bitmap)Image.FromFile(texture.Path))
+                        {
+                            BitmapData data = bmp.LockBits(new Rectangle(System.Drawing.Point.Empty, bmp.Size), ImageLockMode.ReadOnly, bmp.PixelFormat);
+                            Application.Current.Dispatcher.Invoke(() => BindTexture(texture, data));
+                            bmp.UnlockBits(data);
+                        }
+                    }
+                    catch 
+                    {
+                        Thread.Sleep(500);
                     }
                 }
             }

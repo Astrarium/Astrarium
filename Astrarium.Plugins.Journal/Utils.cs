@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal
 {
+    // TODO: merge with Astrarium.Types.Utils.FileSystem
     public static class Utils
     {
         /// <summary>
@@ -113,34 +114,6 @@ namespace Astrarium.Plugins.Journal
             catch (Exception ex)
             {
                 Log.Error($"Unable to copy file: `{sourceFileName}` to `{destFileName}`: {ex}");
-                return false;
-            }
-        }
-
-        public static bool SafeDirectoryDelete(string path)
-        {
-            try
-            {
-                Directory.Delete(path, recursive: true);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Unable to delete directory: `{path}`: {ex}");
-                return false;
-            }
-        }
-
-        public static bool SafeFileDelete(string path)
-        {
-            try
-            {
-                File.Delete(path);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Unable to delete file: `{path}`: {ex}");
                 return false;
             }
         }

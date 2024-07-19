@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,11 +45,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 try
                 {
                     tempFile = Path.GetTempFileName();
-                    using (var client = new WebClient())
-                    {
-                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                        client.DownloadFile("https://www.ap-i.net/pub/virtualplanet/grs.txt", tempFile);
-                    }
+
+                    Downloader.Download(new Uri("https://www.ap-i.net/pub/virtualplanet/grs.txt"), tempFile);
 
                     Dictionary<string, string> data = File.ReadAllLines(tempFile)
                         .Skip(1)

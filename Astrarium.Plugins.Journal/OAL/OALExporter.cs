@@ -13,6 +13,7 @@ using System.Reflection;
 using Astrarium.Types;
 using System.Threading;
 using System.IO.Compression;
+using Astrarium.Types.Utils;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -116,7 +117,7 @@ namespace Astrarium.Plugins.Journal.OAL
             {
                 if (isZipArchive && File.Exists(oalFile))
                 {
-                    Utils.SafeFileDelete(oalFile);
+                    FileSystem.DeleteFile(oalFile);
                 }
 
                 isCompleted = true;

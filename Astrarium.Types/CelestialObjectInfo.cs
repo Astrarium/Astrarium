@@ -9,6 +9,7 @@ namespace Astrarium.Types
         public string Title { get; protected set; }
         public string Subtitle { get; protected set; }
         public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
+        public abstract Type ObjectType { get; }
     }
 
     public class CelestialObjectInfo<T> : CelestialObjectInfo where T : CelestialObject
@@ -27,6 +28,11 @@ namespace Astrarium.Types
         /// Collection of body ephemeris for given instant
         /// </summary>
         private IEnumerable<Ephemeris> Ephemeris { get; set; }
+
+        /// <summary>
+        /// Gets object type
+        /// </summary>
+        public override Type ObjectType => Body.GetType();
 
         public CelestialObjectInfo(SkyContext context, T body, IEnumerable<Ephemeris> ephemeris)
         {

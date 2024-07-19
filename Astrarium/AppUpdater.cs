@@ -10,12 +10,12 @@ namespace Astrarium
 {
     public interface IAppUpdater
     {
-        void CheckUpdates(Action<LastRelease> onUpdateFound, Action<Exception> onError = null);
+        void CheckUpdates(Action<LastRelease> onUpdateFound, Action onUpdateNotFound = null, Action<Exception> onError = null);
     }
 
     public class AppUpdater : IAppUpdater
     {
-        public void CheckUpdates(Action<LastRelease> onUpdateFound, Action<Exception> onError = null)
+        public void CheckUpdates(Action<LastRelease> onUpdateFound, Action onUpdateNotFound = null, Action<Exception> onError = null)
         {
             try
             {
@@ -26,6 +26,10 @@ namespace Astrarium
                 if (lastRelease.Version.CompareTo(currentVersion) > 0)
                 {
                     onUpdateFound?.Invoke(lastRelease);
+                }
+                else
+                {
+                    onUpdateNotFound?.Invoke();
                 }
             }
             catch (Exception ex)

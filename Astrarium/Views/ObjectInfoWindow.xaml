@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="{t:Text ObjectInfoWindow.Title}" 
@@ -38,15 +39,31 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
+        <Grid Grid.Row="0" Margin="0 0 0 4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" TextWrapping="Wrap" Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding CopyNameCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>
             </TextBlock>
-        </StackPanel>
+
+            <StackPanel Visibility="{Binding Subtitle, Converter={s:NotNullToVisibilityConverter}}" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Rectangle Margin="2" Width="16" Height="16">
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                    </Rectangle.Fill>
+                    <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <Label IsEnabled="False" VerticalAlignment="Top"  HorizontalAlignment="Right" Content="{Binding Subtitle}" />
+            </StackPanel>
+        </Grid>
                 
-        <Label FontSize="8" Grid.Row="1" Content="{Binding Subtitle}" />
+        
         
         <TabControl 
             ItemsSource="{Binding Tabs}" 

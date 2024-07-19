@@ -17,6 +17,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public CrdsEcliptical Ecliptical { get; set; }
 
         /// <summary>
+        /// Heliographical coordinates of the solar disk center
+        /// </summary>
+        public CrdsHeliographical CenterDisk { get; set; }
+
+        /// <summary>
         /// Average daily motion of the Sun
         /// </summary>
         public double AverageDailyMotion => 0.985555;
@@ -29,7 +34,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <summary>
         /// Distance from Earth
         /// </summary>
-        public double DistanceFromEarth => Ecliptical.Distance; 
+        public double DistanceFromEarth => Ecliptical.Distance;
 
         /// <summary>
         /// Primary name

@@ -3,6 +3,7 @@ using Astrarium.Plugins.Journal.Controls;
 using Astrarium.Plugins.Journal.Database;
 using Astrarium.Plugins.Journal.Types;
 using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -446,7 +447,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     string fullPath = Path.GetFullPath(Path.Combine(JournalPlugin.PluginDataPath, file));
                     if (File.Exists(fullPath))
                     {
-                        Utils.SafeFileDelete(fullPath);
+                        FileSystem.DeleteFile(fullPath);
                     }
                 }
 
@@ -484,7 +485,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     string fullPath = Path.GetFullPath(Path.Combine(JournalPlugin.PluginDataPath, file));
                     if (File.Exists(fullPath))
                     {
-                        Utils.SafeFileDelete(fullPath);
+                        FileSystem.DeleteFile(fullPath);
                     }
                 }
 
@@ -654,7 +655,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         if (!filePaths.Any(x => Utils.ArePathsEqual(existing.FilePath, x)))
                         {
                             // file is not used by another attachment
-                            Utils.SafeFileDelete(attachment.FilePath);
+                            FileSystem.DeleteFile(attachment.FilePath);
                         }
                     }
 

@@ -16,6 +16,7 @@ namespace Astrarium.ViewModels
     {
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
+        public Type ObjectType { get; private set; }
         public double JulianDay { get; private set; }
 
         public ICommand CopyNameCommand { get; private set; }
@@ -27,6 +28,7 @@ namespace Astrarium.ViewModels
         {
             Title = info.Title;
             Subtitle = info.Subtitle;
+            ObjectType = info.ObjectType;
 
             CopyNameCommand = new Command(CopyName);
             CloseCommand = new Command(Close);

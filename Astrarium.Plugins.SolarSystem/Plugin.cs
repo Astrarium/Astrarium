@@ -1,10 +1,11 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Controls;
+using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Plugins.SolarSystem.ViewModels;
 using Astrarium.Types;
-using Astrarium.Types.Controls;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Controls;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -65,6 +66,14 @@ namespace Astrarium.Plugins.SolarSystem
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
             ExportResourceDictionaries("Images.xaml");
+
+            ExtendObjectInfo("Solar activity", (obj) =>
+            {
+                if (obj is Sun)
+                    return new SolarActivityControl() { DataContext = new { Title = "some title" } };
+                else
+                    return null;
+            });
 
             #endregion UI integration
 
