@@ -50,9 +50,9 @@ namespace Astrarium.Types
             }
         }
 
-        protected void ExtendObjectInfo(string title, Func<CelestialObject, FrameworkElement> viewProvider)
+        protected void ExtendObjectInfo<TViewControl, TViewModel>(string title, Func<SkyContext, CelestialObject, TViewModel> viewModelProvider)
         {
-            ObjectInfoExtensions.Add(new ObjectInfoExtension(title, viewProvider));
+            ObjectInfoExtensions.Add(new ObjectInfoExtension(title, typeof(TViewControl), viewModelProvider));
         }
 
         /// <summary>

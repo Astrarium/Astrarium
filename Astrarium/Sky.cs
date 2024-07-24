@@ -216,10 +216,7 @@ namespace Astrarium
 
         public void Calculate()
         {
-            foreach (var calc in Calculators)
-            {
-                calc.Calculate(Context);
-            }
+            Calculators.ForEach(x => x.Calculate(Context));
             Calculated?.Invoke();
         }
 

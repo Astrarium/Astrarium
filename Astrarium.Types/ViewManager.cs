@@ -41,9 +41,9 @@ namespace Astrarium.Types
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
         /// </summary>
         /// <typeparam name="TViewModel"></typeparam>
-        public static void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase
+        public static void ShowWindow<TViewModel>(ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            viewManager.ShowWindow<TViewModel>(isSingleInstance);
+            viewManager.ShowWindow<TViewModel>(flags);
         }
 
         public static bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
@@ -51,9 +51,9 @@ namespace Astrarium.Types
             return viewManager.ShowDialog<TViewModel>();
         }
 
-        public static void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
+        public static void ShowWindow<TViewModel>(TViewModel viewModel, ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            viewManager.ShowWindow(viewModel);
+            viewManager.ShowWindow(viewModel, flags);
         }
 
         public static bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase

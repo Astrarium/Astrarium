@@ -9,12 +9,14 @@ namespace Astrarium.Types
 {
     public class ObjectInfoExtension
     {
-        public Func<CelestialObject, FrameworkElement> ViewProvider { get; private set; }
+        public Delegate ViewModelProvider { get; private set; }
         public string Title { get; private set; }
-        public ObjectInfoExtension(string title, Func<CelestialObject, FrameworkElement> viewProvider)
+        public Type ViewType { get; private set; }
+        public ObjectInfoExtension(string title, Type viewType, Delegate viewModelProvider)
         {
             Title = title;
-            ViewProvider = viewProvider;
+            ViewType = viewType;
+            ViewModelProvider = viewModelProvider;
         }
     }
 }

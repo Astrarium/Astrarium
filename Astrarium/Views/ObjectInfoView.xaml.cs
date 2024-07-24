@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using Astrarium.Types.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -13,7 +14,7 @@ namespace Astrarium.Views
     /// <summary>
     /// Interaction logic for ObjectInfoView.xaml
     /// </summary>
-    public partial class ObjectInfoView : UserControl
+    public partial class ObjectInfoView : DisposableUserControl
     {
         public event Action<double> JulianDateClicked;
         public event Action<Uri> LinkClicked;

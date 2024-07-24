@@ -6,22 +6,8 @@ namespace Astrarium.Plugins.SolarSystem
     /// Describes previously numbered active regions which still 
     /// contain plage but no visible sunspots.
     /// </summary>
-    public class SolarRegionIa
+    public class SolarRegionIa : ActiveSolarRegion
     {
-        /// <summary>
-        /// SESC region number.
-        /// </summary>
-        public int Nmbr { get; set; }
 
-        /// <summary>
-        /// Plage region location in heliographic degrees latitude and 
-        /// degrees east or west from central meridian rotated to 2400 UTC.
-        /// </summary>
-        public CrdsHeliographical Location { get; private set; } = new CrdsHeliographical();
-
-        /// <summary>
-        /// Carrington longitude of the region.
-        /// </summary>
-        public int Lo { get; set; }
     }
 }

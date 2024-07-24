@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -13,21 +14,28 @@ namespace Astrarium.Plugins.SolarSystem
     /// </summary>
     public class SolarRegionSummary
     {
+        public string FilePath { get; private set; }
         public List<SolarRegionI> RegionsI { get; private set; } = new List<SolarRegionI>();
         public List<SolarRegionIa> RegionsIa { get; private set; } = new List<SolarRegionIa>();
         public List<SolarRegionII> RegionsII { get; private set; } = new List<SolarRegionII>();
 
+        /// <summary>
+        /// Creates new Solar Region Summary from specified file.
+        /// </summary>
+        /// <param name="file"></param>
         public SolarRegionSummary(string file)
         {
             StreamReader sr = new StreamReader(file);
             string line;
             int section = 0;
             Regex regex = new Regex(@"[ ]{2,}", RegexOptions.None);
+            FilePath = file; 
             
             while (!sr.EndOfStream)
             {
                 line = sr.ReadLine().Trim();
                 line = regex.Replace(line, " ");
+
                 if (line.Length == 0) continue;
                 if (line.ToLower().StartsWith("none") ||
                     line.StartsWith("#") ||

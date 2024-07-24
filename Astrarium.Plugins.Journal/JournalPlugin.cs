@@ -92,7 +92,7 @@ namespace Astrarium.Plugins.Journal
 
         private void ShowJournal()
         {
-            ViewManager.ShowWindow<JournalVM>(isSingleInstance: true);
+            ViewManager.ShowWindow<JournalVM>(ViewFlags.SingleInstance);
         }
 
         private async void DoImport()

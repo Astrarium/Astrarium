@@ -39,17 +39,17 @@ namespace Astrarium
             this.typeFactory = typeFactory;
         }
 
-        public void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase
+        public void ShowWindow<TViewModel>(ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            Show<TViewModel>(viewModel: null, isDialog: false, isSingleInstance);
+            Show<TViewModel>(viewModel: null, isDialog: false, flags: flags);
         }
 
         public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            return Show<TViewModel>(viewModel: null, isDialog: true, isSingleInstance: false);
+            return Show<TViewModel>(viewModel: null, isDialog: true, flags: ViewFlags.None);
         }
 
-        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog, bool isSingleInstance) where TViewModel : ViewModelBase
+        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog, ViewFlags flags) where TViewModel : ViewModelBase
         {
             // Resolve view by model type
 
@@ -63,13 +63,23 @@ namespace Astrarium
                 viewType = ResolveVVMBindings(typeof(TViewModel));
             }
 
+            bool needDisposeModel = false;
+
             // Handle single-instance window case
 
-            if (isSingleInstance && viewType != null)
+            if (flags.HasFlag(ViewFlags.SingleInstance) && viewType != null)
             {
                 var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.GetType() == viewType);
                 if (window != null)
                 {
+                    if (viewModel == null)
+                    {
+                        needDisposeModel = true;
+                        viewModel = CreateViewModel<TViewModel>();
+                    }
+
+                    window.DataContext = viewModel;
+                    window.InvalidateVisual();
                     window.Activate();
                     if (window.WindowState == WindowState.Minimized)
                     {
@@ -78,8 +88,6 @@ namespace Astrarium
                     return null;
                 }
             }
-
-            bool needDisposeModel = false;
 
             if (viewModel == null)
             {
@@ -91,10 +99,11 @@ namespace Astrarium
             {
                 var window = typeFactory(viewType) as Window;
                 window.DataContext = viewModel;
+                window.UpdateLayout();
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    if (isDialog)
+                    if (isDialog || flags.HasFlag(ViewFlags.TopMost))
                     {
                         var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
                         window.Owner = owner ?? Application.Current.MainWindow;
@@ -105,7 +114,6 @@ namespace Astrarium
                 {
                     Application.Current.MainWindow = window;
                 }
-
 
                 EventHandler activatedEventHandler = (s, e) => viewModel.OnActivated();
                 window.Activated += activatedEventHandler;
@@ -224,14 +232,14 @@ namespace Astrarium
             return typeFactory(typeof(TViewModel)) as TViewModel;
         }
 
-        public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
+        public void ShowWindow<TViewModel>(TViewModel viewModel, ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            Show(viewModel: viewModel, isDialog: false, isSingleInstance: false);
+            Show(viewModel: viewModel, isDialog: false, flags: flags);
         }
 
         public bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            return Show(viewModel: viewModel, isDialog: true, isSingleInstance: false);
+            return Show(viewModel: viewModel, isDialog: true, flags: ViewFlags.None);
         }
 
         public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)

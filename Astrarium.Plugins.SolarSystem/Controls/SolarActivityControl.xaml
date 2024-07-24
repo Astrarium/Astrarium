@@ -1,12 +1,145 @@
-﻿<UserControl x:Class="Astrarium.Plugins.SolarSystem.Controls.SolarActivityControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Astrarium.Plugins.SolarSystem.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="{Binding Title}" />
-    </Grid>
-</UserControl>
+﻿<c:DisposableUserControl 
+    x:Class="Astrarium.Plugins.SolarSystem.Controls.SolarActivityControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:p="clr-namespace:Astrarium.Plugins.SolarSystem"
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800">
+
+    <c:DisposableUserControl.Resources>
+        <ResourceDictionary>
+            <Style x:Key="SolarActivityListViewStyle" TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}">
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="MinHeight" Value="32" />
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </c:DisposableUserControl.Resources>
+    
+    <StackPanel Orientation="Vertical">
+
+        <Expander IsExpanded="True" Margin="8 4">
+            <Expander.Header>
+                <TextBlock Text="Regions with Sunspots" Margin="0 8" />
+            </Expander.Header>
+            <StackPanel Orientation="Vertical">
+                <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsI}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+                            <GridView.Columns>
+                                <GridViewColumn Width="Auto">
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Nmbr" ToolTip="Group number" />
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Nmbr}" ToolTip="Group number" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+
+
+                                <GridViewColumn Header="Location" Width="Auto" DisplayMemberBinding="{Binding Location}" />
+                                
+                                <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}"  />
+                                
+                                <GridViewColumn Header="Area" Width="Auto" DisplayMemberBinding="{Binding Area}" />
+
+                                <GridViewColumn Width="Auto">
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Z" ToolTip="ff2" />
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.ZurichClassificationCommand}" CommandParameter="{Binding Z}"><Run Text="{Binding Z}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="LL" Width="Auto" DisplayMemberBinding="{Binding LL}" />
+                                <GridViewColumn Header="NN" Width="Auto" DisplayMemberBinding="{Binding NN}" />
+                                <GridViewColumn Width="Auto">
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Mag Type" ToolTip="ff2" />
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            
+                                             <Border Background="{Binding MagType, Converter={p:MagTypeColorConverter}}" CornerRadius="2" Padding="4 2" Margin="2">
+                                                <TextBlock>
+                                                    <Hyperlink Foreground="{StaticResource BrushForeground}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.MagTypeInfoCommand}" CommandParameter="{Binding MagType}"><Run Text="{Binding MagType, Converter={p:MagTypeConverter}}" /></Hyperlink>
+                                                </TextBlock>
+                                            </Border>
+
+                                            
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView.Columns>
+                        </GridView>
+                    </ListView.View>
+                </c:BindableListView>
+
+                <Separator />
+
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <TextBlock Text="Wolf number: " />
+                    <TextBlock Text="{Binding WolfNumber}" />
+                </StackPanel>
+
+            </StackPanel>
+        </Expander>
+
+        <Expander IsExpanded="True" Margin="8 4">
+            <Expander.Header>
+                <TextBlock Text="H-alpha Plages without Spots" Margin="0 8" />
+            </Expander.Header>
+            <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsIa}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
+                        <GridView.Columns>
+                            <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                            <GridViewColumn Header="Location" Width="Auto" DisplayMemberBinding="{Binding Location}" />
+                            <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </c:BindableListView>
+        </Expander>
+
+        <Expander IsExpanded="True" Margin="8 4">
+            <Expander.Header>
+                <TextBlock Text="Regions Due to Return" Margin="0 8" />
+            </Expander.Header>
+            <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsII}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
+                        <GridView.Columns>
+                            <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                            <GridViewColumn Header="Lat" Width="Auto" DisplayMemberBinding="{Binding Lat}" />
+                            <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </c:BindableListView>
+        </Expander>
+
+    </StackPanel>
+</c:DisposableUserControl>

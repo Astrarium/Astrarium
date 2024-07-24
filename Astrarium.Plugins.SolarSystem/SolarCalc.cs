@@ -1,5 +1,7 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Plugins.SolarSystem.Objects;
+using Astrarium.Plugins.SolarSystem.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;

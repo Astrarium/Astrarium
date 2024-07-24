@@ -979,7 +979,7 @@ namespace Astrarium.ViewModels
 
         public void Focus()
         {
-            ViewManager.ShowWindow<MainVM>(true);
+            ViewManager.ShowWindow<MainVM>(ViewFlags.SingleInstance);
         }
 
         private void LockOnObject(CelestialObject body)
@@ -1023,10 +1023,12 @@ namespace Astrarium.ViewModels
                     var vm = new ObjectInfoVM(info);
                     foreach (var ext in uiIntegration.ObjectInfoExtensions)
                     {
-                        var content = ext.ViewProvider.Invoke(body);
-                        if (content != null)
+                        var model = ext.ViewModelProvider.DynamicInvoke(sky.Context, body);
+                        if (model != null)
                         {
-                            vm.AddExtension(ext.Title, content);
+                            var control = Activator.CreateInstance(ext.ViewType) as FrameworkElement;
+                            control.SetValue(FrameworkElement.DataContextProperty, model);
+                            vm.AddExtension(ext.Title, control);
                         }
                     }
 

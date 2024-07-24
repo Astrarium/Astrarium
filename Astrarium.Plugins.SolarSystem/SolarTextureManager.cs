@@ -103,9 +103,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// </summary>
         /// <param name="jd">Julian date</param>
         /// <returns></returns>
-        public int GetTexture(double jd)
+        public int GetTexture(double jd, double utcOffset)
         {
-            Date date = new Date(jd);
+            Date date = new Date(jd, utcOffset);
             DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
 
             string imagePath = GetImagePath(dt);

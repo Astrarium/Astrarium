@@ -9,6 +9,8 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Forms;
+using System.Windows.Markup;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -34,10 +36,21 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly SolarRegionSummaryManager solarRegionSummaryManager;
         private readonly ICollection<SurfaceFeature> lunarFeatures;
         private readonly ICollection<SurfaceFeature> martianFeatures;
-
+        
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
-        public SolarSystemRenderer(ISkyMap map, LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
+        private SolarRegion selectedSolarRegion;
+        public SolarRegion SelectedSolarRegion
+        {
+            get => selectedSolarRegion;
+            set
+            {
+                selectedSolarRegion = value;
+                map.Invalidate();
+            }
+        }
+
+        public SolarSystemRenderer(ISkyMap map, LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, SolarRegionSummaryManager solarRegionSummaryManager, ISettings settings)
         {
             this.map = map;
             this.planetsCalc = planetsCalc;
@@ -57,8 +70,8 @@ namespace Astrarium.Plugins.SolarSystem
             solarTextureManager = new SolarTextureManager();
             solarTextureManager.OnRequestComplete += () => map.Invalidate();
 
-            solarRegionSummaryManager = new SolarRegionSummaryManager();
-            solarRegionSummaryManager.OnRequestComplete += () => map.Invalidate();
+            this.solarRegionSummaryManager = solarRegionSummaryManager;
+            this.solarRegionSummaryManager.OnRequestComplete += () => map.Invalidate();
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -258,11 +271,14 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationZenith = rotZenith,
                         RotationAxis = prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon),
                         LatitudeShift = -sun.CenterDisk.Latitude,
-                        LongitudeShift = 0
+                        LongitudeShift = 0,
+                        DrawEquator = settings.Get("SunEquator"),
+                        EquatorColor = Color.Orange
                     };
 
                     RenderSun(data);
-                    RenderSunspots(data);
+                    RenderPlanetaryGrid(sun, data);
+                    RenderSolarFeatures(data);
                 }
                 else if (body is Moon)
                 {
@@ -272,7 +288,7 @@ namespace Astrarium.Plugins.SolarSystem
                     int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
                     string textureName = $"Moon-{q}k.jpg";
 
-                    RenderSolarSystemObject(moon, new SphereParameters()
+                    var data = new SphereParameters()
                     {
                         Equatorial = body.Equatorial,
                         TextureName = Path.Combine(dataPath, textureName),
@@ -291,8 +307,15 @@ namespace Astrarium.Plugins.SolarSystem
                         EarthShadowApperance = moon.EarthShadow,
                         EarthShadowCoordinates = moon.EarthShadowCoordinates,
                         DrawLabel = settings.Get("MoonLabel"),
-                        Color = Color.Gray
-                    });
+                        Color = Color.Gray,
+                        DrawEquator = settings.Get("MoonEquator"),
+                        DrawPrimeMeridian = settings.Get("MoonPrimeMeridian"),
+                        EquatorColor = Color.LightSteelBlue,
+                        PrimeMeridianColor = Color.LightSteelBlue
+                    };
+
+                    RenderSolarSystemObject(moon, data);
+                    RenderPlanetaryGrid(moon, data);
                 }
             }
         }
@@ -381,6 +404,12 @@ namespace Astrarium.Plugins.SolarSystem
             /// Body label (name). If not set, body's primary name will be used.
             /// </summary>
             public string Label { get; set; }
+
+            public bool DrawEquator { get; set; }
+            public Color EquatorColor { get; set; } = Color.White;
+
+            public bool DrawPrimeMeridian { get; set; }
+            public Color PrimeMeridianColor { get; set; } = Color.White;
         }
 
         private void OnPolarCapTextureReady()
@@ -679,6 +708,11 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderEarthShadow(data);
                 }
 
+                if (body is Moon)
+                {
+                    RenderPlanetaryGrid(body, data);
+                }
+
                 if (data.SurfaceFeatures != null)
                 {
                     RenderPlanetFeatures(body, data);
@@ -729,7 +763,7 @@ namespace Astrarium.Plugins.SolarSystem
             if (settings.Get("SunTexture") && r > 5)
             {
                 GL.Enable(GL.TEXTURE_2D);
-                textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
+                textureId = solarTextureManager.GetTexture(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
                 GL.BindTexture(GL.TEXTURE_2D, textureId);
             }
 
@@ -877,6 +911,79 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
+        private void RenderPlanetaryGrid(SizeableCelestialObject body, SphereParameters data)
+        {
+            var prj = map.Projection;
+
+            // radius of body disk, in pixels
+            float r = prj.GetDiskSize(body.Semidiameter) / 2;
+
+            // center of the body in screen coordinates
+            var p = prj.Project(body.Equatorial);
+
+            // night mode flag
+            bool nightMode = settings.Get("NightMode");
+
+            if (r > 20)
+            {
+                GL.Enable(GL.BLEND);
+                GL.Enable(GL.LINE_SMOOTH);
+                GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+
+                GL.PushMatrix();
+                GL.Translate(p.X, p.Y, 0);
+
+                // equator
+                if (data.DrawEquator)
+                {
+                    var equatorColor = data.EquatorColor.Tint(nightMode);
+
+                    GL.Begin(GL.LINE_STRIP);
+                    for (int i = 0; i < 180; i += 5)
+                    {
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(0, i - 90, data);
+
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            GL.Color3(equatorColor);
+                            GL.Vertex2(pFeature.X, pFeature.Y);
+                        }
+
+                    }
+                    GL.End();
+                }
+
+                // prime meridian
+                if (data.DrawPrimeMeridian)
+                {
+                    var cmColor = data.PrimeMeridianColor.Tint(nightMode);
+
+                    GL.Begin(GL.LINE_STRIP);
+                    for (int i = 0; i < 180; i++)
+                    {
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(i - 90, 0, data);
+
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            GL.Color3(cmColor);
+                            GL.Vertex2(pFeature.X, pFeature.Y);
+                        }
+
+                    }
+                    GL.End();
+                }
+
+                GL.PopMatrix();
+
+                GL.Disable(GL.BLEND);
+                GL.Disable(GL.LINE_SMOOTH);
+            }
+        }
+
         private void RenderPlanetFeatures(SizeableCelestialObject body, SphereParameters data)
         {
             var prj = map.Projection;
@@ -954,8 +1061,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 else if (centeredFeatures.Contains(feature.TypeCode))
                                 {
                                     string label = feature.Name.Contains("Mare") || feature.TypeCode == "MA" || feature.TypeCode == "OC" ? feature.Name.ToUpper() : feature.Name;
-                                    var size = System.Windows.Forms.TextRenderer.MeasureText(label, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
-                                    GL.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
+                                    GL.DrawString($"  {label}  ", fontLabel, brush, pFeature, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center);
                                 }
 
                                 GL.PopMatrix();
@@ -966,55 +1072,87 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        string sunspotFile = null;
-        ICollection<SolarRegionI> sunspots = null;
-
-        private void RenderSunspots(SphereParameters data)
+        private void RenderSolarFeatures(SphereParameters data)
         {
+            if (!settings.Get("SunFeatures")) return;
+
             var prj = map.Projection;
 
             // radius of sun disk, in pixels
             float r = prj.GetDiskSize(sun.Semidiameter) / 2;
 
+            // center of the sun in screen coordinates
+            var p = prj.Project(sun.Equatorial);
+
+            // night mode flag
+            bool nightMode = settings.Get("NightMode");
+
+            // Sunspots and active H-alpha regions
             if (r > 100)
             {
-                // center of the sun in screen coordinates
-                var p = prj.Project(sun.Equatorial);
-
-                // TODO: move color to settings
-                Color featureColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
-
-                Brush brush = new SolidBrush(featureColor);
-                Pen pen = new Pen(featureColor);
-
-                // TODO: create separate setting for feature labels font
-                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-
-                // TODO: move to another place
-                //Date date = new Date(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
-                //string file = Path.Combine(appFolder, "SRS", $"{date.Month:00}{(int)date.Day:00}SRS.txt");
-
                 var srs = solarRegionSummaryManager.GetSRSForJulianDate(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
                 if (srs != null)
                 {
-                    sunspots = srs.RegionsI;
+                    // TODO: move color to settings
+                    Color featureColor = Color.Brown;
 
-                    foreach (var feature in sunspots)
+                    Brush brush = new SolidBrush(featureColor);
+                    Pen pen = new Pen(Color.FromArgb(100, featureColor));
+
+                    // TODO: create separate setting for feature labels font
+                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+
+                    // visible coordinates of body disk center, assume as zero point 
+                    CrdsGeographical c = new CrdsGeographical(0, 0);
+
+                    var regions = srs.RegionsI.Cast<ActiveSolarRegion>().Concat(srs.RegionsIa.Cast<ActiveSolarRegion>());
+
+                    foreach (var region in regions)
                     {
-                        // visible coordinates of the feature relative to sun disk center
-                        CrdsGeographical v = GetVisibleFeatureCoordinates(feature.Location.Latitude, -feature.Location.Longitude, data);
+                        // visible coordinates of the feature relative to body disk center
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(region.Location.Latitude, -region.Location.Longitude, data);
 
-                        // cartesian coordinates of the feature (relative to sun disk center)
-                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+                        // angular distance between disk center and feature
+                        double sep = Angle.Separation(v, c);
 
-                        if (prj.IsInsideScreen(p + pFeature))
+                        // if feature is not too close to disk edge
+                        if (sep < 85)
                         {
-                            GL.PushMatrix();
-                            GL.Translate(p.X, p.Y, 0);
-                            string label = feature.Nmbr.ToString();
-                            var size = System.Windows.Forms.TextRenderer.MeasureText(label, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
-                            GL.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
-                            GL.PopMatrix();
+                            Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                            if (prj.IsInsideScreen(p + pFeature))
+                            {
+                                GL.PushMatrix();
+                                GL.Translate(p.X, p.Y, 0);
+
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                                // rotation of a feature outline
+                                double rot = 90 + Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X));
+
+                                // feature radius, in pixels
+                                double fr = 0;
+                                if (region is SolarRegionI regionI)
+                                {
+                                    fr = regionI.LL / 90.0 * r;
+                                }
+
+                                // sunspot group outline
+                                if (fr > 10 || SelectedSolarRegion == region)
+                                {
+                                    var featurePen = SelectedSolarRegion == region ? new Pen(Color.Red, 2) : pen;
+                                    GL.DrawEllipse(pFeature, featurePen, fr, fr * f, rot);
+                                }
+
+                                // label
+                                var featureBrush = SelectedSolarRegion == region ? new SolidBrush(Color.Red) : (region is SolarRegionI ? brush : new SolidBrush(Color.FromArgb(50, featureColor)));
+
+                                GL.DrawString(region.Nmbr.ToString(), fontLabel, featureBrush, pFeature, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center, antiAlias: true);
+
+                                GL.PopMatrix();
+                            }
                         }
                     }
                 }

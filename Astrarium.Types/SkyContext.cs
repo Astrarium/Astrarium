@@ -258,7 +258,7 @@ namespace Astrarium.Types
             {
                 for (int i = 1; i < args.Length; i++)
                 {
-                    if (!argsCache[i - 1][key].Equals(args[i]))
+                    if (!argsCache[i - 1].ContainsKey(key) || !argsCache[i - 1][key].Equals(args[i]))
                     {
                         needInvoke = true;
                         break;

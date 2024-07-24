@@ -17,7 +17,8 @@ namespace Astrarium.Plugins.SolarSystem
     /// <summary>
     /// This class is responsible for downloading SRS (solar region summary) data from NOAA Space Weather Prediction Center
     /// </summary>
-    internal class SolarRegionSummaryManager
+    [Singleton]
+    public class SolarRegionSummaryManager
     {
         /// <summary>
         /// Base FTP directory of warehouse: place where SRS archive is located
@@ -39,14 +40,25 @@ namespace Astrarium.Plugins.SolarSystem
         /// </summary>
         private AutoResetEvent requestEvent = new AutoResetEvent(false);
 
+        /// <summary>
+        /// Locker to access requests
+        /// </summary>
         private object locker = new object();
+
+        /// <summary>
+        /// Cached SRS data, for faster access
+        /// </summary>
+        private SolarRegionSummary cachedSummary = null;
 
         /// <summary>
         /// Fired on request complete
         /// </summary>
         internal event Action OnRequestComplete;
 
-        internal SolarRegionSummaryManager()
+        /// <summary>
+        /// Creates new instance of the SRS manager
+        /// </summary>
+        public SolarRegionSummaryManager()
         {
             if (!Directory.Exists(localCacheDir))
             {
@@ -63,16 +75,28 @@ namespace Astrarium.Plugins.SolarSystem
             new Thread(RequestWorker) { IsBackground = true }.Start();
         }
 
+        /// <summary>
+        /// Gets SRS data for sp
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <param name="utcOffset"></param>
+        /// <returns></returns>
         public SolarRegionSummary GetSRSForJulianDate(double jd, double utcOffset)
         {
             var date = new Date(jd, utcOffset);
-            string fileName = $"{date.Year:0000}{date.Month:00}{(int)date.Day:00}SRS.txt";
 
+            string fileName = $"{date.Year:0000}{date.Month:00}{(int)date.Day:00}SRS.txt";
             string fullPath = Path.Combine(localCacheDir, fileName);
+
+            if (cachedSummary != null && cachedSummary.FilePath == fullPath)
+            {
+                return cachedSummary;
+            }
 
             if (File.Exists(fullPath))
             {
-                return new SolarRegionSummary(fullPath);
+                cachedSummary = new SolarRegionSummary(fullPath);
+                return cachedSummary;
             }
             else
             {

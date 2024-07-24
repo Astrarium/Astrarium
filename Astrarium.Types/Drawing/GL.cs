@@ -310,7 +310,7 @@ namespace Astrarium.Types
             Hint(LINE_SMOOTH_HINT, NICEST);
 
             LineWidth(pen.Width);
-            Color3(pen.Color);
+            Color4(pen.Color);
 
             if (pen.DashStyle != DashStyle.Solid)
             {

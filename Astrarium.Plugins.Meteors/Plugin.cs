@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.Meteors
 
             MenuItems.Add(MenuItemPosition.MainMenuTools,
                 new MenuItem("$Astrarium.Plugins.Meteors.ToolsMenu",
-                new Command(() => ViewManager.ShowWindow<MeteorShowersVM>(isSingleInstance: true))));
+                new Command(() => ViewManager.ShowWindow<MeteorShowersVM>(ViewFlags.SingleInstance))));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMeteor", "$Settings.Meteors", new SimpleBinding(settings, "Meteors", "IsChecked")));
 

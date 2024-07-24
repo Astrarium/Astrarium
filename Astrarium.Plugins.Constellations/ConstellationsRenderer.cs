@@ -69,8 +69,7 @@ namespace Astrarium.Plugins.Constellations
                             break;
                     }
 
-                    var size = WF.TextRenderer.MeasureText(label, font, Size.Empty, formatFlags);
-                    GL.DrawString(label, font, brushLabel, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
+                    GL.DrawString(label, font, brushLabel, p, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center);
                 }
             }
         }

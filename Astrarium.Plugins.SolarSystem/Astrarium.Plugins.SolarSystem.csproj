@@ -82,9 +82,5 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="SolarActivity\" />
-  </ItemGroup>
 
 </Project>

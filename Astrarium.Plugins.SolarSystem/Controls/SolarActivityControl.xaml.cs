@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Astrarium.Plugins.SolarSystem.Controls
     /// <summary>
     /// Interaction logic for SolarActivityControl.xaml
     /// </summary>
-    public partial class SolarActivityControl : UserControl
+    public partial class SolarActivityControl : DisposableUserControl
     {
         public SolarActivityControl()
         {
