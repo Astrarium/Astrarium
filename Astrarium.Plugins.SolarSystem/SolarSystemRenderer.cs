@@ -227,7 +227,6 @@ namespace Astrarium.Plugins.SolarSystem
                         MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
-
                 }
                 else if (settings.Get("GenericMoons") && body is GenericMoon gm)
                 {
@@ -318,6 +317,17 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderPlanetaryGrid(moon, data);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets matrix for refraction flattening
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Mat4 GetRefractionMatrix(SphereParameters data)
+        {
+            double rotZenith = Angle.ToRadians(data.RotationZenith);
+            return Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
         }
 
         private class SphereParameters
@@ -554,8 +564,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // take refraction into account
                 if (prj.UseRefraction)
                 {
-                    double rotZenith = Angle.ToRadians(data.RotationZenith);
-                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
+                    var matRefraction = GetRefractionMatrix(data);
                     matVision = matRefraction * matVision;
                     matLight = matRefraction * matLight;
                 }
@@ -756,7 +765,6 @@ namespace Astrarium.Plugins.SolarSystem
             if (p == null) return;
 
             double rotAxis = Angle.ToRadians(data.RotationAxis);
-            double rotZenith = Angle.ToRadians(data.RotationZenith);
 
             int textureId = -1;
 
@@ -807,8 +815,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (prj.UseRefraction)
                 {
-                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                    v = matRefraction * v;
+                    v = GetRefractionMatrix(data) * v;
                 }
 
                 if (textureId > 0)
@@ -893,7 +900,7 @@ namespace Astrarium.Plugins.SolarSystem
                 Color[] shadowColors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.FromArgb(0, 0, 0, 0) };
 
                 // render shadow
-                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
+                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors, 0, 0, data);
 
                 // draw shadow outline
                 if (settings.Get("EarthShadowOutline") && pMoon.Distance(pShadow) <= sdPenumbraPixels + rMoon)
@@ -1173,12 +1180,11 @@ namespace Astrarium.Plugins.SolarSystem
             if (p == null) return;
 
             double rotAxis = Angle.ToRadians(data.RotationAxis);
-            double rotZenith = Angle.ToRadians(data.RotationZenith);
 
             Vec2 vecLibration = new Vec2(moon.Libration.l, moon.Libration.b);
             vecLibration.Normalize();
 
-            double librationWeight = (Math.Abs(moon.Libration.l) + Math.Abs(moon.Libration.b));
+            double librationWeight = Math.Abs(moon.Libration.l) + Math.Abs(moon.Libration.b);
             double librationDirection = Math.Atan2(vecLibration.Y, vecLibration.X);
 
             double ax = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(librationDirection);
@@ -1196,8 +1202,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (prj.UseRefraction)
                 {
-                    var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                    v[i] = matRefraction * v[i];
+                    v[i] = GetRefractionMatrix(data) * v[i];
                 }
             }
 
@@ -1275,9 +1280,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (prj.UseRefraction)
             {
-                double rotZenith = Angle.ToRadians(data.RotationZenith);
-                var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                matRings = matRefraction * matRings;
+                matRings = GetRefractionMatrix(data) * matRings;
             }
 
             for (j = 0; j <= segments / 2; j++)
@@ -1380,9 +1383,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (prj.UseRefraction)
             {
-                double zenithRotation = Angle.ToRadians(data.RotationZenith);
-                var matRefraction = Mat4.ZRotation(zenithRotation) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-zenithRotation);
-                v = matRefraction * v;
+                v = GetRefractionMatrix(data) * v;
             }
 
             return v;
@@ -1439,9 +1440,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (prj.UseRefraction)
             {
-                double rotZenith = Angle.ToRadians(data.RotationZenith);
-                var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                pShadow = matRefraction * pShadow;
+                pShadow = GetRefractionMatrix(data) * pShadow;
             }
 
             pShadow += pMoon;
@@ -1449,7 +1448,7 @@ namespace Astrarium.Plugins.SolarSystem
             // Radius of eclipsing moon
             float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
 
-            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening, data.Refraction, data.RotationZenith);
+            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening, data);
 
             if (pShadow.Distance(pMoon) <= sd + sdMoon)
             {
@@ -1459,9 +1458,11 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, double refraction, double rotZenith)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, SphereParameters data)
         {
             var prj = map.Projection;
+
+            var matRefraction = GetRefractionMatrix(data);
 
             GL.PushMatrix();
             GL.Translate(pBody.X, pBody.Y, 0);
@@ -1478,7 +1479,7 @@ namespace Astrarium.Plugins.SolarSystem
             // draw stencil pattern (body outline)
 
             GL.Begin(GL.TRIANGLE_FAN);
-
+           
             for (int i = 0; i <= 64; i++)
             {
                 double t = i / 64.0 * 2 * Math.PI;
@@ -1494,8 +1495,6 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (prj.UseRefraction)
                 {
-                    double rz = Angle.ToRadians(rotZenith);
-                    var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
                     v = matRefraction * v;
                 }
 
@@ -1549,8 +1548,6 @@ namespace Astrarium.Plugins.SolarSystem
                         // refraction flattening
                         if (prj.UseRefraction)
                         {
-                            double rz = Angle.ToRadians(rotZenith);
-                            var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
                             v = matRefraction * v;
                         }
 
@@ -1579,8 +1576,6 @@ namespace Astrarium.Plugins.SolarSystem
                         // refraction flattening
                         if (prj.UseRefraction)
                         {
-                            double rz = Angle.ToRadians(rotZenith);
-                            var matRefraction = Mat4.ZRotation(rz) * Mat4.StretchY(refraction) * Mat4.ZRotation(-rz);
                             v = matRefraction * v;
                         }
 
@@ -1655,9 +1650,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (prj.UseRefraction)
                     {
-                        double rotZenith = Angle.ToRadians(data.RotationZenith);
-                        var matRefraction = Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
-                        pShadow = matRefraction * pShadow;
+                        pShadow = GetRefractionMatrix(data) * pShadow;
                     }
 
                     pShadow += pBody;
@@ -1668,7 +1661,7 @@ namespace Astrarium.Plugins.SolarSystem
                         double[] shadowRadii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
                         Color[] shadowColors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
 
-                        RenderEclipseShadow(pBody, pShadow, radiusBody, shadowRadii, shadowColors, 0, 0, data.Refraction, data.RotationZenith);
+                        RenderEclipseShadow(pBody, pShadow, radiusBody, shadowRadii, shadowColors, 0, 0, data);
 
                         if (pShadow.Distance(pBody) <= radiusBody + radiusUmbra)
                         {

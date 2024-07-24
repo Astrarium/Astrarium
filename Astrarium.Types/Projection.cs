@@ -152,6 +152,7 @@ namespace Astrarium.Types
         }
 
         // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
+        // TODO: check this http://www.hnsky.org/star_count.htm
         public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
         /// <summary>
