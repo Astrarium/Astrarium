@@ -928,6 +928,8 @@ namespace Astrarium.Plugins.SolarSystem
             // center of the body in screen coordinates
             var p = prj.Project(body.Equatorial);
 
+            if (p == null) return;
+
             // night mode flag
             bool nightMode = settings.Get("NightMode");
 
@@ -1091,8 +1093,7 @@ namespace Astrarium.Plugins.SolarSystem
             // center of the sun in screen coordinates
             var p = prj.Project(sun.Equatorial);
 
-            // night mode flag
-            bool nightMode = settings.Get("NightMode");
+            if (p == null) return;
 
             // Sunspots and active H-alpha regions
             if (r > 100)
