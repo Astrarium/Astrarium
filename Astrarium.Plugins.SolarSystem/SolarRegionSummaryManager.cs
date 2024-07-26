@@ -129,6 +129,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
 
                 OnRequestComplete?.Invoke();
+                Thread.Sleep(200);
             }
         }
 

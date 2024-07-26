@@ -71,7 +71,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             ExportResourceDictionaries("Images.xaml");
 
-            ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("Solar activity", GetSolarActivityViewModel);
+            ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 
             #endregion UI integration
 

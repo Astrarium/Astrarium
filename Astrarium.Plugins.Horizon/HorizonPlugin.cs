@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Horizon
 {
-    public class Plugin : AbstractPlugin
+    public class HorizonPlugin : AbstractPlugin
     {
         private readonly ISettings settings = null;
 
-        public Plugin(ISettings settings)
+        public HorizonPlugin(ISettings settings)
         {
             this.settings = settings;
 
@@ -25,6 +25,7 @@ namespace Astrarium.Plugins.Horizon
             DefineSetting("Landmarks", false);
             DefineSetting("HorizonLine", true);
             DefineSetting("GroundTextureNightDimming", 90m);
+            DefineSetting("GroundTransparency", 0m);
             DefineSetting("LabelCardinalDirections", true);
             DefineSetting("MeasureAzimuthFromNorth", false);
 

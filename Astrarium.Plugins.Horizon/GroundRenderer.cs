@@ -127,17 +127,20 @@ namespace Astrarium.Plugins.Horizon
             // night mode flag
             bool nightMode = settings.Get("NightMode");
 
+            // ground transparency as alpha byte
+            int groundTransparency = 255 - (int)(settings.Get<decimal>("GroundTransparency") / 100 * 255);
+
             if (nightMode)
             {
                 // night vision tint
-                GL.Color4(Color.FromArgb((int)(c * 0.6), 0, 0));
+                GL.Color4(Color.FromArgb(groundTransparency, (int)(c * 0.6), 0, 0));
             }
             else
             {
                 if (textureId > 0)
-                    GL.Color4(Color.FromArgb(c, c, c));
+                    GL.Color4(Color.FromArgb(groundTransparency, c, c, c));
                 else
-                    GL.Color4(Color.FromArgb(0, (int)(c * 0.6), 0));
+                    GL.Color4(Color.FromArgb(groundTransparency, 0, (int)(c * 0.6), 0));
             }
 
             double latStop = textureId > 0 ? 90 : 0;

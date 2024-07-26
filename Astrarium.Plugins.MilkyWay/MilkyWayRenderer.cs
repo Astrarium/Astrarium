@@ -34,29 +34,40 @@ namespace Astrarium.Plugins.MilkyWay
             // nautical twilight: suppose Milky Way is not visible
             if (settings.Get("Atmosphere") && milkyWayCalc.SunAltitude > -12) return;
 
+            // maximal displayed brightness of Milky Way
             const double maxAlpha = 80;
+
+            // minimal displayed brightness of Milky Way
             const double minAlpha = 1;
+
+            // minimal FOV to display Milky Way if "MilkyWayDimOnZoom" setting is enabled
             const double minFov = 1;
 
+            // Milky Way brightness
+            int alpha = (int)maxAlpha;
+
+            // max FOV
             double maxFov = prj.MaxFov;
 
-            double a = 0;
-            double b = maxAlpha;
-
+            // dimming on zoom
             if (settings.Get("MilkyWayDimOnZoom"))
             {
+                double a = 0;
+                double b = maxAlpha;
+
                 a = -(maxAlpha - minAlpha) / (minFov - maxFov);
                 b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
+
+                alpha = Math.Min((int)(a * prj.Fov + b), 255);
             }
 
-            // milky way dimming
-            int alpha = Math.Min((int)(a * prj.Fov + b), 255);
-
+            // dimming in atmosphere depending on Sun altitude
             // astronomical twilight: Milky Way is appearing with linear transparency coeff.: 0...1
-            if (milkyWayCalc.SunAltitude >= -18 && milkyWayCalc.SunAltitude <= -12)
+            if (settings.Get("Atmosphere") && milkyWayCalc.SunAltitude >= -18 && milkyWayCalc.SunAltitude <= -12)
             {
                 alpha = (int)(alpha * (-milkyWayCalc.SunAltitude / 6 - 2));
             }
+
 
             if (alpha < minAlpha) return;
 
@@ -110,15 +121,29 @@ namespace Astrarium.Plugins.MilkyWay
                             double s = (double)i / steps;
                             double t = (90 - (lat - k * 10)) / 180.0;
 
-                            double coef = 1;
-                            double ext = 1;
+                            double altDimming = 1;
+                            double extinctionDimming = 1;
+
+                            double alt = prj.ToHorizontal(eq).Altitude;
+
+                            // if extinction is used, dim areas around horizon
                             if (prj.UseExtinction)
                             {
-                                double alt = prj.ToHorizontal(eq).Altitude;
-                                ext = alt > 0 ? (1 - (prj.ExtinctionCoefficient - 0.1)) : 0;
-                                coef = alt > 0 ? Math.Cos(Angle.ToRadians(90 - alt)) : 1;
+                                if (alt >= 0)
+                                {
+                                    const double minExt = 0.1;
+                                    const double maxExt = 0.6;
+                                    extinctionDimming = 1 - (prj.ExtinctionCoefficient - minExt) / (maxExt - minExt);
+                                    altDimming = Math.Cos(Angle.ToRadians(90 - alt));
+                                }
+                                else
+                                {
+                                    altDimming = 0;
+                                    extinctionDimming = 0;
+                                }
                             }
-                            GL.Color4(Color.FromArgb((int)(alpha * ext * coef), milkyWayColor).Tint(nightMode));
+
+                            GL.Color4(Color.FromArgb((int)(alpha * extinctionDimming * altDimming), milkyWayColor).Tint(nightMode));
 
                             GL.TexCoord2(s, t);
                             GL.Vertex2(p.X, p.Y);

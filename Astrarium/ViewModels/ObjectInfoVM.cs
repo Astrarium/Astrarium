@@ -44,6 +44,7 @@ namespace Astrarium.ViewModels
 
         public void AddExtension(string header, FrameworkElement extension)
         {
+            if (header.StartsWith("$")) header = Text.Get(header.Substring(1));
             Tabs.Add(new ObjectInfoTabViewModel(header, extension));
             Tabs[0].IsHeaderVisible = true;
         }

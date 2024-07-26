@@ -16,6 +16,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private double julianDay;
         private double utcOffset;
 
+        public Command UpdateCommand { get; private set; }
         public Command<string> MagTypeInfoCommand { get; private set; }
         public Command<string> ZurichClassificationCommand { get; private set; }
 
@@ -25,6 +26,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             this.renderer = renderer;
             this.srsManager.OnRequestComplete += Update;
 
+            UpdateCommand = new Command(Update);
             MagTypeInfoCommand = new Command<string>(MagTypeInfo);
             ZurichClassificationCommand = new Command<string>(ZurichClassification);
         }
@@ -33,6 +35,18 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         {
             srsManager.OnRequestComplete -= Update;
             renderer.SelectedSolarRegion = null;
+        }
+
+        public bool HasData
+        {
+            get => GetValue<bool>(nameof(HasData));
+            set => SetValue(nameof(HasData), value);
+        }
+
+        public bool IsLoading
+        {
+            get => GetValue<bool>(nameof(IsLoading));
+            set => SetValue(nameof(IsLoading), value);
         }
 
         public ICollection<SolarRegionI> RegionsI
@@ -74,6 +88,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
         private void Update()
         {
+            HasData = false;
+            IsLoading = true;
             var srs = srsManager.GetSRSForJulianDate(julianDay, utcOffset);
             if (srs != null)
             {
@@ -81,12 +97,14 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 RegionsIa = srs.RegionsIa;
                 RegionsII = srs.RegionsII;
                 WolfNumber = srs.WolfNumber;
+                HasData = true;
             }
+            IsLoading = false;
         }
 
         private void MagTypeInfo(string magType)
         {
-            ViewManager.ShowMessageBox($"MagType: {MagTypeFormatter.MagType(magType)}", Text.Get($"SolarActivity.MagType.{magType}"));
+            ViewManager.ShowMessageBox($"{Text.Get("SolarActivity.MagType")}: {MagTypeFormatter.MagType(magType)}", Text.Get($"SolarActivity.MagType.{magType}"));
         }
 
         private void ZurichClassification(string z)
@@ -119,7 +137,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             sb.AppendLine(c_descr);
             sb.AppendLine();
 
-            ViewManager.ShowMessageBox($"Zurich/McIntosh classification", sb.ToString());
+            ViewManager.ShowMessageBox(Text.Get("SolarActivity.Z"), sb.ToString());
         }
     }
 }
