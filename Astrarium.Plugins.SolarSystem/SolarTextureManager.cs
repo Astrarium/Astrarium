@@ -68,6 +68,8 @@ namespace Astrarium.Plugins.SolarSystem
             new Thread(RequestWorker) { IsBackground = true }.Start();
         }
 
+        private DateTime? lastFailedDate;
+
         /// <summary>
         /// Processes requests
         /// </summary>
@@ -79,10 +81,19 @@ namespace Astrarium.Plugins.SolarSystem
 
                 while (requests.Any())
                 {
-                    if (requests.TryPeek(out DateTime dt))
+                    if (requests.TryPeek(out DateTime date))
                     {
-                        RequestSolarImage(dt);
-                        requests.TryDequeue(out dt);
+                        if (date.Equals(lastFailedDate))
+                        {
+                            Thread.Sleep(10000);
+                        }
+
+                        if (!RequestSolarImage(date))
+                        {
+                            lastFailedDate = date;
+                        }
+
+                        requests.TryDequeue(out date);
                     }
                 }
 
@@ -149,9 +160,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets solar image from SOHO
         /// </summary>
-        private void RequestSolarImage(DateTime date)
+        private bool RequestSolarImage(DateTime date)
         {
-            if (!IsDateValid(date)) return;
+            if (!IsDateValid(date)) return false;
 
             // path to cached destination image (PNG), cropped and with transparent background
             string pngImageFile = GetImagePath(date);
@@ -189,9 +200,8 @@ namespace Astrarium.Plugins.SolarSystem
                             string listing = client.DownloadString(lstUrl);
                             srcFileName = listing.Split('\n').Select(s => s.Trim()).FirstOrDefault(s => Regex.IsMatch(s, regexPattern));
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            Log.Debug($"Unable to list solar images for the date {date}. Reason: {ex.Message}");
                             string listing = client.DownloadString(url);
                             var match = Regex.Match(listing, regexPattern);
                             if (match.Success)
@@ -203,7 +213,7 @@ namespace Astrarium.Plugins.SolarSystem
                         if (srcFileName == null)
                         {
                             Log.Debug($"There are no solar image file for the date {date}");
-                            return;
+                            return false;
                         }
 
                         // path to the source image dowloaded from the web, located in the temp directory
@@ -273,10 +283,7 @@ namespace Astrarium.Plugins.SolarSystem
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error($"Unable to download file from {url}, exception: {ex}");
-                }
+                catch { }
                 finally
                 {
                     // cleanup: delete source image, if exists
@@ -293,6 +300,8 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                 }
             }
+
+            return File.Exists(pngImageFile);
         }
     }
 }

@@ -31,9 +31,9 @@ namespace Astrarium.Plugins.SolarSystem
         private string localCacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "SRS");
 
         /// <summary>
-        /// Requests queue. Each item is a 
+        /// Requests queue.
         /// </summary>
-        private ConcurrentQueue<Date> requests = new ConcurrentQueue<Date>();
+        private ConcurrentQueue<DateTime> requests = new ConcurrentQueue<DateTime>();
 
         /// <summary>
         /// Reset event for processing requests
@@ -83,7 +83,14 @@ namespace Astrarium.Plugins.SolarSystem
         /// <returns></returns>
         public SolarRegionSummary GetSRSForJulianDate(double jd, double utcOffset)
         {
-            var date = new Date(jd, utcOffset);
+            Date date = new Date(jd, utcOffset);
+            DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
+
+            // no SRS data for future dates
+            if (dt.Date.Ticks > DateTime.UtcNow.Date.Ticks)
+            {
+                return null;
+            }
 
             string fileName = $"{date.Year:0000}{date.Month:00}{(int)date.Day:00}SRS.txt";
             string fullPath = Path.Combine(localCacheDir, fileName);
@@ -102,9 +109,9 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 lock (locker)
                 {
-                    if (!requests.Contains(date))
+                    if (!requests.Contains(dt))
                     {
-                        requests.Enqueue(date);
+                        requests.Enqueue(dt);
                         requestEvent.Set();
                     }
                 }
@@ -112,6 +119,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             return null;
         }
+
+        private DateTime lastFailedDate;
 
         private void RequestWorker()
         {
@@ -121,9 +130,18 @@ namespace Astrarium.Plugins.SolarSystem
 
                 while (requests.Any())
                 {
-                    if (requests.TryPeek(out Date date))
+                    if (requests.TryPeek(out DateTime date))
                     {
-                        RequestSolarRegionSumary(date);
+                        if (date.Equals(lastFailedDate))
+                        {
+                            Thread.Sleep(10000);
+                        }
+
+                        if (!RequestSolarRegionSumary(date))
+                        {
+                            lastFailedDate = date;
+                        }
+
                         requests.TryDequeue(out date);
                     }
                 }
@@ -133,11 +151,11 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RequestSolarRegionSumary(Date date)
+        private bool RequestSolarRegionSumary(DateTime date)
         {
-            string fileName = $"{date.Year:0000}{date.Month:00}{(int)date.Day:00}SRS.txt";
+            string fileName = $"{date.Year:0000}{date.Month:00}{date.Day:00}SRS.txt";
             string fileUrl = $"{ftpRootDir}/{date.Year}/SRS/{fileName}";
-
+            string fullPath = Path.Combine(localCacheDir, fileName);
             // STEP 1: try to load non-archived file 
 
             try
@@ -145,15 +163,12 @@ namespace Astrarium.Plugins.SolarSystem
                 string tempFile = Path.GetTempFileName();
 
                 Downloader.Download(new Uri(fileUrl), tempFile);
-                string fullPath = Path.Combine(localCacheDir, fileName);
+                
                 File.Move(tempFile, fullPath);
 
-                return;
+                return true;
             }
-            catch (Exception ex)
-            {
-                // TODO: log
-            }
+            catch { }
 
             // STEP 2: assume the SRS data file can be downloaded from archive
 
@@ -177,17 +192,14 @@ namespace Astrarium.Plugins.SolarSystem
                     File.Move(file, Path.Combine(localCacheDir, Path.GetFileName(file)));
                 }
             }
-            catch (Exception ex)
-            {
-
-                // TODO: log
-            }
+            catch { }
             finally
             {
                 FileSystem.DeleteDirectory(tempFolder);
                 FileSystem.DeleteFile(tempArchivePath);
             }
 
+            return File.Exists(fullPath);
         }
     }
 }

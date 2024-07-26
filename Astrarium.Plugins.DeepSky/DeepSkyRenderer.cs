@@ -86,7 +86,7 @@ namespace Astrarium.Plugins.DeepSky
 
                 float sz = prj.GetDiskSize(ds.Semidiameter);
 
-                bool imageDrawn = false;
+                bool hasImage = false;
 
                 if (drawImages)
                 {
@@ -94,6 +94,7 @@ namespace Astrarium.Plugins.DeepSky
 
                     if (File.Exists(path))
                     {
+                        hasImage = true;
                         int textureId = GL.GetTexture(path);
 
                         if (textureId > 0)
@@ -145,14 +146,12 @@ namespace Astrarium.Plugins.DeepSky
 
                                 GL.Disable(GL.TEXTURE_2D);
                                 GL.Disable(GL.BLEND);
-
-                                imageDrawn = true;
                             }
                         }
                     }
                 }
 
-                if (!(imageDrawn && hideOutline))
+                if (!(hasImage && hideOutline))
                 {
                     if (ds.Shape != null && ds.Shape.Any())
                     {

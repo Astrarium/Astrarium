@@ -99,7 +99,6 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 WolfNumber = srs.WolfNumber;
                 HasData = true;
             }
-            IsLoading = false;
         }
 
         private void MagTypeInfo(string magType)
