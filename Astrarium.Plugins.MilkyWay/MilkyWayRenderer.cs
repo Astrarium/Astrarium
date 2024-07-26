@@ -13,16 +13,14 @@ namespace Astrarium.Plugins.MilkyWay
     public class MilkyWayRenderer : BaseRenderer
     {
         private readonly MilkyWayCalc milkyWayCalc;
-        private readonly ISky sky;
         private readonly ISettings settings;
         private readonly string texturePath;
 
         public override RendererOrder Order => RendererOrder.Background;
 
-        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ISky sky, ISettings settings)
+        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ISettings settings)
         {
             this.milkyWayCalc = milkyWayCalc;
-            this.sky = sky;
             this.settings = settings;
 
             texturePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "MilkyWay.jpg");
@@ -36,7 +34,7 @@ namespace Astrarium.Plugins.MilkyWay
             // nautical twilight: suppose Milky Way is not visible
             if (settings.Get("Atmosphere") && milkyWayCalc.SunAltitude > -12) return;
 
-            const double maxAlpha = 60;
+            const double maxAlpha = 80;
             const double minAlpha = 1;
             const double minFov = 1;
 
@@ -50,7 +48,7 @@ namespace Astrarium.Plugins.MilkyWay
                 a = -(maxAlpha - minAlpha) / (minFov - maxFov);
                 b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
             }
-            
+
             // milky way dimming
             int alpha = Math.Min((int)(a * prj.Fov + b), 255);
 
@@ -85,7 +83,9 @@ namespace Astrarium.Plugins.MilkyWay
 
             const int steps = 32;
 
-            GL.Color4(Color.FromArgb(alpha, 205, 225, 255).Tint(nightMode));
+            Color milkyWayColor = Color.FromArgb(205, 225, 255);
+
+            GL.Color4(Color.FromArgb(alpha, milkyWayColor).Tint(nightMode));
 
             for (double lat = -80; lat <= 90; lat += 10)
             {
@@ -109,6 +109,16 @@ namespace Astrarium.Plugins.MilkyWay
                         {
                             double s = (double)i / steps;
                             double t = (90 - (lat - k * 10)) / 180.0;
+
+                            double coef = 1;
+                            double ext = 1;
+                            if (prj.UseExtinction)
+                            {
+                                double alt = prj.ToHorizontal(eq).Altitude;
+                                ext = alt > 0 ? (1 - (prj.ExtinctionCoefficient - 0.1)) : 0;
+                                coef = alt > 0 ? Math.Cos(Angle.ToRadians(90 - alt)) : 1;
+                            }
+                            GL.Color4(Color.FromArgb((int)(alpha * ext * coef), milkyWayColor).Tint(nightMode));
 
                             GL.TexCoord2(s, t);
                             GL.Vertex2(p.X, p.Y);

@@ -144,7 +144,6 @@ namespace Astrarium.Plugins.Atmosphere
 
         private float CalcDaylightFactor()
         {
-            //if (!settings.Get("Ground")) return 0;
             if (!settings.Get("Atmosphere", true)) return 0;
             if (sun == null || moon == null) return 0;
 

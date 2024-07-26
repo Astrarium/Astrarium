@@ -18,6 +18,32 @@ namespace Astrarium.Plugins.DeepSky
             this.settings = settings;
         }
 
+        private int GetDeepSkyBrightness(ISkyMap map, DeepSky ds)
+        {
+            var prj = map.Projection;
+
+            // extinction factor
+            double ext = 1;
+            if (prj.UseExtinction)
+            {
+                var alt = prj.ToHorizontal(ds.Equatorial).Altitude;
+                float deltaMag = prj.GetMagExtinction(alt);
+                ext = Math.Pow(10, deltaMag / -2.5);
+            }
+
+            // displayed magnitude
+            double mag = float.IsNaN(ds.Magnitude) ? 10 : ds.Magnitude;
+
+            // zoom level factor
+            double zf = Math.Min(1, Math.Pow(10, (mag - prj.MagLimit) / -2.5));
+
+            // daylight factor
+            double df = Math.Pow(1 - map.DaylightFactor, 10);
+
+            // displayed brightness, as byte
+            return (int)(100 * zf * df * ext);
+        }
+
         public override void Render(ISkyMap map)
         {
             if (!settings.Get<bool>("DeepSky")) return;
@@ -31,6 +57,7 @@ namespace Astrarium.Plugins.DeepSky
             Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
             bool drawImages = settings.Get("DeepSkyImages") && Directory.Exists(imagesPath);
+            bool hideOutline = settings.Get("DeepSkyHideOutline");
             Brush brushLabel = new SolidBrush(colorLabel);
             var prj = map.Projection;
 
@@ -59,6 +86,8 @@ namespace Astrarium.Plugins.DeepSky
 
                 float sz = prj.GetDiskSize(ds.Semidiameter);
 
+                bool imageDrawn = false;
+
                 if (drawImages)
                 {
                     string path = Path.Combine(imagesPath, $"{ds.CatalogName}.jpg");
@@ -79,6 +108,8 @@ namespace Astrarium.Plugins.DeepSky
 
                             if (p0 != null && p1 != null && p2 != null && p3 != null)
                             {
+                                int brightness = GetDeepSkyBrightness(map, ds);
+
                                 GL.Enable(GL.TEXTURE_2D);
                                 GL.Enable(GL.BLEND);
                                 GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
@@ -87,7 +118,7 @@ namespace Astrarium.Plugins.DeepSky
                                 GL.Begin(GL.TRIANGLE_FAN);
 
                                 GL.TexCoord2(0.5, 0.5);
-                                GL.Color4(Color.FromArgb((int)(100 * (1 - map.DaylightFactor)), 255, 255, 255).Tint(nightMode));
+                                GL.Color4(Color.FromArgb(brightness, 255, 255, 255).Tint(nightMode));
                                 GL.Vertex2(p.X, p.Y);
 
                                 GL.TexCoord2(0, 0);
@@ -114,50 +145,46 @@ namespace Astrarium.Plugins.DeepSky
 
                                 GL.Disable(GL.TEXTURE_2D);
                                 GL.Disable(GL.BLEND);
+
+                                imageDrawn = true;
                             }
                         }
                     }
                 }
 
-                if (ds.Shape != null && ds.Shape.Any())
+                if (!(imageDrawn && hideOutline))
                 {
-                    GL.Enable(GL.BLEND);
-                    GL.Enable(GL.LINE_SMOOTH);
-                    GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
-                    GL.Color4(colorOutline);
-                    GL.Begin(GL.LINE_LOOP);
-
-                    foreach (var oc in ds.Shape)
+                    if (ds.Shape != null && ds.Shape.Any())
                     {
-                        Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(oc, prj.Context.PrecessionElements));
-                        if (op != null)
+                        GL.Enable(GL.BLEND);
+                        GL.Enable(GL.LINE_SMOOTH);
+                        GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+                        GL.Color4(colorOutline);
+                        GL.Begin(GL.LINE_LOOP);
+
+                        foreach (var oc in ds.Shape)
                         {
-                            GL.Vertex2(op.X, op.Y);
+                            Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(oc, prj.Context.PrecessionElements));
+                            if (op != null)
+                            {
+                                GL.Vertex2(op.X, op.Y);
+                            }
                         }
+
+                        GL.End();
                     }
-
-                    GL.End();
-
-                    if (drawLabels && sz > 20)
+                    else
                     {
-                        var p0 = prj.Project(Precession.GetEquatorialCoordinates(ds.Shape.First(), prj.Context.PrecessionElements));
-                        if (p0 != null)
-                        {
-                            map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p0, 5);
-                        }
+                        float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                        float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                        double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
+                        GL.DrawEllipse(p, penOutline, rx, ry, rot);
                     }
                 }
-                else
-                {
-                    float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
-                    float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
-                    double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
-                    GL.DrawEllipse(p, penOutline, rx, ry, rot);
 
-                    if (drawLabels && sz > 20)
-                    {
-                        map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p, sz);
-                    }
+                if (drawLabels && sz > 20)
+                {
+                    map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p, sz);
                 }
 
                 map.AddDrawnObject(p, ds);

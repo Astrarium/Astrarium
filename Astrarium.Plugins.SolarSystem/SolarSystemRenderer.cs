@@ -439,9 +439,10 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
             float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
+            double alt = prj.ToHorizontal(data.Equatorial).Altitude;
 
             // size of object when it's drawn as point (in pixels)
-            float size = Math.Max(prj.GetPointSize(body.Magnitude, data.MaximalPointSize), data.MinimalPointSize);
+            float size = Math.Max(prj.GetPointSize(body.Magnitude, data.MaximalPointSize, alt), data.MinimalPointSize);
 
             // size of object when it's drawn as sphere (in pixels)
             float diam = Math.Min(prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize), data.MaximalDiskSize);

@@ -155,17 +155,34 @@ namespace Astrarium.Types
         // TODO: check this http://www.hnsky.org/star_count.htm
         public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
+        public float GetMagExtinction(double altitude)
+        {
+            if (UseExtinction && altitude > 0)
+            {
+                double h = Math.Max(0, altitude);
+                double airmass = Airmass.GetValue(h, AirmassModel);
+                return (float)(ExtinctionCoefficient * airmass);
+            }
+            return 0;
+        }
+
         /// <summary>
         /// Gets pixel size of point object (like star), depending on object magnitude.
         /// </summary>
         /// <param name="mag">Magnitude of object</param>
         /// <param name="maxDrawingSize">Maximal drawing size of a point, set 0 as no limit.</param>
+        /// <param name="altitude">Body altitude in degrees, needed for taking athmospheric extinction into account</param>
         /// <returns>Returns pixel size of point object (like star), depending on object magnitude.</returns>
-        public float GetPointSize(float mag, float maxDrawingSize = 0)
+        public float GetPointSize(float mag, float maxDrawingSize = 0, double? altitude = null)
         {
             float mag0 = MagLimit;
 
             float size;
+
+            if (altitude.HasValue)
+            {
+                mag += GetMagExtinction(altitude.Value);
+            }
 
             if (mag > mag0)
                 size = 0;
@@ -542,6 +559,38 @@ namespace Astrarium.Types
         public bool UseRefraction { get; set; }
 
         /// <summary>
+        /// Flag indicating atmospheric extinction is applied (dimming of objects magnitudes)
+        /// </summary>
+        public bool UseExtinction { get; set; }
+
+        /// <summary>
+        /// Extinction coefficent.
+        /// </summary>
+        /// <remarks>
+        /// Proposed values of the coeffincent are following:
+        /// 0.1  = best night on dry mountain top
+        /// 0.15 = average night on dry mountain top
+        /// 0.2  = poor night on dry mountain top, 
+        ///        average night at dry sea level site,
+        ///        best night at humid sea level site
+        /// 0.3  = average night at humid sea level site
+        /// 0.4  = average night at poor site with much dust or humiduty
+        /// 0.5  = very poor night
+        /// 
+        /// Source: 
+        /// Title: Atmospheric Extinction Effects on Stellar Alignments
+        /// Authors: Schaefer, B.E.
+        /// Journal: Journal for the History of Astronomy, Archaeoastronomy Supplement, Vol. 17, p.S32
+        /// Bibliographic Code: 1986JHAS...17...32S
+        /// </remarks>
+        public double ExtinctionCoefficient { get; set; } = 0.3;
+
+        /// <summary>
+        /// Airmass model used for extinction.
+        /// </summary>
+        public AirmassModel AirmassModel { get; set; } = AirmassModel.Pickering;
+
+        /// <summary>
         /// Air temperature, °C, used for refraction corrections
         /// </summary>
         public double RefractionTemperature { get; set; } = 10;
@@ -568,6 +617,21 @@ namespace Astrarium.Types
             {
                 return eq;
             }
+        }
+
+        /// <summary>
+        /// Converts equatorial coordinates to horizontal, with refraction correction, if enabled.
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of the body</param>
+        /// <returns>Horizontal coordinates with refraction correction, if enabled.</returns>
+        public CrdsHorizontal ToHorizontal(CrdsEquatorial eq)
+        {
+            CrdsHorizontal hor = eq.ToHorizontal(Context.GeoLocation, Context.SiderealTime);
+            if (UseRefraction)
+            {
+                hor.Altitude += Refraction.CorrectionForVisibleCoordinates(hor.Altitude, RefractionPressure, RefractionTemperature);
+            }
+            return hor;
         }
 
         /// <summary>

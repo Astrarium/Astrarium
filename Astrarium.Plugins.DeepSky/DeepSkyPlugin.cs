@@ -12,14 +12,15 @@ using System.Windows;
 
 namespace Astrarium.Plugins.DeepSky
 {
-    public class Plugin : AbstractPlugin
+    public class DeepSkyPlugin : AbstractPlugin
     {
-        public Plugin(ISettings settings)
+        public DeepSkyPlugin(ISettings settings)
         {
             DefineSetting("DeepSky", true);
             DefineSetting("DeepSkyLabels", true);
             DefineSetting("DeepSkyImages", false);
             DefineSetting("DeepSkyImagesFolder", "");
+            DefineSetting("DeepSkyHideOutline", false);
 
             // Colors
             DefineSetting("ColorDeepSkyOutline", Color.FromArgb(0, 50, 75));

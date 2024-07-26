@@ -46,7 +46,8 @@ namespace Astrarium.Plugins.Novae
 
             foreach (var star in novae)
             {
-                float size = prj.GetPointSize(star.Magnitude);
+                double alt = prj.ToHorizontal(star.Equatorial).Altitude;
+                float size = prj.GetPointSize(star.Magnitude, altitude: alt);
                 if (size > 0)
                 {
                     if ((int)size == 0) size = 1;

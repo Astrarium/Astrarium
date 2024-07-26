@@ -76,7 +76,9 @@ namespace Astrarium.Plugins.UCAC4
 
                 foreach (var star in stars)
                 {
-                    float size = prj.GetPointSize(star.Magnitude) * starDimming;
+                    double alt = prj.ToHorizontal(star.Equatorial).Altitude;
+                    float size = prj.GetPointSize(star.Magnitude, altitude: alt) * starDimming;
+                    if (size < minStarSize) continue;
 
                     var p = prj.Project(star.Equatorial);
 

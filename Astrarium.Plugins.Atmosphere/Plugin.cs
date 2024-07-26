@@ -23,12 +23,17 @@ namespace Astrarium.Plugins.Atmosphere
             DefineSetting("RefractionTemperature", 10m);
             DefineSetting("RefractionPressure", 1010m);
 
+            DefineSetting("Extinction", false);
+            DefineSetting("ExtinctionCoefficient", 0.3m);
+            DefineSetting("AirmassModel", AirmassModel.Hardie);
+
             DefineSettingsSection<AtmosphereSettingsSection, SettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
 
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconAtmosphere", "$Settings.Atmosphere", new SimpleBinding(settings, "Atmosphere", "IsChecked")));
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconRefraction", "$Settings.Refraction", new SimpleBinding(settings, "Refraction", "IsChecked")));
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconExtinction", "$Settings.Extinction", new SimpleBinding(settings, "Extinction", "IsChecked")));
         }
     }
 }

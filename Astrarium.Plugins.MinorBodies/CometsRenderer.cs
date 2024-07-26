@@ -43,7 +43,8 @@ namespace Astrarium.Plugins.MinorBodies
             foreach (var c in comets)
             {
                 float diam = prj.GetDiskSize(c.Semidiameter);
-                float size = prj.GetPointSize(c.Magnitude);
+                double alt = prj.ToHorizontal(c.Equatorial).Altitude;
+                float size = prj.GetPointSize(c.Magnitude, altitude: alt);
 
                 // if "draw all" setting is enabled, draw comets brighter than limit
                 if (drawAll && size < 1 && c.Magnitude <= (float)drawAllMagLimit)

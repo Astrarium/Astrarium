@@ -6,10 +6,24 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:p="clr-namespace:Astrarium.Plugins.Atmosphere"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+    
     Title="{t:Text Section.Atmosphere}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
+
+    <c:SettingsSection.Resources>
+        <ObjectDataProvider x:Key="EnumAirmassModel" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="t:AirmassModel" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </c:SettingsSection.Resources>
+
+
     <StackPanel Orientation="Vertical" Margin="6" Grid.IsSharedSizeScope="True">
         <CheckBox Content="{t:Text Settings.Atmosphere}" IsChecked="{Binding Settings.Atmosphere}" Margin="2" />
 
@@ -39,6 +53,43 @@
 
             </Grid>
         </GroupBox>
+
+        <GroupBox>
+            <GroupBox.Header>
+                <CheckBox Content="{t:Text Settings.Extinction}" IsChecked="{Binding Settings.Extinction}" Margin="2" />
+            </GroupBox.Header>
+
+            <Grid Margin="4" IsEnabled="{Binding Settings.Extinction}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Labels" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{t:Text Settings.AirmassModel}" VerticalAlignment="Center" Padding="0 0 5 0" />
+                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" SelectedValue="{Binding Settings.AirmassModel}" ItemsSource="{Binding Source={StaticResource EnumAirmassModel}}" MinWidth="250" Margin="2">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{t:Text Settings.ExtinctionCoefficient}" VerticalAlignment="Center" Padding="0 0 5 0" />
+                                
+                <c:NumericUpDown HorizontalAlignment="Left" Width="60" Grid.Row="1" Grid.Column="1" Value="{Binding Settings.ExtinctionCoefficient}" Minimum="0.1" Maximum="0.5" Step="0.05" DecimalPlaces="2" Margin="2" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Settings.ExtinctionCoefficient, Converter={p:ExtinctionCoefficientConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" IsEnabled="False" Margin="10 0 0 0" />
+
+            </Grid>
+        </GroupBox>
+
+
+
+
 
         <GroupBox IsEnabled="{Binding Settings.Atmosphere}">
             <GroupBox.Header>

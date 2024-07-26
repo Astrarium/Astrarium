@@ -75,7 +75,8 @@ namespace Astrarium.Plugins.Satellites
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
 
                 if (useMagFilter && s.Magnitude > magFilter) continue;
-
+                
+                // get size withot extinction effect
                 float size = prj.GetPointSize(s.Magnitude);
                 if (size == 0) continue;
 
@@ -83,6 +84,10 @@ namespace Astrarium.Plugins.Satellites
                 var h = Norad.HorizontalCoordinates(prj.Context.GeoLocation, t, prj.Context.SiderealTime);
 
                 if (!showBelowHorizon && h.Altitude < 0) continue;
+
+                // calc size with extinction effect (if applied)
+                size = prj.GetPointSize(s.Magnitude, altitude: h.Altitude);
+                if (size == 0) continue;
 
                 isEclipsed = isEclipsed || h.Altitude < 0;
 

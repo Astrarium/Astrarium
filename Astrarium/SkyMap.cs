@@ -223,6 +223,9 @@ namespace Astrarium
             Projection.UseRefraction = settings.Get("Refraction");
             Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
             Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+            Projection.UseExtinction = settings.Get("Extinction");
+            Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
+            Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
             Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
             Projection.SetScreenSize(w, h);
             Projection.FovChanged += Projection_FovChanged;
@@ -326,6 +329,24 @@ namespace Astrarium
                 if (name == "RefractionTemperature")
                 {
                     Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+                    Invalidate();
+                }
+
+                if (name == "Extinction")
+                {
+                    Projection.UseExtinction = settings.Get("Extinction");
+                    Invalidate();
+                }
+
+                if (name == "ExtinctionCoefficient")
+                {
+                    Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
+                    Invalidate();
+                }
+
+                if (name == "AirmassModel")
+                {
+                    Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
                     Invalidate();
                 }
             };
