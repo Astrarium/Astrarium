@@ -12,6 +12,7 @@ namespace Astrarium.Plugins.FOV
         private readonly ISkyMap map;
         private readonly ISettings settings;
 
+        // TODO: move to settings
         private Font font = new Font("Arial", 8);
         public override RendererOrder Order => RendererOrder.Foreground;
 
@@ -145,9 +146,11 @@ namespace Astrarium.Plugins.FOV
             // do not draw frame if its size exceeds screen bounds
             if (size > 10 && size < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
             {
-                if (isOuter && shading > 0 && frameSize >= prj.Fov / 2)
+                if (isOuter && shading > 0)
                 {
-                    DrawShading(shading, size);
+                    double factor = Math.Min(1, frameSize / (prj.Fov / 2));
+                    short shadePercentage = (short)(factor * shading);
+                    DrawShading(shadePercentage, size);
                 }
 
                 var p = new Vec2(prj.ScreenWidth / 2, prj.ScreenHeight / 2);
