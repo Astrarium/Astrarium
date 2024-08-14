@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.SolarSystem
             // no SRS data for future dates
             if (dt.Date.Ticks > DateTime.UtcNow.Date.Ticks)
             {
-                return null;
+                return SolarRegionSummary.Empty;
             }
 
             string fileName = $"{date.Year:0000}{date.Month:00}{(int)date.Day:00}SRS.txt";
@@ -134,7 +134,7 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         if (date.Equals(lastFailedDate))
                         {
-                            Thread.Sleep(10000);
+                            Thread.Sleep(TimeSpan.FromSeconds(10));
                         }
 
                         if (!RequestSolarRegionSumary(date))
@@ -161,11 +161,8 @@ namespace Astrarium.Plugins.SolarSystem
             try
             {
                 string tempFile = Path.GetTempFileName();
-
                 Downloader.Download(new Uri(fileUrl), tempFile);
-                
                 File.Move(tempFile, fullPath);
-
                 return true;
             }
             catch { }

@@ -19,6 +19,10 @@ namespace Astrarium.Plugins.SolarSystem
         public List<SolarRegionIa> RegionsIa { get; private set; } = new List<SolarRegionIa>();
         public List<SolarRegionII> RegionsII { get; private set; } = new List<SolarRegionII>();
 
+        public static SolarRegionSummary Empty = new SolarRegionSummary();
+
+        private SolarRegionSummary() { }
+
         /// <summary>
         /// Creates new Solar Region Summary from specified file.
         /// </summary>

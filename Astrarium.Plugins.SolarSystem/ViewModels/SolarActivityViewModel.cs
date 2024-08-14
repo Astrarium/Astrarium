@@ -16,7 +16,6 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private double julianDay;
         private double utcOffset;
 
-        public Command UpdateCommand { get; private set; }
         public Command<string> MagTypeInfoCommand { get; private set; }
         public Command<string> ZurichClassificationCommand { get; private set; }
 
@@ -26,7 +25,6 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             this.renderer = renderer;
             this.srsManager.OnRequestComplete += Update;
 
-            UpdateCommand = new Command(Update);
             MagTypeInfoCommand = new Command<string>(MagTypeInfo);
             ZurichClassificationCommand = new Command<string>(ZurichClassification);
         }
@@ -37,10 +35,10 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             renderer.SelectedSolarRegion = null;
         }
 
-        public bool HasData
+        public bool IsEmpty
         {
-            get => GetValue<bool>(nameof(HasData));
-            set => SetValue(nameof(HasData), value);
+            get => GetValue<bool>(nameof(IsEmpty));
+            set => SetValue(nameof(IsEmpty), value);
         }
 
         public bool IsLoading
@@ -88,7 +86,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
         private void Update()
         {
-            HasData = false;
+            IsEmpty = false;
             IsLoading = true;
             var srs = srsManager.GetSRSForJulianDate(julianDay, utcOffset);
             if (srs != null)
@@ -97,7 +95,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 RegionsIa = srs.RegionsIa;
                 RegionsII = srs.RegionsII;
                 WolfNumber = srs.WolfNumber;
-                HasData = true;
+                IsEmpty = srs == SolarRegionSummary.Empty;
+                IsLoading = false;
             }
         }
 
