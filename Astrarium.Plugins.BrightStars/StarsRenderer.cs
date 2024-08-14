@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.BrightStars
                 if (daylightFactor == 1) return;
 
                 float starDimming = 1 - daylightFactor;
-                float minStarSize = daylightFactor * 3; // empiric
+                float minStarSize = daylightFactor * 10; // empiric
 
                 var fontStarNames = settings.Get<Font>("StarsLabelsFont");
                 var color = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);

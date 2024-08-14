@@ -64,7 +64,7 @@ namespace Astrarium.Plugins.Tycho2
                 if (daylightFactor == 1) return;
 
                 float starDimming = 1 - daylightFactor;
-                float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
+                float minStarSize = Math.Max(0.5f, daylightFactor * 10); // empiric
 
                 var nightMode = settings.Get("NightMode");
                 bool isLabels = settings.Get<bool>("StarsLabels");

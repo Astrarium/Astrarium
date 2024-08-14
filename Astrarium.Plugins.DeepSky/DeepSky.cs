@@ -8,7 +8,7 @@ namespace Astrarium.Plugins.DeepSky
     public class DeepSky : SizeableCelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
-        public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";
+        public override string Type => $"DeepSky.{Status}";
 
         /// <inheritdoc />
         public override string CommonName => CatalogName;

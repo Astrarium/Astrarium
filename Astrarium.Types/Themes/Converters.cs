@@ -401,14 +401,10 @@ namespace Astrarium.Types.Themes
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             CelestialObject body = value as CelestialObject;
-            if (body != null)
+            if (body != null && body.Type != null)
             {
-                string key = new[] { body.GetType() }
-                     .Concat(body.GetType().GetInterfaces())
-                     .Select(inf => $"Icon{inf.Name}")
-                     .FirstOrDefault(k => Application.Current.Resources.Contains(k));
-
-                if (key != null)
+                string key = $"Icon{body.Type.Split('.').First()}";
+                if (key != null && Application.Current.Resources.Contains(key))
                 {
                     return Application.Current.Resources[key];
                 }

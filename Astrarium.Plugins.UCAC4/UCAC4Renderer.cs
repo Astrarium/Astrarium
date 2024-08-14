@@ -48,7 +48,7 @@ namespace Astrarium.Plugins.UCAC4
             if (magLimit > 10 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
                 float starDimming = 1 - daylightFactor;
-                float minStarSize = Math.Max(0.5f, daylightFactor * 3);
+                float minStarSize = Math.Max(0.5f, daylightFactor * 10);
 
                 bool nightMode = settings.Get("NightMode");
                 bool isLabels = settings.Get("StarsLabels") && fov < 1 / 60d;

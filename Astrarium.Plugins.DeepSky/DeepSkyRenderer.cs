@@ -71,11 +71,11 @@ namespace Astrarium.Plugins.DeepSky
             // filter deep skies by:
             var deepSkies =
                 // take existing objects only (obviously, do not draw objects that are catalog errors)
-                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&
+                deepSkyCalc.deepSkies.Where(ds => /*!ds.Status.IsEmpty() && */
                 // do not draw small objects for current FOV
-                prj.GetDiskSize(ds.Semidiameter) > 20 &&
+                (ds.Semidiameter == 0 || prj.GetDiskSize(ds.Semidiameter) > 20) &&
                 // do not draw dim objects (exceeding mag limit for current FOV)
-                ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
+                ((float.IsNaN(ds.Magnitude) ? 20 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
                 Angle.Separation(eqCenter, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
@@ -111,41 +111,49 @@ namespace Astrarium.Plugins.DeepSky
                             {
                                 int brightness = GetDeepSkyBrightness(map, ds);
 
-                                GL.Enable(GL.TEXTURE_2D);
-                                GL.Enable(GL.BLEND);
-                                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                                if (brightness > 0)
+                                {
+                                    GL.Enable(GL.TEXTURE_2D);
+                                    GL.Enable(GL.BLEND);
+                                    GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
-                                GL.BindTexture(GL.TEXTURE_2D, textureId);
-                                GL.Begin(GL.TRIANGLE_FAN);
+                                    GL.BindTexture(GL.TEXTURE_2D, textureId);
+                                    GL.Begin(GL.TRIANGLE_FAN);
 
-                                GL.TexCoord2(0.5, 0.5);
-                                GL.Color4(Color.FromArgb(brightness, 255, 255, 255).Tint(nightMode));
-                                GL.Vertex2(p.X, p.Y);
+                                    GL.TexCoord2(0.5, 0.5);
+                                    GL.Color4(Color.FromArgb(brightness, 255, 255, 255).Tint(nightMode));
+                                    GL.Vertex2(p.X, p.Y);
 
-                                GL.TexCoord2(0, 0);
-                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                                GL.Vertex2(p0.X, p0.Y);
+                                    GL.TexCoord2(0, 0);
+                                    GL.Color4(Color.FromArgb(0, 255, 255, 255));
+                                    GL.Vertex2(p0.X, p0.Y);
 
-                                GL.TexCoord2(0, 1);
-                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                                GL.Vertex2(p1.X, p1.Y);
+                                    GL.TexCoord2(0, 1);
+                                    GL.Color4(Color.Transparent);
+                                    GL.Vertex2(p1.X, p1.Y);
 
-                                GL.TexCoord2(1, 1);
-                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                                GL.Vertex2(p2.X, p2.Y);
+                                    GL.TexCoord2(1, 1);
+                                    GL.Color4(Color.Transparent);
+                                    GL.Vertex2(p2.X, p2.Y);
 
-                                GL.TexCoord2(1, 0);
-                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                                GL.Vertex2(p3.X, p3.Y);
+                                    GL.TexCoord2(1, 0);
+                                    GL.Color4(Color.Transparent);
+                                    GL.Vertex2(p3.X, p3.Y);
 
-                                GL.TexCoord2(0, 0);
-                                GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                                GL.Vertex2(p0.X, p0.Y);
+                                    GL.TexCoord2(0, 0);
+                                    GL.Color4(Color.Transparent);
+                                    GL.Vertex2(p0.X, p0.Y);
 
-                                GL.End();
+                                    GL.End();
 
-                                GL.Disable(GL.TEXTURE_2D);
-                                GL.Disable(GL.BLEND);
+                                    GL.Disable(GL.TEXTURE_2D);
+                                    GL.Disable(GL.BLEND);
+                                }
+                                
+                                if (brightness < 20)
+                                {
+                                    hasImage = false;
+                                }
                             }
                         }
                     }
@@ -174,14 +182,22 @@ namespace Astrarium.Plugins.DeepSky
                     }
                     else
                     {
-                        float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
-                        float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
-                        double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
-                        GL.DrawEllipse(p, penOutline, rx, ry, rot);
+                        if (ds.Semidiameter > 0)
+                        {
+                            float rx = prj.GetDiskSize(ds.LargeSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                            float ry = prj.GetDiskSize(ds.SmallSemidiameter.GetValueOrDefault(ds.Semidiameter)) / 2;
+                            double rot = prj.GetAxisRotation(ds.Equatorial, 90 + ds.PositionAngle.GetValueOrDefault());
+                            GL.DrawEllipse(p, penOutline, rx, ry, rot);
+                        }
+                        else
+                        {
+                            GL.DrawLine(p + new Vec2(-4, -4), p + new Vec2(4, 4), penOutline);
+                            GL.DrawLine(p + new Vec2(4, -4), p + new Vec2(-4, 4), penOutline);
+                        }
                     }
                 }
 
-                if (drawLabels && sz > 20)
+                if (drawLabels && (sz > 20 || fov < 1))
                 {
                     map.DrawObjectLabel(ds.Names.First(), fontLabel, brushLabel, p, sz);
                 }
