@@ -268,7 +268,7 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         Refraction = mu,
                         RotationZenith = rotZenith,
-                        RotationAxis = prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon),
+                        RotationAxis = -prj.GetPhaseRotation(sun.Ecliptical) - 7.25,
                         LatitudeShift = -sun.CenterDisk.Latitude,
                         LongitudeShift = 0,
                         DrawEquator = settings.Get("SunEquator"),
