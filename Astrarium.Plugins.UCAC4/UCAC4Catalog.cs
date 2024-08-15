@@ -25,9 +25,20 @@ namespace Astrarium.Plugins.UCAC4
         private readonly ISky sky;
         private readonly BinaryReader[] zoneReaders = new BinaryReader[ZONES_COUNT];
         private readonly bool[] zoneAvailable = new bool[ZONES_COUNT];
+
+        /// <summary>
+        /// List of high proper motion stars
+        /// </summary>
         private readonly List<UCAC4HPMStarData> hpmStars = new List<UCAC4HPMStarData>();
+
+        /// <summary>
+        /// Flag indicating catalog data is initialized
+        /// </summary>
         private bool isInitialized = false;
 
+        /// <summary>
+        /// Precessional elements for converting to J2000.0 epoch
+        /// </summary>
         public PrecessionalElements PrecessionElements0 { get; private set; }
 
         /// <summary>
