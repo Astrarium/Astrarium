@@ -27,8 +27,10 @@ namespace Astrarium.Plugins.Novae
             if (map.DaylightFactor == 1) return;
 
             var prj = map.Projection;
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             var nightMode = settings.Get("NightMode");
             bool drawLabels = settings.Get("StarsLabels") && settings.Get("NovaeLabels") && prj.Fov <= limitAllNames;
+            bool drawAll = settings.Get("NovaeDrawAll");
             Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
             Brush brushLabel = new SolidBrush(labelColor);
             var fontStarNames = settings.Get<Font>("StarsLabelsFont");
@@ -37,7 +39,7 @@ namespace Astrarium.Plugins.Novae
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
             // filter novae by magnitude and FOV
-            var novae = calc.Novae.Where(n => n.Magnitude < prj.MagLimit && Angle.Separation(prj.CenterEquatorial, n.Equatorial) < fov);
+            var novae = calc.Novae.Where(n => (n.Magnitude < prj.MagLimit || drawAll) && Angle.Separation(eqCenter, n.Equatorial) < fov);
 
             GL.Enable(GL.POINT_SMOOTH);
             GL.Enable(GL.BLEND);
@@ -48,7 +50,7 @@ namespace Astrarium.Plugins.Novae
             {
                 double alt = prj.ToHorizontal(star.Equatorial).Altitude;
                 float size = prj.GetPointSize(star.Magnitude, altitude: alt);
-                if (size > 0)
+                if (size > 0 || drawAll)
                 {
                     if ((int)size == 0) size = 1;
 

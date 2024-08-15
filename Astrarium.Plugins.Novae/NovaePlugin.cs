@@ -12,6 +12,7 @@ namespace Astrarium.Plugins.Novae
         {
             DefineSetting("Novae", true);
             DefineSetting("NovaeLabels", true);
+            DefineSetting("NovaeDrawAll", false);
             DefineSettingsSection<NovaeSettingsSection, SettingsViewModel>();
             ExportResourceDictionaries("Images.xaml");
         }
