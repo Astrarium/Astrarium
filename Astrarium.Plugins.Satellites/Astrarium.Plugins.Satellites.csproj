@@ -3,7 +3,7 @@
 		<TargetFrameworks>net451</TargetFrameworks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<UseWpf>true</UseWpf>
-		<Product>Planner</Product>
+		<Product>Satellites</Product>
 		<Description>Artificial satellites plugin</Description>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
