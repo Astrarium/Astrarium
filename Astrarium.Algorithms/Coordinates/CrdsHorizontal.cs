@@ -75,7 +75,7 @@ namespace Astrarium.Algorithms
 
         public override string ToString()
         {
-            return $"Az: {new DMS(Angle.To360(Azimuth + (MeasureAzimuthFromNorth ? 180 : 0)))}; Alt:{new DMS(Altitude)}";
+            return $"Az: {new DMS(Angle.To360(Azimuth + (MeasureAzimuthFromNorth ? 180 : 0)))}; Alt: {new DMS(Altitude)}";
         }
 
         public override bool Equals(object obj)
