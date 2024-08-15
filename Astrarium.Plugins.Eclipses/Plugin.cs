@@ -24,7 +24,9 @@ namespace Astrarium.Plugins.Eclipses
 
             #endregion UI integration
 
-            DefineSetting("EclipseMapTileServer", "", isPermanent: true);
+            DefineSetting(Settings.EclipseMapTileServer, "", isPermanent: true);
+            DefineSetting(Settings.EclipseMapOverlayTileServer, "", isPermanent: true);
+            DefineSetting(Settings.EclipseMapOverlayOpacity, 0.5f, isPermanent: true);
         }
 
         private void ShowSolarEclipsesView()

@@ -582,19 +582,19 @@ namespace System.Windows.Forms
             {
                 new OfflineTileServer(),
                 new OpenStreetMapTileServer(userAgent),
-                new StamenTerrainTileServer(),
+                //new StamenTerrainTileServer(),
                 new OpenTopoMapServer(userAgent),
                 new WikimapiaTileServer(userAgent),
                 new EsriSatelliteMapsTileServer(userAgent),
-                new DoubleGisTileServer(userAgent),
+                //new DoubleGisTileServer(userAgent),
                 new GoogleMapsSatelliteTileServer(userAgent),
                 new GoogleMapsRoadmapTileServer(userAgent),
                 new GoogleMapsHybridTileServer(userAgent),
                 new BingMapsAerialTileServer(),
                 new BingMapsRoadsTileServer(),
                 new BingMapsHybridTileServer(),
-                new YandexRoadMapsTileServer(userAgent),
-                new YandexSatelliteMapsTileServer(userAgent)
+                //new YandexRoadMapsTileServer(userAgent),
+                //new YandexSatelliteMapsTileServer(userAgent)
             };
         }
 

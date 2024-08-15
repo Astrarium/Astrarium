@@ -257,6 +257,9 @@ namespace Astrarium.ViewModels
             protected set => SetValue(nameof(TileServers), value);
         }
 
+        /// <summary>
+        /// Selected overlay opacity
+        /// </summary>
         public float OverlayOpacity
         {
             get => GetValue(nameof(OverlayOpacity), 0.5f);

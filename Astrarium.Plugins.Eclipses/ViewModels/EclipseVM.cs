@@ -92,6 +92,39 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         }
 
         /// <summary>
+        /// Selected overlay opacity
+        /// </summary>
+        public float OverlayOpacity
+        {
+            get => GetValue(nameof(OverlayOpacity), 0.5f);
+            set
+            {
+                SetValue(nameof(OverlayOpacity), value);
+                if (settings.Get<float>(nameof(OverlayOpacity)) != value)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayOpacity, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collection of allowed overlay opacities
+        /// </summary>
+        public IEnumerable<float> OverlayOpacities
+        {
+            get => Enumerable.Range(1, 9).Select(x => x / 10f);
+        }
+
+        /// <summary>
+        /// Collection of overlay tile servers to switch between them
+        /// </summary>
+        public ICollection<ITileServer> OverlayTileServers
+        {
+            get => GetValue<ICollection<ITileServer>>(nameof(OverlayTileServers));
+            protected set => SetValue(nameof(OverlayTileServers), value);
+        }
+
+        /// <summary>
         /// Collection of markers (points) on the map
         /// </summary>
         public ObservableCollection<Marker> Markers
@@ -243,7 +276,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         }
 
         /// <summary>
-        /// Tile server of the eclipse map
+        /// Tile server of the map
         /// </summary>
         public ITileServer TileServer
         {
@@ -252,9 +285,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 SetValue(nameof(TileServer), value);
                 TileImageAttributes = GetImageAttributes();
-                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
+                if (settings.Get<string>(Settings.EclipseMapTileServer) != value.Name)
                 {
-                    settings.SetAndSave("EclipseMapTileServer", value.Name);
+                    settings.SetAndSave(Settings.EclipseMapTileServer, value.Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overlay tile server of the map
+        /// </summary>
+        public ITileServer OverlayTileServer
+        {
+            get => GetValue<ITileServer>(nameof(OverlayTileServer));
+            set
+            {
+                SetValue(nameof(OverlayTileServer), value);
+                if (value == null)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayTileServer, "");
+                }
+                else if (settings.Get<string>(Settings.EclipseMapOverlayTileServer) != value.Name)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayTileServer, value.Name);
                 }
             }
         }
@@ -444,17 +497,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
             string userAgent = $"Astrarium/{Application.ProductVersion}";
 
-            TileServers = new List<ITileServer>()
-            {
-                new OfflineTileServer(),
-                new OpenStreetMapTileServer(userAgent),
-                new StamenTerrainTileServer(),
-                new OpenTopoMapServer(userAgent)
-            };
+            TileServers = MapControl.CreateTileServers(userAgent);
+            OverlayTileServers = MapControl.CreateOverlayServers(userAgent);
 
-            string tileServerName = settings.Get<string>("EclipseMapTileServer");
+            string tileServerName = settings.Get<string>(Settings.EclipseMapTileServer);
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));
-            TileServer = tileServer ?? TileServers.First();
+
+            string overlayServerName = settings.Get<string>(Settings.EclipseMapOverlayTileServer);
+            var overlayServer = OverlayTileServers.FirstOrDefault(s => s.Name.Equals(overlayServerName));
+
+            SetValue(nameof(TileServer), tileServer ?? TileServers.First());
+            SetValue(nameof(OverlayTileServer), overlayServer);
+            SetValue(nameof(OverlayOpacity), settings.Get(Settings.EclipseMapOverlayOpacity, 0.5f));
+
             IsDarkMode = settings.Get("NightMode");
 
             meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);

@@ -182,19 +182,19 @@
                 TextAlignment="Center" 
                 VerticalAlignment="Center" />
 
-            <Grid Margin="2" Height="20" Grid.Row="2" Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}" HorizontalAlignment="Stretch">
+            <Grid Height="26" Background="{StaticResource BrushControlDarkBackground}" Grid.Row="2" Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" MinWidth="200" />
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" MinWidth="200" MaxWidth="400" />
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal" Grid.Column="0">
-                    <TextBlock Text="Map:" Margin="2 0 4 0" />
+                <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{t:Text LocationWindow.Map}" Margin="2 0 4 0" />
                     <ComboBox Padding="4 -1" Margin="2 0" Width="140" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
-                    <TextBlock Text="Light Pollution Overlay:" Margin="4 0 4 0" />
-                    
-                    <c:NullItemSelectorAdapter NullItem="None" ItemsSource="{Binding OverlayTileServers, Mode=OneTime}">
+                    <TextBlock Text="{t:Text LocationWindow.Overlay}" Margin="4 0 4 0" />
+
+                    <c:NullItemSelectorAdapter NullItem="{t:Text LocationWindow.Overlay.None}" ItemsSource="{Binding OverlayTileServers, Mode=OneTime}">
                         <ComboBox Padding="4 -1" Margin="2 0" Width="100" Height="18" SelectedItem="{Binding OverlayTileServer}" />
                     </c:NullItemSelectorAdapter>
 
