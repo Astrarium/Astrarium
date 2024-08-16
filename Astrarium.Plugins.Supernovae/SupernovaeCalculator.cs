@@ -184,8 +184,11 @@ namespace Astrarium.Plugins.Supernovae
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
+            searchString = searchString.Replace(" ", "");
             return Supernovae
-                .Where(m => m.Names.Any(n => n.Equals(searchString, StringComparison.OrdinalIgnoreCase) || n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) || n.Replace(" ", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(m => m.Names.Select(name => name.Replace(" ", "")).Any(name =>
+                    name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    (name.StartsWith("SN") && name.Substring(2).Trim().StartsWith(searchString, StringComparison.OrdinalIgnoreCase))))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
