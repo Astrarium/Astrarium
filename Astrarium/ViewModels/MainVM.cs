@@ -502,8 +502,7 @@ namespace Astrarium.ViewModels
 
             // Context menu initialization
 
-            var menuInfo = new MenuItem("$ContextMenu.Info", GetObjectInfoCommand);
-            menuInfo.HotKey = new KeyGesture(Key.I, ModifierKeys.Control);
+            var menuInfo = new MenuItem("$ContextMenu.Info", GetObjectInfoCommand) { HotKey = new KeyGesture(Key.I, ModifierKeys.Control) };
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
@@ -515,12 +514,11 @@ namespace Astrarium.ViewModels
             ContextMenuItems.Add(null);
 
             ContextMenuItems.Add(new MenuItem("$ContextMenu.Center", CenterOnPointCommand));
-            ContextMenuItems.Add(new MenuItem("$ContextMenu.Search", SearchObjectCommand));
+            ContextMenuItems.Add(new MenuItem("$ContextMenu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") });
 
             ContextMenuItems.Add(null);
 
-            var menuEphemerides = new MenuItem("$ContextMenu.Ephemerides", GetObjectEphemerisCommand);
-            menuEphemerides.HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E");
+            var menuEphemerides = new MenuItem("$ContextMenu.Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") };
             menuEphemerides.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
                 SourceToTargetConverter = (o) => map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any()
