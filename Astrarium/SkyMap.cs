@@ -614,7 +614,7 @@ namespace Astrarium
         /// <inheritdoc />
         public void DrawObjectLabel(string label, Font font, Brush brush, PointF p, float size)
         {
-            SizeF b = System.Windows.Forms.TextRenderer.MeasureText(label, font);
+            SizeF b = System.Windows.Forms.TextRenderer.MeasureText($"{label} ", font);
 
             float s = size > 5 ? (size / 2.8284f + 2) : 1;
             for (int x = 0; x < 2; x++)
@@ -626,7 +626,7 @@ namespace Astrarium
                     RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
                     if (!labels.Any(l => l.IntersectsWith(r)))
                     {
-                        GL.DrawString(label, font, brush, r.Location);
+                        GL.DrawString($"{label} ", font, brush, r.Location);
                         labels.Add(r);
                         return;
                     }
