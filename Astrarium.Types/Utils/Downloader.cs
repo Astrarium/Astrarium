@@ -73,27 +73,5 @@ namespace Astrarium.Types.Utils
                 while (bytesRead > 0);
             }
         }
-
-        //public static void DownloadFtp(Uri uri, string localPath, CancellationTokenSource cancelTokenSource, Progress<double> progress)
-        //{
-        //    FtpWebRequest downloadRequest = (FtpWebRequest)WebRequest.Create(uri);
-        //    downloadRequest.Timeout = 10000;
-        //    downloadRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-        //    downloadRequest.Credentials = new NetworkCredential();
-
-        //    using (FtpWebResponse downloadResponse = (FtpWebResponse)downloadRequest.GetResponse())
-        //    using (Stream responseStream = downloadResponse.GetResponseStream())
-        //    using (Stream fileStream = File.Create(localPath))
-        //    {
-        //        responseStream.ReadTimeout = 10000;
-
-        //        byte[] buffer = new byte[1024 * 10];
-        //        int read;
-        //        while ((read = responseStream.Read(buffer, 0, buffer.Length)) > 0)
-        //        {
-        //            fileStream.Write(buffer, 0, read);
-        //        }
-        //    }
-        //}
     }
 }

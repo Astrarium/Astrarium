@@ -107,11 +107,16 @@ namespace Astrarium.Plugins.SolarSystem
             .AddHeader(Text.Get("GenericMoon.OrbitalElements"));
 
             decimal validityPeriod = settings.Get<decimal>("GenericMoonsOrbitalElementsValidity");
-            //if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
+            if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
             {
-                info.AddRow(Text.Get("GenericMoon.OrbitalElements.Obsolete"), () => { 
-                    // TODO: update
-                }, Text.Get("GenericMoon.OrbitalElements.Update"));
+                info.AddRow(
+                    Text.Get("GenericMoon.OrbitalElements.Obsolete"), 
+                    () => { 
+                        orbitalElementsManager.Update(GenericMoons.Select(x => x.Data));
+                        info.Clear();
+                        GetInfo(info);
+                    }, 
+                    Text.Get("GenericMoon.OrbitalElements.Update"));
             }
 
             info

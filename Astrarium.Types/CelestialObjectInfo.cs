@@ -53,6 +53,11 @@ namespace Astrarium.Types
             return this;
         }
 
+        public void Clear()
+        {
+            InfoElements.Clear();
+        }
+
         public CelestialObjectInfo<T> AddHeader(string text)
         {
             InfoElements.Add(new InfoElementHeader()

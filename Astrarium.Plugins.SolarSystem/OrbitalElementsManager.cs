@@ -11,28 +11,33 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Astrarium.Plugins.SolarSystem.Objects;
+using Astrarium.Types.Utils;
+using System.Threading;
 
 namespace Astrarium.Plugins.SolarSystem
 {
-    internal class OrbitalElementsManager
+    [Singleton]
+    public class OrbitalElementsManager
     {
-        private static readonly string OrbitalElementsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements");
+        private static readonly string OrbitalElementsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements");
+
+        private static readonly string OrbitalElementsFilePath = Path.Combine(OrbitalElementsDirectory, "SatellitesOrbits.dat");
 
         private ISettings settings;
 
-        internal OrbitalElementsManager(ISettings settings)
+        public OrbitalElementsManager(ISettings settings)
         {
             this.settings = settings;
 
-            if (!Directory.Exists(OrbitalElementsPath))
+            if (!Directory.Exists(OrbitalElementsDirectory))
             {
                 try
                 {
-                    Directory.CreateDirectory(OrbitalElementsPath);
+                    Directory.CreateDirectory(OrbitalElementsDirectory);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"Unable to create directory for orbital elements: {OrbitalElementsPath}, Details: {ex}");
+                    Log.Error($"Unable to create directory for orbital elements: {OrbitalElementsDirectory}, Details: {ex}");
                 }
             }
         }
@@ -41,14 +46,13 @@ namespace Astrarium.Plugins.SolarSystem
         {
             List<GenericMoonData> orbits = null;
             JsonSerializer serializer = new JsonSerializer();
-            string cachedFilePath = Path.Combine(OrbitalElementsPath, "SatellitesOrbits.dat");
 
-            if (File.Exists(cachedFilePath))
+            if (File.Exists(OrbitalElementsFilePath))
             {
                 Log.Debug("Read cached orbital elements file...");
                 try
                 {
-                    using (StreamReader file = File.OpenText(cachedFilePath))
+                    using (StreamReader file = File.OpenText(OrbitalElementsFilePath))
                     {
                         orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
                     }
@@ -99,53 +103,7 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         Log.Debug($"Found {obsoleteOrbitsCount} obsolete orbital elements, downloading from web.");
 
-                        string startDate = today.ToString("yyyy-MM-dd");
-                        string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
-
-                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-                        foreach (var orbit in obsoleteOrbits)
-                        {
-                            string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
-                            try
-                            {
-                                var request = WebRequest.Create(url);
-                                using (var response = (HttpWebResponse)(request.GetResponse()))
-                                using (var receiveStream = response.GetResponseStream())
-                                using (var reader = new StreamReader(receiveStream))
-                                {
-                                    if (response.StatusCode == HttpStatusCode.OK)
-                                    {
-                                        ParseOrbit(orbit, reader.ReadToEnd());
-                                    }
-                                    else
-                                    {
-                                        Log.Error($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error($"Unable to download orbital elements from url: {url}, Details: {ex}");
-                            }
-                        }
-
-                        Log.Debug($"{orbits.Count} orbital elements downloaded.");
-                        Log.Debug("Saving orbital elements to cache...");
-
-                        try
-                        {
-                            using (StreamWriter file = File.CreateText(cachedFilePath))
-                            {
-                                serializer.Formatting = Formatting.Indented;
-                                serializer.Serialize(file, orbits);
-                            }
-                            Log.Debug("Orbital elements saved to cache.");
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error($"Unable to save orbital elements to cache, Details: {ex}");
-                        }
+                        DoUpdate(obsoleteOrbits);
                     });
                 }
                 else
@@ -155,6 +113,100 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             return orbits;
+        }
+
+        /// <summary>
+        /// Updates orbital elements with showing progress dialog
+        /// </summary>
+        public async void Update(IEnumerable<GenericMoonData> orbits)
+        {
+            var tokenSource = new CancellationTokenSource();
+            var progress = new Progress<double>();
+
+            // TODO: localize
+            ViewManager.ShowProgress("$Wait", "Updating...", tokenSource, progress);
+
+            int updated = await Task.Run(() => DoUpdate(orbits, progress, tokenSource));
+
+            if (!tokenSource.IsCancellationRequested)
+            {
+                tokenSource.Cancel();
+
+                if (updated > 0)
+                {
+                    // TODO: localize
+                    ViewManager.ShowMessageBox("Done", $"Total count of updated orbital elements: {updated}");
+                }
+            }
+        }
+
+        private int DoUpdate(IEnumerable<GenericMoonData> orbits, IProgress<double> progress = null, CancellationTokenSource token = null)
+        {
+            DateTime today = DateTime.Today;
+
+            string startDate = today.ToString("yyyy-MM-dd");
+            string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
+
+            int processed = 0;
+            int updated = 0;
+            double totalCount = orbits.Count();
+
+            Log.Debug($"Updating orbital elements...");
+
+            foreach (var orbit in orbits)
+            {
+                if (token != null && token.IsCancellationRequested)
+                    return updated;
+
+                if (progress != null)
+                    progress.Report(processed / totalCount * 100);
+
+                Uri url = new Uri($"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'");
+                string tempPath = Path.GetTempFileName();
+
+                try
+                {
+                    Downloader.Download(url, tempPath);
+                    ParseOrbit(orbit, File.ReadAllText(tempPath));
+                    updated++;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                }
+                finally
+                {
+                    FileSystem.DeleteFile(tempPath);
+                }
+
+                processed++;
+            }
+
+            Log.Debug($"{updated} orbital elements updated.");
+
+            SaveToCache(orbits);
+
+            return updated;
+        }
+
+        private void SaveToCache(IEnumerable<GenericMoonData> orbits)
+        {
+            Log.Debug("Saving orbital elements to cache...");
+
+            JsonSerializer serializer = new JsonSerializer();
+            try
+            {
+                using (StreamWriter file = File.CreateText(OrbitalElementsFilePath))
+                {
+                    serializer.Formatting = Formatting.Indented;
+                    serializer.Serialize(file, orbits);
+                }
+                Log.Debug("Orbital elements saved to cache.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to save orbital elements to cache, Details: {ex}");
+            }
         }
 
         private void ParseOrbit(GenericMoonData orbit, string response)

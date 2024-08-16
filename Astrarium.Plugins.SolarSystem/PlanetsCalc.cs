@@ -17,7 +17,9 @@ namespace Astrarium.Plugins.SolarSystem
         ICelestialObjectCalc<NeptuneMoon>,
         ICelestialObjectCalc<GenericMoon>
     {
-        private ISettings settings;
+        private readonly ISettings settings;
+        private readonly OrbitalElementsManager orbitalElementsManager;
+
         private Planet[] planets = new Planet[8];
         private Pluto pluto = new Pluto();
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
@@ -55,15 +57,16 @@ namespace Astrarium.Plugins.SolarSystem
 
         public override void Initialize()
         {
-            var orbits = new OrbitalElementsManager(settings).Load();
+            var orbits = orbitalElementsManager.Load();
             foreach (var orbit in orbits)
             {
                 genericMoons.Add(new GenericMoon() { Data = orbit });
             }
         }
 
-        public PlanetsCalc(ISettings settings)
+        public PlanetsCalc(OrbitalElementsManager orbitalElementsManager, ISettings settings)
         {
+            this.orbitalElementsManager = orbitalElementsManager;
             this.settings = settings;
 
             for (int i = 0; i < planets.Length; i++)

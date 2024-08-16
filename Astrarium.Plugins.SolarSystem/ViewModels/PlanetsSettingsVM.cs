@@ -9,18 +9,29 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem.ViewModels
 {
     public class PlanetsSettingsVM : SettingsViewModel
     {
+        private readonly PlanetsCalc calc;
+        private readonly OrbitalElementsManager orbitalElementsManager;
+
         public Command UpdateGRSLongitudeCommand { get; private set; }
+        public Command UpdateGenericMoonsOrbitalElementsCommand { get; private set; }
 
         public bool IsGRSSectionEnabled
         {
             get => GetValue<bool>(nameof(IsGRSSectionEnabled));
             set => SetValue(nameof(IsGRSSectionEnabled), value);
+        }
+
+        public bool OrbitalElementsIsReady
+        {
+            get => GetValue<bool>(nameof(OrbitalElementsIsReady));
+            set => SetValue(nameof(OrbitalElementsIsReady), value);
         }
 
         public GreatRedSpotSettings GRSLongitude
@@ -29,9 +40,13 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => Settings.Set("GRSLongitude", value);
         }
 
-        public PlanetsSettingsVM(ISettings settings) : base(settings)
+        public PlanetsSettingsVM(PlanetsCalc calc, OrbitalElementsManager orbitalElementsManager, ISettings settings) : base(settings)
         {
+            this.calc = calc;
+            this.orbitalElementsManager = orbitalElementsManager;
             UpdateGRSLongitudeCommand = new Command(UpdateGRSLongitude);
+            UpdateGenericMoonsOrbitalElementsCommand = new Command(UpdateGenericMoonsOrbitalElements);
+            OrbitalElementsIsReady = true;
             IsGRSSectionEnabled = true;
         }
 
@@ -102,6 +117,13 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             {
                 ViewManager.ShowMessageBox("$Error", error);
             }
+        }
+
+        private void UpdateGenericMoonsOrbitalElements()
+        {
+            OrbitalElementsIsReady = false;
+            orbitalElementsManager.Update(calc.GenericMoons.Select(x => x.Data));
+            OrbitalElementsIsReady = true;
         }
     }
 }

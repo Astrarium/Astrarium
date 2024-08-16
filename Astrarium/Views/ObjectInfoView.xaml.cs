@@ -119,7 +119,7 @@ namespace Astrarium.Views
                             Grid.SetColumn(cellCaption, 0);
                             Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                             link.Inlines.Add(C.Text);
-                            link.Click += (s, e) => C.Command.Invoke();
+                            link.Click += (s, e) => { C.Command.Invoke(); SetObjectInfo(info); };
                             var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
                             Grid.SetRow(cellValue, r);
