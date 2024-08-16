@@ -705,7 +705,7 @@ namespace Astrarium.Plugins.UCAC4
                 }
             }
 
-            return stars;
+            return stars.Where(filterFunc).ToList();
         }
 
         /// <inheritdoc />
