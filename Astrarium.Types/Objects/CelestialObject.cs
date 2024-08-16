@@ -34,6 +34,7 @@ namespace Astrarium.Types
         /// </summary>
         public abstract string CommonName { get; }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             if (obj is CelestialObject celestialObject)
@@ -44,6 +45,12 @@ namespace Astrarium.Types
             {
                 return false;
             }
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return $"{Type}/{CommonName}".GetHashCode();
         }
     }
 }
