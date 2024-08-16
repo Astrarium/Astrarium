@@ -16,7 +16,7 @@ namespace Astrarium.ViewModels
     {
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
-        public Type ObjectType { get; private set; }
+        public string ObjectType { get; private set; }
         public double JulianDay { get; private set; }
 
         public ICommand CopyNameCommand { get; private set; }
