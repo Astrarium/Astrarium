@@ -23,6 +23,12 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => SetValue(nameof(IsGRSSectionEnabled), value);
         }
 
+        public GreatRedSpotSettings GRSLongitude
+        {
+            get => Settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            set => Settings.Set("GRSLongitude", value);
+        }
+
         public PlanetsSettingsVM(ISettings settings) : base(settings)
         {
             UpdateGRSLongitudeCommand = new Command(UpdateGRSLongitude);
@@ -31,13 +37,13 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
         private async void UpdateGRSLongitude()
         {
-            var grs = Settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            var grs = GRSLongitude;
 
             IsGRSSectionEnabled = false;
             double jd = grs.Epoch;
             double longitude = grs.Longitude;
             double drift = grs.MonthlyDrift;
-            bool isError = false;
+            string error = null;
 
             await Task.Run(() =>
             {
@@ -63,8 +69,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"Unable to update GRS data. Reason: {ex}");
-                    isError = true;
+                    error = $"Unable to update GRS data. Reason: {ex.Message}";
+                    Log.Error(error);
                 }
                 finally
                 {
@@ -76,22 +82,25 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                         }
                         catch { }
                     }
+
+                    if (error == null)
+                    {
+                        grs.Epoch = jd;
+                        grs.MonthlyDrift = drift;
+                        grs.Longitude = longitude;
+
+                        GRSLongitude = grs;
+
+                        NotifyPropertyChanged(nameof(GRSLongitude));
+                    }
                 }
             });
 
             IsGRSSectionEnabled = true;
 
-            if (isError)
+            if (error != null)
             {
-                ViewManager.ShowMessageBox("$Error", "Unable to update GRS data.");
-            }
-            else
-            {
-                grs.Epoch = jd;
-                grs.MonthlyDrift = drift;
-                grs.Longitude = longitude;
-
-                Settings.Set("GRSLongitude", grs);
+                ViewManager.ShowMessageBox("$Error", error);
             }
         }
     }

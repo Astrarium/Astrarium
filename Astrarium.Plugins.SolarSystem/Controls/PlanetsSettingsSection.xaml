@@ -79,13 +79,13 @@
                 </Grid.RowDefinitions>
 
                 <Label Content="{t:Text Settings.GRSLongitude.Epoch}" Grid.Column="0" Grid.Row="0" />
-                <c:DatePicker Name="Epoch" Options="MonthYear" JulianDay="{Binding Settings.GRSLongitude.Epoch}" Grid.Column="1" Grid.Row="0" />
+                <c:DatePicker Name="Epoch" Options="MonthYear" JulianDay="{Binding GRSLongitude.Epoch}" Grid.Column="1" Grid.Row="0" />
 
                 <Label Content="{t:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
-                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="Longitude" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding Settings.GRSLongitude.Longitude}" />
+                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="Longitude" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding GRSLongitude.Longitude}" />
 
                 <Label Content="{t:Text Settings.GRSLongitude.MonthlyDrift}" Grid.Column="0" Grid.Row="2" />
-                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="MonthlyDrift" Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding Settings.GRSLongitude.MonthlyDrift}" />
+                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="MonthlyDrift" Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding GRSLongitude.MonthlyDrift}" />
 
                 <Label Grid.Column="1" Grid.Row="3" Padding="0 4" VerticalAlignment="Center">
                     <Hyperlink Command="{Binding UpdateGRSLongitudeCommand}">

@@ -37,9 +37,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             DefineSetting("GRSLongitude", new GreatRedSpotSettings()
             {
-                Epoch = 2458150.5000179596,
-                MonthlyDrift = 2,
-                Longitude = 283
+                Epoch = 2460492.5,
+                MonthlyDrift = 1.54,
+                Longitude = 57
             }, isPermanent: true);
 
             DefineSetting("Moon", true);
