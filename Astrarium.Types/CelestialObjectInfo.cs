@@ -114,6 +114,17 @@ namespace Astrarium.Types
             });
             return this;
         }
+
+        public CelestialObjectInfo<T> AddRow(string text, Action command, string commandText)
+        {
+            InfoElements.Add(new InfoElementCommand()
+            {
+                Caption = text,
+                Command = command,
+                Text = commandText
+            });
+            return this;
+        }
     }
 
     public abstract class InfoElement { }
@@ -136,5 +147,12 @@ namespace Astrarium.Types
         public string Caption { get; set; }
         public Uri Uri { get; set; }
         public string UriText { get; set; }
+    }
+
+    public class InfoElementCommand : InfoElement
+    {
+        public string Caption { get; set; }
+        public Action Command { get; set; }
+        public string Text { get; set; }
     }
 }

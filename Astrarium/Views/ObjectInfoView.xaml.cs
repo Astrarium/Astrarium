@@ -110,6 +110,23 @@ namespace Astrarium.Views
                             Grid.SetColumn(cellValue, 1);
                         }
                         break;
+
+                    case InfoElementCommand C:
+                        {
+                            var cellCaption = new TextBlock() { Text = C.Caption, Padding = cellPadding };
+                            tblInfo.Children.Add(cellCaption);
+                            Grid.SetRow(cellCaption, r);
+                            Grid.SetColumn(cellCaption, 0);
+                            Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
+                            link.Inlines.Add(C.Text);
+                            link.Click += (s, e) => C.Command.Invoke();
+                            var cellValue = new TextBlock(link) { Padding = cellPadding, VerticalAlignment = VerticalAlignment.Center };
+                            tblInfo.Children.Add(cellValue);
+                            Grid.SetRow(cellValue, r);
+                            Grid.SetColumn(cellValue, 1);
+                        }
+                        break;
+
                     default:
                         break;
                 }

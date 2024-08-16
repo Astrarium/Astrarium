@@ -44,4 +44,18 @@ namespace Astrarium.Plugins.SolarSystem
             return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "E" : "W")}";
         }
     }
+
+    internal static class OrbitalElementsFormatters
+    {
+        public static IEphemFormatter M = new Formatters.UnsignedDoubleFormatter(4, "°");
+        public static IEphemFormatter P = new Formatters.UnsignedDoubleFormatter(4, " d");
+        public static IEphemFormatter n = new Formatters.UnsignedDoubleFormatter(4, " °/d");
+        public static IEphemFormatter e = new Formatters.UnsignedDoubleFormatter(4, "°");
+        public static IEphemFormatter a = new Formatters.UnsignedDoubleFormatter(4, " au");
+        public static IEphemFormatter i = new Formatters.UnsignedDoubleFormatter(4, "°");
+        public static IEphemFormatter w = new Formatters.UnsignedDoubleFormatter(4, "°");
+        public static IEphemFormatter Om = new Formatters.UnsignedDoubleFormatter(4, "°");
+        public static IEphemFormatter Pw = new Formatters.SignedDoubleFormatter(4, " y");
+        public static IEphemFormatter POm = new Formatters.SignedDoubleFormatter(4, " y");
+    }
 }

@@ -104,15 +104,28 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Magnitude")
             .AddRow("AngularDiameter")
 
-            .AddHeader(Text.Get("GenericMoon.OrbitalElements"))
-            .AddRow("OrbitalElements.Epoch", Formatters.Date.Format(new Date(info.Body.Data.jd)));
-            // TODO: add other orbital elements
+            .AddHeader(Text.Get("GenericMoon.OrbitalElements"));
 
             decimal validityPeriod = settings.Get<decimal>("GenericMoonsOrbitalElementsValidity");
-            if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
+            //if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
             {
-                info.AddRow("OrbitalElements.Obsolete", "");
+                info.AddRow(Text.Get("GenericMoon.OrbitalElements.Obsolete"), () => { 
+                    // TODO: update
+                }, Text.Get("GenericMoon.OrbitalElements.Update"));
             }
+
+            info
+            .AddRow("OrbitalElements.Epoch", Formatters.DateTime.Format(new Date(info.Body.Data.jd)))
+            .AddRow("OrbitalElements.M", OrbitalElementsFormatters.M.Format(info.Body.Data.M))
+            .AddRow("OrbitalElements.P", OrbitalElementsFormatters.P.Format(1 / info.Body.Data.n))
+            .AddRow("OrbitalElements.n", OrbitalElementsFormatters.n.Format(info.Body.Data.n))
+            .AddRow("OrbitalElements.e", OrbitalElementsFormatters.e.Format(info.Body.Data.e))
+            .AddRow("OrbitalElements.a", OrbitalElementsFormatters.a.Format(info.Body.Data.a))
+            .AddRow("OrbitalElements.i", OrbitalElementsFormatters.i.Format(info.Body.Data.i))
+            .AddRow("OrbitalElements.w", OrbitalElementsFormatters.w.Format(info.Body.Data.w))
+            .AddRow("OrbitalElements.Om", OrbitalElementsFormatters.Om.Format(info.Body.Data.Om))
+            .AddRow("OrbitalElements.Pw", OrbitalElementsFormatters.Pw.Format(info.Body.Data.Pw))
+            .AddRow("OrbitalElements.POm", OrbitalElementsFormatters.POm.Format(info.Body.Data.POm));
         }
     }
 }
