@@ -244,7 +244,7 @@ namespace Astrarium
 
         private void SkyView_MouseDoubleClick(object sender, WF.MouseEventArgs e)
         {
-            GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
+            GetMapDoubleClick(this)?.Execute(new PointF(e.X, map.Projection.ScreenHeight - e.Y));
         }
 
         private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
