@@ -48,10 +48,14 @@ namespace Astrarium.ViewModels
             set
             {
                 _SearchString = value;
-                NotifyPropertyChanged(nameof(SearchString));
+                NotifyPropertyChanged(nameof(SearchString), nameof(EmptySearchString), nameof(NothingFound));
                 DoSearch();
             }
         }
+
+        public bool NothingFound => !EmptySearchString && SelectedItem == null;
+
+        public bool EmptySearchString => string.IsNullOrEmpty(SearchString);
 
         /// <summary>
         /// Backing field for <see cref="SelectedItem"/>.
@@ -67,7 +71,7 @@ namespace Astrarium.ViewModels
             set
             {
                 _SelectedItem = value;
-                NotifyPropertyChanged(nameof(SelectedItem));
+                NotifyPropertyChanged(nameof(SelectedItem), nameof(EmptySearchString), nameof(NothingFound));
             }
         }
 
@@ -90,6 +94,8 @@ namespace Astrarium.ViewModels
             {
                 SearchResults.Add(new SearchResultItem(item, string.Join(", ", item.Names)));
             }
+
+            NotifyPropertyChanged(nameof(SearchResults));
 
             SelectedItem = SearchResults.Any() ? SearchResults[0] : null;
         }

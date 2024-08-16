@@ -20,13 +20,20 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Name="lstEmpty" 
-            Text="{t:Text SearchWindow.NothingFound}" 
+        <TextBlock Grid.Row="0"
+            Text="{t:Text SearchWindow.EmptySearchString}" 
             IsEnabled="False"
-            Visibility="{Binding SelectedItem, Converter={s:NullToVisibilityConverter}}" 
+            Visibility="{Binding EmptySearchString, Converter={s:BoolToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
-        
+
+        <TextBlock Grid.Row="0" 
+            Text="{t:Text SearchWindow.NothingFound}" 
+            IsEnabled="False"
+            Visibility="{Binding NothingFound, Converter={s:BoolToVisibilityConverter}}" 
+            TextAlignment="Center" 
+            VerticalAlignment="Center" />
+
         <ListView Grid.Row="0"     
             x:Name="lstResults"
             ItemsSource="{Binding Path=SearchResults, Mode=OneWay}"
