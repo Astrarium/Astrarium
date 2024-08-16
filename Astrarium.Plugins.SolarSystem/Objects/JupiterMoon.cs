@@ -49,6 +49,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public override string[] Names => new[] { Name };
 
+        /// <summary>
+        /// Distance from Earth, in a.u.
+        /// </summary>
         public double DistanceFromEarth { get; internal set; }
 
         /// <summary>
