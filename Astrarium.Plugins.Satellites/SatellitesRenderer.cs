@@ -56,7 +56,12 @@ namespace Astrarium.Plugins.Satellites
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             // diff, in hours
-            double deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
+            double deltaTime = 0;
+
+            lock (calculator.Locker)
+            {
+                deltaTime = (prj.Context.JulianDay - calculator.JulianDay) * 24;
+            }
 
             foreach (var s in satellites)
             {
@@ -75,7 +80,7 @@ namespace Astrarium.Plugins.Satellites
                 s.Magnitude = Norad.GetSatelliteMagnitude(s.StdMag, t.Length);
 
                 if (useMagFilter && s.Magnitude > magFilter) continue;
-                
+
                 // get size withot extinction effect
                 float size = prj.GetPointSize(s.Magnitude);
                 if (size == 0) continue;
