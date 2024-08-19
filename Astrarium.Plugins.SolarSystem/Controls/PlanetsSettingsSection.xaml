@@ -44,12 +44,12 @@
         </CheckBox>
 
 
-        <GroupBox Header="orbital elements" Margin="0 2">
+        <GroupBox Header="{t:Text Settings.GenericMoonsOrbitalElements}" Margin="0 2">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="0 2 0 0" >
-                    <CheckBox IsChecked="{Binding Settings.GenericMoonsAutoUpdate}" VerticalAlignment="Center" Content="auto update"  Margin="4 4 4 4" />
+                    <CheckBox IsChecked="{Binding Settings.GenericMoonsAutoUpdate}" VerticalAlignment="Center" Content="{t:Text Settings.GenericMoonsOrbitalElementsValidity}"  Margin="4 4 4 4" />
                     <c:NumericUpDown VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.GenericMoonsOrbitalElementsValidity}" Minimum="1" Maximum="365" />
-                    <TextBlock Margin="4" VerticalAlignment="Center" Text="days" />
+                    <TextBlock Margin="4" VerticalAlignment="Center" Text="{t:Text Settings.GenericMoonsOrbitalElementsValidity.Days}" />
                 </StackPanel>
 
                 <Grid>
@@ -58,12 +58,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="4"  Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
-                        <TextBlock IsEnabled="False" Text="last updated" Margin="0 0 4 0" />
-                        <TextBlock IsEnabled="False" Text="{Binding LastUpdated, Mode=OneWay, FallbackValue='?'}" />
+                        <TextBlock IsEnabled="False" Text="{t:Text Settings.GenericMoonsOrbitalElements.LastUpdated}" Margin="0 0 4 0" />
+                        <TextBlock IsEnabled="False" Text="{Binding GenericMoonsOrbitalElementsLastUpdated, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue='?'}" />
                     </StackPanel>
                     <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
                         <Button Margin="2" MinWidth="100" Padding="8 0" Visibility="Collapsed" Content="Elements editor" />
-                        <Button Margin="2" MinWidth="100" Padding="8 0" Command="{Binding UpdateGenericMoonsOrbitalElementsCommand}" Content="update now" />
+                        <Button Margin="2" MinWidth="100" Padding="8 0" Command="{Binding UpdateGenericMoonsOrbitalElementsCommand}" Content="{t:Text Settings.GenericMoonsOrbitalElements.UpdateNow}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

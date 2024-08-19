@@ -3,6 +3,7 @@ using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Plugins.SolarSystem.ViewModels;
 using Astrarium.Types;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Controls;
@@ -34,6 +35,7 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSetting("GenericMoons", true);
             DefineSetting("GenericMoonsAutoUpdate", false);
             DefineSetting("GenericMoonsOrbitalElementsValidity", 30m);
+            DefineSetting("GenericMoonsOrbitalElementsLastUpdated", DateTime.MinValue);
 
             DefineSetting("GRSLongitude", new GreatRedSpotSettings()
             {

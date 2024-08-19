@@ -110,12 +110,8 @@ namespace Astrarium.Plugins.SolarSystem
             if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
             {
                 info.AddRow(
-                    Text.Get("GenericMoon.OrbitalElements.Obsolete"), 
-                    () => { 
-                        orbitalElementsManager.Update(GenericMoons.Select(x => x.Data));
-                        info.Clear();
-                        GetInfo(info);
-                    }, 
+                    Text.Get("GenericMoon.OrbitalElements.Obsolete"),
+                    () => UpdateOrbitalElements(info), 
                     Text.Get("GenericMoon.OrbitalElements.Update"));
             }
 
@@ -131,6 +127,17 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("OrbitalElements.Om", OrbitalElementsFormatters.Om.Format(info.Body.Data.Om))
             .AddRow("OrbitalElements.Pw", OrbitalElementsFormatters.Pw.Format(info.Body.Data.Pw))
             .AddRow("OrbitalElements.POm", OrbitalElementsFormatters.POm.Format(info.Body.Data.POm));
+        }
+
+        private void UpdateOrbitalElements(CelestialObjectInfo<GenericMoon> info)
+        {
+            orbitalElementsManager.Update(GenericMoons.Select(x => x.Data), null, () => OnAfterUpdate(info));
+        }
+
+        private void OnAfterUpdate(CelestialObjectInfo<GenericMoon> info)
+        {
+            info.Clear();
+            GetInfo(info);
         }
     }
 }

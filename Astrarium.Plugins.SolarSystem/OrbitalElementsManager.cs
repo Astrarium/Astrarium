@@ -118,13 +118,14 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Updates orbital elements with showing progress dialog
         /// </summary>
-        public async void Update(IEnumerable<GenericMoonData> orbits)
+        public async void Update(IEnumerable<GenericMoonData> orbits, Action onBefore, Action onAfter)
         {
+            onAfter?.Invoke();
+
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
 
-            // TODO: localize
-            ViewManager.ShowProgress("$Wait", "Updating...", tokenSource, progress);
+            ViewManager.ShowProgress("$OrbitalElementsDownloader.WaitTitle", "$OrbitalElementsDownloader.WaitText", tokenSource, progress);
 
             int updated = await Task.Run(() => DoUpdate(orbits, progress, tokenSource));
 
@@ -134,10 +135,11 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (updated > 0)
                 {
-                    // TODO: localize
-                    ViewManager.ShowMessageBox("Done", $"Total count of updated orbital elements: {updated}");
+                    ViewManager.ShowMessageBox("$OrbitalElementsDownloader.CompletedTitle", Text.Get("OrbitalElementsDownloader.CompletedText", ("count", updated.ToString())));
                 }
             }
+
+            onAfter?.Invoke();
         }
 
         private int DoUpdate(IEnumerable<GenericMoonData> orbits, IProgress<double> progress = null, CancellationTokenSource token = null)
@@ -184,7 +186,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             Log.Debug($"{updated} orbital elements updated.");
 
-            SaveToCache(orbits);
+            if (processed > 0)
+            {
+                SaveToCache(orbits);
+            }
 
             return updated;
         }
@@ -201,6 +206,9 @@ namespace Astrarium.Plugins.SolarSystem
                     serializer.Formatting = Formatting.Indented;
                     serializer.Serialize(file, orbits);
                 }
+
+                settings.SetAndSave("GenericMoonsOrbitalElementsLastUpdated", DateTime.Now);
+
                 Log.Debug("Orbital elements saved to cache.");
             }
             catch (Exception ex)

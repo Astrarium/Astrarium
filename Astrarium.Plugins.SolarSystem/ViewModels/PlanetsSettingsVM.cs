@@ -34,6 +34,15 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => SetValue(nameof(OrbitalElementsIsReady), value);
         }
 
+        public string GenericMoonsOrbitalElementsLastUpdated
+        {
+            get
+            {
+                var timestamp = Settings.Get<DateTime>("GenericMoonsOrbitalElementsLastUpdated");
+                return timestamp < new DateTime(2000, 1, 1) ? Text.Get("GenericMoonsOrbitalElementsLastUpdated.Unknown") : Formatters.DateTime.Format(timestamp);
+            }
+        }
+
         public GreatRedSpotSettings GRSLongitude
         {
             get => Settings.Get<GreatRedSpotSettings>("GRSLongitude");
@@ -121,8 +130,17 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
         private void UpdateGenericMoonsOrbitalElements()
         {
+            orbitalElementsManager.Update(calc.GenericMoons.Select(x => x.Data), OnBeforeUpdate, OnAfterUpdate);
+        }
+
+        private void OnBeforeUpdate()
+        {
             OrbitalElementsIsReady = false;
-            orbitalElementsManager.Update(calc.GenericMoons.Select(x => x.Data));
+        }
+
+        private void OnAfterUpdate()
+        {
+            NotifyPropertyChanged(nameof(GenericMoonsOrbitalElementsLastUpdated));
             OrbitalElementsIsReady = true;
         }
     }
