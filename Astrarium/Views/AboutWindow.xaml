@@ -20,13 +20,16 @@
     </Window.Resources>
         <TabControl>
             <TabItem Header="{t:Text AboutWindow.VersionTab}">
-                <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="100" Width="500">
-                    <Image Source="/Logo/256.png" Height="48" Width="48" Stretch="UniformToFill" Margin="0 8 0 0"/>
-                    <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" HorizontalAlignment="Center" FontSize="28" Margin="0 -8 0 0" />
-                    <TextBlock IsEnabled="False" Text="{Binding ProductDescription, FallbackValue='Product description'}" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="Auto" Width="500">
+                    
+                    <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" HorizontalAlignment="Center" FontSize="28" />
+                    <TextBlock IsEnabled="False" Text="{Binding ProductDescription, FallbackValue='Product description'}" HorizontalAlignment="Center" FontSize="12" />
+
+
+                    <Image Source="/Logo/256.png" Height="72" Width="72" Stretch="UniformToFill" Margin="8 16 8 0"/>
                 </StackPanel>
-                <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="4 12 4 4" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="8" HorizontalAlignment="Center" />
                     <TextBlock HorizontalAlignment="Center">
                     <Hyperlink NavigateUri="https://astrarium.space/" RequestNavigate="Hyperlink_RequestNavigate">https://astrarium.space</Hyperlink>
                     </TextBlock>
