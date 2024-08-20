@@ -98,10 +98,10 @@
                 <Label Content="{t:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
                 <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="Longitude" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding GRSLongitude.Longitude}" />
 
-                <Label Content="{t:Text Settings.GRSLongitude.MonthlyDrift}" Grid.Column="0" Grid.Row="2" />
+                <Label Content="{t:Text Settings.GRSLongitude.MonthlyDrift}" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" />
                 <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="MonthlyDrift" Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding GRSLongitude.MonthlyDrift}" />
 
-                <Button Grid.Column="2" Grid.Row="2" Margin="2" MinWidth="100" Padding="8 0" Content="{t:Text Settings.GRSLongitude.Update}" Command="{Binding UpdateGRSLongitudeCommand}" />
+                <Button Grid.Column="2" Grid.Row="2" Margin="6" MinWidth="100" Padding="8 0" Content="{t:Text Settings.GRSLongitude.Update}" Command="{Binding UpdateGRSLongitudeCommand}" />
             </Grid>
             <GroupBox.IsEnabled>
                 <MultiBinding Converter="{s:BooleanAndConverter}">
