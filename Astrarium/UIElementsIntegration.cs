@@ -74,6 +74,9 @@ namespace Astrarium
             // View mode
             SettingDefinitions.Add(new SettingDefinition("ViewMode", ProjectionViewType.Horizontal));
 
+            // Time sync on start
+            SettingDefinitions.Add(new SettingDefinition("TimeSyncOnStart", false));
+
             SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(FontsSettingsSection), typeof(FontsSettingsVM)));

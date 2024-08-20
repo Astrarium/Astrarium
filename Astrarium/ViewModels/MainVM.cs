@@ -546,6 +546,11 @@ namespace Astrarium.ViewModels
             menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
 
             ContextMenuItems.Add(menuLock);
+
+            if (settings.Get("TimeSyncOnStart"))
+            {
+                sky.TimeSync = true;
+            }
         }
 
         private void Sky_TimeSyncChanged(bool timeSync)
