@@ -83,9 +83,7 @@ namespace Astrarium.Plugins.Constellations
             GL.Enable(GL.LINE_SMOOTH);
             GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
-            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
+            double fov = prj.RealFov;
 
             var color = settings.Get<Color>("ColorConstBorders").Tint(nightMode);
 

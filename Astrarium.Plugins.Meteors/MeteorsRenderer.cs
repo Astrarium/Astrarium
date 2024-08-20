@@ -33,8 +33,9 @@ namespace Astrarium.Plugins.Meteors
             bool showLabels = settings.Get("MeteorsLabels");
             int activityClassLimit = (int)settings.Get("MeteorsActivityClassLimit", MeteorActivityClass.IV);
             var labelsType = settings.Get<MeteorLabelType>("MeteorsLabelsType");
+            double fov = prj.RealFov;
 
-            var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(prj.CenterEquatorial, m.Equatorial) < prj.Fov);
+            var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(prj.CenterEquatorial, m.Equatorial) < fov);
             if (onlyActive)
             {
                 meteors = meteors.Where(m => m.IsActive);

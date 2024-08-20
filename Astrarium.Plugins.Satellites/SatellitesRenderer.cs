@@ -39,9 +39,7 @@ namespace Astrarium.Plugins.Satellites
             Brush brushLabel = new SolidBrush(labelColor);
             Brush brushEclipsedLabel = new SolidBrush(eclipsedLabelColor);
             var fontNames = settings.Get<Font>("SatellitesLabelsFont");
-
-            // real circular FOV with respect of screen borders
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.RealFov;
 
             // filter satellites
             var satellites = calculator.Satellites;

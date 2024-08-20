@@ -691,7 +691,7 @@ namespace Astrarium.ViewModels
 
         private void Zoom(int delta)
         {
-            map.Projection.Fov *= Math.Pow(1.1, -delta / 120);            
+            map.Projection.Fov *= Math.Pow(1.1, -delta / 120);
             map.Invalidate();
         }
        

@@ -52,9 +52,7 @@ namespace Astrarium.Plugins.BrightStars
             var allStars = starsCalc.Stars;
 
             double maxFov = prj.MaxFov * 0.7;
-
-            // fov
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight) + 1e-2;
+            double fov = prj.RealFov;
 
             // equatorial coordinates of screen center for current epoch
             CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);

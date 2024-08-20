@@ -34,9 +34,7 @@ namespace Astrarium.Plugins.Novae
             Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
             Brush brushLabel = new SolidBrush(labelColor);
             var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-
-            // real circular FOV with respect of screen borders
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.RealFov;
 
             // filter novae by magnitude and FOV
             var novae = calc.Novae.Where(n => (n.Magnitude < prj.MagLimit || drawAll) && Angle.Separation(eqCenter, n.Equatorial) < fov);

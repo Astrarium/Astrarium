@@ -38,7 +38,7 @@ namespace Astrarium.Plugins.MinorBodies
             var font = settings.Get<Font>("AsteroidsLabelsFont");
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             var asteroids = asteroidsCalc.Asteroids;
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.RealFov;
             Color clrEdge = colorAsteroidEdge.Tint(nightMode);
             Color clrCenter = colorAsteroid.Tint(nightMode);
 

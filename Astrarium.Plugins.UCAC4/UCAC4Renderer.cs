@@ -38,10 +38,7 @@ namespace Astrarium.Plugins.UCAC4
             if (daylightFactor == 1) return;
 
             var prj = map.Projection;
-
-            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
+            double fov = prj.RealFov;
 
             float magLimit = Math.Min(float.MaxValue, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
 

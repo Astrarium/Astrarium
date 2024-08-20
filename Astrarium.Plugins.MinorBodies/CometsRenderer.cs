@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.MinorBodies
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             var font = settings.Get<Font>("CometsLabelsFont");
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.RealFov;
             var comets = cometsCalc.Comets.Where(a => Angle.Separation(eqCenter, a.Equatorial) < fov + Angle.Separation(a.Equatorial, a.TailEquatorial) + a.Semidiameter / 3600);
 
             foreach (var c in comets)

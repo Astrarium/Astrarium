@@ -337,6 +337,19 @@ namespace Astrarium.Types
             }
         }
 
+        /// <summary>
+        /// Gets real field of view based on screen's width and height proportions
+        /// </summary>
+        public double RealFov
+        {
+            get
+            {
+                double w = Math.Max(ScreenWidth, ScreenHeight) / (double)Math.Min(ScreenWidth, ScreenHeight);
+                double h = Math.Min(ScreenWidth, ScreenHeight) / (double)Math.Min(ScreenWidth, ScreenHeight);
+                return Fov * Math.Sqrt(h * h + w * w) / 2;
+            }
+        }
+
         public event Action<double> FovChanged;
 
         public Vec2 Project(CrdsEquatorial eq)

@@ -476,8 +476,7 @@ namespace Astrarium.Plugins.SolarSystem
             // DRAW AS TEXTURED SPHERE
             else if (diam >= data.MinimalDiskSize && diam >= data.MaximalPointSize)
             {
-                // do not draw if out of screen
-                double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+                double fov = prj.RealFov;
 
                 var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
@@ -758,7 +757,7 @@ namespace Astrarium.Plugins.SolarSystem
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             // do not draw if out of screen
-            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            double fov = prj.RealFov;
             if (Angle.Separation(eqCenter, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
 
             float r = diam / 2;

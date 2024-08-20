@@ -61,11 +61,7 @@ namespace Astrarium.Plugins.DeepSky
             Brush brushLabel = new SolidBrush(colorLabel);
             var prj = map.Projection;
 
-            // real circular FOV with respect of screen borders
-
-            double w = Math.Max(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double h = Math.Min(prj.ScreenWidth, prj.ScreenHeight) / (double)Math.Min(prj.ScreenWidth, prj.ScreenHeight);
-            double fov = prj.Fov * Math.Sqrt(h * h + w * w) / 2;
+            double fov = prj.RealFov;
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
             // filter deep skies by:
