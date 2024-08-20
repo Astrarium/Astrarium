@@ -65,7 +65,7 @@ namespace Astrarium.Plugins.Satellites
                 settings.SetAndSave("SatellitesOrbitalElements", tleSources);
             }
             tleSource.LastUpdated = DateTime.Now;
-            calc.LoadSatellites(Path.Combine(TLE_DIR, $"{tleSource.FileName}.tle"));
+            calc.LoadSatellites(TLE_DIR, tleSource);
         }
 
         public override async void Initialize()
@@ -76,13 +76,12 @@ namespace Astrarium.Plugins.Satellites
             // user directory for satellites data exists and contains TLE files
             if (Directory.Exists(TLE_DIR) && Directory.EnumerateFiles(TLE_DIR, "*.tle").Any())
             {
-                // load TLE files that match settings
-                var tleFiles = Directory.EnumerateFiles(TLE_DIR, "*.tle")
-                    .Where(fileName => tleSources.Any(x => x.IsEnabled && x.FileName == Path.GetFileNameWithoutExtension(fileName)));
-
-                foreach (string file in tleFiles)
+                foreach (var tleSource in tleSources)
                 {
-                    calc.LoadSatellites(file);
+                    if (File.Exists(Path.Combine(TLE_DIR, $"{tleSource.FileName}.tle")))
+                    {
+                        calc.LoadSatellites(TLE_DIR, tleSource);
+                    }
                 }
             }
 

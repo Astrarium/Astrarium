@@ -16,6 +16,11 @@ namespace Astrarium.Plugins.Satellites
         /// Orbital data in TLE (two lines elements) format
         /// </summary>
         public TLE Tle { get; set; }
+
+        /// <summary>
+        /// TLE source name (file name without extension)
+        /// </summary>
+        public string Source { get; set; }
         
         /// <summary>
         /// Creates new instance of satellite

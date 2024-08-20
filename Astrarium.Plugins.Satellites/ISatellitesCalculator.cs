@@ -2,6 +2,7 @@
 {
     public interface ISatellitesCalculator
     {
-        void LoadSatellites(string tleFile);
+        void LoadSatellites(string directory, TLESource tleSource);
+        void Calculate();
     }
 }

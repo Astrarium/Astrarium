@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +13,8 @@ namespace Astrarium.Plugins.Satellites.ViewModels
 {
     public class SatellitesSettingsVM : SettingsViewModel
     {
+        private readonly ISatellitesCalculator calc;
+        private readonly ISkyMap map;
         private readonly IOrbitalElementsUpdater updater;
         private readonly ISettings settings;
 
@@ -24,12 +28,19 @@ namespace Astrarium.Plugins.Satellites.ViewModels
 
         public TLESource SelectedSource { get; set; }
 
-        public SatellitesSettingsVM(IOrbitalElementsUpdater updater, ISettings settings) : base(settings)
+        public SatellitesSettingsVM(ISatellitesCalculator calc, ISkyMap map, IOrbitalElementsUpdater updater, ISettings settings) : base(settings)
         {
+            this.calc = calc;
+            this.map = map;
             this.updater = updater;
             this.settings = settings;
 
-            Sources = new ObservableCollection<TLESource>(settings.Get<List<TLESource>>("SatellitesOrbitalElements"));
+            var sources = settings.Get<List<TLESource>>("SatellitesOrbitalElements");
+            Sources = new ObservableCollection<TLESource>(sources);
+            foreach (var source in sources)
+            {
+                source.PropertyChanged += Source_PropertyChanged;
+            }
 
             DeleteSourceCommand = new Command<TLESource>(DeleteSource);
             EditSourceCommand = new Command<TLESource>(EditSource);
@@ -38,10 +49,25 @@ namespace Astrarium.Plugins.Satellites.ViewModels
             EditSelectedSourceCommand = new Command(() => EditSource(SelectedSource));
         }
 
+        public override void Dispose()
+        {
+            foreach (var source in Sources)
+            {
+                source.PropertyChanged -= Source_PropertyChanged;
+            }
+        }
+
+        private void Source_PropertyChanged(object sender, EventArgs args)
+        {
+            calc.Calculate();
+            map.Invalidate();
+        }
+
         private void DeleteSource(TLESource tleSource)
         {
             if (ViewManager.ShowMessageBox("$Warning", "$Settings.SatellitesOrbitalElementsSources.ButtonDelete.Confirm", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
+                tleSource.PropertyChanged -= Source_PropertyChanged;
                 Sources.Remove(tleSource);
             }
         }
@@ -55,12 +81,17 @@ namespace Astrarium.Plugins.Satellites.ViewModels
                 int index = Sources.IndexOf(tleSource);
                 if (index >= 0)
                 {
-                    Sources.Insert(index, vm.GetTleSource());
+                    var source = vm.GetTleSource();
+                    source.PropertyChanged += Source_PropertyChanged;
+                    tleSource.PropertyChanged -= Source_PropertyChanged;
+                    Sources.Insert(index, source);
                     Sources.Remove(tleSource);
                 }
                 else
                 {
-                    Sources.Add(vm.GetTleSource());
+                    var source = vm.GetTleSource();
+                    source.PropertyChanged += Source_PropertyChanged;
+                    Sources.Add(source);
                 }
                 settings.Set("SatellitesOrbitalElements", Sources.ToList());
             }

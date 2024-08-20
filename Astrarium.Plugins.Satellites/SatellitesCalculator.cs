@@ -14,8 +14,13 @@ namespace Astrarium.Plugins.Satellites
     {
         private const double AU = 149597870.691;
 
+        private readonly ISky sky;
+        private readonly ISettings settings;
+
+        private List<TLESource> tleSources = new List<TLESource>();
         private List<Satellite> satellites = new List<Satellite>();
-        public ICollection<Satellite> Satellites => satellites;
+
+        public IEnumerable<Satellite> Satellites => satellites.Where(x => tleSources.Any(s => s.IsEnabled && s.FileName == x.Source));
 
         public Vec3 SunVector { get; private set; }
 
@@ -28,11 +33,10 @@ namespace Astrarium.Plugins.Satellites
 
         private Func<SkyContext, CrdsEquatorial> SunEquatorial;
 
-        private readonly ISky sky;
-
-        public SatellitesCalculator(ISky sky)
+        public SatellitesCalculator(ISky sky, ISettings settings)
         {
             this.sky = sky;
+            this.settings = settings;
         }
 
         /// <inheritdoc />
@@ -45,6 +49,20 @@ namespace Astrarium.Plugins.Satellites
 
             // Load general satellites data (names, magnitude, sizes) 
             LoadSatellitesData(satellitesDataFile);
+
+            GetTleSources();
+        }
+
+        private void GetTleSources()
+        {
+            // get current TLE sources list
+            tleSources = settings.Get<List<TLESource>>("SatellitesOrbitalElements");
+        }
+
+        public void Calculate()
+        {
+            GetTleSources();
+            Calculate(sky.Context);
         }
 
         public override void Calculate(SkyContext context)
@@ -265,10 +283,11 @@ namespace Astrarium.Plugins.Satellites
             }
         }
 
-        public void LoadSatellites(string tleFile)
+        public void LoadSatellites(string directory, TLESource tleSource)
         {
             int totalCount = 0;
             int newCount = 0;
+            string tleFile = Path.Combine(directory, $"{tleSource.FileName}.tle");
             using (var sr = new StreamReader(tleFile, Encoding.UTF8))
             {
                 while (!sr.EndOfStream)
@@ -296,6 +315,7 @@ namespace Astrarium.Plugins.Satellites
                     {
                         var satellite = new Satellite(name.Trim(), tle);
                         satellite.StdMag = GetStdMagnitude(satellite.Tle.SatelliteNumber);
+                        satellite.Source = tleSource.FileName;
                         satellites.Add(satellite);
                         newCount++;
                     }
