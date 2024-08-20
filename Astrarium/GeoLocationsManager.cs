@@ -14,11 +14,6 @@ namespace Astrarium
     public class GeoLocationsManager : IGeoLocationsManager
     {
         /// <summary>
-        /// App settings instance
-        /// </summary>
-        private readonly ISettings settings;
-
-        /// <summary>
         /// Locker to access elements from different threads
         /// </summary>
         private object locker = new object();
@@ -31,9 +26,8 @@ namespace Astrarium
         /// <summary>
         /// Creates new instance of <see cref="GeoLocationsManager"/>
         /// </summary>
-        public GeoLocationsManager(ISettings settings)
+        public GeoLocationsManager()
         {
-            this.settings = settings;
             string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
             fileReader = new StreamReader(File.OpenRead(filePath), Encoding.UTF8);
         }
