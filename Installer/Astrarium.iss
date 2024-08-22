@@ -1,4 +1,4 @@
-; Astrarium Inno Setup project file
+п»ї; Astrarium Inno Setup project file
 ; Copyright Alexander Krutov, 2018-2024
 ; https://astrarium.space/
 
@@ -28,7 +28,7 @@ UninstallDisplayIcon  = {app}\Astrarium\Astrarium.exe
 Compression           = lzma2
 SolidCompression      = yes
 OutputBaseFilename    = Astrarium-setup
-AppCopyright          = "© Alexander Krutov, 2018-2024"
+AppCopyright          = "В© Alexander Krutov, 2018-2024"
 AppPublisher          = Alexander Krutov
 AppPublisherURL       = https://astrarium.space/
 AppUpdatesURL         = https://astrarium.space/
@@ -78,112 +78,117 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
         GoToNextFile(path, handle, size + FileSize(filename))
 
 [CustomMessages]
-ru.Astrarium                                = Ядро программы Astrarium 
+ru.Astrarium                                = РЇРґСЂРѕ РїСЂРѕРіСЂР°РјРјС‹ Astrarium 
 en.Astrarium                                = Astrarium application core
 #define sz_Astrarium                        = CalcDirSize('..\Deploy\Astrarium')
 sz_Astrarium                                = {#CalcPackageSize('..\Deploy\Astrarium')}
 
-ru.Astrarium_Plugins_SolarSystem            = Солнце, Луна и планеты
+ru.Astrarium_Plugins_SolarSystem            = РЎРѕР»РЅС†Рµ, Р›СѓРЅР° Рё РїР»Р°РЅРµС‚С‹
 en.Astrarium_Plugins_SolarSystem            = Sun, Moon and planets
 #define sz_Astrarium_Plugins_SolarSystem    = CalcDirSize('..\Deploy\Astrarium.Plugins.SolarSystem')
 sz_Astrarium_Plugins_SolarSystem            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.SolarSystem')}
 
-ru.Astrarium_Plugins_BrightStars            = Каталог ярких звёзд
+ru.Astrarium_Plugins_BrightStars            = РљР°С‚Р°Р»РѕРі СЏСЂРєРёС… Р·РІС‘Р·Рґ
 en.Astrarium_Plugins_BrightStars            = Bright Stars Catalogue
 #define sz_Astrarium_Plugins_BrightStars    = CalcDirSize('..\Deploy\Astrarium.Plugins.BrightStars')
 sz_Astrarium_Plugins_BrightStars            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.BrightStars')}
 
-ru.Astrarium_Plugins_Constellations         = Линии, названия и границы созвездий
+ru.Astrarium_Plugins_Constellations         = Р›РёРЅРёРё, РЅР°Р·РІР°РЅРёСЏ Рё РіСЂР°РЅРёС†С‹ СЃРѕР·РІРµР·РґРёР№
 en.Astrarium_Plugins_Constellations         = Constellations lines, names and boundaries
 #define sz_Astrarium_Plugins_Constellations = CalcDirSize('..\Deploy\Astrarium.Plugins.Constellations')
 sz_Astrarium_Plugins_Constellations         = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Constellations')}
 
-ru.Astrarium_Plugins_DeepSky                = Объекты дальнего космоса
-en.Astrarium_Plugins_DeepSky                = Deep Sky Objects
-#define sz_Astrarium_Plugins_DeepSky        = CalcDirSize('..\Deploy\Astrarium.Plugins.DeepSky')
-sz_Astrarium_Plugins_DeepSky                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.DeepSky')}
-
-ru.Astrarium_Plugins_MinorBodies            = Астероиды и кометы
-en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
-#define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
-sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
-
-ru.Astrarium_Plugins_Meteors            	  = Метеорные потоки
-en.Astrarium_Plugins_Meteors            	  = Meteor showers
-#define sz_Astrarium_Plugins_Meteors    	  = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
-sz_Astrarium_Plugins_Meteors            	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
-
-ru.Astrarium_Plugins_Novae          		    = Новые звёзды
-en.Astrarium_Plugins_Novae             		  = Novae stars
-#define sz_Astrarium_Plugins_Novae     		  = CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
-sz_Astrarium_Plugins_Novae              	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
-
-ru.Astrarium_Plugins_Supernovae          	 = Сверхновые звёзды
-en.Astrarium_Plugins_Supernovae             = Supernovae stars
-#define sz_Astrarium_Plugins_Supernovae     = CalcDirSize('..\Deploy\Astrarium.Plugins.Supernovae')
-sz_Astrarium_Plugins_Supernovae              = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Supernovae')}
-
-ru.Astrarium_Plugins_Satellites          	= Искусственные спутники Земли
-en.Astrarium_Plugins_Satellites             = Artificial satellites
-#define sz_Astrarium_Plugins_Satellites     = CalcDirSize('..\Deploy\Astrarium.Plugins.Satellites')
-sz_Astrarium_Plugins_Satellites             = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Satellites')}
-
-ru.Astrarium_Plugins_Eclipses               = Затмения
-en.Astrarium_Plugins_Eclipses               = Eclipses
-#define sz_Astrarium_Plugins_Eclipses       = CalcDirSize('..\Deploy\Astrarium.Plugins.Eclipses')
-sz_Astrarium_Plugins_Eclipses               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Eclipses')}
-
-ru.Astrarium_Plugins_JupiterMoons           = Спутники Юпитера и БКП
-en.Astrarium_Plugins_JupiterMoons           = Jupiter moons events and GRS
-#define sz_Astrarium_Plugins_JupiterMoons   = CalcDirSize('..\Deploy\Astrarium.Plugins.JupiterMoons')
-sz_Astrarium_Plugins_JupiterMoons           = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.JupiterMoons')}
-
-ru.Astrarium_Plugins_Grids                  = Линии и сетки
+ru.Astrarium_Plugins_Grids                  = Р›РёРЅРёРё Рё СЃРµС‚РєРё
 en.Astrarium_Plugins_Grids                  = Celestial grids and lines
 #define sz_Astrarium_Plugins_Grids          = CalcDirSize('..\Deploy\Astrarium.Plugins.Grids')
 sz_Astrarium_Plugins_Grids                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Grids')}
 
-ru.Astrarium_Plugins_Horizon                = Линия горизонта
-en.Astrarium_Plugins_Horizon                = Horizon
+ru.Astrarium_Plugins_DeepSky                = РћР±СЉРµРєС‚С‹ РґР°Р»СЊРЅРµРіРѕ РєРѕСЃРјРѕСЃР°
+en.Astrarium_Plugins_DeepSky                = Deep Sky Objects
+#define sz_Astrarium_Plugins_DeepSky        = CalcDirSize('..\Deploy\Astrarium.Plugins.DeepSky')
+sz_Astrarium_Plugins_DeepSky                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.DeepSky')}
+
+ru.Astrarium_Plugins_MinorBodies            = РђСЃС‚РµСЂРѕРёРґС‹ Рё РєРѕРјРµС‚С‹
+en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
+#define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
+sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
+
+ru.Astrarium_Plugins_Meteors            	  = РњРµС‚РµРѕСЂРЅС‹Рµ РїРѕС‚РѕРєРё
+en.Astrarium_Plugins_Meteors            	  = Meteor showers
+#define sz_Astrarium_Plugins_Meteors    	  = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
+sz_Astrarium_Plugins_Meteors            	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
+
+ru.Astrarium_Plugins_Novae          		    = РќРѕРІС‹Рµ Р·РІС‘Р·РґС‹
+en.Astrarium_Plugins_Novae             		  = Novae stars
+#define sz_Astrarium_Plugins_Novae     		  = CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
+sz_Astrarium_Plugins_Novae              	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
+
+ru.Astrarium_Plugins_Supernovae          	 = РЎРІРµСЂС…РЅРѕРІС‹Рµ Р·РІС‘Р·РґС‹
+en.Astrarium_Plugins_Supernovae             = Supernovae stars
+#define sz_Astrarium_Plugins_Supernovae     = CalcDirSize('..\Deploy\Astrarium.Plugins.Supernovae')
+sz_Astrarium_Plugins_Supernovae              = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Supernovae')}
+
+ru.Astrarium_Plugins_Satellites          	= РСЃРєСѓСЃСЃС‚РІРµРЅРЅС‹Рµ СЃРїСѓС‚РЅРёРєРё Р—РµРјР»Рё
+en.Astrarium_Plugins_Satellites             = Artificial satellites
+#define sz_Astrarium_Plugins_Satellites     = CalcDirSize('..\Deploy\Astrarium.Plugins.Satellites')
+sz_Astrarium_Plugins_Satellites             = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Satellites')}
+
+ru.Astrarium_Plugins_Eclipses               = Р—Р°С‚РјРµРЅРёСЏ
+en.Astrarium_Plugins_Eclipses               = Eclipses
+#define sz_Astrarium_Plugins_Eclipses       = CalcDirSize('..\Deploy\Astrarium.Plugins.Eclipses')
+sz_Astrarium_Plugins_Eclipses               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Eclipses')}
+
+ru.Astrarium_Plugins_JupiterMoons           = РЎРїСѓС‚РЅРёРєРё Р®РїРёС‚РµСЂР° Рё Р‘РљРџ
+en.Astrarium_Plugins_JupiterMoons           = Jupiter moons events and GRS
+#define sz_Astrarium_Plugins_JupiterMoons   = CalcDirSize('..\Deploy\Astrarium.Plugins.JupiterMoons')
+sz_Astrarium_Plugins_JupiterMoons           = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.JupiterMoons')}
+
+ru.Astrarium_Plugins_Horizon                = Р“РѕСЂРёР·РѕРЅС‚ Рё Р»Р°РЅРґС€Р°С„С‚
+en.Astrarium_Plugins_Horizon                = Horizon and landscape
 #define sz_Astrarium_Plugins_Horizon        = CalcDirSize('..\Deploy\Astrarium.Plugins.Horizon')
 sz_Astrarium_Plugins_Horizon                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Horizon')}
 
-ru.Astrarium_Plugins_MilkyWay               = Контур Млечного пути
+ru.Astrarium_Plugins_Atmosphere             = РђС‚РјРѕСЃС„РµСЂР°
+en.Astrarium_Plugins_Atmosphere             = Atmosphere 
+#define sz_Astrarium_Plugins_Atmosphere     = CalcDirSize('..\Deploy\Astrarium.Plugins.Atmosphere')
+sz_Astrarium_Plugins_Atmosphere             = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Atmosphere')}
+
+ru.Astrarium_Plugins_MilkyWay               = РљРѕРЅС‚СѓСЂ РњР»РµС‡РЅРѕРіРѕ РїСѓС‚Рё
 en.Astrarium_Plugins_MilkyWay               = Milky Way outline
 #define sz_Astrarium_Plugins_MilkyWay       = CalcDirSize('..\Deploy\Astrarium.Plugins.MilkyWay')
 sz_Astrarium_Plugins_MilkyWay               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MilkyWay')}
 
-ru.Astrarium_Plugins_MeasureTool            = Инструмент Линейка
+ru.Astrarium_Plugins_MeasureTool            = РРЅСЃС‚СЂСѓРјРµРЅС‚ Р›РёРЅРµР№РєР°
 en.Astrarium_Plugins_MeasureTool            = Measure tool
 #define sz_Astrarium_Plugins_MeasureTool    = CalcDirSize('..\Deploy\Astrarium.Plugins.MeasureTool')
 sz_Astrarium_Plugins_MeasureTool            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MeasureTool')}
 
-ru.Astrarium_Plugins_Tracks                 = Инструмент Треки движения
+ru.Astrarium_Plugins_Tracks                 = РРЅСЃС‚СЂСѓРјРµРЅС‚ РўСЂРµРєРё РґРІРёР¶РµРЅРёСЏ
 en.Astrarium_Plugins_Tracks                 = Motion tracks tool
 #define sz_Astrarium_Plugins_Tracks         = CalcDirSize('..\Deploy\Astrarium.Plugins.Tracks')
 sz_Astrarium_Plugins_Tracks                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Tracks')}
 
-ru.Astrarium_Plugins_FOV                    = Инструмент Поле зрения телескопа и окуляра
+ru.Astrarium_Plugins_FOV                    = РРЅСЃС‚СЂСѓРјРµРЅС‚ РџРѕР»Рµ Р·СЂРµРЅРёСЏ С‚РµР»РµСЃРєРѕРїР° Рё РѕРєСѓР»СЏСЂР°
 en.Astrarium_Plugins_FOV                    = Field Of View plugin
 #define sz_Astrarium_Plugins_FOV            = CalcDirSize('..\Deploy\Astrarium.Plugins.FOV')
 sz_Astrarium_Plugins_FOV                    = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.FOV')}
 
-ru.Astrarium_Plugins_Tycho2                 = Звёздный каталог Tycho2
+ru.Astrarium_Plugins_Tycho2                 = Р—РІС‘Р·РґРЅС‹Р№ РєР°С‚Р°Р»РѕРі Tycho2
 en.Astrarium_Plugins_Tycho2                 = Tycho2 star catalogue
 #define sz_Astrarium_Plugins_Tycho2         = CalcDirSize('..\Deploy\Astrarium.Plugins.Tycho2')
 sz_Astrarium_Plugins_Tycho2                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Tycho2')}
 
-ru.Astrarium_Plugins_UCAC4                  = Звёздный каталог UCAC4
+ru.Astrarium_Plugins_UCAC4                  = Р—РІС‘Р·РґРЅС‹Р№ РєР°С‚Р°Р»РѕРі UCAC4
 en.Astrarium_Plugins_UCAC4                  = UCAC4 star catalogue
 #define sz_Astrarium_Plugins_UCAC4          = CalcDirSize('..\Deploy\Astrarium.Plugins.UCAC4')
 sz_Astrarium_Plugins_UCAC4                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.UCAC4')}
 
-ru.Astrarium_Plugins_ASCOM                  = Управление телескопом через ASCOM
+ru.Astrarium_Plugins_ASCOM                  = РЈРїСЂР°РІР»РµРЅРёРµ С‚РµР»РµСЃРєРѕРїРѕРј С‡РµСЂРµР· ASCOM
 en.Astrarium_Plugins_ASCOM                  = ASCOM telescope control
 #define sz_Astrarium_Plugins_ASCOM          = CalcDirSize('..\Deploy\Astrarium.Plugins.ASCOM')
 sz_Astrarium_Plugins_ASCOM                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.ASCOM')}
 
-ru.Astrarium_Plugins_Planner                = Планировщик наблюдений
+ru.Astrarium_Plugins_Planner                = РџР»Р°РЅРёСЂРѕРІС‰РёРє РЅР°Р±Р»СЋРґРµРЅРёР№
 en.Astrarium_Plugins_Planner                = Observation planner
 #define sz_Astrarium_Plugins_Planner        = CalcDirSize('..\Deploy\Astrarium.Plugins.Planner')
 sz_Astrarium_Plugins_Planner                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Planner')}
@@ -193,6 +198,9 @@ Name: Astrarium;                        Description: {cm:Astrarium};            
 Name: Astrarium_Plugins_SolarSystem;    Description: {cm:Astrarium_Plugins_SolarSystem};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_SolarSystem};  
 Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_BrightStars};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_BrightStars};  
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
+Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};
+Name: Astrarium_Plugins_Horizon;        Description: {cm:Astrarium_Plugins_Horizon};        Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Horizon};
+Name: Astrarium_Plugins_Atmosphere;     Description: {cm:Astrarium_Plugins_Atmosphere};     Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Atmosphere};
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
 Name: Astrarium_Plugins_Meteors;    	Description: {cm:Astrarium_Plugins_Meteors};    	Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Meteors};
@@ -201,8 +209,6 @@ Name: Astrarium_Plugins_Supernovae;    	Description: {cm:Astrarium_Plugins_Super
 Name: Astrarium_Plugins_Satellites;    	Description: {cm:Astrarium_Plugins_Satellites};    	Types: full;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Satellites};
 Name: Astrarium_Plugins_JupiterMoons;   Description: {cm:Astrarium_Plugins_JupiterMoons};   Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_JupiterMoons};
 Name: Astrarium_Plugins_Eclipses;       Description: {cm:Astrarium_Plugins_Eclipses};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Eclipses};
-Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};
-Name: Astrarium_Plugins_Horizon;        Description: {cm:Astrarium_Plugins_Horizon};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Horizon};
 Name: Astrarium_Plugins_MilkyWay;       Description: {cm:Astrarium_Plugins_MilkyWay};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MilkyWay};
 Name: Astrarium_Plugins_MeasureTool;    Description: {cm:Astrarium_Plugins_MeasureTool};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MeasureTool};
 Name: Astrarium_Plugins_Tracks;         Description: {cm:Astrarium_Plugins_Tracks};         Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Tracks};
