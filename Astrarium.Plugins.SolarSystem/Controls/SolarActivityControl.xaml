@@ -65,7 +65,9 @@
                                             </GridViewColumn.HeaderTemplate>
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Nmbr}" ToolTip="{t:Text SolarActivity.Nmbr}" />
+                                                    <TextBlock ToolTip="{t:Text SolarActivity.Nmbr}">
+                                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.OpenRegionLinkCommand}" CommandParameter="{Binding Nmbr}"><Run Text="{Binding Nmbr}" /></Hyperlink>
+                                                    </TextBlock>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>

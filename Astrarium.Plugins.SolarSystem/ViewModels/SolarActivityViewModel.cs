@@ -1,7 +1,9 @@
-﻿using Astrarium.Plugins.SolarSystem;
+﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.SolarSystem;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +18,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private double julianDay;
         private double utcOffset;
 
+        public Command<int> OpenRegionLinkCommand { get; private set; }
         public Command<string> MagTypeInfoCommand { get; private set; }
         public Command<string> ZurichClassificationCommand { get; private set; }
 
@@ -25,6 +28,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             this.renderer = renderer;
             this.srsManager.OnRequestComplete += Update;
 
+            OpenRegionLinkCommand = new Command<int>(OpenRegionLink);
             MagTypeInfoCommand = new Command<string>(MagTypeInfo);
             ZurichClassificationCommand = new Command<string>(ZurichClassification);
         }
@@ -97,6 +101,24 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 WolfNumber = srs.WolfNumber;
                 IsEmpty = srs == SolarRegionSummary.Empty;
                 IsLoading = false;
+            }
+        }
+
+        private void OpenRegionLink(int nmbr)
+        {
+            try
+            {
+                Date date = new Date(julianDay, utcOffset);
+                DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
+                if (dt > new DateTime(2002, 6, 14))
+                {
+                    nmbr += 10000;
+                }
+                Process.Start($"https://www.spaceweatherlive.com/en/solar-activity/region/{nmbr}.html");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to start browser: {ex.Message}");
             }
         }
 
