@@ -49,7 +49,7 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSetting("MoonMaxLibrationPoint", false);
             DefineSetting("MoonPrimeMeridian", false);
             DefineSetting("MoonEquator", false);
-            DefineSetting("MoonTextureQuality", TextureQuality.Normal);
+            DefineSetting("MoonTextureQuality", TextureQuality.High);
             DefineSetting("MoonSurfaceFeatures", true);
             DefineSetting("EarthShadowOutline", false);
 

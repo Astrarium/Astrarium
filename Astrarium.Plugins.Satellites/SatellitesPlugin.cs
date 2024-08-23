@@ -27,10 +27,10 @@ namespace Astrarium.Plugins.Satellites
 
             DefineSetting("Satellites", true);
             DefineSetting("SatellitesLabels", true);
-            DefineSetting("SatellitesShowOrbit", false);
-            DefineSetting("SatellitesShowEclipsed", false);
-            DefineSetting("SatellitesShowBelowHorizon", false);
-            DefineSetting("SatellitesUseMagFilter", false);
+            DefineSetting("SatellitesShowOrbit", true);
+            DefineSetting("SatellitesShowEclipsed", true);
+            DefineSetting("SatellitesShowBelowHorizon", true);
+            DefineSetting("SatellitesUseMagFilter", true);
             DefineSetting("SatellitesMagFilter", 4.0m);
 
             DefineSetting("ColorSatellitesOrbit", Color.FromArgb(255, 100, 0));
@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.Satellites
             {
                 new TLESource() { FileName = "Brightest", Url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle", IsEnabled = true },
                 new TLESource() { FileName = "SpaceStations", Url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle", IsEnabled = true }
-            });
+            }, isPermanent: true);
 
             DefineSetting("SatellitesAutoUpdateOrbitalElements", true);
             DefineSetting("SatellitesAutoUpdateOrbitalElementsPeriod", 1m);
