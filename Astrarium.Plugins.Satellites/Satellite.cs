@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using System.Collections.Generic;
 
 namespace Astrarium.Plugins.Satellites
 {
@@ -18,9 +19,9 @@ namespace Astrarium.Plugins.Satellites
         public TLE Tle { get; set; }
 
         /// <summary>
-        /// TLE source name (file name without extension)
+        /// TLE source names (files name without extension)
         /// </summary>
-        public string Source { get; set; }
+        public List<string> Sources { get; private set; } = new List<string>();
         
         /// <summary>
         /// Creates new instance of satellite

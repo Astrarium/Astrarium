@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.Satellites
         private List<TLESource> tleSources = new List<TLESource>();
         private List<Satellite> satellites = new List<Satellite>();
 
-        public IEnumerable<Satellite> Satellites => satellites.Where(x => tleSources.Any(s => s.IsEnabled && s.FileName == x.Source));
+        public IEnumerable<Satellite> Satellites => satellites.Where(x => tleSources.Any(s => s.IsEnabled && x.Sources.Contains(s.FileName)));
 
         public Vec3 SunVector { get; private set; }
 
@@ -134,6 +134,7 @@ namespace Astrarium.Plugins.Satellites
         private Vec3 GeocentricSatelliteVector(SkyContext c, Satellite s)
         {
             double deltaTime = (c.JulianDay - JulianDay) * 24;
+            Norad.SGP4(s.Tle, c.JulianDay, s.Position, s.Velocity);
             return s.Position + deltaTime * s.Velocity;
         }
 
@@ -186,11 +187,11 @@ namespace Astrarium.Plugins.Satellites
                 .SetTitle(string.Join(", ", s.Names))
                 .SetSubtitle(Text.Get("Satellite.Type"))
 
-                .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
+                .AddRow("Constellation", Constellations.FindConstellation(eq, c.JulianDay))
 
                 .AddHeader(Text.Get("Satellite.Equatorial"))
-                .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
-                .AddRow("Equatorial.Delta", s.Equatorial.Delta)
+                .AddRow("Equatorial.Alpha", eq.Alpha)
+                .AddRow("Equatorial.Delta", eq.Delta)
 
                 .AddHeader(Text.Get("Satellite.Horizontal"))
                 .AddRow("Horizontal.Azimuth", hor.Azimuth)
@@ -305,6 +306,10 @@ namespace Astrarium.Plugins.Satellites
                     // update TLE if newer
                     if (existing != null)
                     {
+                        if (!existing.Sources.Contains(tleSource.FileName))
+                        {
+                            existing.Sources.Add(tleSource.FileName);
+                        }
                         if (existing.Tle.Epoch < tle.Epoch)
                         {
                             existing.Tle = tle;
@@ -315,7 +320,7 @@ namespace Astrarium.Plugins.Satellites
                     {
                         var satellite = new Satellite(name.Trim(), tle);
                         satellite.StdMag = GetStdMagnitude(satellite.Tle.SatelliteNumber);
-                        satellite.Source = tleSource.FileName;
+                        satellite.Sources.Add(tleSource.FileName);
                         satellites.Add(satellite);
                         newCount++;
                     }
