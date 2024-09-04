@@ -14,9 +14,9 @@ namespace Astrarium.Plugins.Meteors
             DefineSetting("MeteorsOnlyActive", true);
             DefineSetting("MeteorsLabels", true);
             DefineSetting("MeteorsLabelsType", MeteorLabelType.Name);
-            DefineSetting("ColorMeteors", Color.FromArgb(140, 16, 53));
+            DefineSetting("ColorMeteors", Color.MediumOrchid);
 
-            DefineSetting("MeteorsLabelsFont", new Font("Arial", 8));
+            DefineSetting("MeteorsLabelsFont", new Font("Arial", 9));
 
             MenuItems.Add(MenuItemPosition.MainMenuTools,
                 new MenuItem("$Astrarium.Plugins.Meteors.ToolsMenu",

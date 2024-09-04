@@ -33,9 +33,9 @@ namespace Astrarium.Plugins.Satellites
             DefineSetting("SatellitesUseMagFilter", true);
             DefineSetting("SatellitesMagFilter", 4.0m);
 
-            DefineSetting("ColorSatellitesOrbit", Color.FromArgb(255, 100, 0));
-            DefineSetting("ColorSatellitesLabels", Color.FromArgb(255, 255, 0));
-            DefineSetting("ColorEclipsedSatellitesLabels", Color.FromArgb(50, 50, 0));
+            DefineSetting("ColorSatellitesOrbit", Color.Yellow);
+            DefineSetting("ColorSatellitesLabels", Color.YellowGreen);
+            DefineSetting("ColorEclipsedSatellitesLabels", Color.DarkOliveGreen);
             DefineSetting("SatellitesLabelsFont", new Font("Arial", 8));
 
             DefineSetting("SatellitesOrbitalElements", new List<TLESource>()

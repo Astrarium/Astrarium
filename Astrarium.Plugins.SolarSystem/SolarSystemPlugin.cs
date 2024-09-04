@@ -54,10 +54,10 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSetting("EarthShadowOutline", false);
 
             // Colors
-            DefineSetting("ColorSolarSystemLabel", Color.DimGray);
+            DefineSetting("ColorSolarSystemLabel", Color.LightGray);
 
             // Fonts
-            DefineSetting("SolarSystemLabelsFont", new Font("Arial", 8));
+            DefineSetting("SolarSystemLabelsFont", new Font("Arial", 9));
 
             #endregion Settings
 

@@ -98,7 +98,7 @@ namespace Astrarium.Plugins.ASCOM
             ascom.OnMessageShow += Ascom_OnMessageShow;
 
             DefineSetting("TelescopeMarkerColor", Color.DarkOrange);
-            DefineSetting("TelescopeMarkerFont", SystemFonts.DefaultFont);
+            DefineSetting("TelescopeMarkerFont", new Font("Arial", 9));
 
             DefineSetting("TelescopeMarkerLabel", true);
             DefineSetting("TelescopeFindCurrentPointAfterConnect", false);

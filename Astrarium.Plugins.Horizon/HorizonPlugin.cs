@@ -30,11 +30,11 @@ namespace Astrarium.Plugins.Horizon
             DefineSetting("MeasureAzimuthFromNorth", false);
 
             // Colors
-            DefineSetting("ColorCardinalDirections", Color.FromArgb(0x00, 0x99, 0x99));
-            DefineSetting("ColorHorizon", Color.FromArgb(0x00, 0x40, 0x00));
+            DefineSetting("ColorCardinalDirections", Color.SeaGreen);
+            DefineSetting("ColorHorizon", Color.DarkGreen);
 
             // Fonts
-            DefineSetting("CardinalDirectionsFont", new Font("Arial", 12));
+            DefineSetting("CardinalDirectionsFont", new Font("Arial", 14, FontStyle.Bold));
 
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
 
