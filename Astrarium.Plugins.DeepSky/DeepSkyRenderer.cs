@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Astrarium.Plugins.DeepSky
 {
@@ -32,7 +33,7 @@ namespace Astrarium.Plugins.DeepSky
             }
 
             // displayed magnitude
-            double mag = float.IsNaN(ds.Magnitude) ? 10 : ds.Magnitude;
+            double mag = float.IsNaN(ds.Magnitude) ? 12 : ds.Magnitude;
 
             // zoom level factor
             double zf = Math.Min(1, Math.Pow(10, (mag - prj.MagLimit) / -2.5));
@@ -71,7 +72,7 @@ namespace Astrarium.Plugins.DeepSky
                 // do not draw small objects for current FOV
                 (ds.Semidiameter == 0 || prj.GetDiskSize(ds.Semidiameter) > 20) &&
                 // do not draw dim objects (exceeding mag limit for current FOV)
-                ((float.IsNaN(ds.Magnitude) ? 20 : ds.Magnitude) <= prj.MagLimit) &&
+                ((float.IsNaN(ds.Magnitude) ? 10 : ds.Magnitude) <= prj.MagLimit) &&
                 // do not draw object outside current FOV
                 Angle.Separation(eqCenter, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
@@ -87,69 +88,55 @@ namespace Astrarium.Plugins.DeepSky
                 if (drawImages)
                 {
                     string path = Path.Combine(imagesPath, $"{ds.CatalogName}.jpg");
+                    hasImage = File.Exists(path);
 
-                    if (File.Exists(path))
+                    if (hasImage)
                     {
-                        hasImage = true;
                         int textureId = GL.GetTexture(path);
 
                         if (textureId > 0)
                         {
-                            double sd = ds.Semidiameter / 3600 * 2;
-                            double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+                            int brightness = GetDeepSkyBrightness(map, ds);
 
-                            Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
-                            Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
-                            Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
-                            Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
-
-                            if (p0 != null && p1 != null && p2 != null && p3 != null)
+                            if (brightness > 0)
                             {
-                                int brightness = GetDeepSkyBrightness(map, ds);
+                                Color centralColor = Color.FromArgb(brightness, 255, 255, 255).Tint(nightMode);
+                                Color edgeColor = Color.FromArgb(0, 255, 255, 255).Tint(nightMode);
 
-                                if (brightness > 0)
+                                GL.Enable(GL.TEXTURE_2D);
+                                GL.Enable(GL.BLEND);
+                                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+                                GL.BindTexture(GL.TEXTURE_2D, textureId);
+                                GL.Begin(GL.TRIANGLE_FAN);
+
+                                GL.TexCoord2(0.5, 0.5);
+                                GL.Color4(centralColor);
+                                GL.Vertex2(p.X, p.Y);
+
+                                double sdDec = ds.Semidiameter / 3600 * 2;
+                                double sdRA = sdDec / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+
+                                for (int i = 0; i <= 16; i++)
                                 {
-                                    GL.Enable(GL.TEXTURE_2D);
-                                    GL.Enable(GL.BLEND);
-                                    GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
-
-                                    GL.BindTexture(GL.TEXTURE_2D, textureId);
-                                    GL.Begin(GL.TRIANGLE_FAN);
-
-                                    GL.TexCoord2(0.5, 0.5);
-                                    GL.Color4(Color.FromArgb(brightness, 255, 255, 255).Tint(nightMode));
-                                    GL.Vertex2(p.X, p.Y);
-
-                                    GL.TexCoord2(0, 0);
-                                    GL.Color4(Color.FromArgb(0, 255, 255, 255));
-                                    GL.Vertex2(p0.X, p0.Y);
-
-                                    GL.TexCoord2(0, 1);
-                                    GL.Color4(Color.Transparent);
-                                    GL.Vertex2(p1.X, p1.Y);
-
-                                    GL.TexCoord2(1, 1);
-                                    GL.Color4(Color.Transparent);
-                                    GL.Vertex2(p2.X, p2.Y);
-
-                                    GL.TexCoord2(1, 0);
-                                    GL.Color4(Color.Transparent);
-                                    GL.Vertex2(p3.X, p3.Y);
-
-                                    GL.TexCoord2(0, 0);
-                                    GL.Color4(Color.Transparent);
-                                    GL.Vertex2(p0.X, p0.Y);
-
-                                    GL.End();
-
-                                    GL.Disable(GL.TEXTURE_2D);
-                                    GL.Disable(GL.BLEND);
+                                    double a = i / 16.0 * Math.PI * 2;
+                                    double sinA = Math.Sin(a);
+                                    double cosA = Math.Cos(a);
+                                    double tx = 0.5 + 0.5 * sinA;
+                                    double ty = 0.5 + 0.5 * cosA;
+                                    var pEdge = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA * sinA, -sdDec * cosA));
+                                    if (pEdge != null)
+                                    {
+                                        GL.TexCoord2(tx, ty);
+                                        GL.Color4(edgeColor);
+                                        GL.Vertex2(pEdge.X, pEdge.Y);
+                                    }
                                 }
-                                
-                                if (brightness < 20)
-                                {
-                                    hasImage = false;
-                                }
+
+                                GL.End();
+
+                                GL.Disable(GL.TEXTURE_2D);
+                                GL.Disable(GL.BLEND);
                             }
                         }
                     }
