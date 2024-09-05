@@ -41,6 +41,7 @@ namespace Astrarium.Plugins.MinorBodies
             double fov = prj.RealFov;
             Color clrEdge = colorAsteroidEdge.Tint(nightMode);
             Color clrCenter = colorAsteroid.Tint(nightMode);
+            Color clrPoint = Color.White.Tint(nightMode);
 
             foreach (var a in asteroids)
             {
@@ -104,7 +105,7 @@ namespace Astrarium.Plugins.MinorBodies
 
                             GL.PointSize(size);
                             GL.Begin(GL.POINTS);
-                            GL.Color3(clrCenter);
+                            GL.Color3(clrPoint);
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 
