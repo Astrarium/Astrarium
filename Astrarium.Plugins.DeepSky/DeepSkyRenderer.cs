@@ -114,17 +114,42 @@ namespace Astrarium.Plugins.DeepSky
                                 GL.Color4(centralColor);
                                 GL.Vertex2(p.X, p.Y);
 
-                                double sdDec = ds.Semidiameter / 3600 * 2;
-                                double sdRA = sdDec / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+                                // diameter in radians
+                                double dia = Angle.ToRadians(ds.Semidiameter / 3600 * 2);
 
-                                for (int i = 0; i <= 16; i++)
+                                // R.A. of the deep sky object center, in radians
+                                double ra0 = Angle.ToRadians(ds.Equatorial.Alpha);
+
+                                // Dec. of the deep sky object center, in radians
+                                double dec0 = Angle.ToRadians(ds.Equatorial.Delta);
+
+                                double sinDia = Math.Sin(dia);
+                                double cosDia = Math.Cos(dia);
+                                double sinDec0 = Math.Sin(dec0);
+                                double cosDec0 = Math.Cos(dec0);
+
+                                const int steps = 16;
+                                for (int i = 0; i <= steps; i++)
                                 {
-                                    double a = i / 16.0 * Math.PI * 2;
+                                    // iterable angle, from 0 to 2*PI
+                                    double a = (double)i / steps * Math.PI * 2;
                                     double sinA = Math.Sin(a);
                                     double cosA = Math.Cos(a);
+
+                                    // texture coordinates
                                     double tx = 0.5 + 0.5 * sinA;
                                     double ty = 0.5 + 0.5 * cosA;
-                                    var pEdge = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA * sinA, -sdDec * cosA));
+
+                                    // find R.A. and Dec. of the deep sky object' edge points
+                                    // based on:
+                                    // https://www.movable-type.co.uk/scripts/latlong.html
+                                    // "Destination point given distance and bearing from start point"
+                                    double dec = Math.Asin(sinDec0 * cosDia + cosDec0 * sinDia * Math.Cos(a + Math.PI));
+                                    double ra = ra0 + Math.Atan2(Math.Sin(a + Math.PI) * sinDia * cosDec0, cosDia - sinDec0 * Math.Sin(dec));
+
+                                    // on-screen coordinates of the edge point
+                                    var pEdge = prj.Project(new CrdsEquatorial(Angle.ToDegrees(ra), Angle.ToDegrees(dec)));
+
                                     if (pEdge != null)
                                     {
                                         GL.TexCoord2(tx, ty);
