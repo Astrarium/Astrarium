@@ -155,6 +155,11 @@ namespace Astrarium.Types
         // TODO: check this http://www.hnsky.org/star_count.htm
         public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
+        /// <summary>
+        /// Gets magnitude extinction for a given altitude
+        /// </summary>
+        /// <param name="altitude">Altitude of a point, in degrees</param>
+        /// <returns></returns>
         public float GetMagExtinction(double altitude)
         {
             if (UseExtinction && altitude > 0)
