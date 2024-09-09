@@ -42,12 +42,10 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="jd">Julian day to calculate the Carrington rotation number</param>
         /// <returns>Carrington rotation number for the given instant.</returns>
-        /// <remarks>
-        /// The formula is taken from Duffeth-Smith book, page 75.
-        /// </remarks>
         public static long CarringtonNumber(double jd)
         {
-            return Convert.ToInt64(1690 + (jd - 2444235.34) / 27.2753);
+            const double jd0 = 2398140.10155;
+            return Convert.ToInt64(Round((jd - jd0) / 27.2752316 - 0.5));
         }
 
         /// <summary>
@@ -197,6 +195,65 @@ namespace Astrarium.Algorithms
             double lambda = To360(TL - 0.00569 - 0.00478 * Sin(Omega));
 
             return new CrdsEcliptical(lambda, 0, R);
+        }
+
+        /// <summary>
+        /// Calculates heliographical coordinates of the center of solar disk.
+        /// </summary>
+        /// <param name="jd">Julian day</param>
+        /// <returns>Heliographical coordinates of the center of solar disk</returns>
+        /// <remarks>
+        /// Method is taken from AA(II), chapter 29. 
+        /// </remarks>
+        public static CrdsHeliographical Center(double jd)
+        {
+            double T = (jd - 2451545.0) / 36525.0;
+            double T2 = T * T;
+
+            // Sun's sidereial period, expressed in days
+            const double SP = 25.38;
+
+            double theta = (jd - 2398220) * 360 / SP;
+
+            // inclination of the solar equator on the ecliptic
+            double I = ToRadians(7.25);
+
+            // longitude of the ascending node of the solar equator on the ecliptic
+            double K = 73.6667 + 1.395_8333 * (jd - 2396_758) / 36525;
+
+            // geometric true longitude of the Sun
+            double L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
+
+            // mean anomaly of the Sun
+            double M = 357.52911 + 35999.05029 * T - 0.0001537 * T2;
+            M = ToRadians(M);
+
+            // Sun's equation of the center
+            double C = (1.914602 - 0.004817 * T - 0.000014 * T2) * Sin(M)
+                + (0.019993 - 0.000101 * T) * Sin(2 * M)
+                + 0.000289 * Sin(3 * M);
+
+            // True longitude of the Sun (⊙)
+            double TL = L0 + C;
+
+            // Longitude of the ascending node of the Moon's mean orbit
+            double Omega = ToRadians(125.04 - 1934.136 * T);
+
+            // Apparent longitude of the Sun
+            double lambda = To360(TL - 0.00569 - 0.00478 * Sin(Omega));
+
+            // (lambda - K) in radians
+            double lambda_K = ToRadians(lambda - K);
+
+            double sinB0 = Sin(lambda_K) * Sin(I);
+
+            double eta = Atan2(-Sin(lambda_K) * Cos(I), -Cos(lambda_K));
+
+            return new CrdsHeliographical()
+            {
+                Latitude = ToDegrees(Asin(sinB0)),
+                Longitude = To360(ToDegrees(eta) - theta)
+            };
         }
     }
 }

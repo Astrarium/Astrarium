@@ -4,6 +4,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
+	<UseWindowsForms>true</UseWindowsForms>
     <Product>Horizon</Product>
     <Description>Horizon line and ground</Description>
     <Authors>Alexander Krutov</Authors>
@@ -20,6 +21,10 @@
     <ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
   </Target>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+	
   <ItemGroup>
     <None Remove="Text.ini" />
     <EmbeddedResource Include="Text.ini" />
@@ -47,6 +52,12 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Update="Landscapes\*.*">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>

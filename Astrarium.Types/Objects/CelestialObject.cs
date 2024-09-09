@@ -1,9 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -13,9 +8,9 @@ namespace Astrarium.Types
     public abstract class CelestialObject
     {
         /// <summary>
-        /// Local horizontal coordinates of the object
+        /// Current equatorial coordinates of the object
         /// </summary>
-        public CrdsHorizontal Horizontal { get; set; }
+        public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
         /// Gets array of celestial object names
@@ -38,5 +33,24 @@ namespace Astrarium.Types
         /// In combination with object type (<see cref="Type"/>) should give a unique object identifier on the sky.
         /// </summary>
         public abstract string CommonName { get; }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj is CelestialObject celestialObject)
+            {
+                return celestialObject.Type == Type && celestialObject.CommonName == CommonName;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return $"{Type}/{CommonName}".GetHashCode();
+        }
     }
 }

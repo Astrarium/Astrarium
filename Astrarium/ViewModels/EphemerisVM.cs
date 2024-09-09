@@ -20,7 +20,7 @@ namespace Astrarium.ViewModels
 
         private readonly ISky sky;
         private CelestialObject Body;
-        private List<Ephemerides> Ephemeris;
+        private ICollection<Ephemerides> Ephemeris;
         private double StartDate;
         private double EndDate;
         private TimeSpan Step;
@@ -33,7 +33,7 @@ namespace Astrarium.ViewModels
             CloseCommand = new Command(Close);
         }
 
-        public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides)
+        public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, ICollection<Ephemerides> ephemerides)
         {
             string bodyName = body.Names.First();
             string bodyTypeName = body.GetType().Name;
@@ -57,7 +57,7 @@ namespace Astrarium.ViewModels
             };
             dateColumn.ExtendedProperties["Formatter"] = Formatters.DateTime;
             table.Columns.Add(dateColumn);
-            table.Columns.AddRange(ephemerides[0].Select(e => 
+            table.Columns.AddRange(ephemerides.ElementAt(0).Select(e => 
             {
                 var column = new DataColumn()
                 {
@@ -74,7 +74,7 @@ namespace Astrarium.ViewModels
             {
                 var row = table.NewRow();
                 row["Date"] = new Date(jdFrom + i * step.TotalDays, utcOffset);
-                foreach (var e in ephemerides[i])
+                foreach (var e in ephemerides.ElementAt(i))
                 {
                     row[e.Key] = e.Value;
                 }
@@ -124,7 +124,7 @@ namespace Astrarium.ViewModels
 
     public interface IEphemeridesWriter
     {
-        void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides);
+        void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, ICollection<Ephemerides> ephemerides);
     }
 
     public class EphemeridesCsvWriter : IEphemeridesWriter
@@ -143,7 +143,7 @@ namespace Astrarium.ViewModels
             nf.NumberDecimalSeparator = ".";
         }
 
-        public void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides)
+        public void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, ICollection<Ephemerides> ephemerides)
         {
             string bodyTypeName = body.GetType().Name;
 
@@ -155,7 +155,7 @@ namespace Astrarium.ViewModels
                 row.Append("\"");
                 row.Append(Text.Get("EphemeridesWindow.DateColumn"));
                 row.Append("\", ");
-                row.Append(string.Join(", ", ephemerides[0].Select(e => $"\"{Text.Get($"{bodyTypeName}.{e.Key}")}\"")));
+                row.Append(string.Join(", ", ephemerides.ElementAt(0).Select(e => $"\"{Text.Get($"{bodyTypeName}.{e.Key}")}\"")));
                 writer.WriteLine(row.ToString());
 
                 // content rows
@@ -167,7 +167,7 @@ namespace Astrarium.ViewModels
                     row.Append(isRawData ? jd.ToString(nf) : Formatters.DateTime.Format(new Date(jd, utcOffset)));
                     row.Append("\",");
 
-                    foreach (var e in ephemerides[i])
+                    foreach (var e in ephemerides.ElementAt(i))
                     {
                         row.Append("\"");
                         row.Append(isRawData ? Convert.ToString(e.Value, nf) : e.Formatter.Format(e.Value));

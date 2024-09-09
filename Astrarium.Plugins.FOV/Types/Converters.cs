@@ -80,22 +80,22 @@ namespace Astrarium.Plugins.FOV
             {
                 if (reader.TokenType == JsonToken.String)
                 {
-                    return new SkyColor((Color)JValue.Load(reader).ToObject(typeof(Color)));
+                    return (Color)JValue.Load(reader).ToObject(typeof(Color));
                 }
                 else
                 {
-                    return JObject.Load(reader).ToObject<SkyColor>();
+                    return JObject.Load(reader).ToObject<Color>();
                 }
             }
             catch
             {
-                return new SkyColor(Color.Plum);
+                return Color.Plum;
             }
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(SkyColor) == objectType;
+            return typeof(Color) == objectType;
         }
     }
 }

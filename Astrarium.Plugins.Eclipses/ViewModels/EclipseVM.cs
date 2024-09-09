@@ -92,6 +92,39 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         }
 
         /// <summary>
+        /// Selected overlay opacity
+        /// </summary>
+        public float OverlayOpacity
+        {
+            get => GetValue(nameof(OverlayOpacity), 0.5f);
+            set
+            {
+                SetValue(nameof(OverlayOpacity), value);
+                if (settings.Get<float>(nameof(OverlayOpacity)) != value)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayOpacity, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collection of allowed overlay opacities
+        /// </summary>
+        public IEnumerable<float> OverlayOpacities
+        {
+            get => Enumerable.Range(1, 9).Select(x => x / 10f);
+        }
+
+        /// <summary>
+        /// Collection of overlay tile servers to switch between them
+        /// </summary>
+        public ICollection<ITileServer> OverlayTileServers
+        {
+            get => GetValue<ICollection<ITileServer>>(nameof(OverlayTileServers));
+            protected set => SetValue(nameof(OverlayTileServers), value);
+        }
+
+        /// <summary>
         /// Collection of markers (points) on the map
         /// </summary>
         public ObservableCollection<Marker> Markers
@@ -243,7 +276,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         }
 
         /// <summary>
-        /// Tile server of the eclipse map
+        /// Tile server of the map
         /// </summary>
         public ITileServer TileServer
         {
@@ -252,9 +285,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 SetValue(nameof(TileServer), value);
                 TileImageAttributes = GetImageAttributes();
-                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
+                if (settings.Get<string>(Settings.EclipseMapTileServer) != value.Name)
                 {
-                    settings.SetAndSave("EclipseMapTileServer", value.Name);
+                    settings.SetAndSave(Settings.EclipseMapTileServer, value.Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overlay tile server of the map
+        /// </summary>
+        public ITileServer OverlayTileServer
+        {
+            get => GetValue<ITileServer>(nameof(OverlayTileServer));
+            set
+            {
+                SetValue(nameof(OverlayTileServer), value);
+                if (value == null)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayTileServer, "");
+                }
+                else if (settings.Get<string>(Settings.EclipseMapOverlayTileServer) != value.Name)
+                {
+                    settings.SetAndSave(Settings.EclipseMapOverlayTileServer, value.Name);
                 }
             }
         }
@@ -436,27 +489,28 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             this.observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
             this.locationsManager = locationsManager;
             this.eclipsesCalculator = eclipsesCalculator;
-            this.locationsManager.Load();
 
             SetMapColors();
 
             ChartZoomLevel = 1;
-            SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.LocationName})";
+            SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.Name})";
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
+            string userAgent = $"Astrarium/{Application.ProductVersion}";
 
-            TileServers = new List<ITileServer>()
-            {
-                new OfflineTileServer(),
-                new OpenStreetMapTileServer("Astrarium v1.0 contact astrarium@astrarium.space"),
-                new StamenTerrainTileServer(),
-                new OpenTopoMapServer()
-            };
+            TileServers = MapControl.CreateTileServers(userAgent);
+            OverlayTileServers = MapControl.CreateOverlayServers(userAgent);
 
-            string tileServerName = settings.Get<string>("EclipseMapTileServer");
+            string tileServerName = settings.Get<string>(Settings.EclipseMapTileServer);
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));
-            TileServer = tileServer ?? TileServers.First();
 
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            string overlayServerName = settings.Get<string>(Settings.EclipseMapOverlayTileServer);
+            var overlayServer = OverlayTileServers.FirstOrDefault(s => s.Name.Equals(overlayServerName));
+
+            SetValue(nameof(TileServer), tileServer ?? TileServers.First());
+            SetValue(nameof(OverlayTileServer), overlayServer);
+            SetValue(nameof(OverlayOpacity), settings.Get(Settings.EclipseMapOverlayOpacity, 0.5f));
+
+            IsDarkMode = settings.Get("NightMode");
 
             meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);
 
@@ -465,9 +519,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "Schema")
+            if (e.PropertyName == "NightMode")
             {
-                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+                IsDarkMode = settings.Get("NightMode");
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
             }
@@ -476,12 +530,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected void AddLocationMarker()
         {
             Markers.Remove(Markers.FirstOrDefault(m => m.Data as string == "CurrentLocation"));
-            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName) { Data = "CurrentLocation" });
+            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.Name) { Data = "CurrentLocation" });
         }
 
         protected void AddCitiesListMarker(CrdsGeographical g)
         {
-            Markers.Add(new Marker(ToGeo(g), citiesListMarkerStyle, g.LocationName) { MinZoomToDisplayLabel = 10, Data = "CitiesList" });
+            Markers.Add(new Marker(ToGeo(g), citiesListMarkerStyle, g.Name) { MinZoomToDisplayLabel = 10, Data = "CitiesList" });
         }
 
         private void ChartZoomIn()
@@ -529,7 +583,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void LockOnCurrentPosition()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = Text.Get("EclipseView.LockedPoint");
+            g.Name = Text.Get("EclipseView.LockedPoint");
             LockOn(g);
         }
 
@@ -549,7 +603,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void AddCurrentPositionToCitiesList()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = Text.Get("EclipseView.NoName");
+            g.Name = Text.Get("EclipseView.NoName");
             AddToCitiesList(g);
         }
 
@@ -611,7 +665,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected ImageAttributes GetImageAttributes()
         {
             // make image "red"
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (settings.Get("NightMode"))
             {
                 float[][] matrix = {
                     new float[] {0.3f, 0, 0, 0, 0},

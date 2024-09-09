@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.Eclipses.Types
 
             const string empty = "—";
 
-            LocationName = local.Location.LocationName;
+            LocationName = local.Location.Name;
             Coordinates = local.Location;
             CoordinatesString = Format.Geo.Format(local.Location);
 

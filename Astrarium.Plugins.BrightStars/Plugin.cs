@@ -9,12 +9,13 @@ namespace Astrarium.Plugins.BrightStars
         public Plugin(ISettings settings)
         {
             DefineSetting("Stars", true);
+            DefineSetting("StarsScalingFactor", 1m);
             DefineSetting("StarsLabels", true);
             DefineSetting("StarsProperNames", true);
             DefineSetting("StarsColors", true);
 
-            DefineSetting("ColorStarsLabels", new SkyColor(64, 64, 64));
-            DefineSetting("StarsLabelsFont", new Font("Arial", 8));
+            DefineSetting("ColorStarsLabels", Color.Silver);
+            DefineSetting("StarsLabelsFont", new Font(FontFamily.GenericSerif, 10));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked")));
 

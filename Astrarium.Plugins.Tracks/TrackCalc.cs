@@ -22,14 +22,7 @@ namespace Astrarium.Plugins.Tracks
 
         public override void Calculate(SkyContext context)
         {
-            foreach (var track in Tracks)
-            {
-                foreach (var tp in track.Points)
-                {
-                    // Apparent horizontal coordinates
-                    tp.Horizontal = tp.Equatorial0.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
-            }
+            
         }
     }
 }

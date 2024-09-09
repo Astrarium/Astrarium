@@ -36,6 +36,10 @@ namespace Astrarium.Plugins.DeepSky
 
         private readonly ISky sky;
 
+        private readonly IEphemFormatter angularSizeFormatter = new DeepSkyAngularSizeFormatter();
+        private readonly IEphemFormatter surfaceBrightnessFormatter = new DeepSkySurfaceBrightnessFormatter();
+        private readonly IEphemFormatter posAngleFormatter = new DeepSkyPositionAngleFormatter();
+
         public DeepSkyCalc(ISky sky)
         {
             this.sky = sky;
@@ -43,45 +47,10 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Calculate(SkyContext context)
         {
-            // precessional elements
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-
             foreach (var ds in deepSkies)
             {
-                ds.Equatorial = context.Get(Equatorial, ds);
-                ds.Horizontal = context.Get(Horizontal, ds);
-
-                if (ds.Outline != null)
-                {
-                    foreach (var op in ds.Outline)
-                    {
-                        CrdsEquatorial eq0 = new CrdsEquatorial(op.Equatorial0);
-
-                        // Equatorial coordinates for the mean equinox and epoch of the target date
-                        var eq = Precession.GetEquatorialCoordinates(eq0, p);
-
-                        // Nutation effect
-                        var eq1 = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
-
-                        // Aberration effect
-                        var eq2 = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
-
-                        // Apparent coordinates of the object
-                        eq += eq1 + eq2;
-
-                        // Apparent horizontal coordinates
-                        op.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                    }
-                }
+                ds.Equatorial = Equatorial(context, ds);
             }
-        }
-
-        /// <summary>
-        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
-        /// </summary>
-        private PrecessionalElements GetPrecessionalElements(SkyContext c)
-        {
-            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }
 
         /// <summary>
@@ -89,21 +58,7 @@ namespace Astrarium.Plugins.DeepSky
         /// </summary>
         private CrdsEquatorial Equatorial(SkyContext c, DeepSky ds)
         {
-            PrecessionalElements p = c.Get(GetPrecessionalElements);
-            
-            // Equatorial coordinates for the mean equinox and epoch of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
-
-            // Nutation effect
-            var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
-
-            // Aberration effect
-            var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
-
-            // Apparent coordinates of the object
-            eq += eq1 + eq2;
-
-            return eq;
+            return Precession.GetEquatorialCoordinates(ds.Equatorial0, c.PrecessionElements);
         }
 
         /// <summary>
@@ -143,6 +98,11 @@ namespace Astrarium.Plugins.DeepSky
             e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
             e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
             e["Magnitude"] = (c, ds) => ds.Magnitude;
+            e["ObjectType", Formatters.Simple] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.ObjectType;
+            e["PositionAngle", posAngleFormatter] = (c, ds) => ds.PositionAngle;
+            e["LargeDiameter", angularSizeFormatter] = (c, ds) => ds.LargeSemidiameter * 2;
+            e["SmallDiameter", angularSizeFormatter] = (c, ds) => ds.SmallSemidiameter * 2;
+            e["SurfaceBrightness", surfaceBrightnessFormatter] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.SurfaceBrightness;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
             e["RTS.Set"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Set);
@@ -161,7 +121,8 @@ namespace Astrarium.Plugins.DeepSky
             DeepSky ds = info.Body;
             SkyContext c = info.Context;
             DeepSkyInfo details = c.Get(ReadDeepSkyDetails, ds);
-            string constellation = Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
+            CrdsEquatorial eq = c.Get(Equatorial, ds);
+            string constellation = Constellations.FindConstellation(eq, c.JulianDay);
 
             info
             .SetSubtitle(Text.Get($"DeepSky.{ds.Status}.Type"))
@@ -169,16 +130,16 @@ namespace Astrarium.Plugins.DeepSky
             .AddRow("Constellation", constellation)
 
             .AddHeader(Text.Get("DeepSky.Equatorial"))
-            .AddRow("Equatorial.Alpha", ds.Equatorial.Alpha)
-            .AddRow("Equatorial.Delta", ds.Equatorial.Delta)
+            .AddRow("Equatorial.Alpha", eq.Alpha)
+            .AddRow("Equatorial.Delta", eq.Delta)
 
             .AddHeader(Text.Get("DeepSky.Equatorial0"))
             .AddRow("Equatorial0.Alpha", ds.Equatorial0.Alpha)
             .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
 
             .AddHeader(Text.Get("DeepSky.Horizontal"))
-            .AddRow("Horizontal.Azimuth", ds.Horizontal.Azimuth)
-            .AddRow("Horizontal.Altitude", ds.Horizontal.Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader(Text.Get("DeepSky.RTS"))
             .AddRow("RTS.Rise")
@@ -194,7 +155,7 @@ namespace Astrarium.Plugins.DeepSky
 
             .AddHeader(Text.Get("DeepSky.Properties"));
 
-            info.AddRow("Type", details.ObjectType);
+            info.AddRow("ObjectType", details.ObjectType);
             if (ds.Magnitude != float.NaN)
             {
                 info.AddRow("VisualMagnitude", ds.Magnitude, Formatters.Magnitude);
@@ -205,21 +166,21 @@ namespace Astrarium.Plugins.DeepSky
             }
             if (details.SurfaceBrightness != null)
             {
-                info.AddRow("SurfaceBrightness", details.SurfaceBrightness, new Formatters.SignedDoubleFormatter(2, " mag/sq.arcsec"));
+                info.AddRow("SurfaceBrightness");
             }
 
-            if (ds.SizeA > 0)
+            if (ds.LargeSemidiameter != null)
             {
-                string size = $"{Formatters.Angle.Format(ds.SizeA / 60)}";
-                if (ds.SizeB > 0)
+                string size = angularSizeFormatter.Format(ds.LargeSemidiameter * 2);
+                if (ds.SmallSemidiameter != null)
                 {
-                    size += $" x {Formatters.Angle.Format(ds.SizeB / 60)}";
+                    size += $" x {angularSizeFormatter.Format(ds.SmallSemidiameter * 2)}";
                 }
                 info.AddRow("AngularDiameter", size, Formatters.Simple);
             }
-            if (ds.PA > 0)
+            if (ds.PositionAngle != null)
             {
-                info.AddRow("PositionAngle", ds.PA, new Formatters.UnsignedDoubleFormatter(2, "\u00B0"));
+                info.AddRow("PositionAngle");
             }
 
             if (details.Identifiers.Any() || details.PGC != null)
@@ -243,7 +204,7 @@ namespace Astrarium.Plugins.DeepSky
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return deepSkies
+           return deepSkies
                 .Where(ds => ds.CommonName.Equals(searchString) || ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
@@ -269,7 +230,7 @@ namespace Astrarium.Plugins.DeepSky
                     }
 
                     DeepSkyStatus status = (DeepSkyStatus)(Convert.ToInt32(strStatus) % 10);
-                    if (status == DeepSkyStatus.Duplicate || 
+                    if (status == DeepSkyStatus.Duplicate ||
                         status == DeepSkyStatus.DuplicateIC)
                     {
                         continue;
@@ -308,9 +269,9 @@ namespace Astrarium.Plugins.DeepSky
                         Equatorial0 = new CrdsEquatorial(ra, dec),
                         Status = status,
                         Magnitude = string.IsNullOrWhiteSpace(mag) ? float.NaN : float.Parse(mag, CultureInfo.InvariantCulture),
-                        SizeA = float.Parse(string.IsNullOrWhiteSpace(sizeA) ? "0" : sizeA, CultureInfo.InvariantCulture),
-                        SizeB = float.Parse(string.IsNullOrWhiteSpace(sizeB) ? "0" : sizeB, CultureInfo.InvariantCulture),
-                        PA = short.Parse(string.IsNullOrWhiteSpace(PA) ? "0" : PA),
+                        LargeSemidiameter = !string.IsNullOrWhiteSpace(sizeA) ? float.Parse(sizeA, CultureInfo.InvariantCulture) * 30: (float?)null,
+                        SmallSemidiameter = !string.IsNullOrWhiteSpace(sizeB) ? float.Parse(sizeB, CultureInfo.InvariantCulture) * 30: (float?)null,
+                        PositionAngle = !string.IsNullOrWhiteSpace(PA) ? float.Parse(PA) : (float?)null,
                         Messier = messier,
                     };
 
@@ -337,7 +298,7 @@ namespace Astrarium.Plugins.DeepSky
             // Load deep sky object outlines
             using (var reader = new StreamReader(OUTLINES_FILE))
             {
-                List<CelestialPoint> outline = new List<CelestialPoint>();
+                List<CrdsEquatorial> outline = new List<CrdsEquatorial>();
 
                 while (!reader.EndOfStream)
                 {
@@ -347,13 +308,13 @@ namespace Astrarium.Plugins.DeepSky
                     // End previos outline and begin a new one
                     if (line.StartsWith("//"))
                     {
-                        outline = new List<CelestialPoint>();
+                        outline = new List<CrdsEquatorial>();
 
                         string name = line.Substring(2).Trim().ToUpper();
                         var ds = deepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
                         if (ds != null && ds.Status != DeepSkyStatus.Galaxy)
                         {
-                            ds.Outline = outline;
+                            ds.Shape = outline;
                         }
 
                         continue;
@@ -366,11 +327,11 @@ namespace Astrarium.Plugins.DeepSky
                     uint decD = Convert.ToUInt32(line.Substring(15, 2).Trim());
                     uint decM = Convert.ToUInt32(line.Substring(18, 2).Trim());
                     double decS = Convert.ToDouble(line.Substring(21).Trim(), CultureInfo.InvariantCulture);
-                    CelestialPoint cp = new CelestialPoint();
-                    cp.Equatorial0.Alpha = new HMS(raH, raM, raS).ToDecimalAngle();
-                    cp.Equatorial0.Delta = new DMS(decD, decM, decS).ToDecimalAngle() * (line[14] == '-' ? -1 : 1);
 
-                    outline.Add(cp);
+                    double alpha = new HMS(raH, raM, raS).ToDecimalAngle();
+                    double delta = new DMS(decD, decM, decS).ToDecimalAngle() * (line[14] == '-' ? -1 : 1);
+
+                    outline.Add(new CrdsEquatorial(alpha, delta));
                 }
             }
         }

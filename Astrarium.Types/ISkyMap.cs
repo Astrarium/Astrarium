@@ -10,74 +10,79 @@ namespace Astrarium.Types
     /// </summary>
     public interface ISkyMap : INotifyPropertyChanged
     {
+        event Action<double> FovChanged;
+
+        event Action ContextChanged;
+
         /// <summary>
-        /// Gets or sets width of the canvas, in pixels
+        /// Value indicating sky darkness (daylight presence). 1 means Sun above horizon, 0 - totally dark sky.
         /// </summary>
-        int Width { get; set; }
+        float DaylightFactor { get; set; }
 
         /// <summary>
-        /// Gets or sets height of the canvas, in pixels
-        /// </summary>
-        int Height { get; set; }
-
-        float MagLimit { get; }
-
-        /// <summary>
-        /// Gets or sets current field of view, in degrees
-        /// </summary>
-        double ViewAngle { get; set; }
-
-        /// <summary>
-        /// Gets or sets horizontal coordinates of the central point of the canvas.
-        /// </summary>
-        CrdsHorizontal Center { get; }
-
-        /// <summary>
-        /// Selected celestial object
+        /// Gets or sets selected celestial object.
         /// </summary>
         CelestialObject SelectedObject { get; set; }
 
         /// <summary>
-        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// Gets or sets celestial object the map is locked on (synchronized with visible daily motion). 
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
-        CrdsHorizontal MousePosition { get; }
+        /// <summary>
+        /// Gets mouse position in equatorial coordinates
+        /// </summary>
+        CrdsEquatorial MouseEquatorialCoordinates { get; }
 
         /// <summary>
-        /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
+        /// Gets mouse position in screen coordinates (x, y)
         /// </summary>
-        IProjection Projection { get; }
+        PointF MouseScreenCoordinates { get; }
+
+        /// <summary>
+        /// Gets map projection
+        /// </summary>
+        Projection Projection { get; }
+
+        /// <summary>
+        /// Sets map projection by its type
+        /// </summary>
+        /// <param name="type"></param>
+        void SetProjection(Type type);
+
+        bool TimeSync { get; set; }
 
         void Invalidate();
-
-        /// <summary>
-        /// Renders the celestial map on provided Graphics object
-        /// </summary>
-        /// <param name="g">Graphics to render the map.</param>
-        void Render(Graphics g);
 
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, double viewAngleTarget);
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
         void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget);
-        void GoToPoint(CrdsHorizontal hor, double viewAngleTarget);
-        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration);
-        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget);
+        void GoToPoint(CrdsEquatorial eq, double viewAngleTarget);
+        void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration);
+        void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration, double viewAngleTarget);
 
-        void AddDrawnObject(CelestialObject obj);
+        void AddDrawnObject(PointF p, CelestialObject obj);
 
         /// <summary>
-        /// Occurs when map's View Angle is changed.
+        /// Draws celestial object label
         /// </summary>
-        event Action<double> ViewAngleChanged;
+        /// <param name="label">Object label</param>
+        /// <param name="font">Font for rendering label</param>
+        /// <param name="brush">Brush for rendering label</param>
+        /// <param name="p">Center of the body, in screen coordinates</param>
+        /// <param name="size">Object size, in pixels</param>
+        void DrawObjectLabel(string label, Font font, Brush brush, PointF point, float size);
 
         /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
         event Action<CelestialObject> SelectedObjectChanged;
 
-        event Action OnInvalidate;
+        /// <summary>
+        /// Occurs when locked celestial object is changed
+        /// </summary>
+        event Action<CelestialObject> LockedObjectChanged;
     }
 }

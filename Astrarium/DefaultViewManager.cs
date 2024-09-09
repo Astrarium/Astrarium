@@ -14,6 +14,7 @@ using WF = System.Windows.Forms;
 using System.Drawing.Printing;
 using System.Drawing;
 using System.IO;
+using Astrarium.Algorithms;
 
 namespace Astrarium
 {
@@ -38,17 +39,17 @@ namespace Astrarium
             this.typeFactory = typeFactory;
         }
 
-        public void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase
+        public void ShowWindow<TViewModel>(ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            Show<TViewModel>(viewModel: null, isDialog: false, isSingleInstance);
+            Show<TViewModel>(viewModel: null, isDialog: false, flags: flags);
         }
 
         public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            return Show<TViewModel>(viewModel: null, isDialog: true, isSingleInstance: false);
+            return Show<TViewModel>(viewModel: null, isDialog: true, flags: ViewFlags.None);
         }
 
-        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog, bool isSingleInstance) where TViewModel : ViewModelBase
+        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog, ViewFlags flags) where TViewModel : ViewModelBase
         {
             // Resolve view by model type
 
@@ -62,13 +63,23 @@ namespace Astrarium
                 viewType = ResolveVVMBindings(typeof(TViewModel));
             }
 
+            bool needDisposeModel = false;
+
             // Handle single-instance window case
 
-            if (isSingleInstance && viewType != null)
+            if (flags.HasFlag(ViewFlags.SingleInstance) && viewType != null)
             {
                 var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.GetType() == viewType);
                 if (window != null)
                 {
+                    if (viewModel == null)
+                    {
+                        needDisposeModel = true;
+                        viewModel = CreateViewModel<TViewModel>();
+                    }
+
+                    window.DataContext = viewModel;
+                    window.InvalidateVisual();
                     window.Activate();
                     if (window.WindowState == WindowState.Minimized)
                     {
@@ -77,8 +88,6 @@ namespace Astrarium
                     return null;
                 }
             }
-
-            bool needDisposeModel = false;
 
             if (viewModel == null)
             {
@@ -90,10 +99,11 @@ namespace Astrarium
             {
                 var window = typeFactory(viewType) as Window;
                 window.DataContext = viewModel;
+                window.UpdateLayout();
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    if (isDialog)
+                    if (isDialog || flags.HasFlag(ViewFlags.TopMost))
                     {
                         var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
                         window.Owner = owner ?? Application.Current.MainWindow;
@@ -105,6 +115,9 @@ namespace Astrarium
                     Application.Current.MainWindow = window;
                 }
 
+                EventHandler activatedEventHandler = (s, e) => viewModel.OnActivated();
+                window.Activated += activatedEventHandler;
+
                 Action<bool?> viewModelClosingHandler = null;
                 viewModelClosingHandler = (dialogResult) =>
                 {
@@ -112,10 +125,11 @@ namespace Astrarium
                     {
                         window.DialogResult = dialogResult;
                     }
-                    
+
                     window.Close();
 
                     viewModel.Closing -= viewModelClosingHandler;
+                    window.Activated -= activatedEventHandler;
 
                     if (needDisposeModel)
                     {
@@ -124,7 +138,7 @@ namespace Astrarium
 
                     Application.Current.Dispatcher.Invoke(() => window.Owner?.Activate());
                 };
-
+                
                 viewModel.Closing += viewModelClosingHandler;
 
                 if (isDialog)
@@ -218,14 +232,14 @@ namespace Astrarium
             return typeFactory(typeof(TViewModel)) as TViewModel;
         }
 
-        public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
+        public void ShowWindow<TViewModel>(TViewModel viewModel, ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            Show(viewModel: viewModel, isDialog: false, isSingleInstance: false);
+            Show(viewModel: viewModel, isDialog: false, flags: flags);
         }
 
         public bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            return Show(viewModel: viewModel, isDialog: true, isSingleInstance: false);
+            return Show(viewModel: viewModel, isDialog: true, flags: ViewFlags.None);
         }
 
         public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)
@@ -244,11 +258,25 @@ namespace Astrarium
         public void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null)
         {
             var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
-            dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+            dialog.Owner = owner ?? Application.Current.MainWindow;
             dialog.Topmost = true;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.CancellationTokenSource = tokenSource;
+            dialog.Progress = progress;
+            dialog.Show();
+        }
+
+        public void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null)
+        {
+            var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
+            var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+            dialog.Owner = owner ?? Application.Current.MainWindow;
+            dialog.Topmost = true;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
+            dialog.CancellationTokenSource = tokenSource;
+            dialog.TextProgress = textProgress;
             dialog.Progress = progress;
             dialog.Show();
         }
@@ -353,6 +381,18 @@ namespace Astrarium
             return (ShowDialog(vm) ?? false) ? vm.SelectedItem.Body : null;
         }
 
+        public CrdsGeographical ShowLocationDialog(CrdsGeographical location)
+        {
+            using (var vm = CreateViewModel<LocationVM>())
+            {
+                vm.SetLocation(new CrdsGeographical(location));
+                if (ShowDialog(vm) == true)
+                    return new CrdsGeographical(vm.ObserverLocation);
+                else
+                    return null;
+            }
+        }
+
         public TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
         {
             var vm = CreateViewModel<TimeSpanVM>();
@@ -366,6 +406,18 @@ namespace Astrarium
             {
                 window.popupText.Text = message.StartsWith("$") ? Text.Get(message.Substring(1)) : message;
                 window.popup.Show();
+            }
+        }
+
+        public void ShowTooltipMessage(PointF mouse, string message)
+        {
+            if (Application.Current?.MainWindow is MainWindow window)
+            {
+                window.skyToolTip.Content = message;
+                window.skyToolTip.PlacementRectangle = new Rect(mouse.X, mouse.Y, 0, 0);
+                window.skyToolTip.IsOpen = true;
+                window.skyToolTip.Tag = (window.skyToolTip.Tag as long? ?? 0) + 1;
+                window.skyView.Cursor = WF.Cursors.Help;
             }
         }
     }

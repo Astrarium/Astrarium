@@ -1,0 +1,15 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DrawingImage x:Key="IconMilkyWay">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                <DrawingGroup.Transform>
+                    <ScaleTransform ScaleX="0.9" ScaleY="0.9" />
+                </DrawingGroup.Transform>
+                <GeometryDrawing Brush="White" Geometry="F1 M24,30z M0,0z M19.839,5.553L22,7.714A9.054,9.054,0,0,0,18.429,9.857C16.286,12 17.714,13.429 15.571,15.571 13.428,17.713 12,16.286 9.857,18.429A10.455,10.455,0,0,0,7.714,22L5.556,19.841A0.979,0.979,0,0,0,5.805,19.461A9.511,9.511,0,0,1,7.705,16.278A3.827,3.827,0,0,1,10.051,15.124A5.8,5.8,0,0,0,13.419,13.424A5.8,5.8,0,0,0,15.119,10.056A3.827,3.827,0,0,1,16.273,7.71A8.135,8.135,0,0,1,19.41,5.821A0.971,0.971,0,0,0,19.839,5.553z M6.293,14.864A5.8,5.8,0,0,1,9.661,13.164A3.826,3.826,0,0,0,12.007,12.009A3.826,3.826,0,0,0,13.162,9.663A5.8,5.8,0,0,1,14.862,6.295A10.067,10.067,0,0,1,18.355,4.073L16.286,2A9.054,9.054,0,0,0,12.714,4.143C10.571,6.286 12,7.714 9.857,9.857 7.714,12 6.286,10.571 4.143,12.714A10.446,10.446,0,0,0,2,16.286L4.082,18.367A11.008,11.008,0,0,1,6.293,14.864z" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+</ResourceDictionary>

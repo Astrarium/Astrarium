@@ -26,6 +26,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private readonly IRecentPlansManager recentPlansManager;
         private readonly IObservationPlanner planner;
         private readonly IPlanManagerFactory readWriterFactory;
+        private readonly ITelescopeManager telescopeManager;
 
         #endregion Dependencies
 
@@ -36,6 +37,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
+        public ICommand SlewTelescopeCommand { get; private set; }
         public ICommand ClearFilterCommand { get; private set; }
         public ICommand ShowSmartFilterCommand { get; private set; }
         public ICommand RemoveSelectedItemsCommand { get; private set; }
@@ -205,6 +207,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public bool NoTotalItems => isInitialized && TotalItemsCount == 0;
         public bool NoFilteredItems => isInitialized && TotalItemsCount > 0 && FilteredItemsCount == 0;
         public bool HasItemsToDisplay => isInitialized && !NoTotalItems && !NoFilteredItems;
+        public bool IsTelescopeAvailable => telescopeManager.IsTelescopeAvailable;
+        public bool IsTelescopeConnected => telescopeManager.IsTelescopeConnected;
         
         public DateTime Date 
         {
@@ -218,19 +222,22 @@ namespace Astrarium.Plugins.Planner.ViewModels
             private set => SetValue(nameof(IsDarkMode), value);
         }
 
-        public PlanningListVM(ISky sky, ISettings settings, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory)
+        public PlanningListVM(ISky sky, ISettings settings, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory, ITelescopeManager telescopeManager)
         {
             this.planner = planner;
             this.sky = sky;
             this.mainWindow = mainWindow;
             this.recentPlansManager = recentPlansManager;
             this.readWriterFactory = readWriterFactory;
+            this.telescopeManager = telescopeManager;
+            this.telescopeManager.TelescopeConnectionChanged += () => NotifyPropertyChanged(nameof(IsTelescopeConnected));
 
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
             settings.SettingValueChanged += Settings_SettingValueChanged;
 
             SetTimeCommand = new Command<Date>(SetTime);
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
+            SlewTelescopeCommand = new Command<CelestialObject>(SlewTelescope);
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
             ClearFilterCommand = new Command(ClearFilter);
             ShowSmartFilterCommand = new Command(ShowSmartFilter);
@@ -246,9 +253,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void Settings_SettingValueChanged(string settingName, object value)
         {
-            if (settingName == "Schema")
+            if (settingName == "NightMode")
             {
-                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+                IsDarkMode = (bool)value;
             }
         }
 
@@ -321,14 +328,33 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             if (!mainWindow.CenterOnObject(body))
             {
-                if (ViewManager.ShowMessageBox("$Warning", "$PlanningListWindow.ObjectNotFoundDialog.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    ephemerides.Remove(SelectedTableItem);
-                    IsSaved = false;
-                    TableData.Refresh();
-                    NotifyTableItemsCountChanged();
-                    NotifySelectedTableItemChanged();
-                }
+                ShowObjectNotFoundDialog();
+            }
+        }
+
+        private void SlewTelescope(CelestialObject celestialObject)
+        {
+            CelestialObject body = sky.Search(celestialObject.Type, celestialObject.CommonName);
+            if (body != null)
+            {
+                mainWindow.CenterOnObject(body);
+                telescopeManager.SlewToCoordinates(body.Equatorial);
+            }
+            else
+            {
+                ShowObjectNotFoundDialog();
+            }
+        }
+
+        private void ShowObjectNotFoundDialog()
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "$PlanningListWindow.ObjectNotFoundDialog.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                ephemerides.Remove(SelectedTableItem);
+                IsSaved = false;
+                TableData.Refresh();
+                NotifyTableItemsCountChanged();
+                NotifySelectedTableItemChanged();
             }
         }
 
@@ -367,7 +393,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void AddObject()
         {
-            var body = ViewManager.ShowSearchDialog(x => true);
+            var body = ViewManager.ShowSearchDialog(x => x is IObservableObject);
             if (body != null)
             {
                 AddObject(body);

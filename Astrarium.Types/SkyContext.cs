@@ -38,6 +38,24 @@ namespace Astrarium.Types
                 };
         }
 
+        public void Set(double jd, CrdsGeographical geoLocation)
+        {
+            _JulianDay = jd;
+            _GeoLocation = geoLocation;
+            UpdateContextVariables();
+            ClearCache();
+            ContextChanged?.Invoke();
+        }
+
+        private void UpdateContextVariables()
+        {
+            NutationElements = Nutation.NutationElements(_JulianDay);
+            AberrationElements = Aberration.AberrationElements(_JulianDay);
+            Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
+            SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+            PrecessionElements = Precession.ElementsFK5(Date.EPOCH_J2000, _JulianDay);
+        }
+
         private double _JulianDay;
 
         /// <summary>
@@ -49,10 +67,7 @@ namespace Astrarium.Types
             set
             {
                 _JulianDay = value;
-                NutationElements = Nutation.NutationElements(_JulianDay);
-                AberrationElements = Aberration.AberrationElements(_JulianDay);
-                Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
-                SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+                UpdateContextVariables();
                 ClearCache();
                 ContextChanged?.Invoke();
             }
@@ -117,6 +132,11 @@ namespace Astrarium.Types
         /// Elements to calculate aberration effect
         /// </summary>
         public AberrationElements AberrationElements { get; private set; }
+
+        /// <summary>
+        /// Precession elements for converting coordinates of J2000 epoch to current epoch.
+        /// </summary>
+        public PrecessionalElements PrecessionElements { get; private set; }
 
         /// <summary>
         /// True obliquity of the ecliptic, in degrees
@@ -238,7 +258,7 @@ namespace Astrarium.Types
             {
                 for (int i = 1; i < args.Length; i++)
                 {
-                    if (!argsCache[i - 1][key].Equals(args[i]))
+                    if (!argsCache[i - 1].ContainsKey(key) || !argsCache[i - 1][key].Equals(args[i]))
                     {
                         needInvoke = true;
                         break;

@@ -45,6 +45,12 @@ namespace Astrarium.Types
             return Get(key).GetValue<T>();
         }
 
+        public T GetValueOrDefault<T>(string key)
+        {
+            var ephem = Get(key);
+            return (ephem != null) ? ephem.GetValue<T>() : default(T);
+        }
+
         public Ephemerides(CelestialObject body)
         {
             CelestialObject = body;

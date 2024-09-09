@@ -7,6 +7,9 @@
     <!-- Captions, icons, etc. -->
     <Color x:Key="ColorForeground">#BCD0E0</Color>
 
+    <!-- Window border -->
+    <Color x:Key="ColorWindowBorder">#1E2A33</Color>
+    
     <!-- Window background -->
     <Color x:Key="ColorWindowBackground">#1E2A33</Color>
 

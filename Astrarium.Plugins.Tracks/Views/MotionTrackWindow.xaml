@@ -40,14 +40,7 @@
         <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="3" Grid.Column="0" Content="{t:Text MotionTrackWindow.Color}" />
-        <c:ColorPicker Grid.Row="3" Grid.Column="1" SelectedColor="{Binding TrackColor}" ColorSchema="{Binding ColorSchema}">
-            <c:ColorPicker.Caption>
-                <MultiBinding Converter="{s:ColorToStringConverter}">
-                    <Binding Path="SelectedColor" RelativeSource="{RelativeSource Self}" Mode="OneWay" />
-                    <Binding Path="ColorSchema" Mode="OneWay" />
-                </MultiBinding>
-            </c:ColorPicker.Caption>
-        </c:ColorPicker>
+        <c:ColorPicker Grid.Row="3" Grid.Column="1" SelectedColor="{Binding TrackColor}" Caption="{Binding TrackColor, Converter={s:ColorToStringConverter}}" />
 
         <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Padding="0, 8, 0, 0" Margin="0 4 0 0">
             <GroupBox.Header>

@@ -18,12 +18,17 @@ namespace Astrarium.Plugins.SolarSystem
 
         public IEnumerable<Moon> GetCelestialObjects() => new Moon[] { Moon };
 
+        public LunarCalc(ISky sky)
+        {
+            sky.MoonEquatorial = Equatorial;
+        }
+
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
-            Moon.Horizontal = c.Get(Horizontal);
             Moon.PAaxis = c.Get(PAaxis);
             Moon.Phase = c.Get(Phase);
+            Moon.PhaseAngle = Math.Sign(c.Get(Elongation)) * c.Get(PhaseAngle);
             Moon.Ecliptical0 = c.Get(Ecliptical0);
             Moon.Semidiameter = c.Get(Semidiameter);
             Moon.Elongation = c.Get(Elongation);
@@ -31,6 +36,7 @@ namespace Astrarium.Plugins.SolarSystem
             Moon.AscendingNode = c.Get(AscendingNode);
             Moon.EarthShadow = c.Get(EarthShadow);
             Moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
+            Moon.Magnitude = c.Get(Magnitude);
         }
 
         /// <summary>
@@ -97,9 +103,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visible semidiameter of the Moon, in seconds of arc 
         /// </summary>
-        public double Semidiameter(SkyContext c)
+        public float Semidiameter(SkyContext c)
         {
-            return LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
+            return (float)LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
         }
 
         /// <summary>
@@ -242,7 +248,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets horizontal topocentrical coordinates of Earth Shadow
         /// </summary>
-        private CrdsHorizontal EarthShadowCoordinates(SkyContext c)
+        private CrdsEquatorial EarthShadowCoordinates(SkyContext c)
         {
             // Ecliptical coordinates of Sun
             var eclSun = c.Get(SunEcliptical);
@@ -254,10 +260,7 @@ namespace Astrarium.Plugins.SolarSystem
             var eq0 = eclShadow.ToEquatorial(c.Epsilon);
 
             // Topocentrical equatorial coordinates
-            var eq = eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
-
-            // finally get the horizontal coordinates
-            return eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
         }
 
         /// <summary>

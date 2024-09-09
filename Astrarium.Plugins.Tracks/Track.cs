@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -58,7 +59,7 @@ namespace Astrarium.Plugins.Tracks
         /// <summary>
         /// Track path points
         /// </summary>
-        public IList<CelestialPoint> Points { get; } = new List<CelestialPoint>();
+        public IList<CrdsEquatorial> Points { get; } = new List<CrdsEquatorial>();
 
         /// <summary>
         /// Desired labels step. This value should not be less than calculation step.
@@ -69,7 +70,7 @@ namespace Astrarium.Plugins.Tracks
         /// <summary>
         /// Track color
         /// </summary>
-        public SkyColor Color { get; set; }
+        public Color Color { get; set; }
 
         /// <summary>
         /// Flag indicating is it required to draw track labels or not

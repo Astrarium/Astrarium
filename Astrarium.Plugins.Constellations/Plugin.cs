@@ -16,12 +16,12 @@ namespace Astrarium.Plugins.Constellations
             DefineSetting("ConstLinesType", ConstellationsCalc.LineType.Traditional);
 
             // Colors
-            DefineSetting("ColorConstLines", new SkyColor(64, 64, 64));
-            DefineSetting("ColorConstBorders", new SkyColor(64, 32, 32));
-            DefineSetting("ColorConstLabels", new SkyColor(64, 32, 32));
+            DefineSetting("ColorConstLines", Color.Gray);
+            DefineSetting("ColorConstBorders", Color.IndianRed);
+            DefineSetting("ColorConstLabels", Color.IndianRed);
 
             // Fonts
-            DefineSetting("ConstLabelsFont", new Font(FontFamily.GenericSansSerif, 32));
+            DefineSetting("ConstLabelsFont", new Font("Arial", 32));
 
             ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", new SimpleBinding(settings, "ConstLines", "IsChecked")));
             ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstBorders", "$Settings.ConstBorders", new SimpleBinding(settings, "ConstBorders", "IsChecked")));

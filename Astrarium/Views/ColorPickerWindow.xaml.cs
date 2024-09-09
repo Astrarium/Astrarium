@@ -20,9 +20,6 @@ namespace Astrarium.Views
     /// </summary>
     public partial class ColorPickerWindow : Window
     {
-        public static readonly DependencyProperty SliderOnlyProperty = DependencyProperty.Register(
-            "SliderOnly", typeof(bool), typeof(ColorPickerWindow), new PropertyMetadata(SliderOnlyPropertyChanged));
-
         public static readonly DependencyProperty SelectedColorProperty = DependencyProperty.Register(
             "SelectedColor", typeof(Color), typeof(ColorPickerWindow), new PropertyMetadata(SelectedColorPropertyChanged));
 
@@ -34,16 +31,6 @@ namespace Astrarium.Views
 
         public static readonly DependencyProperty SliderThumbsHighlightColorProperty = DependencyProperty.Register(
             "SliderThumbsHighlightColor", typeof(System.Windows.Media.Color), typeof(ColorPickerWindow), new PropertyMetadata(SliderThumbsHighlightColorPropertyChanged));
-
-        public static void SetSliderOnly(DependencyObject target, bool value)
-        {
-            target.SetValue(SliderOnlyProperty, value);
-        }
-
-        public static bool GetSliderOnly(DependencyObject target)
-        {
-            return (bool)target.GetValue(SliderOnlyProperty);
-        }
 
         public static void SetSelectedColor(DependencyObject target, Color value)
         {
@@ -83,11 +70,6 @@ namespace Astrarium.Views
         public static System.Windows.Media.Color GetSliderThumbsHighlightColor(DependencyObject target)
         {
             return (System.Windows.Media.Color)target.GetValue(SliderThumbsHighlightColorProperty);
-        }
-
-        private static void SliderOnlyPropertyChanged(DependencyObject target, DependencyPropertyChangedEventArgs args)
-        {
-            (target as ColorPickerWindow).picker.SliderOnly = (bool)args.NewValue;
         }
 
         private static void SelectedColorPropertyChanged(DependencyObject target, DependencyPropertyChangedEventArgs args)

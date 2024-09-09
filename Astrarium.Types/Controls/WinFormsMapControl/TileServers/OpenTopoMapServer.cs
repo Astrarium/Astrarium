@@ -54,5 +54,14 @@
             string server = _Subdomains[_Random.Next(_Subdomains.Length)];
             return new Uri($"https://{server}.tile.opentopomap.org/{z}/{x}/{y}.png");
         }
+
+        /// <summary>
+        /// Creates new instance of <see cref="OpenTopoMapServer"/>.
+        /// </summary>
+        /// <param name="userAgent">User-Agent string used to dowload tile images from OpenTopoMapServer tile servers.</param>
+        public OpenTopoMapServer(string userAgent)
+        {
+            UserAgent = userAgent;
+        }
     }
 }

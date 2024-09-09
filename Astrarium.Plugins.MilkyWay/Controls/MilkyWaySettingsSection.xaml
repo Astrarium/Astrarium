@@ -13,5 +13,6 @@
     d:DesignWidth="800">
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.MilkyWay}" IsChecked="{Binding Settings.MilkyWay}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.MilkyWayDimOnZoom}" IsChecked="{Binding Settings.MilkyWayDimOnZoom}" IsEnabled="{Binding Settings.MilkyWay}" Margin="2" />
     </StackPanel>
 </c:SettingsSection>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
@@ -29,7 +30,7 @@ namespace Astrarium.Types
         /// Shows window by its ViewModel type. 
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
         /// </summary>
-        void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase;
+        void ShowWindow<TViewModel>(ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase;
 
         /// <summary>
         /// Shows dialog window by its ViewModel type.
@@ -42,7 +43,7 @@ namespace Astrarium.Types
         /// Shows window by its ViewModel instance. 
         /// Calling this method automatically attaches passed ViewModel instance to DataContext property.
         /// </summary>
-        void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
+        void ShowWindow<TViewModel>(TViewModel viewModel, ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase;
 
         /// <summary>
         /// Shows dialog window by its ViewModel instance. 
@@ -68,6 +69,15 @@ namespace Astrarium.Types
         /// <param name="tokenSource">Cancellation token source instance. Use <see cref="CancellationTokenSource.Cancel()"/> to close the window.</param>
         /// <param name="progress">Progress instance. Can be null for indeterminate progress bar.</param>
         void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null);
+
+        /// <summary>
+        /// Shows window with progress bar
+        /// </summary>
+        /// <param name="caption">Window title</param>
+        /// <param name="textProgress">Progress instance to update the dialog text.</param>
+        /// <param name="tokenSource">Cancellation token source instance. Use <see cref="CancellationTokenSource.Cancel()"/> to close the window.</param>
+        /// <param name="progress">Progress instance. Can be null for indeterminate progress bar.</param>
+        void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null);
 
         /// <summary>
         /// Shows save file dialog
@@ -133,6 +143,13 @@ namespace Astrarium.Types
         CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null);
 
         /// <summary>
+        /// Shows geo location chooser dialog.
+        /// </summary>
+        /// <param name="location">Current geo location</param>
+        /// <returns>Geo location choosen by user.</returns>
+        CrdsGeographical ShowLocationDialog(CrdsGeographical location);
+
+        /// <summary>
         /// Shows dialog to select a time span
         /// </summary>
         /// <param name="timeSpan">Time span selected by default</param>
@@ -144,5 +161,12 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="message">Popup message text</param>
         void ShowPopupMessage(string message);
+
+        /// <summary>
+        /// Shows tooltip message over main application window
+        /// </summary>
+        /// <param name="mouse">Current coordinates</param>
+        /// <param name="message">Message text</param>
+        void ShowTooltipMessage(PointF mouse, string message);
     }
 }

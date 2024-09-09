@@ -15,5 +15,7 @@
         <CheckBox Content="{t:Text Settings.Sun}" IsChecked="{Binding Settings.Sun}" Margin="2" />
         <CheckBox Content="{t:Text Settings.SunLabel}" IsChecked="{Binding Settings.SunLabel}" IsEnabled="{Binding Settings.Sun}" Margin="2" />
         <CheckBox Content="{t:Text Settings.SunTexture}" IsChecked="{Binding Settings.SunTexture}" IsEnabled="{Binding Settings.Sun}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.SunFeatures}" IsChecked="{Binding Settings.SunFeatures}" IsEnabled="{Binding Settings.Sun}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.SunEquator}" IsChecked="{Binding Settings.SunEquator}" IsEnabled="{Binding Settings.Sun}" Margin="2" />
     </StackPanel>
 </c:SettingsSection>

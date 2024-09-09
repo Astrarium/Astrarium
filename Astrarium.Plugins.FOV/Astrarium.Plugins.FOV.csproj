@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
     <UseWpf>true</UseWpf>
     <Product>FOV</Product>
     <Description>Field Of View</Description>
@@ -26,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
  
   <ItemGroup>

@@ -3,521 +3,290 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 
 namespace Astrarium.Plugins.Grids
 {
     public class CelestialGridRenderer : BaseRenderer
     {
+        private readonly CelestialGridCalculator calc;
         private readonly ISettings settings;
 
-        private PrecessionalElements peFrom1950 = null;
-        private PrecessionalElements peTo1950 = null;
-
-        private CelestialGrid LineEcliptic = new CelestialGrid("Ecliptic", 1, 24);
-        private CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
-        private CelestialGrid LineMeridian = new CelestialGrid("Meridian", 1, 24);
-
-        private CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
-        private CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
-
-        private Pen penGridEquatorial = null;
-        private Pen penGridHorizontal = null;
-        private Pen penLineEcliptic = null;
-        private Pen penLineGalactic = null;
-        private Pen penLineMeridian = null;
-
-        private Font fontNodeLabel = new Font("Arial", 8);
-        private Font fontEquinoxLabel = new Font("Arial", 8);
+        private Font fontLabel = new Font("Arial", 10);
 
         private string[] nodesLabels = new string[] { "\u260A", "\u260B" };
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
-        private int[] equinoxRA = new int[] { 0, 12 };
+        private string[] horizontalLabels = new string[] { "CelestialGridRenderer.Zenith", "CelestialGridRenderer.Nadir" };
+        private string[] equatorialLabels = new string[] { "CelestialGridRenderer.NCP", "CelestialGridRenderer.SCP" };
+        private string[] equatorialTooltips = new string[] { "CelestialGridRenderer.NCP.Tooltip", "CelestialGridRenderer.SCP.Tooltip" };
+        private string[] equinoxTooltips = new string[] { "CelestialGridRenderer.VernalEquinox.Tooltip", "CelestialGridRenderer.AutumnalEquinox.Tooltip" };
+        private string[] nodesTooltips = new string[] { "CelestialGridRenderer.LunarAscendingNode.Tooltip", "CelestialGridRenderer.LunarDescendingNode.Tooltip" };
 
-        private string[] horizontalLabels = new string[] { Text.Get("CelestialGridRenderer.Zenith"), Text.Get("CelestialGridRenderer.Nadir") };
-        private CrdsHorizontal[] horizontalPoles = new CrdsHorizontal[2] { new CrdsHorizontal(0, 90), new CrdsHorizontal(0, -90) };
+        private List<Tuple<Vec2, string>> labels = new List<Tuple<Vec2, string>>();
 
-        private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
-        private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
-
-        public CelestialGridRenderer(ISettings settings)
+        public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
         {
+            this.calc = calc;
             this.settings = settings;
-
-            penGridEquatorial = new Pen(Brushes.Transparent);
-            penGridHorizontal = new Pen(Brushes.Transparent);
-            penLineEcliptic = new Pen(Brushes.Transparent);
-            penLineGalactic = new Pen(Brushes.Transparent);
-            penLineMeridian = new Pen(Brushes.Transparent);
         }
 
-        public override void Initialize()
+        public override void Render(ISkyMap map)
         {
-            // Ecliptic
-            LineEcliptic.FromHorizontal = (h, ctx) =>
-            {
-                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
-                var ec = eq.ToEcliptical(ctx.Epsilon);
-                return new GridPoint(ec.Lambda, ec.Beta);
-            };
-            LineEcliptic.ToHorizontal = (c, ctx) =>
-            {
-                var ec = new CrdsEcliptical(c.Longitude, c.Latitude);
-                var eq = ec.ToEquatorial(ctx.Epsilon);
-                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
-            };
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
 
-            // Galactic equator
-            LineGalactic.FromHorizontal = (h, ctx) =>
-            {
-                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
-                var eq1950 = Precession.GetEquatorialCoordinates(eq, peTo1950);
-                var gal = eq1950.ToGalactical();
-                return new GridPoint(gal.l, gal.b);
-            };
-            LineGalactic.ToHorizontal = (c, ctx) =>
-            {
-                var gal = new CrdsGalactical(c.Longitude, c.Latitude);
-                var eq1950 = gal.ToEquatorial();
-                var eq = Precession.GetEquatorialCoordinates(eq1950, peFrom1950);
-                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
-            };
+            labels.Clear();
 
-            // Meridian line
-            LineMeridian.FromHorizontal = (h, ctx) => new GridPoint(0, h.Azimuth - 180);
-            LineMeridian.ToHorizontal = (c, context) => new CrdsHorizontal(0, c.Longitude - 180);
+            Color colorGridEquatorial = settings.Get<Color>("ColorEquatorialGrid").Tint(nightMode);
+            Color colorGridHorizontal = settings.Get<Color>("ColorHorizontalGrid").Tint(nightMode);
+            Color colorLineEcliptic = settings.Get<Color>("ColorEcliptic").Tint(nightMode);
+            Color colorLineGalactic = settings.Get<Color>("ColorGalacticEquator").Tint(nightMode);
+            Color colorLineMeridian = settings.Get<Color>("ColorMeridian").Tint(nightMode);
 
-            // Horizontal grid
-            GridHorizontal.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
-            GridHorizontal.ToHorizontal = (c, context) => new CrdsHorizontal(c.Longitude, c.Latitude);
+            SolidBrush brushHorizontal = new SolidBrush(colorGridHorizontal);
+            SolidBrush brushEquatorial = new SolidBrush(colorGridEquatorial);
+            SolidBrush brushEcliptic = new SolidBrush(colorLineEcliptic);
 
-            // Equatorial grid
-            GridEquatorial.FromHorizontal = (h, ctx) =>
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.BLEND);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.LINE_STIPPLE);
+            GL.Enable(GL.CULL_FACE);
+
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
-                return new GridPoint(eq.Alpha, eq.Delta);
-            };
-            GridEquatorial.ToHorizontal = (c, ctx) =>
+                GL.CullFace(GL.BACK);
+            }
+            else
             {
-                var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
-                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
-            };
+                GL.CullFace(GL.FRONT);
+            }
+
+            if (settings.Get("GalacticEquator"))
+            {
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsGalactical gal = new CrdsGalactical(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    gal.l = (double)i / segments * 360;
+                    var eq1950 = gal.ToEquatorial();
+                    var eq = Precession.GetEquatorialCoordinates(eq1950, calc.PrecessionalElementsB1950ToCurrent);
+                    return prj.Project(eq);
+                };
+
+                DrawLine(colorLineGalactic, segments, project);
+            }
+
+            if (settings.Get("EclipticLine"))
+            {
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsEcliptical ecl = new CrdsEcliptical(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    ecl.Lambda = (double)i / segments * 360;
+                    return prj.Project(ecl.ToEquatorial(prj.Context.Epsilon));
+                };
+
+                DrawLine(colorLineEcliptic, segments, project);
+
+                if (settings.Get("LabelEquinoxPoints"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsEcliptical(i * 180, 0).ToEquatorial(prj.Context.Epsilon);
+                        DrawLabel(prj, eq, equinoxLabels[i], Text.Get(equinoxTooltips[i]), brushEcliptic);
+                    }
+                }
+
+                if (settings.Get("LabelLunarNodes"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsEcliptical(calc.LunarAscendingNodeLongitude + i * 180, 0).ToEquatorial(prj.Context.Epsilon);
+                        DrawLabel(prj, eq, nodesLabels[i], Text.Get(nodesTooltips[i]), brushEcliptic);
+                    }
+                }
+            }
+
+            if (settings.Get("HorizontalGrid"))
+            {
+                CrdsHorizontal h = new CrdsHorizontal();
+                Func<double, double, Vec2> project = (double lon, double lat) =>
+                {
+                    h.Azimuth = lon;
+                    h.Altitude = lat;
+                    return prj.Project(h);
+                };
+
+                DrawGrid(prj, colorGridHorizontal, project);
+
+                if (settings.Get("LabelHorizontalPoles"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var eq = new CrdsHorizontal(0, 90 * (i == 0 ? 1 : -1)).ToEquatorial(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                        DrawLabel(prj, eq, Text.Get(horizontalLabels[i]), Text.Get(horizontalLabels[i]), brushHorizontal);
+                    }
+                }
+            }
+
+            if (settings.Get("EquatorialGrid"))
+            {
+                CrdsEquatorial eq = new CrdsEquatorial();
+                Func<double, double, Vec2> project = (double lon, double lat) =>
+                {
+                    eq.Alpha = lon;
+                    eq.Delta = lat;
+                    return prj.Project(eq);
+                };
+
+                DrawGrid(prj, colorGridEquatorial, project);
+
+                if (settings.Get("LabelEquatorialPoles"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        eq = new CrdsEquatorial(0, 90 * (i == 0 ? 1 : -1));
+                        DrawLabel(prj, eq, Text.Get(equatorialLabels[i]), Text.Get(equatorialTooltips[i]), brushEquatorial);
+                    }
+                }
+            }
+
+            if (settings.Get("MeridianLine"))
+            {
+                int segments = prj.Fov < 45 ? 128 : 64;
+                CrdsHorizontal hor = new CrdsHorizontal(0, 0);
+                Func<int, Vec2> project = (int i) =>
+                {
+                    hor.Altitude = (double)i / segments * 360;
+                    return prj.Project(hor);
+                };
+
+                DrawLine(colorLineMeridian, segments, project);
+            }
+
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.LINE_SMOOTH);
+            GL.Disable(GL.POINT_SMOOTH);
+            GL.Disable(GL.LINE_STIPPLE);
+            GL.Disable(GL.CULL_FACE);
         }
 
-        public override void Render(IMapContext map)
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
         {
-            peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, map.JulianDay);
-            peTo1950 = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_B1950);
+            if (labels.Any(x => x.Item1.Distance(map.MouseScreenCoordinates) < 5))
+            {
+                var label = labels.FirstOrDefault(x => x.Item1.Distance(map.MouseScreenCoordinates) < 5);
+                if (label != null)
+                {
+                    ViewManager.ShowTooltipMessage(label.Item1, label.Item2);
+                }
+            }
+        }
 
-            Color colorGridEquatorial = map.GetColor("ColorEquatorialGrid");
-            Color colorGridHorizontal = map.GetColor("ColorHorizontalGrid");
-            Color colorLineEcliptic = map.GetColor("ColorEcliptic");
-            Color colorLineGalactic = map.GetColor("ColorGalacticEquator");
-            Color colorLineMeridian = map.GetColor("ColorMeridian");
+        private void DrawLabel(Projection prj, CrdsEquatorial eq, string label, string tooltip, SolidBrush brush)
+        {
+            Vec2 p = prj.Project(eq);
+            if (prj.IsInsideScreen(p))
+            {
+                GL.Color3(brush.Color);
+                GL.PointSize(5);
+                GL.Begin(GL.POINTS);
+                GL.Vertex2(p.X, p.Y);
+                GL.End();
+                GL.DrawString(label, fontLabel, brush, new Vec2(p.X + 3, p.Y - 3));
+                labels.Add(new Tuple<Vec2, string>(p, tooltip));
+            }
+        }
 
-            penGridEquatorial.Color = colorGridEquatorial;
-            penGridHorizontal.Color = colorGridHorizontal;
-            penLineEcliptic.Color = colorLineEcliptic;
-            penLineGalactic.Color = colorLineGalactic;
-            penLineMeridian.Color = colorLineMeridian;
+        private void DrawLine(Color color, int segments, Func<int, Vec2> projectPoint)
+        {
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
 
-            if (settings.Get<bool>("GalacticEquator"))
+            GL.Begin(GL.LINE_STRIP);
+
+            for (int i = 0; i <= segments; i++)
             {
-                DrawGrid(map, penLineGalactic, LineGalactic);
+                var p = projectPoint(i);
+
+                if (p != null)
+                {
+                    GL.Vertex2(p.X, p.Y);
+                }
+                else
+                {
+                    GL.End();
+                    GL.Begin(GL.LINE_STRIP);
+                }
             }
-            if (settings.Get<bool>("EquatorialGrid"))
+
+            GL.End();
+        }
+
+        private void DrawGrid(Projection prj, Color color, Func<double, double, Vec2> projectPoint)
+        {
+            int segments = prj.Fov < 45 ? 128 : 64;
+
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
+
+            // HOR. GRID
             {
-                DrawGrid(map, penGridEquatorial, GridEquatorial);
-                DrawEquatorialPoles(map);
-            }
-            if (settings.Get<bool>("HorizontalGrid"))
-            {
-                DrawGrid(map, penGridHorizontal, GridHorizontal);
-                DrawHorizontalPoles(map);
-            }
-            if (settings.Get<bool>("EclipticLine"))
-            {
-                DrawGrid(map, penLineEcliptic, LineEcliptic);
-                DrawEquinoxLabels(map);
-                DrawLunarNodes(map);
-            }
-            if (settings.Get<bool>("MeridianLine"))
-            {
-                DrawGrid(map, penLineMeridian, LineMeridian);
+                // parallels
+                for (int alt = -80; alt <= 80; alt += 10)
+                {
+                    GL.Begin(GL.LINE_STRIP);
+
+                    for (int i = 0; i <= segments; i++)
+                    {
+                        double lon = i / (double)segments * 360;
+                        double lat = alt;
+
+                        var p = projectPoint(lon, lat);
+
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(GL.LINE_STRIP);
+                        }
+                    }
+
+                    GL.End();
+                }
+
+                // meridians
+                for (int i = 0; i < 24; i++)
+                {
+                    GL.Begin(GL.LINE_STRIP);
+
+                    for (int alt = -80; alt <= 80; alt += 2)
+                    {
+                        double lon = i / 24.0 * 360;
+                        double lat = alt;
+
+                        var p = projectPoint(lon, lat);
+                        if (p != null)
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(GL.LINE_STRIP);
+                        }
+                    }
+
+                    GL.End();
+                }
             }
         }
 
         public override RendererOrder Order => RendererOrder.Grids;
-
-        private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
-        {
-            bool isAnyPoint = false;
-
-            // Azimuths 
-            for (int j = 0; j < grid.Columns; j++)
-            {
-                var segments = grid.Column(j)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle ? p : null)
-                    .Split(p => p == null, true);
-
-                foreach (var segment in segments)
-                {
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (segment.First().RowIndex > 1)
-                            segment.Insert(0, grid[segment.First().RowIndex - 1, j]);
-                    }
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (segment.Last().RowIndex < grid.Rows - 2)
-                            segment.Add(grid[segment.Last().RowIndex + 1, j]);
-                    }
-
-                    PointF[] refPoints = new PointF[2];
-                    for (int k = 0; k < 2; k++)
-                    {
-                        var coord = grid.FromHorizontal(map.Center, map);
-                        coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle + k * (map.ViewAngle * 2);
-                        coord.Latitude = Math.Min(coord.Latitude, 80);
-                        coord.Latitude = Math.Max(coord.Latitude, -80);
-                        var refHorizontal = grid.ToHorizontal(coord, map);
-                        refPoints[k] = map.Project(refHorizontal);
-                    }
-
-                    DrawGroupOfPoints(map, penGrid, segment.Select(s => map.Project(grid.ToHorizontal(s, map))).ToArray(), refPoints);
-
-                    isAnyPoint = true;
-                }
-            }
-
-            // Altitude circles
-            for (int i = 0; i < grid.Rows; i++)
-            {
-                var segments = grid.Row(i)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle ? p : null)
-                    .Split(p => p == null, true).ToList();
-
-                // segment that starts with point "0 degrees"
-                var seg0 = segments.FirstOrDefault(s => s.First().ColumnIndex == 0);
-
-                // segment that ends with point "345 degrees"
-                var seg23 = segments.FirstOrDefault(s => s.Last().ColumnIndex == 23);
-
-                // join segments into one
-                if (seg0 != null && seg23 != null && seg0 != seg23)
-                {
-                    segments.Remove(seg0);
-                    seg23.AddRange(seg0);
-                }
-
-                foreach (var segment in segments)
-                {
-                    if (segment.Count == 24)
-                    {
-                        map.Graphics.DrawClosedCurve(penGrid, segment.Select(s => map.Project(grid.ToHorizontal(s, map))).ToArray());
-                    }
-                    else
-                    {
-                        for (int k = 0; k < 2; k++)
-                        {
-                            int col = segment.First().ColumnIndex;
-                            if (col == 0)
-                                segment.Insert(0, grid[i, 23]);
-                            else
-                                segment.Insert(0, grid[i, col - 1]);
-                        }
-
-                        for (int k = 0; k < 2; k++)
-                        {
-                            int col = segment.Last().ColumnIndex;
-
-                            if (col < 23)
-                                segment.Add(grid[i, col + 1]);
-                            else if (col == 23)
-                                segment.Add(grid[i, 0]);
-                        }
-
-                        PointF[] refPoints = new PointF[2];
-                        for (int k = 0; k < 2; k++)
-                        {
-                            var coord = grid.FromHorizontal(map.Center, map);
-                            coord.Longitude += -map.ViewAngle + k * (map.ViewAngle * 2);
-                            coord.Latitude = segment[0].Latitude;
-                            var refHorizontal = grid.ToHorizontal(coord, map);
-                            refPoints[k] = map.Project(refHorizontal);
-                        }
-
-                        if (!map.IsOutOfScreen(refPoints[0]) || !map.IsOutOfScreen(refPoints[1]))
-                        {
-                            refPoints = map.LineScreenIntersection(refPoints[0], refPoints[1]);
-                        }
-
-                        DrawGroupOfPoints(map, penGrid, segment.Select(s => map.Project(grid.ToHorizontal(s, map))).ToArray(), refPoints);
-                    }
-
-                    isAnyPoint = true;
-                }
-            }
-
-            // Special case: there are no points visible 
-            // on the screen at the current position and zoom.
-            // Then we select one point that is closest to screen senter. 
-            if (!isAnyPoint)
-            {
-                GridPoint closestPoint = grid.Points.OrderBy(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center)).First();
-                {
-                    var segment = new List<GridPoint>();
-                    segment.Add(closestPoint);
-                    int i = closestPoint.RowIndex;
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        int col = segment.First().ColumnIndex;
-                        if (col == 0)
-                            segment.Insert(0, grid[i, 23]);
-                        else
-                            segment.Insert(0, grid[i, col - 1]);
-                    }
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        int col = segment.Last().ColumnIndex;
-
-                        if (col < 23)
-                            segment.Add(grid[i, col + 1]);
-                        else if (col == 23)
-                            segment.Add(grid[i, 0]);
-                    }
-
-                    PointF[] refPoints = new PointF[2];
-                    for (int k = 0; k < 2; k++)
-                    {
-                        var coord = grid.FromHorizontal(map.Center, map);
-                        coord.Longitude += -map.ViewAngle + k * (map.ViewAngle * 2);
-                        coord.Latitude = segment[0].Latitude;
-                        var refHorizontal = grid.ToHorizontal(coord, map);
-                        refPoints[k] = map.Project(refHorizontal);
-                    }
-
-                    if (!map.IsOutOfScreen(refPoints[0]) || !map.IsOutOfScreen(refPoints[1]))
-                    {
-                        refPoints = map.LineScreenIntersection(refPoints[0], refPoints[1]);
-                    }
-
-                    DrawGroupOfPoints(map, penGrid, segment.Select(s => map.Project(grid.ToHorizontal(s, map))).ToArray(), refPoints);
-                }
-
-                {
-                    var segment = new List<GridPoint>();
-                    segment.Add(closestPoint);
-                    int j = closestPoint.ColumnIndex;
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (segment.First().RowIndex > 1)
-                            segment.Insert(0, grid[segment.First().RowIndex - 1, j]);
-                    }
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (segment.Last().RowIndex < grid.Rows - 2)
-                            segment.Add(grid[segment.Last().RowIndex + 1, j]);
-                    }
-
-                    PointF[] refPoints = new PointF[2];
-                    for (int k = 0; k < 2; k++)
-                    {
-                        var coord = grid.FromHorizontal(map.Center, map);
-                        coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle + k * (map.ViewAngle * 2);
-                        coord.Latitude = Math.Min(coord.Latitude, 80);
-                        coord.Latitude = Math.Max(coord.Latitude, -80);
-                        var refHorizontal = grid.ToHorizontal(coord, map);
-                        refPoints[k] = map.Project(refHorizontal);
-                    }
-
-                    DrawGroupOfPoints(map, penGrid, segment.Select(s => map.Project(grid.ToHorizontal(s, map))).ToArray(), refPoints);
-                }
-            }
-        }
-
-        private void DrawGroupOfPoints(IMapContext map, Pen penGrid, PointF[] points, PointF[] refPoints)
-        {
-            // Do not draw figure containing less than 2 points
-            if (points.Length < 2)
-            {
-                return;
-            }
-
-            // Two points can be simply drawn as a line
-            if (points.Length == 2)
-            {
-                map.Graphics.DrawLine(penGrid, points[0], points[1]);
-                return;
-            }
-
-            // Coordinates of the screen center
-            var origin = new PointF(map.Width / 2, map.Height / 2);
-
-            // Small radius is a screen diagonal
-            double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / 2;
-
-            // From 3 to 5 points. Probably we can straighten curve to line.
-            // Apply some calculations to detect conditions when it's possible.
-            if (points.Length > 2 && points.Length < 6)
-            {
-                // Determine start, middle and end points of the curve
-                PointF pStart = points[0];
-                PointF pMid = points[points.Length / 2];
-                PointF pEnd = points[points.Length - 1];
-
-                // Get angle between middle and last points of the curve
-                double alpha = map.AngleBetweenVectors(pMid, pStart, pEnd);
-
-                double d1 = map.DistanceBetweenPoints(pStart, origin);
-                double d2 = map.DistanceBetweenPoints(pEnd, origin);
-
-                // It's almost a straight line
-                if (alpha > 179)
-                {
-                    // Check the at least one last point of the curve 
-                    // is far enough from the screen center
-                    if (d1 > r * 2 || d2 > r * 2)
-                    {
-                        map.Graphics.DrawLine(penGrid, refPoints[0], refPoints[1]);
-                        return;
-                    }
-                }
-
-                // If both of last points of the line are far enough from the screen center 
-                // then assume that the curve is an arc of a big circle.
-                // Check the curvature of that circle by comparing its radius with small radius
-                if (d1 > r * 2 && d2 > r * 2)
-                {
-                    var R = FindCircleRadius(points);
-                    if (R / r > 60)
-                    {
-                        map.Graphics.DrawLine(penGrid, refPoints[0], refPoints[1]);
-                        return;
-                    }
-                }
-            }
-
-            if (points.All(p => map.DistanceBetweenPoints(p, origin) < r * 60))
-            {
-                // Draw the curve in regular way
-                map.Graphics.DrawCurve(penGrid, points);
-            }
-        }
-
-        private void DrawEquinoxLabels(IMapContext map)
-        {
-            if (settings.Get<bool>("LabelEquinoxPoints"))
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    var h = LineEcliptic.ToHorizontal(LineEcliptic.Column(equinoxRA[i]).ElementAt(0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
-                    {
-                        PointF p = map.Project(h);
-
-                        var hint = map.Graphics.TextRenderingHint;
-                        map.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                        map.Graphics.DrawStringOpaque(equinoxLabels[i], fontEquinoxLabel, penLineEcliptic.Brush, new SolidBrush(map.GetSkyColor()), p);
-                        map.Graphics.TextRenderingHint = hint;
-                    }
-                }
-            }
-        }
-
-        private void DrawLunarNodes(IMapContext map)
-        {
-            if (settings.Get<bool>("LabelLunarNodes"))
-            {
-                double ascNode = LunarEphem.TrueAscendingNode(map.JulianDay);
-
-                for (int i = 0; i < 2; i++)
-                {
-                    var h = LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
-                    {
-                        PointF p = map.Project(h);
-
-                        var hint = map.Graphics.TextRenderingHint;
-                        map.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                        map.Graphics.FillEllipse(penLineEcliptic.Brush, p.X - 1.5f, p.Y - 1.5f, 3, 3);
-                        map.Graphics.DrawStringOpaque(nodesLabels[i], fontNodeLabel, penLineEcliptic.Brush, new SolidBrush(map.GetSkyColor()), p);
-                        map.Graphics.TextRenderingHint = hint;
-                    }
-                }
-            }
-        }
-
-        private void DrawHorizontalPoles(IMapContext map)
-        {
-            if (settings.Get<bool>("LabelHorizontalPoles"))
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    if (Angle.Separation(horizontalPoles[i], map.Center) < map.ViewAngle)
-                    {
-                        PointF p = map.Project(horizontalPoles[i]);
-                        map.Graphics.DrawXCross(penGridHorizontal, p, 3);
-                        map.Graphics.DrawString(horizontalLabels[i], SystemFonts.DefaultFont, penGridHorizontal.Brush, p.X + 5, p.Y + 5);
-                    }
-                }
-            }
-        }
-
-        private void DrawEquatorialPoles(IMapContext map)
-        {
-            if (settings.Get<bool>("LabelEquatorialPoles"))
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    var h = GridEquatorial.ToHorizontal(polePoints[i], map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
-                    {
-                        PointF p = map.Project(h);
-                        map.Graphics.DrawXCross(penGridEquatorial, p, 3);
-                        map.Graphics.DrawString(equatorialLabels[i], SystemFonts.DefaultFont, penGridEquatorial.Brush, p.X + 5, p.Y + 5);
-                    }
-                }
-            }
-        }
-
-        private double FindCircleRadius(PointF[] l)
-        {
-            // https://www.scribd.com/document/14819165/Regressions-coniques-quadriques-circulaire-spherique
-            // via http://math.stackexchange.com/questions/662634/find-the-approximate-center-of-a-circle-passing-through-more-than-three-points
-
-            var n = l.Count();
-            var sumx = l.Sum(p => p.X);
-            var sumxx = l.Sum(p => p.X * p.X);
-            var sumy = l.Sum(p => p.Y);
-            var sumyy = l.Sum(p => p.Y * p.Y);
-
-            var d11 = n * l.Sum(p => p.X * p.Y) - sumx * sumy;
-
-            var d20 = n * sumxx - sumx * sumx;
-            var d02 = n * sumyy - sumy * sumy;
-
-            var d30 = n * l.Sum(p => p.X * p.X * p.X) - sumxx * sumx;
-            var d03 = n * l.Sum(p => p.Y * p.Y * p.Y) - sumyy * sumy;
-
-            var d21 = n * l.Sum(p => p.X * p.X * p.Y) - sumxx * sumy;
-            var d12 = n * l.Sum(p => p.Y * p.Y * p.X) - sumyy * sumx;
-
-            var x = ((d30 + d12) * d02 - (d03 + d21) * d11) / (2 * (d20 * d02 - d11 * d11));
-            var y = ((d03 + d21) * d20 - (d30 + d12) * d11) / (2 * (d20 * d02 - d11 * d11));
-
-            var c = (sumxx + sumyy - 2 * x * sumx - 2 * y * sumy) / n;
-            var r = Math.Sqrt(c + x * x + y * y);
-
-            return r;
-        }
     }
 }

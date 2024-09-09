@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace Astrarium.Types.Controls
 {
-    public class SettingsSection : UserControl
+    public class SettingsSection : DisposableUserControl
     {
         public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(nameof(Title), typeof(string), typeof(SettingsSection), new UIPropertyMetadata(null));
 

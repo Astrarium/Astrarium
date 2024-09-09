@@ -58,7 +58,7 @@ namespace Astrarium.Algorithms
 
         public override string ToString()
         {
-            return $"RA: {new HMS(Alpha)}; Dec:{new DMS(Delta)}";
+            return $"RA: {new HMS(Alpha)}; Dec: {new DMS(Delta)}";
         }
 
         /// <summary>

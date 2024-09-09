@@ -20,7 +20,7 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="info"></param>
         void GetInfo(CelestialObjectInfo<T> info);
-        
+
         /// <summary>
         /// Searches celestial objects by specified string
         /// </summary>
@@ -30,7 +30,7 @@ namespace Astrarium.Types
         /// <param name="filterFunc">Filter function to match searching criteria.</param>
         /// <returns>Collection of celestial objects matching the search criteria.</returns>
         ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50);
-        
+
         /// <summary>
         /// Enumerates celestial objects of given type which calculator operates of.
         /// The method can return empty enumerable if celestial objects should not be exposed outside the calculator.

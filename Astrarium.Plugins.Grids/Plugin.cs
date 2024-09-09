@@ -24,14 +24,14 @@ namespace Astrarium.Plugins.Grids
             DefineSetting("GalacticEquator", true);
             DefineSetting("MeridianLine", false);
 
-            DefineSetting("ColorEcliptic", new SkyColor(0x80, 0x80, 0x00));
-            DefineSetting("ColorMeridian", new SkyColor(0x08, 0xA4, 0x6F));
-            DefineSetting("ColorGalacticEquator", new SkyColor(64, 0, 64));
-            DefineSetting("ColorHorizontalGrid", new SkyColor(0x00, 0x40, 0x00));
-            DefineSetting("ColorEquatorialGrid", new SkyColor(0, 64, 64));
+            DefineSetting("ColorEcliptic", Color.Goldenrod);
+            DefineSetting("ColorMeridian", Color.SpringGreen);
+            DefineSetting("ColorGalacticEquator", Color.Fuchsia);
+            DefineSetting("ColorHorizontalGrid", Color.Green);
+            DefineSetting("ColorEquatorialGrid", Color.DarkCyan);
 
-            ToolbarItems.Add("Grids", new ToolbarToggleButton("IconEquatorialGrid", "$Settings.EquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked")));
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconHorizontalGrid", "$Settings.HorizontalGrid", new SimpleBinding(settings, "HorizontalGrid", "IsChecked")));
+            ToolbarItems.Add("Grids", new ToolbarToggleButton("IconEquatorialGrid", "$Settings.EquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked")));
 
             DefineSettingsSection<GridsSettingsSection, SettingsViewModel>();
 

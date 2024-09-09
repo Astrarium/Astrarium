@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalContactsTable[6] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P4"), local.PenumbralEnd);
             });
 
-            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.Name} ({Format.Geo.Format(observerLocation)})";
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
             IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;

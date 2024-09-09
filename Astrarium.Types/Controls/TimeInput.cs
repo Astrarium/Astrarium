@@ -274,10 +274,10 @@ namespace Astrarium.Types.Controls
             int start = editor.SelectionStart;
             string text = string.Join(":", groups.Select(g => $"{g:D2}"));
 
-            var value = StringToValue(text, ShowSeconds);
+            Value = StringToValue(text, ShowSeconds);
             if (editor.Text != text)
             {
-                editor.Text = ValueToString(value, ShowSeconds);
+                editor.Text = ValueToString(Value, ShowSeconds);
             }
             editor.SelectionStart = start;
             editor.SelectionLength = 2;

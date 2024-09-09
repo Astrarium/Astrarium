@@ -31,7 +31,8 @@ namespace Astrarium
             {
                 int i1 = GetOrderIndex(r1);
                 int i2 = GetOrderIndex(r2);
-                if (i1 == -1 && i2 == -1)
+
+                if (i1 == -1 || i2 == -1)
                 {
                     return r1.Order - r2.Order;
                 }

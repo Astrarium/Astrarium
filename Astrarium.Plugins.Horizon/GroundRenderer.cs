@@ -1,145 +1,256 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
+using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.Horizon
 {
     public class GroundRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
         private readonly ISettings settings;
-
-        // TODO: move to settings!
-        private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
-        private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
+        private readonly ILandscapesManager landscapesManager;
 
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
 
-        public GroundRenderer(ISettings settings)
+        public GroundRenderer(ISkyMap map, ILandscapesManager landscapesManager, ISettings settings)
         {
+            this.map = map;
+            this.landscapesManager = landscapesManager;
             this.settings = settings;
         }
 
         public override RendererOrder Order => RendererOrder.Terrestrial;
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            if (settings.Get<bool>("Ground"))
+            RenderHorizonLine();
+            RenderGround();
+            RenderCardinalLabels();
+        }
+
+        private void RenderHorizonLine()
+        {
+            if (!settings.Get<bool>("HorizonLine") || settings.Get("Ground")) return;
+
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.LineWidth(5);
+
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+            GL.Begin(GL.LINE_STRIP);
+            GL.Color4(settings.Get<Color>("ColorHorizon").Tint(nightMode));
+
+            const int steps = 64;
+            var hor = new CrdsHorizontal();
+            for (int i = 0; i <= steps; i++)
             {
-                const int POINTS_COUNT = 64;
-                PointF[] hor = new PointF[POINTS_COUNT];
-                double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
-                SolidBrush brushGround = new SolidBrush(map.GetColor(colorGroundNight, colorGroundDay));
-
-                // Bottom part of ground shape
-
-                for (int i = 0; i < POINTS_COUNT; i++)
+                hor.Azimuth = (double)i / steps * 360;
+                var p = prj.Project(hor);
+                if (p != null)
                 {
-                    var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
-                    hor[i] = map.Project(h);
+                    GL.Vertex2(p.X, p.Y);
                 }
-
-                if (hor.Any(h => !map.IsOutOfScreen(h)))
+                else
                 {
-                    GraphicsPath gp = new GraphicsPath();
-
-                    gp.AddCurve(hor);
-
-                    var pts = map.IsInverted ? 
-                        new PointF[]
-                    {
-                        new PointF(map.Width + 1, -1),
-                        new PointF(-1, -1),
-                    } : new PointF[]
-                    {
-                        new PointF(map.Width + 1, map.Height + 1),
-                        new PointF(-1, map.Height + 1)
-                    };
-
-                    if (hor.Last().X > map.Width / 2)
-                    {
-                        gp.AddLines(pts);
-                    }
-                    else
-                    {
-                        gp.AddLines(pts.Reverse().ToArray());
-                    }
-
-                    map.Graphics.FillPath(brushGround, gp);
-                }
-                else if (map.Center.Altitude <= 0)
-                {
-                    map.Graphics.FillRectangle(brushGround, 0, 0, map.Width, map.Height);
-                }
-
-                // Top part of ground shape 
-
-                if (map.Center.Altitude > 0)
-                {
-                    for (int i = 0; i < POINTS_COUNT; i++)
-                    {
-                        var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle - step * i, 0);
-                        hor[i] = map.Project(h);
-                    }
-
-                    if (hor.Count(h => !map.IsOutOfScreen(h)) > 2)
-                    {
-                        GraphicsPath gp = new GraphicsPath();
-
-                        gp.AddCurve(hor);
-                        gp.AddLines(new PointF[]
-                        {
-                            new PointF(map.Width + 1, -1),
-                            new PointF(-1, -1),
-                        });
-
-                        map.Graphics.FillPath(brushGround, gp);
-                    }
+                    GL.End();
+                    GL.Begin(GL.LINE_STRIP);
                 }
             }
 
-            if (map.Schema == ColorSchema.White || (!settings.Get<bool>("Ground") && settings.Get<bool>("HorizonLine")))
+            GL.End();
+
+            GL.LineWidth(1);
+            GL.Disable(GL.BLEND);
+        }
+
+        private void RenderGround()
+        {
+            var prj = map.Projection;
+            if (!settings.Get<bool>("Ground")) return;
+            int textureId = 0;
+            double aziShift = 0;
+            var landmarks = new Landmark[0];
+
+            GL.Enable(GL.TEXTURE_2D);
+            GL.Enable(GL.CULL_FACE);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                const int POINTS_COUNT = 64;
-                PointF[] hor = new PointF[POINTS_COUNT];
-                double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
-
-                for (int i = 0; i < POINTS_COUNT; i++)
-                {
-                    var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
-                    hor[i] = map.Project(h);
-                }
-
-                if (hor.Any(h => !map.IsOutOfScreen(h)))
-                {
-                    Pen penHorizonLine = new Pen(map.GetColor("ColorHorizon"), 2);
-                    map.Graphics.DrawCurve(penHorizonLine, hor);
-                }
+                GL.CullFace(GL.BACK);
+            }
+            else
+            {
+                GL.CullFace(GL.FRONT);
             }
 
-            if (settings.Get<bool>("LabelCardinalDirections"))
+            if (settings.Get("UseLandscape"))
             {
-                Brush brushCardinalLabels = new SolidBrush(map.GetColor("ColorCardinalDirections"));
-                StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Near, Alignment = StringAlignment.Center };
-                for (int i = 0; i < cardinalDirections.Length; i++)
+                string landscapeName = settings.Get<string>("Landscape");
+                Landscape landscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == landscapeName);
+                if (File.Exists(landscape?.Path))
                 {
-                    var h = new CrdsHorizontal(i * 360 / cardinalDirections.Length, 0);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
-                    {
-                        PointF p = map.Project(h);
-                        var fontBase = settings.Get<Font>("CardinalDirectionsFont");
-                        var font = new Font(fontBase.FontFamily, fontBase.Size * (i % 2 == 0 ? 1 : 0.75f), fontBase.Style);
+                    string landscapeFileName = Path.GetFileNameWithoutExtension(landscape.Path);
+                    string landscapeLocation = Directory.GetParent(landscape.Path).FullName;
+                    aziShift = landscape.AzimuthShift;
+                    landmarks = landscape.Landmarks;
+                    textureId = GL.GetTexture(landscape.Path, permanent: true, readyCallback: map.Invalidate);
+                    GL.BindTexture(GL.TEXTURE_2D, textureId);
+                }
+            }
+            else
+            {
+                GL.Disable(GL.TEXTURE_2D);
+            }
 
-                        using (var gp = new GraphicsPath())
+            int steps = prj.Fov < 90 ? 32 : 128;
+
+            // night texture dimming (default is 90%), clamping to range 0...100%
+            decimal dimming = Math.Min(100, Math.Max(0, settings.Get<decimal>("GroundTextureNightDimming", 90)));
+
+            // night color
+            int nc = (int)((100 - dimming) / 100 * 255);
+
+            // blackout coeff
+            int c = nc + (int)((255 - nc) * map.DaylightFactor);
+
+            // night mode flag
+            bool nightMode = settings.Get("NightMode");
+
+            // ground transparency as alpha byte
+            int groundTransparency = 255 - (int)(settings.Get<decimal>("GroundTransparency") / 100 * 255);
+
+            if (nightMode)
+            {
+                // night vision tint
+                GL.Color4(Color.FromArgb(groundTransparency, (int)(c * 0.6), 0, 0));
+            }
+            else
+            {
+                if (textureId > 0)
+                    GL.Color4(Color.FromArgb(groundTransparency, c, c, c));
+                else
+                    GL.Color4(Color.FromArgb(groundTransparency, 0, (int)(c * 0.6), 0));
+            }
+
+            double latStop = textureId > 0 ? 90 : 0;
+
+            for (double lat = -80; lat <= latStop; lat += 10)
+            {
+                GL.Begin(GL.TRIANGLE_STRIP);
+
+                for (int i = 0; i <= steps; i++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var p = prj.Project(new CrdsHorizontal(i / (double)steps * 360 + aziShift, lat - k * 10));
+
+                        if (p != null)
                         {
-                            map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), font, brushCardinalLabels, p, format);
+                            double s = (double)i / steps;
+                            double t = (90 - (lat - k * 10)) / 180.0;
+
+                            GL.TexCoord2(s, t);
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(GL.TRIANGLE_STRIP);
+                            break;
                         }
                     }
+                }
+                GL.End();
+            }
+
+            GL.Disable(GL.TEXTURE_2D);
+            GL.Disable(GL.CULL_FACE);
+            GL.Disable(GL.BLEND);
+
+            if (landmarks != null && settings.Get("Landmarks"))
+            {
+                foreach (var landmark in landmarks)
+                {
+                    if (landmark.FOV == null || prj.Fov <= landmark.FOV.Value)
+                    {
+                        var color = (landmark.Color ?? Color.Black).Tint(nightMode);
+
+                        // starting point
+                        var p = prj.Project(new CrdsHorizontal(landmark.Azimuth, landmark.Altitude));
+
+                        // wide object landmark
+                        if (landmark.Width != null)
+                        {
+                            var pen = new Pen(color);
+                            for (int i = 0; i < 12; i++)
+                            {
+                                var p0 = prj.Project(new CrdsHorizontal(landmark.Azimuth + i / 12.0 * landmark.Width.Value, landmark.Altitude));
+                                var p1 = prj.Project(new CrdsHorizontal(landmark.Azimuth + (i + 1) / 12.0 * landmark.Width.Value, landmark.Altitude));
+
+                                if (p0 != null && p1 != null)
+                                {
+                                    GL.DrawLine(p0, p1, pen);
+                                }
+                            }
+
+                            // central point
+                            var pc = prj.Project(new CrdsHorizontal(landmark.Azimuth + landmark.Width.Value / 2, landmark.Altitude));
+
+                            if (prj.IsInsideScreen(pc))
+                            {
+                                GL.DrawString($"{landmark.Label} ", System.Drawing.SystemFonts.DefaultFont, new SolidBrush(color), new Vec2(pc.X, pc.Y + 10), verticalAlign: StringAlignment.Center, horizontalAlign: StringAlignment.Center, antiAlias: true);
+                            } 
+                        }
+                        // single-point landmark
+                        else
+                        {
+                            if (prj.IsInsideScreen(p))
+                            {
+                                var p1 = new Vec2(p.X, p.Y + 30);
+                                var p0 = new Vec2(p.X + 5, p.Y + 30);
+                                GL.DrawLine(p1, p, new Pen(color));
+                                GL.DrawString($"{landmark.Label} ", System.Drawing.SystemFonts.DefaultFont, new SolidBrush(color), p0, antiAlias: true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void RenderCardinalLabels()
+        {
+            if (!settings.Get("LabelCardinalDirections")) return;
+
+            var prj = map.Projection;
+
+            var nightMode = settings.Get("NightMode");
+            var fontMajor = settings.Get<Font>("CardinalDirectionsFont");
+            var fontMinor = new Font(fontMajor.FontFamily, fontMajor.Size * 0.75f, fontMajor.Style);
+            var color = settings.Get<Color>("ColorCardinalDirections").Tint(nightMode);
+            var brush = new SolidBrush(color);
+
+            for (int i = 0; i < cardinalDirections.Length; i++)
+            {
+                if (prj.Fov > 90 && i % 2 == 1) continue;
+
+                var p = prj.Project(new CrdsHorizontal((double)i / cardinalDirections.Length * 360, 0));
+                if (prj.IsInsideScreen(p))
+                {
+                    string label = Text.Get($"CardinalDirections.{cardinalDirections[i]}");
+                    var font = i % 2 == 0 ? fontMajor : fontMinor;
+                    var size = WF.TextRenderer.MeasureText(label, font);
+                    GL.DrawString(label, font, brush, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
                 }
             }
         }

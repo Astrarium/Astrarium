@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.FOV
             LoadEquipment();
             Binning = 1;
             Rotation = 0;
-            Color = new SkyColor(System.Drawing.Color.Pink);
+            Color = System.Drawing.Color.Pink;
 
             AddEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: true));
             EditEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: false));
@@ -358,6 +358,16 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
+        public bool ShadingVisible
+        {
+            get => FrameType != FrameType.Camera;
+        }
+
+        public int LabelColspan
+        {
+            get => FrameType != FrameType.Camera ? 1 : 2;
+        }
+
         public Binocular Binocular => Binoculars.FirstOrDefault(t => t.Id == BinocularId);
         public Telescope Telescope => Telescopes.FirstOrDefault(t => t.Id == TelescopeId);
         public Eyepiece Eyepiece => Eyepieces.FirstOrDefault(t => t.Id == EyepieceId);
@@ -423,17 +433,19 @@ namespace Astrarium.Plugins.FOV
                     nameof(BinocularVisible),
                     nameof(CameraVisible),
                     nameof(LensVisible),
-                    nameof(FinderVisible)
-                    );
+                    nameof(FinderVisible),
+                    nameof(ShadingVisible),
+                    nameof(LabelColspan)
+                );
                 Calculate();
             }
         }
 
-        public ColorSchema ColorSchema => _Settings.Get<ColorSchema>("Schema");
+        public bool NightMode => _Settings.Get("NightMode");
 
-        public SkyColor Color
+        public Color Color
         {
-            get => GetValue<SkyColor>(nameof(Color));
+            get => GetValue<Color>(nameof(Color));
             set => SetValue(nameof(Color), value);
         }
 
@@ -482,7 +494,6 @@ namespace Astrarium.Plugins.FOV
                         Id = _Id,
                         Color = Color,
                         Label = Label,
-                        Shading = Shading,
                         Enabled = true,
                         LensId = LensId,
                         Width = cameraFieldOfView.Size.Width,
@@ -514,8 +525,8 @@ namespace Astrarium.Plugins.FOV
                         Id = _Id,
                         Color = Color,
                         Label = Label,
-                        Shading = Shading,
                         Enabled = true,
+                        Shading = Shading,
                         Sizes = new float?[] {
                             (float?)FinderSize1,
                             FinderSize2Enabled ? (float?)FinderSize2 : null,
@@ -537,6 +548,7 @@ namespace Astrarium.Plugins.FOV
                     TelescopeId = telescopeFrame.TelescopeId;
                     EyepieceId = telescopeFrame.EyepieceId;
                     LensId = telescopeFrame.LensId;
+                    Shading = telescopeFrame.Shading;
                     FrameType = FrameType.Telescope;
                 }
                 else if (value is CameraFovFrame cameraFrame)
@@ -552,7 +564,8 @@ namespace Astrarium.Plugins.FOV
                 else if (value is BinocularFovFrame binocularFrame)
                 {
                     BinocularId = binocularFrame.BinocularId;
-                    FrameType = FrameType.Binocular;
+                    Shading = binocularFrame.Shading;
+                    FrameType = FrameType.Binocular;                    
                 }
                 else if (value is FinderFovFrame finderFrame)
                 {
@@ -567,12 +580,12 @@ namespace Astrarium.Plugins.FOV
                         FinderSize3Enabled = true;
                         FinderSize3 = (decimal)finderFrame.Sizes[2];
                     }
+                    Shading = finderFrame.Shading;
                     FinderCrosslines = finderFrame.Crosslines;
                     FrameType = FrameType.Finder;
                 }
 
                 _Id = value.Id;
-                Shading = value.Shading;
                 Color = value.Color;
                 Label = value.Label;
             }

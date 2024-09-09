@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -46,41 +47,37 @@ namespace Astrarium.ViewModels
                 string filePath = ViewManager.ShowSaveFileDialog("$Save", "Astrarium-installer", ".exe", "Application executable|*.exe|All files|*.*", out int selectedExtensionIndex);
                 if (filePath != null)
                 {
-                    using (var client = new WebClient())
+                    try
                     {
-                        try
-                        {
-                            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                            client.DownloadFile("https://github.com/Astrarium/Astrarium/releases/latest/download/Astrarium-setup.exe", filePath);
-                        }
-                        catch (Exception ex)
-                        {
-                            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToDownloadInstaller")}: {ex.Message}"));
-                            return;
-                        }
+                        Downloader.Download(new Uri("https://github.com/Astrarium/Astrarium/releases/latest/download/Astrarium-setup.exe"), filePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToDownloadInstaller")}: {ex.Message}"));
+                        return;
+                    }
 
-                        if (File.Exists(filePath))
+                    if (File.Exists(filePath))
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            Application.Current.Dispatcher.Invoke(() =>
+                            var answer = ViewManager.ShowMessageBox("$Warning", "$AppUpdateWindow.InstallConfirmation", MessageBoxButton.YesNo);
+                            if (answer == MessageBoxResult.Yes)
                             {
-                                var answer = ViewManager.ShowMessageBox("$Warning", Text.Get("AppUpdateWindow.InstallConfirmation"), MessageBoxButton.YesNo);
-                                if (answer == MessageBoxResult.Yes)
+                                try
                                 {
-                                    try
-                                    {
-                                        ProcessStartInfo info = new ProcessStartInfo(filePath);
-                                        info.UseShellExecute = true;
-                                        info.Verb = "runas";
-                                        Process.Start(info);
-                                        Environment.Exit(0);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToStartInstaller")}: {ex.Message}");
-                                    }
+                                    ProcessStartInfo info = new ProcessStartInfo(filePath);
+                                    info.UseShellExecute = true;
+                                    info.Verb = "runas";
+                                    Process.Start(info);
+                                    Environment.Exit(0);
                                 }
-                            });
-                        }
+                                catch (Exception ex)
+                                {
+                                    ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToStartInstaller")}: {ex.Message}");
+                                }
+                            }
+                        });
                     }
                 }
             });

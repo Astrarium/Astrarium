@@ -79,16 +79,16 @@ namespace Astrarium.Types.Controls
                 TrySetValue(path);
             }
             else if (Mode == PickerMode.Directory)
-                { 
+            {
                 string path = ViewManager.ShowSelectFolderDialog(Caption, SelectedPath);
                 TrySetValue(path);
-                }
             }
+        }
 
         private void TrySetValue(string path)
+        {
+            if (!string.IsNullOrEmpty(path))
             {
-                if (!string.IsNullOrEmpty(path))
-                {
                 if (Validator == null || Validator.Invoke(path))
                 {
                     SelectedPath = path;

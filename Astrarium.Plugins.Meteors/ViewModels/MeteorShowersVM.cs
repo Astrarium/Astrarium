@@ -118,7 +118,7 @@ namespace Astrarium.Plugins.Meteors
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
             Moon = Sky.Search("Moon");
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            IsDarkMode = settings.Get("NightMode");
             settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();
         }
@@ -127,7 +127,7 @@ namespace Astrarium.Plugins.Meteors
         {
             if (settingName == "Schema")
             {
-                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+                IsDarkMode = (bool)value;
             }
         }
 
@@ -163,7 +163,7 @@ namespace Astrarium.Plugins.Meteors
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
             SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
-            var phase = Calculator.LunarPhaseAtMax(cMax, m);
+            var phase = Calculator.LunarPhaseAtMax(cMax);
 
             var sb = new StringBuilder();
             sb.AppendLine($"**{Text.Get("MeteorShowersInfoDialog.Names")}**  ");

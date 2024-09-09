@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:Astrarium.Views"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="{t:Text ObjectInfoWindow.Title}" 
         Width="600" Height="600"
@@ -12,9 +13,25 @@
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="HoverPropertyStyle" x:Name="HoverPropertyStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Style.Setters>
+                    <Setter Property="Padding" Value="4" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid Margin="4">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,43 +39,70 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
+        <Grid Grid.Row="0" Margin="0 0 0 4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" TextWrapping="Wrap" Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding CopyNameCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
-                                <Setter Property="Cursor" Value="Hand" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
             </TextBlock>
-        </StackPanel>
+
+            <StackPanel Visibility="{Binding Subtitle, Converter={s:NotNullToVisibilityConverter}}" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Rectangle Margin="2" Width="16" Height="16">
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                    </Rectangle.Fill>
+                    <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <Label IsEnabled="False" VerticalAlignment="Top"  HorizontalAlignment="Right" Content="{Binding Subtitle}" />
+            </StackPanel>
+        </Grid>
                 
-        <Label FontSize="8" Grid.Row="1" Content="{Binding Subtitle}" />
-        
-        <Separator Grid.Row="2" Height="1" />
+        <TabControl 
+            ItemsSource="{Binding Tabs}" 
+            SelectedIndex="0" Grid.Row="2" Margin="-2 0">
 
-        <ScrollViewer
-            Grid.Row="3"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Auto">
-            <v:ObjectInfoView 
-                DataContext="{Binding InfoElements}"
-                CellPadding="4 0 8 2"
-                HeaderPadding="4 16 4 4"
-                HeaderBackground="Transparent"
-                LinkCommand="{Binding DataContext.LinkClickedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type v:ObjectInfoWindow}}}">
-            </v:ObjectInfoView>
-        </ScrollViewer>
+            <!-- Header -->
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Padding="2" Text="{Binding Header}" />
+                </DataTemplate>
+            </TabControl.ItemTemplate>
 
-        <Separator Grid.Row="4" Height="1" />
-        <StackPanel Grid.Row="5"                    
+            <!-- Header style: hide header by demand -->
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                    <Style.Setters>
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                    </Style.Setters>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsHeaderVisible}" Value="false">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.ItemContainerStyle>
+            
+            <!-- Tab content -->
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ScrollViewer
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Auto" 
+                        Content="{Binding Content}">
+                    </ScrollViewer>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+
+        <Separator Grid.Row="3" Height="1" />
+        <StackPanel Grid.Row="4"           
+                    Margin="0 4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button MinWidth="80" Command="{Binding CloseCommand}" Content="{t:Text Close}" />

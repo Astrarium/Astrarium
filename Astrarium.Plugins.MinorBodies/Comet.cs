@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.MinorBodies
 {
-    public class Comet : SizeableCelestialObject, IMovingObject, IMagnitudeObject
+    public class Comet : SizeableCelestialObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Name or readable designation of the comet
@@ -40,9 +40,9 @@ namespace Astrarium.Plugins.MinorBodies
         public double AverageDailyMotion { get; set; }
 
         /// <summary>
-        /// Visible horizontal coordinates of comet tail end
+        /// Visible equatorial coordinates of comet tail end
         /// </summary>
-        public CrdsHorizontal TailHorizontal { get; set; }
+        public CrdsEquatorial TailEquatorial { get; set; }
 
         /// <summary>
         /// Gets comet names
@@ -59,8 +59,8 @@ namespace Astrarium.Plugins.MinorBodies
         /// </summary>
         public Comet()
         {
-            Horizontal = new CrdsHorizontal();
-            TailHorizontal = new CrdsHorizontal();
+            TailEquatorial = new CrdsEquatorial();
+            Equatorial = new CrdsEquatorial();
         }
     }
 }

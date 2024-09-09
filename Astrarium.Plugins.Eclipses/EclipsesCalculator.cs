@@ -232,13 +232,15 @@ namespace Astrarium.Plugins.Eclipses
 
             for (int i = 0; i < 5; i++)
             {
+                var sunEph = sunEphem.ElementAt(i);
+                var moonEph = moonEphem.ElementAt(i);
                 pos[i] = new SunMoonPosition()
                 {
                     JulianDay = t0 + step * (i - 2),
-                    Sun = new CrdsEquatorial(sunEphem[i].GetValue<double>("Equatorial0.Alpha"), sunEphem[i].GetValue<double>("Equatorial0.Delta")),
-                    Moon = new CrdsEquatorial(moonEphem[i].GetValue<double>("Equatorial0.Alpha"), moonEphem[i].GetValue<double>("Equatorial0.Delta")),
-                    DistanceSun = sunEphem[i].GetValue<double>("Distance") * AU / EARTH_RADIUS,
-                    DistanceMoon = moonEphem[i].GetValue<double>("Distance") / EARTH_RADIUS
+                    Sun = new CrdsEquatorial(sunEph.GetValue<double>("Equatorial0.Alpha"), sunEph.GetValue<double>("Equatorial0.Delta")),
+                    Moon = new CrdsEquatorial(moonEph.GetValue<double>("Equatorial0.Alpha"), moonEph.GetValue<double>("Equatorial0.Delta")),
+                    DistanceSun = sunEph.GetValue<double>("Distance") * AU / EARTH_RADIUS,
+                    DistanceMoon = moonEph.GetValue<double>("Distance") / EARTH_RADIUS
                 };
             }
 

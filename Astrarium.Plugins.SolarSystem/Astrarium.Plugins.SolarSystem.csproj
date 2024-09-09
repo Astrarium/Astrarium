@@ -38,8 +38,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="OpenTK" Version="3.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   
@@ -48,7 +47,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  
 
   <ItemGroup>
     <Compile Update="Controls\MoonSettingsSection.xaml.cs">
@@ -61,8 +59,15 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
-  
 
+  <ItemGroup>
+	<ContentWithTargetPath Include="Libs\glfw.dll">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <TargetPath>glfw.dll</TargetPath>
+	</ContentWithTargetPath>
+	<None Include="Libs\glfw.dll" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Page Update="Controls\MoonSettingsSection.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

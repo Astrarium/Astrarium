@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         public ObservableCollection<TrackListItemVM> Tracks { get; private set; } = new ObservableCollection<TrackListItemVM>();
         public bool NoTracks => !Tracks.Any();
-        public ColorSchema ColorSchema { get; private set; }
+        public bool NightMode { get; private set; }
 
         private TrackListItemVM _SelectedTrack;
         public TrackListItemVM SelectedTrack
@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
             this.sky = sky;            
             this.trackCalc = trackCalc;
 
-            ColorSchema = settings.Get<ColorSchema>("Schema");
+            NightMode = settings.Get("NightMode");
             CancelCommand = new Command(Close);
             SelectTrackCommand = new Command<TrackListItemVM>(SelectTrack);
             EditSelectedTrackCommand = new Command(EditSelectedTrack);
@@ -88,7 +88,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 From = sky.Context.JulianDay,
                 To = sky.Context.JulianDay + 30,
                 LabelsStep = TimeSpan.FromDays(1),
-                Color = new SkyColor(Color.DimGray)
+                Color = Color.DimGray
             });
         }
 
@@ -143,6 +143,6 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         public string Body { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public SkyColor Color { get; set; }
+        public Color Color { get; set; }
     }
 }

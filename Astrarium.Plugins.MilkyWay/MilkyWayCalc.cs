@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -12,51 +13,26 @@ namespace Astrarium.Plugins.MilkyWay
     public class MilkyWayCalc : BaseCalc
     {
         /// <summary>
-        /// Outline points
+        /// Altitude of the Sun above horizon
         /// </summary>
-        public List<List<CelestialPoint>> MilkyWay { get; private set; } = new List<List<CelestialPoint>>();
+        public double SunAltitude { get; private set; }
+
+        public PrecessionalElements PrecessionElementsB1950ToCurrent { get; private set; }
+
+        private readonly ISky sky;
+
+        public MilkyWayCalc(ISky sky)
+        {
+            this.sky = sky;
+        }
 
         public override void Calculate(SkyContext context)
         {
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            // solar altitude, in degrees
+            SunAltitude = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime).Altitude;
 
-            foreach (var block in MilkyWay)
-            {
-                foreach (var bp in block)
-                {
-                    // Equatorial coordinates for the mean equinox and epoch of the target date
-                    var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
-
-                    // Apparent horizontal coordinates
-                    bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
-            }
-        }
-
-        public override void Initialize()
-        {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MilkyWay.dat");
-
-            List<CelestialPoint> block = null;
-            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
-            {
-                int fragment = -1;
-                while (sr.BaseStream.Position != sr.BaseStream.Length)
-                {
-                    int f = sr.ReadChar();
-                    if (f != fragment)
-                    {
-                        fragment = f;
-                        block = new List<CelestialPoint>();
-                        MilkyWay.Add(block);
-                    }
-
-                    block.Add(new CelestialPoint()
-                    {
-                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
-                    });
-                }
-            }
+            // precession elements from B1950 to current epoch
+            PrecessionElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_B1950, context.JulianDay);
         }
     }
 }

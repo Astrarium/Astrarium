@@ -39,11 +39,11 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(GenericMoon_Equatorial, id).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double GenericMoon_Semidiameter(SkyContext c, int id)
+        private float GenericMoon_Semidiameter(SkyContext c, int id)
         {
             var ecl = c.Get(GenericMoon_Ecliptical, id);
             var radius = genericMoons.FirstOrDefault(gm => gm.Id == id).Data.radius;
-            return GenericSatellite.Semidiameter(ecl.Distance, radius);
+            return (float)GenericSatellite.Semidiameter(ecl.Distance, radius);
         }
 
         private float GenericMoon_Magnitude(SkyContext c, int id)
@@ -104,15 +104,40 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Magnitude")
             .AddRow("AngularDiameter")
 
-            .AddHeader(Text.Get("GenericMoon.OrbitalElements"))
-            .AddRow("OrbitalElements.Epoch", Formatters.Date.Format(new Date(info.Body.Data.jd)));
-            // TODO: add other orbital elements
+            .AddHeader(Text.Get("GenericMoon.OrbitalElements"));
 
             decimal validityPeriod = settings.Get<decimal>("GenericMoonsOrbitalElementsValidity");
             if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
             {
-                info.AddRow("OrbitalElements.Obsolete", "");
+                info.AddRow(
+                    Text.Get("GenericMoon.OrbitalElements.Obsolete"),
+                    () => UpdateOrbitalElements(info), 
+                    Text.Get("GenericMoon.OrbitalElements.Update"));
             }
+
+            info
+            .AddRow("OrbitalElements.Epoch", Formatters.DateTime.Format(new Date(info.Body.Data.jd)))
+            .AddRow("OrbitalElements.M", OrbitalElementsFormatters.M.Format(info.Body.Data.M))
+            .AddRow("OrbitalElements.P", OrbitalElementsFormatters.P.Format(1 / info.Body.Data.n))
+            .AddRow("OrbitalElements.n", OrbitalElementsFormatters.n.Format(info.Body.Data.n))
+            .AddRow("OrbitalElements.e", OrbitalElementsFormatters.e.Format(info.Body.Data.e))
+            .AddRow("OrbitalElements.a", OrbitalElementsFormatters.a.Format(info.Body.Data.a))
+            .AddRow("OrbitalElements.i", OrbitalElementsFormatters.i.Format(info.Body.Data.i))
+            .AddRow("OrbitalElements.w", OrbitalElementsFormatters.w.Format(info.Body.Data.w))
+            .AddRow("OrbitalElements.Om", OrbitalElementsFormatters.Om.Format(info.Body.Data.Om))
+            .AddRow("OrbitalElements.Pw", OrbitalElementsFormatters.Pw.Format(info.Body.Data.Pw))
+            .AddRow("OrbitalElements.POm", OrbitalElementsFormatters.POm.Format(info.Body.Data.POm));
+        }
+
+        private void UpdateOrbitalElements(CelestialObjectInfo<GenericMoon> info)
+        {
+            orbitalElementsManager.Update(GenericMoons.Select(x => x.Data), null, () => OnAfterUpdate(info));
+        }
+
+        private void OnAfterUpdate(CelestialObjectInfo<GenericMoon> info)
+        {
+            info.Clear();
+            GetInfo(info);
         }
     }
 }

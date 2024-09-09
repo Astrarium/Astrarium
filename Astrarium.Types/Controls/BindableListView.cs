@@ -35,7 +35,7 @@ namespace Astrarium.Types.Controls
         {
             base.OnMouseDoubleClick(e);
             DependencyObject obj = (DependencyObject)e.OriginalSource;
-            while (obj != null && obj != this)
+            while (obj != null && obj != this && obj is Visual)
             {
                 if (obj.GetType() == typeof(ListViewItem))
                 {

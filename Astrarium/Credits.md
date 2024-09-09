@@ -1,8 +1,8 @@
 ﻿# Credits #
 
-- [log4net](https://logging.apache.org/log4net/)  
-by Apache Software Foundation  
-licensed under [Apache License, Version 2.0](https://logging.apache.org/log4net/license.html)
+- [NLog](https://nlog-project.org/)  
+by Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen
+licensed under [BSD-3 license](https://github.com/NLog/NLog/blob/master/LICENSE.txt)
   
 - [Markdown.XAML](https://github.com/theunrepentantgeek/Markdown.XAML)  
 by Bevan Arps  
@@ -15,10 +15,6 @@ licensed under [MIT license](https://github.com/JamesNK/Newtonsoft.Json/blob/mas
 - [Ninject](http://www.ninject.org/)  
 by Enkari, Ltd and the Ninject project contributors  
 [dual-licensed](https://github.com/ninject/Ninject/blob/master/LICENSE.txt) under Apache License Version 2.0 or the Microsoft Public License (Ms-PL)
-
-- [OpenTK](https://opentk.net/)
-by [Open Toolkit Team](https://github.com/opentk/opentk/graphs/contributors)  
-distributed under the permissive MIT/X11 license
 
 - **Books**  
 Most of implementations are based on algorithms and formulae given in the following books:

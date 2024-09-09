@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="Astrarium.Plugins.Journal.Views.VariableStarObservationDetailsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:tc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Vertical" Margin="0 4 0 0">
+        <GroupBox Header="Variable star findings">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="AAVSO chart date" VerticalAlignment="Center" Margin="4" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ChartDate}" VerticalAlignment="Center" Margin="4" />
+                <CheckBox Grid.Row="0" Grid.Column="2" Content="Non-AAVSO chart" IsThreeState="True" IsChecked="{Binding NonAAVSOChart}" VerticalAlignment="Center" Margin="4" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Magnitude" VerticalAlignment="Center" Margin="4" />
+                <tc:NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding VisMag}" DecimalPlaces="2" VerticalAlignment="Center" Margin="4" />
+                <CheckBox Grid.Row="1" Grid.Column="2" Content="Magnitude uncertain" IsThreeState="True" IsChecked="{Binding VisMagUncertain}" VerticalAlignment="Center" Margin="4" />
+                <CheckBox Grid.Row="1" Grid.Column="3" Content="Magnitude fainter than specified value" IsThreeState="True" IsChecked="{Binding VisMagFainterThan}" VerticalAlignment="Center" Margin="4" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Comparison stars" VerticalAlignment="Center" Margin="4" />
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"  Text="{Binding ComparisonStars}" VerticalAlignment="Center" Margin="4" />
+                <CheckBox Grid.Row="2" Grid.Column="3" Content="Problem with comparison stars" IsThreeState="True" IsChecked="{Binding ComparismSequenceProblem}" VerticalAlignment="Center" Margin="4" />
+            </Grid>
+        </GroupBox>
+        
+        <GroupBox Header="Variable star observation conditions" Padding="8" Margin="0 2">
+            <WrapPanel Margin="0 4 0 0"  Orientation="Horizontal">
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Star identification uncertain" IsChecked="{Binding StarIdentificationUncertain}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="The sky is bright (due to Moon, twilight, light pollution, aurora etc.)" IsChecked="{Binding BrightSky}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Clouds, or dust, smoke, haze etc." IsChecked="{Binding Clouds}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Poor seeing" IsChecked="{Binding PoorSeeing}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Near horizon" IsChecked="{Binding NearHorizon}" />
+            </WrapPanel>
+        </GroupBox>
+
+        <GroupBox Header="Variable star characteristics" Padding="8" Margin="0 2">
+            <WrapPanel Margin="0 4 0 0" Orientation="Horizontal">
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Faint star" IsChecked="{Binding FaintStar}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Unusual activity" IsChecked="{Binding UnusualActivity}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Outburst" IsChecked="{Binding Outburst}" />
+            </WrapPanel>
+        </GroupBox>
+
+    </StackPanel>
+    
+
+</UserControl>

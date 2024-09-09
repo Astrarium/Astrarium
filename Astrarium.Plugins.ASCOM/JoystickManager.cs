@@ -1,30 +1,43 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Astrarium.Types;
-using OpenTK.Input;
 
 namespace Astrarium.Plugins.ASCOM
 {
     [Singleton(typeof(IJoystickManager))]
     public class JoystickManager : IJoystickManager
     {
-        public event Action DevicesListChanged;
-        public event Action<string, bool> ButtonStateChanged;
-        public event Action SelectedDeviceChanged;
+        private const string GLFW = "glfw";
+
+        private const int GLFW_TRUE = 1;
+
+        [DllImport(GLFW)]
+        private static extern void glfwPollEvents();
+
+        [DllImport(GLFW)]
+        private static extern bool glfwInit();
+
+        [DllImport(GLFW)]
+        private static extern int glfwJoystickPresent(int jid);
+
+        [DllImport(GLFW)]
+        private static extern IntPtr glfwGetJoystickName(int jid);
+
+        [DllImport(GLFW)]
+        private static extern IntPtr glfwGetJoystickButtons(int jid, ref int count);
+
+        [DllImport(GLFW)]
+        private static extern IntPtr glfwGetJoystickAxes(int jid, ref int count);
 
         private ManualResetEvent isEnabledEvent = new ManualResetEvent(false);
 
-        private readonly List<JoystickDevice> allDevices = new List<JoystickDevice>()
-        {
-            new JoystickDevice() { Index = 0 },
-            new JoystickDevice() { Index = 1 },
-            new JoystickDevice() { Index = 2 },
-            new JoystickDevice() { Index = 3 }
-        };
+        private readonly List<JoystickDevice> allDevices = Enumerable.Range(0, 16).Select(index => new JoystickDevice() { Index = index }).ToList();
 
         private bool isEnabled = false;
         public bool IsEnabled
@@ -44,7 +57,7 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
-        public ICollection<JoystickDevice> Devices => allDevices.Where(x => !string.IsNullOrEmpty(x.Name) && x.Buttons.Count > 0).ToArray();
+        public ICollection<JoystickDevice> Devices => allDevices.Where(x => !string.IsNullOrEmpty(x.Name)).ToArray();
 
         private JoystickDevice selectedDevice = null;
         public JoystickDevice SelectedDevice
@@ -60,124 +73,182 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
+        public event Action DevicesListChanged;
+        public event Action<string, bool> ButtonStateChanged;
+        public event Action SelectedDeviceChanged;
+
         public JoystickManager()
         {
             Thread joystickThread = new Thread(Poll) { IsBackground = true };
+            joystickThread.SetApartmentState(ApartmentState.STA);
             joystickThread.Start();
         }
 
-        private void Poll()
+        [HandleProcessCorruptedStateExceptions]
+        private void Init()
         {
+            int retryCount = 0;
             while (true)
             {
-                RefreshDevicesList();
-                RefreshButtonStates();
+                try
+                {
+                    glfwInit();
+                    break;
+                }
+                catch
+                {
+                    retryCount++;
+                    if (retryCount < 5)
+                        Thread.Sleep(1000);
+                    else
+                        break;
+                }
+            }
+        }
+        
+        private void Poll()
+        {
+            Init();
+            
+            while (true)
+            {
+                glfwPollEvents();
+                bool needRefresh = false;
+
+                for (int j = 0; j < allDevices.Count; j++)
+                {
+                    var joystick = allDevices[j];
+                    bool isConnected = glfwJoystickPresent(j) == GLFW_TRUE;
+
+                    byte[] buttons = new byte[0];
+                    float[] axes = new float[0];
+
+                    if (isConnected)
+                    {
+                        string name = PtrToStringUtf8(glfwGetJoystickName(j));
+
+                        int count = 0;
+                        IntPtr buttonStatesPtr = glfwGetJoystickButtons(j, ref count);
+                        buttons = PtrToByteArray(buttonStatesPtr, count);
+
+                        IntPtr axisStates = glfwGetJoystickAxes(j, ref count);
+                        axes = PtrToArrayOfFloat(axisStates, count);
+
+                        if (joystick.Name != name)
+                        {
+                            joystick.Name = name;
+                            needRefresh = true;
+                        }
+                    }
+
+                    if (joystick.IsConnected != isConnected)
+                    {
+                        joystick.IsConnected = isConnected;
+                        joystick.Buttons.Clear();
+                        needRefresh = true;
+                    }
+
+                    if (!joystick.Buttons.Any())
+                    {
+                        for (int a = 0; a < axes.Length; a++)
+                        {
+                            joystick.Buttons.Add(new JoystickButton() { Button = $"Axis {a + 1} PLUS" });
+                            joystick.Buttons.Add(new JoystickButton() { Button = $"Axis {a + 1} MINUS" });
+                        }
+
+                        for (int b = 0; b < buttons.Length; b++)
+                        {
+                            joystick.Buttons.Add(new JoystickButton() { Button = $"Button {b + 1}" });
+                        }
+                    }
+
+                    if (needRefresh)
+                    {
+                        DevicesListChanged?.Invoke();
+                    }
+
+                    for (int a = 0; a < axes.Length; a++)
+                    {
+                        var axisDec = joystick.Buttons.FirstOrDefault(x => x.Button == $"Axis {a + 1} MINUS");
+                        if (axisDec != null)
+                        {
+                            bool isPressed = axes[a] < -0.5;
+                            if (isPressed != axisDec.IsPressed)
+                            {
+                                axisDec.IsPressed = isPressed;
+                                ButtonStateChanged?.Invoke(axisDec.Button, isPressed);
+                            }
+                        }
+
+                        var axisInc = joystick.Buttons.FirstOrDefault(x => x.Button == $"Axis {a + 1} PLUS");
+                        if (axisInc != null)
+                        {
+                            bool isPressed = axes[a] > 0.5;
+                            if (isPressed != axisInc.IsPressed)
+                            {
+                                axisInc.IsPressed = isPressed;
+                                ButtonStateChanged?.Invoke(axisInc.Button, isPressed);
+                            }
+                        }
+                    }
+
+                    for (int b = 0; b < buttons.Length; b++)
+                    {
+                        bool isPressed = buttons[b] == 1;
+                        var button = joystick.Buttons.FirstOrDefault(x => x.Button == $"Button {b + 1}");
+                        if (button != null)
+                        {
+                            if (isPressed != button.IsPressed)
+                            {
+                                button.IsPressed = isPressed;
+                                ButtonStateChanged?.Invoke(button.Button, isPressed);
+                            }
+                        }
+                    }
+                }
+
+                if (needRefresh)
+                {
+                    DevicesListChanged?.Invoke();
+                }
+
                 Thread.Sleep(10);
                 isEnabledEvent.WaitOne();
             }
         }
 
-        private void RefreshDevicesList()
+        private static string PtrToStringUtf8(IntPtr ptr)
         {
-            bool needRefresh = false;
-
-            for (int i = 0; i < 4; i++)
+            if (ptr == IntPtr.Zero)
             {
-                var device = allDevices[i];
-                device.IsConnected = GamePad.GetState(i).IsConnected;
-                Guid id = Joystick.GetGuid(i);
-                if (id != device.Id)
-                {
-                    device.Id = id;
-                    device.Name = $"Joystick #{i + 1}";
-
-                    int buttonCount = Joystick.GetCapabilities(i).ButtonCount;
-                    int axisCount = Joystick.GetCapabilities(i).AxisCount;
-
-                    // init buttons
-                    device.Buttons.Clear();
-
-                    if (buttonCount > 2)
-                    {
-                        // init axis
-                        for (int a = 0; a < axisCount; a++)
-                        {
-                            device.Buttons.Add(new JoystickButton() { Button = $"Axis {a} PLUS" });
-                            device.Buttons.Add(new JoystickButton() { Button = $"Axis {a} MINUS" });
-                        }
-
-                        // init buttons
-                        for (int b = 0; b < buttonCount; b++)
-                        {
-                            device.Buttons.Add(new JoystickButton() { Button = $"Button {b}" });
-                        }
-                    }
-
-                    needRefresh = true;
-                }
+                return null;
             }
-
-            if (needRefresh)
+            int len = 0;
+            while (Marshal.ReadByte(ptr, len) != 0)
             {
-                DevicesListChanged?.Invoke();
+                len++;
             }
+            if (len == 0)
+            {
+                return null;
+            }
+            byte[] array = new byte[len];
+            Marshal.Copy(ptr, array, 0, len);
+            return Encoding.UTF8.GetString(array);
         }
 
-        private void RefreshButtonStates()
+        private static byte[] PtrToByteArray(IntPtr ptr, int count)
         {
-            var device = SelectedDevice;
+            byte[] array = new byte[count];
+            Marshal.Copy(ptr, array, 0, count);
+            return array;
+        }
 
-            if (device != null)
-            {
-                int index = device.Index;
-                var name = GamePad.GetName(index);
-                var state = Joystick.GetState(index);
-                var cap = Joystick.GetCapabilities(index);
-
-                int axisCount = cap.AxisCount;
-                int buttonsCount = cap.ButtonCount;
-
-                // update axis
-                for (int a = 0; a < axisCount; a++)
-                {
-                    var axisDec = device.Buttons.FirstOrDefault(x => x.Button == $"Axis {a} MINUS");
-                    if (axisDec != null)
-                    {
-                        bool isPressed = state.GetAxis(a) < -0.5;
-                        if (isPressed != axisDec.IsPressed)
-                        {
-                            axisDec.IsPressed = isPressed;
-                            ButtonStateChanged?.Invoke(axisDec.Button, isPressed);
-                        }
-                    }
-
-                    var axisInc = device.Buttons.FirstOrDefault(x => x.Button == $"Axis {a} PLUS");
-                    if (axisInc != null)
-                    {
-                        bool isPressed = state.GetAxis(a) > 0.5;
-                        if (isPressed != axisInc.IsPressed)
-                        {
-                            axisInc.IsPressed = isPressed;
-                            ButtonStateChanged?.Invoke(axisInc.Button, isPressed);
-                        }
-                    }
-                }
-
-                // update buttons
-                for (int b = 0; b < buttonsCount; b++)
-                {
-                    var button = device.Buttons.FirstOrDefault(x => x.Button == $"Button {b}");
-                    if (button != null)
-                    {
-                        bool isPressed = state.GetButton(b) == OpenTK.Input.ButtonState.Pressed;
-                        if (isPressed != button.IsPressed)
-                        {
-                            button.IsPressed = isPressed;
-                            ButtonStateChanged?.Invoke(button.Button, isPressed);
-                        }
-                    }
-                }
-            }
+        private static float[] PtrToArrayOfFloat(IntPtr ptr, int count)
+        {
+            float[] array = new float[count];
+            Marshal.Copy(ptr, array, 0, count);
+            return array;
         }
     }
 }

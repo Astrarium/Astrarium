@@ -49,9 +49,14 @@ namespace Astrarium.Plugins.BrightStars
             {
                 if (star != null)
                 {
-                    star.Horizontal = context.Get(Horizontal, star.Number);
+                    star.Equatorial = context.Get(Equatorial, star.Number);
                 }
             }
+        }
+
+        public IEnumerable<Star> GetStars(CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        {
+            return Stars.Where(s => s != null && magFilter(s.Magnitude) && Angle.Separation(eq, s.Equatorial) < angle);
         }
 
         public override void Initialize()
@@ -65,7 +70,7 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
-        private double YearsSince2000(SkyContext c)
+        public double YearsSince2000(SkyContext c)
         {
             return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }
@@ -89,7 +94,7 @@ namespace Astrarium.Plugins.BrightStars
             double years = c.Get(YearsSince2000);
 
             // Initial coodinates for J2000 epoch
-            CrdsEquatorial eq0 = new CrdsEquatorial(star.Equatorial0);
+            CrdsEquatorial eq0 = new CrdsEquatorial(star.Alpha0, star.Delta0);
 
             // Take into account effect of proper motion:
             // now coordinates are for the mean equinox of J2000.0,
@@ -191,8 +196,8 @@ namespace Astrarium.Plugins.BrightStars
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s.Number).Delta)
 
             .AddHeader(Text.Get("Star.Equatorial0"))
-            .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
-            .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
+            .AddRow("Equatorial0.Alpha", (double)s.Alpha0)
+            .AddRow("Equatorial0.Delta", (double)s.Delta0)
 
             .AddHeader(Text.Get("Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
@@ -230,7 +235,7 @@ namespace Astrarium.Plugins.BrightStars
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
-
+            double t = context.Get(YearsSince2000);
             return Stars.Where(s => s != null &&
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))

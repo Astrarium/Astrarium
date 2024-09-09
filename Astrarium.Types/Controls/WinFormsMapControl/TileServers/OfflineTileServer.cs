@@ -30,6 +30,11 @@ namespace System.Windows.Forms
         public int MaxZoomLevel => 5;
 
         /// <summary>
+        /// Gets projection used by the tile server
+        /// </summary>
+        public IProjection Projection => SphericalMercatorProjection.Instance;
+
+        /// <summary>
         /// Gets tile image by X and Y indices of the tile and zoom level Z.
         /// </summary>
         /// <param name="x">X-index of the tile.</param>

@@ -4,6 +4,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
+	<UseWindowsForms>true</UseWindowsForms>
     <Product>Constellations</Product>
     <Description>Constellations borders and labels</Description>
     <Authors>Alexander Krutov</Authors>

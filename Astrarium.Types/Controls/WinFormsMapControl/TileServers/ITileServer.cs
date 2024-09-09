@@ -3,6 +3,11 @@
 namespace System.Windows.Forms
 {
     /// <summary>
+    /// Indicates the server is overlay tile server
+    /// </summary>
+    public interface IOverlayTileServer { }
+
+    /// <summary>
     /// Provides the functionality of a Tile Server implementations
     /// </summary>
     public interface ITileServer
@@ -28,6 +33,11 @@ namespace System.Windows.Forms
         /// Gets maximal zoom level allowed for the tile server
         /// </summary>
         int MaxZoomLevel { get; }
+
+        /// <summary>
+        /// Gets projection used by the tile server
+        /// </summary>
+        IProjection Projection { get; }
 
         /// <summary>
         /// Requests tile image by X and Y indices of the tile and zoom level Z.

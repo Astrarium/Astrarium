@@ -6,5 +6,5 @@
              mc:Ignorable="d" 
              xmlns:controls="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types">
-    <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" IsEnabled="{Binding IsEnabled}" ColorSchema="{Binding Settings.Schema, Mode=OneWay}" SelectedColor="{Binding SettingValue}" Visibility="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
+    <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" IsEnabled="{Binding IsEnabled}" SelectedColor="{Binding SettingValue}" Visibility="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
 </UserControl>

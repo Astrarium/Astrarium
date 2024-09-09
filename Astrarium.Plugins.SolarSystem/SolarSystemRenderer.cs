@@ -3,12 +3,14 @@ using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using static Astrarium.Plugins.SolarSystem.Plugin;
+using System.Windows.Forms;
+using System.Windows.Markup;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -17,76 +19,76 @@ namespace Astrarium.Plugins.SolarSystem
     /// </summary>
     public class SolarSystemRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
         private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
 
         private readonly Sun sun;
         private readonly Moon moon;
         private readonly Planet mars;
+        private readonly Planet jupiter;
+        private readonly Planet saturn;
         private readonly Pluto pluto;
 
         private Font fontShadowLabel = new Font("Arial", 8);
         private Brush brushLabel;
-
-        private readonly Color clrSunDaylight = Color.FromArgb(255, 255, 200);
-        private readonly Color clrSunNight = Color.FromArgb(250, 210, 10);
-        private static Color clrShadow = Color.FromArgb(10, 10, 10);
-
-        private Color clrPenumbraTransp = Color.Transparent;
-        private Color clrPenumbraGrayLight = Color.FromArgb(100, clrShadow);
-        private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
-        private Color clrUmbraGray = Color.FromArgb(230, clrShadow);
-        private Color clrUmbraRed = Color.FromArgb(200, 50, 0, 0);
-        private Color clrJupiterShadow = Color.FromArgb(200, 0, 0, 0);
-        private Color clrJupiterMoonShadowLight = Color.FromArgb(128, 0, 0, 0);
-        private Color clrJupiterMoonShadowDark = Color.FromArgb(64, 0, 0, 0);
-        private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
-        private Pen penShadowOutline = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
-        private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
-
-        private Brush[] brushRings = new Brush[]
-        {
-            new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
-            new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
-            new SolidBrush(Color.FromArgb(32, 0, 0, 0))
-        };
-
-        private readonly SolarTextureDownloader solarTextureDownloader = new SolarTextureDownloader();
-        private readonly BaseSphereRenderer sphereRenderer;
-        private readonly ImagesCache imagesCache = new ImagesCache();
+        private readonly SolarTextureManager solarTextureManager;
+        private readonly SolarRegionSummaryManager solarRegionSummaryManager;
         private readonly ICollection<SurfaceFeature> lunarFeatures;
         private readonly ICollection<SurfaceFeature> martianFeatures;
-
+        
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
-        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
+        private SolarRegion selectedSolarRegion;
+        public SolarRegion SelectedSolarRegion
         {
+            get => selectedSolarRegion;
+            set
+            {
+                selectedSolarRegion = value;
+                map.Invalidate();
+            }
+        }
+
+        public SolarSystemRenderer(ISkyMap map, LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, SolarRegionSummaryManager solarRegionSummaryManager, ISettings settings)
+        {
+            this.map = map;
             this.planetsCalc = planetsCalc;
             this.settings = settings;
 
-            this.sun = solarCalc.Sun;
-            this.moon = lunarCalc.Moon;
-            this.mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
-            this.pluto = planetsCalc.Pluto;
+            sun = solarCalc.Sun;
+            moon = lunarCalc.Moon;
+            mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
+            jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
+            saturn = planetsCalc.Planets.ElementAt(Planet.SATURN - 1);
+            pluto = planetsCalc.Pluto;
 
             var featuresReader = new SurfaceFeaturesReader();
             lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
             martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
 
-            sphereRenderer = new SphereRendererFactory().CreateRenderer();
+            solarTextureManager = new SolarTextureManager();
+            solarTextureManager.OnRequestComplete += () => map.Invalidate();
+
+            this.solarRegionSummaryManager = solarRegionSummaryManager;
+            this.solarRegionSummaryManager.OnRequestComplete += () => map.Invalidate();
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            brushLabel = new SolidBrush(map.GetColor("ColorSolarSystemLabel"));
+            bool drawLabelMag = settings.Get("PlanetsLabelsMag");
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+            brushLabel = new SolidBrush(settings.Get<Color>("ColorSolarSystemLabel").Tint(nightMode));
 
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
                 .Cast<ISolarSystemObject>()
                 .Concat(new[] { pluto })
                 .Concat(new[] { sun })
+                .Concat(new[] { moon })
                 .Concat(planetsCalc.MarsMoons)
                 .Concat(planetsCalc.JupiterMoons)
                 .Concat(planetsCalc.SaturnMoons)
@@ -94,390 +96,984 @@ namespace Astrarium.Plugins.SolarSystem
                 .Concat(planetsCalc.NeptuneMoons)
                 .Concat(planetsCalc.GenericMoons)
                 .OrderByDescending(body => body.DistanceFromEarth)
+                .Cast<CelestialObject>()
                 .ToArray();
 
             foreach (var body in bodies)
             {
+                // do not draw if display setting is off
+                if (!body.DisplaySettingNames.All(x => settings.Get(x)))
+                {
+                    continue;
+                }
+
+                double rotZenith = 0;
+                double mu = 1;
+
+                if (prj.UseRefraction)
+                {
+                    CrdsHorizontal hor = body.Equatorial.ToHorizontal(prj.Context.GeoLocation, prj.Context.SiderealTime);
+                    rotZenith = prj.GetAxisRotation(hor, 0);
+                    mu = Refraction.Flattening(hor.Altitude, prj.RefractionPressure, prj.RefractionTemperature);
+                }
+
                 if (body is Planet planet)
                 {
-                    RenderPlanet(map, planet);
-                }
-                if (body is Pluto pluto)
-                {
-                    RenderPlanet(map, pluto);
+                    double rotAxis = prj.GetAxisRotation(planet.Equatorial, planet.Appearance.P);
+                    double rotPhase = prj.GetPhaseRotation(planet.Ecliptical);
+                    string label = settings.Get("PlanetsLabelsMag") ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
+
+                    var data = new SphereParameters()
+                    {
+                        Equatorial = body.Equatorial,
+                        Color = GetPlanetColor(planet.Number),
+                        MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
+                        MaximalPointSize = 7,
+                        TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
+                        PhaseAngle = planet.PhaseAngle,
+                        Flattening = planet.Flattening,
+                        LatitudeShift = -planet.Appearance.D,
+                        LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[planet.Number - 1],
+                        SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
+                        SmoothShadow = planet.Number > Planet.MARS,
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Label = label
+                    };
+
+                    bool isRendered = RenderSolarSystemObject(planet, data);
+                    if (isRendered && planet.Number == Planet.JUPITER)
+                    {
+                        // draw moon shadows over Jupiter
+                        RenderJupiterMoonShadow(planet, data);
+                    }
                 }
                 else if (body is MarsMoon mm)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.MARS - 1), mm, hasTexture: false);
-                }
-                else if (body is JupiterMoon jm)
-                {
-                    if (RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1), jm))
+                    RenderSolarSystemObject(mm, new SphereParameters()
                     {
-                        RenderJupiterMoonShadow(map, jm, jm.RectangularS);
-                        RenderJupiterShadow(map, jm);
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Equatorial = body.Equatorial,
+                        MaximalDiskSize = 0,
+                        MaximalPointSize = 2
+                    });
+                }
+                else if (body is JupiterMoon jupiterMoon)
+                {
+                    double rotAxis = prj.GetAxisRotation(jupiterMoon.Equatorial, jupiter.Appearance.P);
+                    double rotPhase = prj.GetPhaseRotation(jupiter.Ecliptical);
+
+                    var data = new SphereParameters()
+                    {
+                        TextureName = Path.Combine(dataPath, $"5-{jupiterMoon.Number}.jpg"),
+                        LongitudeShift = jupiterMoon.CM,
+                        PhaseAngle = jupiter.PhaseAngle,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        Equatorial = body.Equatorial,
+                        DrawLabel = settings.Get("PlanetsLabels") && prj.Fov <= 1,
+                        MaximalPointSize = 3
+                    };
+
+                    if (RenderSolarSystemObject(jupiterMoon, data))
+                    {
+                        // shadow of other moons above current
+                        RenderJupiterMoonShadow(jupiterMoon, data, jupiterMoon.RectangularS);
+
+                        // shadow of jupiter above current
+                        RenderJupiterShadow(jupiterMoon, data);
                     }
                 }
-                else if (body is SaturnMoon sm)
+                else if (body is SaturnMoon saturnMoon)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.SATURN - 1), sm, hasTexture: false);
+                    double rotAxis = prj.GetAxisRotation(saturnMoon.Equatorial, saturn.Appearance.P);
+                    double rotPhase = prj.GetPhaseRotation(saturn.Ecliptical);
+                    RenderSolarSystemObject(saturnMoon, new SphereParameters()
+                    {
+                        Equatorial = body.Equatorial,
+                        MaximalPointSize = 1.5f,
+                        TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
+                        LongitudeShift = saturnMoon.CM,
+                        PhaseAngle = saturn.PhaseAngle,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        DrawLabel = settings.Get("PlanetsLabels")
+                    });
                 }
-                else if (body is UranusMoon um)
+                else if (body is UranusMoon uranusMoon)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.URANUS - 1), um, hasTexture: false);
+                    RenderSolarSystemObject(uranusMoon, new SphereParameters()
+                    {
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Equatorial = body.Equatorial,
+                        MaximalDiskSize = 0,
+                        MaximalPointSize = 2
+                    });
                 }
-                else if (body is NeptuneMoon nm)
+                else if (body is NeptuneMoon neptuneMoon)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.NEPTUNE - 1), nm, hasTexture: false);
+                    RenderSolarSystemObject(neptuneMoon, new SphereParameters()
+                    {
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Equatorial = body.Equatorial,
+                        MaximalDiskSize = 0,
+                        MaximalPointSize = 2
+                    });
                 }
                 else if (settings.Get("GenericMoons") && body is GenericMoon gm)
                 {
-                    if (gm.Data.planet == Planet.PLUTO)
+                    RenderSolarSystemObject(gm, new SphereParameters()
                     {
-                        RenderPlanetMoon(map, planetsCalc.Pluto, gm, hasTexture: false);
-                    }
-                    else
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Equatorial = body.Equatorial,
+                        MaximalDiskSize = 0,
+                        MaximalPointSize = 2,
+                    });
+                }
+                else if (body is Pluto pluto)
+                {
+                    double rotAxis = prj.GetAxisRotation(pluto.Equatorial, pluto.Appearance.P);
+                    double rotPhase = prj.GetPhaseRotation(pluto.Ecliptical);
+                    string label = settings.Get("PlanetsLabelsMag") ? $"{pluto.Name} {Formatters.Magnitude.Format(pluto.Magnitude)}" : pluto.Name;
+
+                    RenderSolarSystemObject(pluto, new SphereParameters()
                     {
-                        RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(gm.Data.planet - 1), gm, hasTexture: false);
-                    }
+                        Equatorial = body.Equatorial,
+                        Color = GetPlanetColor(pluto.Number),
+                        MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
+                        MaximalPointSize = 7,
+                        TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
+                        LatitudeShift = -pluto.Appearance.D,
+                        LongitudeShift = pluto.Appearance.CM,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[pluto.Number - 1],
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        Label = label
+                    });
                 }
                 else if (body is Sun)
                 {
-                    RenderSun(map);
+                    var data = new SphereParameters()
+                    {
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = -prj.GetPhaseRotation(sun.Ecliptical) - 7.25,
+                        LatitudeShift = -sun.CenterDisk.Latitude,
+                        LongitudeShift = 0,
+                        DrawEquator = settings.Get("SunEquator"),
+                        EquatorColor = Color.Orange
+                    };
+
+                    RenderSun(data);
+                    RenderPlanetaryGrid(sun, data);
+                    RenderSolarFeatures(data);
+                }
+                else if (body is Moon)
+                {
+                    double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
+                    double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
+                    double size = prj.GetDiskSize(moon.Semidiameter, 10);
+                    int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
+                    string textureName = $"Moon-{q}k.jpg";
+
+                    var data = new SphereParameters()
+                    {
+                        Equatorial = body.Equatorial,
+                        TextureName = Path.Combine(dataPath, textureName),
+                        FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
+                        MinimalDiskSize = 10,
+                        MaximalPointSize = 0,
+                        PhaseAngle = moon.PhaseAngle,
+                        LatitudeShift = -moon.Libration.b,
+                        LongitudeShift = -moon.Libration.l,
+                        Refraction = mu,
+                        RotationZenith = rotZenith,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        BodyPhysicalDiameter = 3474,
+                        SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
+                        EarthShadowApperance = moon.EarthShadow,
+                        EarthShadowCoordinates = moon.EarthShadowCoordinates,
+                        DrawLabel = settings.Get("MoonLabel"),
+                        Color = Color.Gray,
+                        DrawEquator = settings.Get("MoonEquator"),
+                        DrawPrimeMeridian = settings.Get("MoonPrimeMeridian"),
+                        EquatorColor = Color.LightSteelBlue,
+                        PrimeMeridianColor = Color.LightSteelBlue
+                    };
+
+                    RenderSolarSystemObject(moon, data);
+                    RenderPlanetaryGrid(moon, data);
                 }
             }
+        }
 
-            RenderMoon(map);
+        /// <summary>
+        /// Gets matrix for refraction flattening
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Mat4 GetRefractionMatrix(SphereParameters data)
+        {
+            double rotZenith = Angle.ToRadians(data.RotationZenith);
+            return Mat4.ZRotation(rotZenith) * Mat4.StretchY(data.Refraction) * Mat4.ZRotation(-rotZenith);
+        }
 
-            if (map.Schema == ColorSchema.Day && settings.Get("Sun"))
+        private class SphereParameters
+        {
+            /// <summary>
+            /// Equatorial coordinates of the body
+            /// </summary>
+            public CrdsEquatorial Equatorial { get; set; }
+
+            /// <summary>
+            /// Color of the celestial body when it's drawn as a point
+            /// </summary>
+            public Color Color { get; set; } = Color.White;
+
+            /// <summary>
+            /// Texture name (path) to be used
+            /// </summary>
+            public string TextureName { get; set; }
+
+            /// <summary>
+            /// Fallback texture, if any. Can be null.
+            /// </summary>
+            public string FallbackTextureName { get; set; }
+
+            public bool SmoothShadow { get; set; }
+
+            public float MinimalPointSize { get; set; }
+            public float MaximalPointSize { get; set; }
+            public float MinimalDiskSize { get; set; }
+            public float MaximalDiskSize { get; set; } = float.MaxValue;
+
+            /// <summary>
+            /// Collection of surface features of the body
+            /// </summary>
+            public ICollection<SurfaceFeature> SurfaceFeatures { get; set; }
+
+            /// <summary>
+            /// Refraction flattening of the body
+            /// </summary>
+            public double Refraction { get; set; } = 1;
+
+            /// <summary>
+            /// Physical diameter of celestial body, in kilometers
+            /// </summary>
+            public double BodyPhysicalDiameter { get; set; }
+
+            public ShadowAppearance EarthShadowApperance { get; set; }
+            public CrdsEquatorial EarthShadowCoordinates { get; set; }
+
+            /// <summary>
+            /// Rotation of axis, measured counter-clockwise from top of screen
+            /// </summary>
+            public double RotationAxis { get; set; }
+
+            /// <summary>
+            /// Rotation of phase, measured counter-clockwise from top of screen
+            /// </summary>
+            public double RotationPhase { get; set; }
+
+            /// <summary>
+            /// Rotation angle of vector pointed to zenith, measured counter-clockwise from top of screen
+            /// </summary>
+            public double RotationZenith { get; set; }
+
+            /// <summary>
+            /// Phase angle of the body
+            /// </summary>
+            public double PhaseAngle { get; set; }
+
+            /// <summary>
+            /// Body flattening
+            /// </summary>
+            public double Flattening { get; set; }
+
+            public double LongitudeShift { get; set; }
+            public double LatitudeShift { get; set; }
+
+            /// <summary>
+            /// Flag indicating body should be rendered with label.
+            /// </summary>
+            public bool DrawLabel { get; set; }
+
+            /// <summary>
+            /// Body label (name). If not set, body's primary name will be used.
+            /// </summary>
+            public string Label { get; set; }
+
+            public bool DrawEquator { get; set; }
+            public Color EquatorColor { get; set; } = Color.White;
+
+            public bool DrawPrimeMeridian { get; set; }
+            public Color PrimeMeridianColor { get; set; } = Color.White;
+        }
+
+        private void OnPolarCapTextureReady()
+        {
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.MIRRORED_REPEAT);
+            GL.TexParameter(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.MIRRORED_REPEAT);
+            map.Invalidate();
+        }
+
+        private void OnBodyTextureReady()
+        {
+            map.Invalidate();
+        }
+
+        private bool RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
+        {
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+            float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
+            double alt = prj.ToHorizontal(data.Equatorial).Altitude;
+
+            // size of object when it's drawn as point (in pixels)
+            float size = Math.Max(prj.GetPointSize(body.Magnitude, data.MaximalPointSize, alt), data.MinimalPointSize);
+
+            // size of object when it's drawn as sphere (in pixels)
+            float diam = Math.Min(prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize), data.MaximalDiskSize);
+
+            // take into account dimming during twilight
+            float starDimming = 1 - map.DaylightFactor;
+            size *= starDimming;
+
+            Vec2 p = prj.Project(data.Equatorial);
+            if (p == null) return false;
+
+            bool renderResult = false;
+
+            // DRAW AS POINT
+            if (size >= diam && size >= data.MinimalPointSize && size > 0 && data.MaximalPointSize > 0 && map.DaylightFactor < 1)
             {
-                DrawHalo(map);
+                // out of screen
+                if (!prj.IsInsideScreen(p)) return false;
+
+                GL.Enable(GL.POINT_SMOOTH);
+                GL.Enable(GL.BLEND);
+                GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
+
+                GL.PointSize(size * starsScalingFactor);
+                GL.Begin(GL.POINTS);
+                GL.Color3(data.Color.Tint(nightMode));
+                GL.Vertex2(p.X, p.Y);
+                GL.End();
             }
-
-            RenderEarthShadow(map);
-            DrawLunarSurfaceFeatures(map);
-        }
-
-        public override bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton)
-        {
-            return mouseButton == MouseButton.None &&
-                (Angle.Separation(mouse, moon.Horizontal) < moon.Semidiameter / 3600 ||
-                 Angle.Separation(mouse, mars.Horizontal) < mars.Semidiameter / 3600);
-        }
-
-        private void RenderSun(IMapContext map)
-        {
-            if (!settings.Get("Sun")) return;
-
-            bool isGround = settings.Get("Ground");
-            bool useTextures = settings.Get("SunTexture");
-            double ad = Angle.Separation(sun.Horizontal, map.Center);
-            Graphics g = map.Graphics;
-            Color colorSun = map.GetColor(clrSunNight, clrSunDaylight);
-
-            if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) &&
-                ad < map.ViewAngle + sun.Semidiameter / 3600)
+            // DRAW AS TEXTURED SPHERE
+            else if (diam >= data.MinimalDiskSize && diam >= data.MaximalPointSize)
             {
-                PointF p = map.Project(sun.Horizontal);
-                map.Rotate(p, sun.Equatorial, 0);
-                float size = map.GetDiskSize(sun.Semidiameter, 10);
+                double fov = prj.RealFov;
 
-                if (map.Schema == ColorSchema.Night && useTextures && size > 10)
+                var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+
+                if (Angle.Separation(eqCenter, data.Equatorial) > fov + body.Semidiameter / 3600) return false;
+
+                renderResult = true;
+
+                GL.Enable(GL.TEXTURE_2D);
+
+                float[] zero = new float[4] { 0, 0, 0, 0 };
+                float[] one = new float[4] { 1, 1, 1, 1 };
+
+                // color of unilluminated part 
+                float[] ambient;
+
+                // color of illuminated part
+                float[] diffuse;
+
+                if (settings.Get("NightMode"))
                 {
-                    Date date = new Date(map.JulianDay);
-                    DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
-                    Brush brushSun = new SolidBrush(clrSunNight);
-                    Image imageSun = imagesCache.RequestImage("Sun", dt, SunImageProvider, map.Redraw);
-                    g.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
-                    if (imageSun != null)
-                    {
-                        map.DrawImage(imageSun, -size / 2, -size / 2, size, size);
-                    }
+                    diffuse = new float[4] { 0.5f, 0, 0, 1f };
+                    ambient = new float[4] { 0.5f, 0, 0, 0.5f };
                 }
                 else
                 {
-                    if (map.Schema == ColorSchema.White)
+                    diffuse = one;
+                    ambient = new float[4] { 0.2f, 0.2f, 0.2f, 0f };
+                }
+
+                GL.Light(GL.LIGHT0, GL.DIFFUSE, diffuse);
+                GL.Light(GL.LIGHT0, GL.AMBIENT, zero);
+                GL.Light(GL.LIGHT0, GL.SPECULAR, zero);
+
+                GL.Material(GL.FRONT, GL.DIFFUSE, one);
+                GL.Material(GL.FRONT, GL.AMBIENT, ambient);
+                GL.Material(GL.FRONT, GL.EMISSION, zero);
+                GL.Material(GL.FRONT, GL.SHININESS, zero);
+                GL.Material(GL.FRONT, GL.SPECULAR, zero);
+
+                GL.Enable(GL.LIGHT0);
+                GL.Enable(GL.LIGHTING);
+                GL.Enable(GL.CULL_FACE);
+                GL.Enable(GL.BLEND);
+                GL.Enable(GL.TEXTURE_2D);
+
+                GL.CullFace(GL.FRONT);
+
+                GL.PushMatrix();
+                GL.Translate(p.X, p.Y, 0);
+
+                double x, y, z;
+                double s, t;
+                int i, j;
+
+                // radius of sphere, in pixels
+                float radius = prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize) / 2;
+
+                // number of segments to build the sphere
+                int segments = radius < 20 ? 16 : 64;
+
+                // delta rho, step by latitude
+                double drho = Math.PI / segments;
+
+                // delta theta, step by longitude
+                double dtheta = 2.0 * Math.PI / segments;
+
+                // step by segments count
+                double delta = 1.0 / segments;
+
+                // rotation matrix to proper orient sphere 
+                Mat4 matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? -1 : 1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
+
+                // illumination matrix (phase)
+                Mat4 matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * matVision;
+
+                // rotation of axis
+                double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+                // rotation of phase
+                double rotPhase = Angle.ToRadians(data.RotationPhase);
+
+                matVision = Mat4.ZRotation(rotAxis) * matVision;
+                matLight = Mat4.ZRotation(rotPhase) * matLight;
+
+                // take refraction into account
+                if (prj.UseRefraction)
+                {
+                    var matRefraction = GetRefractionMatrix(data);
+                    matVision = matRefraction * matVision;
+                    matLight = matRefraction * matLight;
+                }
+
+                float shadowSmoothness = data.SmoothShadow ? 1 : 5;
+
+                bool drawCaps = body == mars && settings.Get("PlanetsMartianPolarCaps");
+                bool drawRings = body is Planet saturn && saturn.Number == Planet.SATURN;
+
+                Vec3 vecVision;
+                Vec3 vecLight;
+
+                if (drawRings)
+                {
+                    RenderSaturnRings(data, 1);
+                }
+
+                const int LAYER_PLANET = 0;
+                const int LAYER_POLAR_CAP = 1;
+                int layers = drawCaps ? 2 : 1;
+
+                double cap1 = 0;
+                double cap2 = 0;
+
+                for (int layer = 0; layer < layers; layer++)
+                {
+                    t = 1;
+
+                    // polar cap limits, in fractions of planet diameter
+                    if (layer == LAYER_POLAR_CAP)
                     {
-                        g.FillEllipse(Brushes.White, -size / 2, -size / 2, size, size);
-                        g.DrawEllipse(Pens.Black, -size / 2, -size / 2, size, size);
+                        cap1 = prj.FlipVertical ? 1 - planetsCalc.MarsSPCWidth / 180 : 1 - planetsCalc.MarsNPCWidth / 180;
+                        cap2 = prj.FlipVertical ? planetsCalc.MarsNPCWidth / 180 : planetsCalc.MarsSPCWidth / 180;
+                    }
+
+                    int texture = 0;
+
+                    if (layer == LAYER_PLANET)
+                    {
+                        texture = GL.GetTexture(data.TextureName, data.FallbackTextureName, readyCallback: OnBodyTextureReady, permanent: data.FallbackTextureName != null);
+                    }
+                    else if (layer == LAYER_POLAR_CAP)
+                    {
+                        texture = GL.GetTexture(Path.Combine(dataPath, "PolarCap.png"), readyCallback: OnPolarCapTextureReady);
+                    }
+
+                    if (texture > 0)
+                    {
+                        GL.Enable(GL.TEXTURE_2D);
+                        GL.BindTexture(GL.TEXTURE_2D, texture);
                     }
                     else
                     {
-                        Brush brushSun = new SolidBrush(colorSun);
-                        g.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
+                        float r = data.Color.R / 255f;
+                        float g = data.Color.G / 255f;
+                        float b = data.Color.B / 255f;
+                        GL.Disable(GL.TEXTURE_2D);
+                        GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });
+                        GL.Light(GL.LIGHT0, GL.DIFFUSE, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
                     }
-                }
 
-                g.ResetTransform();
+                    GL.ShadeModel(GL.SMOOTH);
 
-                if (settings.Get("SunLabel"))
-                {
-                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                    map.DrawObjectCaption(fontLabel, brushLabel, sun.Name, p, size);
-                }
-
-                map.AddDrawnObject(sun);
-            }
-        }
-
-        private void DrawHalo(IMapContext map)
-        {
-            int size = (int)(map.DayLightFactor * 100);
-            float sunSize = map.GetDiskSize(sun.Semidiameter);
-            int alpha = (int)(map.DayLightFactor * (1 - sunSize / (2 * size)) * 255);
-            Graphics g = map.Graphics;
-
-            if (settings.Get("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
-            {
-                bool isEclipse = sun.Horizontal.Altitude > 0 && map.DayLightFactor < 1;
-
-                using (var halo = new GraphicsPath())
-                {
-                    PointF p = map.Project(sun.Horizontal);
-                    halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
-
-                    Region reg = new Region(halo);
-
-                    using (GraphicsPath gpMoon = new GraphicsPath())
+                    for (i = 0; i < segments; i++)
                     {
-                        if (isEclipse)
+                        GL.Begin(GL.QUAD_STRIP);
+
+                        s = 0;
+
+                        for (j = 0; j <= segments; j++)
                         {
-                            PointF pMoon = map.Project(moon.Horizontal);
-                            float szMoon = map.GetDiskSize(moon.Semidiameter, 10) / 2;
-                            gpMoon.AddEllipse(pMoon.X - szMoon, pMoon.Y - szMoon, 2 * szMoon, 2 * szMoon);
-                            reg.Exclude(gpMoon);
-                        }
+                            x = -Math.Sin(j * dtheta) * Math.Sin(i * drho);
+                            y = Math.Cos(j * dtheta) * Math.Sin(i * drho);
+                            z = Math.Cos(i * drho) * (1 - data.Flattening);
 
-                        var brush = new PathGradientBrush(halo);
-                        brush.CenterPoint = p;
-                        brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
-                        brush.SurroundColors = new Color[] { Color.Transparent };
+                            vecVision = matVision * new Vec3(x, y, z);
+                            vecLight = matLight * new Vec3(-x, -y, -z);
 
-                        g.FillRegion(brush, reg);
+                            GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
 
-                        if (isEclipse)
-                        {
-                            g.FillPath(new SolidBrush(Color.FromArgb((int)(alpha * map.DayLightFactor), brush.CenterColor)), gpMoon);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void RenderMoon(IMapContext map)
-        {
-            if (!settings.Get("Moon")) return;
-
-            bool isGround = settings.Get("Ground");
-            double ad = Angle.Separation(moon.Horizontal, map.Center);
-
-            if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
-                ad < map.ViewAngle + moon.Semidiameter / 3600.0)
-            {
-                // drawing size
-                float size = map.GetDiskSize(moon.Semidiameter, 10);
-
-                Graphics g = map.Graphics;
-                bool useTextures = settings.Get("MoonTexture");
-                int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
-                string textureName = $"Moon-{q}k";
-
-                PointF p = map.Project(moon.Horizontal);
-
-                map.Rotate(p, moon.Equatorial, moon.PAaxis);
-
-                SolidBrush brushMoon = new SolidBrush(map.GetColor(Color.Gray));
-
-                if (useTextures && size > 10)
-                {
-                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken(textureName, moon.Libration.l, moon.Libration.b, map.Schema), MoonTextureProvider, map.Redraw);
-                    if (textureMoon != null)
-                    {
-                        var gs = g.Save();
-                        using (GraphicsPath gp = new GraphicsPath())
-                        {
-                            gp.AddEllipse(-size / 2, -size / 2, size, size);
-                            g.SetClip(gp);
-                        }
-                        g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-                        map.DrawImage(textureMoon, -size / 2, -size / 2, size, size);
-                        g.Restore(gs);
-                    }
-                    else
-                    {
-                        g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-                    }
-                }
-                else
-                {
-                    // Moon disk
-                    g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-                }
-
-                g.ResetTransform();
-
-                float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
-                GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
-
-                map.Rotate(p, moon.Ecliptical0);
-                map.Flip();
-
-                if (settings.Get("MoonPhase"))
-                {
-                    g.FillPath(GetShadowBrush(map), shadow);
-                }
-                else
-                {
-                    g.DrawPath(new Pen(GetShadowBrush(map), 1) { DashStyle = DashStyle.Custom, DashPattern = new float[] { 10, 5 } }, shadow);
-                }
-
-                g.ResetTransform();
-
-                if (settings.Get("MoonLabel"))
-                {
-                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                    map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
-                }
-
-                map.AddDrawnObject(moon);
-            }
-        }
-
-        private void DrawLunarSurfaceFeatures(IMapContext map)
-        {
-            if (settings.Get("Moon") && settings.Get("MoonTexture") && settings.Get("MoonSurfaceFeatures"))
-            {
-                var p = map.Project(moon.Horizontal);
-                var rotation = map.Rotate(p, moon.Equatorial, moon.PAaxis);
-                DrawSurfaceFeatures(map, lunarFeatures, moon, 3474, rotation, moon.Libration.b, moon.Libration.l, map.GetColor(Color.AntiqueWhite));
-            }
-        }
-
-        private void DrawMartianSurfaceFeatures(IMapContext map)
-        {
-            if (settings.Get("Planets") && settings.Get("PlanetsTextures") && settings.Get("PlanetsSurfaceFeatures"))
-            {
-                var p = map.Project(mars.Horizontal);
-                var rotation = map.Rotate(p, mars.Equatorial, mars.Appearance.P);
-                DrawSurfaceFeatures(map, martianFeatures, mars, 6779, rotation, mars.Appearance.D, -mars.Appearance.CM, map.GetColor(Color.Wheat));
-            }
-        }
-
-        private void DrawSurfaceFeatures(IMapContext map, ICollection<SurfaceFeature> features, SizeableCelestialObject body, float bodyDiameter, float axisRotation, double latitudeShift, double longitudeShift, Color featuresColor)
-        {
-            map.Graphics.ResetTransform();
-
-            if (map.MouseButton == MouseButton.None &&
-                Angle.Separation(map.MousePosition, body.Horizontal) < body.Semidiameter / 3600 &&
-                (!settings.Get("Ground") || body.Horizontal.Altitude + body.Semidiameter / 3600 > 0))
-            {
-                PointF pMouse = map.Project(map.MousePosition);
-                Graphics g = map.Graphics;
-
-                // radius of celestial body disk, in pixels
-                float r = map.GetDiskSize(body.Semidiameter, 10) / 2;
-
-                // do not draw if size of disk is too small
-                if (r > 100)
-                {
-                    PointF p = map.Project(body.Horizontal);
-                    Brush brush = new SolidBrush(featuresColor);
-                    Pen pen = new Pen(featuresColor);
-
-                    // minimal diameter of feature, in pixels, that is allowed to be drawn on current magnification
-                    const float minDiameterPx = 5;
-
-                    // minimal diameter of feature, converted to km
-                    float minDiameterKm = bodyDiameter / (2 * r) * minDiameterPx;
-
-                    // visible coordinates of body disk center, assume as zero point 
-                    CrdsGeographical c = new CrdsGeographical(0, 0);
-
-                    foreach (var feature in features.TakeWhile(f => f.Diameter > minDiameterKm))
-                    {
-                        // feature outline radius, in pixels
-                        float fr = feature.Diameter / bodyDiameter * r;
-
-                        // visible coordinates of the feature
-                        CrdsGeographical v = GetVisibleFeatureCoordinates((map.IsInverted ? -1 : 1) * feature.Latitude, (map.IsMirrored ? -1 : 1) * feature.Longitude, (map.IsInverted ? -1 : 1) * latitudeShift, (map.IsMirrored ? -1 : 1) * longitudeShift);
-
-                        // angular separation between visible center of the body disk and center of the feature
-                        // expressed in degrees of arc, from 0 (center) to 90 (disk edge)
-                        double sep = Angle.Separation(v, c);
-                        if (sep < 85)
-                        {
-                            PointF pFeature = GetCartesianFeatureCoordinates(r, v, axisRotation);
-
-                            // do not draw if feature is out of screen
-                            if (!map.IsOutOfScreen(new PointF(pFeature.X + p.X, pFeature.Y + p.Y)))
+                            if (layer == LAYER_PLANET)
                             {
-                                // distance, in pixels, between center of the feature and current mouse position
-                                double d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
-
-                                // visible flattening of feature outline,
-                                // depends on angular distance between feature and visible center of the body disk
-                                float f = (float)Math.Cos(Angle.ToRadians(sep));
-
-                                bool needDrawLabel = true;
-
-                                if (fr > 100 || d < fr)
+                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), -t * (prj.FlipVertical ? -1 : 1));
+                            }
+                            else if (layer == LAYER_POLAR_CAP)
+                            {
+                                if (t > cap1 || t < cap2)
                                 {
-                                    float labelDist = 3;
-                                    StringFormat format = null;
-
-                                    // draw feature outline (for craters and satellite features only)
-                                    if (feature.TypeCode == "AA" || feature.TypeCode == "SF")
-                                    {
-                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
-
-                                        using (GraphicsPath gp = new GraphicsPath())
-                                        {
-                                            gp.AddEllipse(-fr, -fr * f, fr * 2, fr * f * 2);
-                                            gp.Transform(g.Transform);
-
-                                            if (gp.IsVisible(pMouse))
-                                            {
-                                                g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
-                                            }
-                                            else
-                                            {
-                                                needDrawLabel = false;
-                                            }
-                                        }
-
-                                        g.ResetTransform();
-                                        labelDist = fr * 2 * f;
-                                    }
-
-                                    // center label for maria, oceanus, sinus, lacus, palus 
-                                    if (feature.TypeCode == "ME" ||
-                                        feature.TypeCode == "OC" ||
-                                        feature.TypeCode == "SI" ||
-                                        feature.TypeCode == "LC" ||
-                                        feature.TypeCode == "PA")
-                                    {
-                                        format = new StringFormat();
-                                        format.Alignment = StringAlignment.Center;
-                                        format.LineAlignment = StringAlignment.Center;
-                                    }
-                                    // fill central dot
-                                    else if (feature.TypeCode != "AA" && feature.TypeCode != "SF")
-                                    {
-                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        g.FillEllipse(brush, -1, -1, 3, 3);
-                                        g.ResetTransform();
-                                    }
-
-                                    g.ResetTransform();
-
-                                    // draw feature label
-                                    if (needDrawLabel)
-                                    {
-                                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                                        map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);
-                                    }
+                                    GL.TexCoord2(0, 1);
                                 }
+                                else
+                                {
+                                    GL.TexCoord2(0, 0);
+                                }
+                            }
+
+                            GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
+
+                            x = -Math.Sin(j * dtheta) * Math.Sin((i + 1) * drho);
+                            y = Math.Cos(j * dtheta) * Math.Sin((i + 1) * drho);
+                            z = Math.Cos((i + 1) * drho) * (1 - data.Flattening);
+
+                            vecVision = matVision * new Vec3(x, y, z);
+                            vecLight = matLight * new Vec3(-x, -y, -z);
+
+                            GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
+
+                            if (layer == LAYER_PLANET)
+                            {
+                                GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (delta - t) * (prj.FlipVertical ? -1 : 1));
+                            }
+                            else if (layer == LAYER_POLAR_CAP)
+                            {
+                                if (t - delta > cap1 || t - delta < cap2)
+                                {
+                                    GL.TexCoord2(0, 1);
+                                }
+                                else
+                                {
+                                    GL.TexCoord2(0, 0);
+                                }
+                            }
+
+                            GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
+
+                            s += delta;
+                        }
+                        GL.End();
+
+                        t -= delta;
+                    }
+                }
+
+                if (drawRings)
+                {
+                    RenderSaturnRings(data, -1);
+                }
+
+                GL.PopMatrix();
+
+                GL.Disable(GL.LIGHT0);
+                GL.Disable(GL.LIGHTING);
+                GL.Disable(GL.CULL_FACE);
+                GL.Disable(GL.BLEND);
+                GL.Disable(GL.TEXTURE_2D);
+
+                if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null &&
+                    Angle.Separation(eqCenter, data.EarthShadowCoordinates) < fov + moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter / 3600)
+                {
+                    RenderEarthShadow(data);
+                }
+
+                if (body is Moon)
+                {
+                    RenderPlanetaryGrid(body, data);
+                }
+
+                if (data.SurfaceFeatures != null)
+                {
+                    RenderPlanetFeatures(body, data);
+                }
+
+                if (body is Moon)
+                {
+                    RenderLibrationPoint(data);
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            map.AddDrawnObject(p, body);
+
+            if (data.DrawLabel)
+            {
+                string label = data.Label ?? body.Names.First();
+                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                map.DrawObjectLabel(label, fontLabel, brushLabel, p, Math.Max(size, diam));
+            }
+
+            return renderResult;
+        }
+
+        private void RenderSun(SphereParameters data)
+        {
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+            float diam = prj.GetDiskSize(sun.Semidiameter, 10);
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+
+            // do not draw if out of screen
+            double fov = prj.RealFov;
+            if (Angle.Separation(eqCenter, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
+
+            float r = diam / 2;
+            Vec2 p = prj.Project(sun.Equatorial);
+            if (p == null) return;
+
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+            int textureId = -1;
+
+            if (settings.Get("SunTexture") && r > 5)
+            {
+                GL.Enable(GL.TEXTURE_2D);
+                textureId = solarTextureManager.GetTexture(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
+                GL.BindTexture(GL.TEXTURE_2D, textureId);
+            }
+
+            GL.PushMatrix();
+            GL.Translate(p.X, p.Y, 0);
+
+            if (nightMode)
+            {
+                GL.Color4(Color.Red);
+            }
+            else if (textureId > 0)
+            {
+                GL.Color4(Color.White);
+            }
+            else
+            {
+                if (map.DaylightFactor == 1)
+                {
+                    GL.Color4(Color.White);
+                }
+                else
+                {
+                    var f = map.DaylightFactor;
+                    var c1 = Color.Orange;
+                    var c2 = Color.White;
+                    float R = c1.R + f * (c2.R - c1.R);
+                    float G = c1.G + f * (c2.G - c1.G);
+                    float B = c1.B + f * (c2.B - c1.B);
+                    GL.Color4(Color.FromArgb((byte)R, (byte)G, (byte)B));
+                }
+            }
+
+            GL.Begin(GL.TRIANGLE_FAN);
+
+            for (int i = 0; i <= 64; i++)
+            {
+                double ang0 = Angle.ToRadians(i / 64.0 * 360);
+                double ang = ang0 + rotAxis;
+
+                Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+
+                if (prj.UseRefraction)
+                {
+                    v = GetRefractionMatrix(data) * v;
+                }
+
+                if (textureId > 0)
+                {
+                    double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
+                    double ty = -(prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
+                    GL.TexCoord2(0.5f + 0.499f * tx, 0.5f + 0.499f * ty);
+                }
+                
+                GL.Vertex2(v.X, v.Y);
+            }
+
+            GL.End();
+
+            GL.PopMatrix();
+
+            GL.Disable(GL.TEXTURE_2D);
+
+            map.AddDrawnObject(p, sun);
+
+            if (settings.Get("SunLabel"))
+            {
+                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                map.DrawObjectLabel(sun.Name, fontLabel, brushLabel, p, 2 * r);
+            }
+        }
+
+        private void RenderEarthShadow(SphereParameters data)
+        {
+            var prj = map.Projection;
+
+            // moon radius in pixels (1 extra pixel added for better rendering)
+            float rMoon = prj.GetDiskSize(moon.Semidiameter) / 2 + 1;
+
+            if (rMoon > 5)
+            {
+                // center of the moon in screen coordinates
+                var pMoon = prj.Project(data.Equatorial);
+                if (pMoon == null) return;
+
+                // center of the shadow
+                var pShadow = prj.Project(data.EarthShadowCoordinates);
+                if (pShadow == null) return;
+
+                // moon semidiameter in seconds of arc
+                double sdMoon = moon.Semidiameter;
+
+                // semidiameter of penumbra in seconds of arc
+                double sdPenumbra = data.EarthShadowApperance.PenumbraRadius * 6378.0 / 1738.0 * sdMoon;
+
+                // semidiameter of umbra in seconds of arc
+                double sdUmbra = sdPenumbra / data.EarthShadowApperance.Ratio;
+
+                // semidiameter of penumbra in pixels
+                double sdPenumbraPixels = prj.GetDiskSize(sdPenumbra) / 2;
+
+                // semidiameter of umbra in pixels
+                double sdUmbraPixels = sdPenumbraPixels / data.EarthShadowApperance.Ratio;
+
+                // distance, in degrees, between lunar center and center of the Earth shadow
+                double dist = Angle.Separation(data.Equatorial, data.EarthShadowCoordinates);
+
+                // color of umbra center
+                Color colorCenter = Color.FromArgb(220, 10, 0, 0);
+
+                // color of umbra edge
+                Color colorEdge = Color.FromArgb(230, Color.Black);
+
+                double maxDist = (sdUmbra - sdMoon) / 3600.0;
+
+                // full eclipse (moon inside umbra)
+                if (dist < maxDist)
+                {
+                    // center of umbra stays black
+                    colorCenter = Color.FromArgb(220, 10, 0, 0);
+
+                    // whereas the umbra edges are dark red 
+                    colorEdge = GradientColor(Color.FromArgb(220, 120, 40, 0), colorEdge, dist / maxDist);
+                }
+
+                double[] shadowRadii = new double[] { 0, sdUmbraPixels * 0.99, sdUmbraPixels, sdUmbraPixels * 1.01, sdPenumbraPixels };
+                Color[] shadowColors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.FromArgb(0, 0, 0, 0) };
+
+                // render shadow
+                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors, 0, 0, data);
+
+                // draw shadow outline
+                if (settings.Get("EarthShadowOutline") && pMoon.Distance(pShadow) <= sdPenumbraPixels + rMoon)
+                {
+                    // TODO: move to settings
+                    Color clrShadowOutline = Color.FromArgb(100, 50, 0);
+                    var pen = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
+
+                    GL.DrawEllipse(pShadow, pen, sdPenumbraPixels, sdPenumbraPixels * data.Refraction, data.RotationZenith);
+                    GL.DrawEllipse(pShadow, pen, sdUmbraPixels, sdUmbraPixels * data.Refraction, data.RotationZenith);
+
+                    var brush = new SolidBrush(clrShadowOutline);
+                    map.DrawObjectLabel(Text.Get("EarthShadow.Label"), fontShadowLabel, brush, pShadow, (float)sdPenumbraPixels * 2);
+                }
+            }
+        }
+
+        private void RenderPlanetaryGrid(SizeableCelestialObject body, SphereParameters data)
+        {
+            var prj = map.Projection;
+
+            // radius of body disk, in pixels
+            float r = prj.GetDiskSize(body.Semidiameter) / 2;
+
+            // center of the body in screen coordinates
+            var p = prj.Project(body.Equatorial);
+
+            if (p == null) return;
+
+            // night mode flag
+            bool nightMode = settings.Get("NightMode");
+
+            if (r > 20)
+            {
+                GL.Enable(GL.BLEND);
+                GL.Enable(GL.LINE_SMOOTH);
+                GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+
+                GL.PushMatrix();
+                GL.Translate(p.X, p.Y, 0);
+
+                // equator
+                if (data.DrawEquator)
+                {
+                    var equatorColor = data.EquatorColor.Tint(nightMode);
+
+                    GL.Begin(GL.LINE_STRIP);
+                    for (int i = 0; i < 180; i += 5)
+                    {
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(0, i - 90, data);
+
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            GL.Color3(equatorColor);
+                            GL.Vertex2(pFeature.X, pFeature.Y);
+                        }
+
+                    }
+                    GL.End();
+                }
+
+                // prime meridian
+                if (data.DrawPrimeMeridian)
+                {
+                    var cmColor = data.PrimeMeridianColor.Tint(nightMode);
+
+                    GL.Begin(GL.LINE_STRIP);
+                    for (int i = 0; i < 180; i++)
+                    {
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(i - 90, 0, data);
+
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            GL.Color3(cmColor);
+                            GL.Vertex2(pFeature.X, pFeature.Y);
+                        }
+
+                    }
+                    GL.End();
+                }
+
+                GL.PopMatrix();
+
+                GL.Disable(GL.BLEND);
+                GL.Disable(GL.LINE_SMOOTH);
+            }
+        }
+
+        private void RenderPlanetFeatures(SizeableCelestialObject body, SphereParameters data)
+        {
+            var prj = map.Projection;
+
+            // radius of celestial body disk, in pixels
+            float r = prj.GetDiskSize(body.Semidiameter) / 2;
+
+            if (r > 100)
+            {
+                // feature types that should be drawn with outline
+                string[] outlinedFeatures = new string[] { "AA", "SF" };
+
+                // feature types that should be labeled in central point
+                string[] centeredFeatures = new string[] { "ME", "OC", "SI", "LC", "PA", "PR", "MO", "VA", "RU", "RI", "DO", "CA", "AL", "LF", "PL" };
+
+                // center of the body in screen coordinates
+                var p = prj.Project(data.Equatorial);
+
+                // TODO: move color to settings
+                Color featureColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
+
+                Brush brush = new SolidBrush(featureColor);
+                Pen pen = new Pen(featureColor);
+
+                // TODO: create separate setting for feature labels font
+                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+
+                // minimal diameter of feature, in pixels, that is allowed to be drawn on current zoom
+                const float minDiameterPx = 5;
+
+                // minimal diameter of feature, converted to km
+                double minDiameterKm = data.BodyPhysicalDiameter / (2 * r) * minDiameterPx;
+
+                // visible coordinates of body disk center, assume as zero point 
+                CrdsGeographical c = new CrdsGeographical(0, 0);
+
+                foreach (SurfaceFeature feature in data.SurfaceFeatures.TakeWhile(f => f.Diameter == 0 || f.Diameter > minDiameterKm))
+                {
+                    // visible coordinates of the feature relative to body disk center
+                    CrdsGeographical v = GetVisibleFeatureCoordinates(feature.Latitude, feature.Longitude, data);
+
+                    // angular distance between disk center and feature
+                    double sep = Angle.Separation(v, c);
+
+                    // if feature is not too close to disk edge
+                    if (sep < 85)
+                    {
+                        Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                        if (prj.IsInsideScreen(p + pFeature))
+                        {
+                            // feature outline radius, in pixels
+                            double fr = (feature.Diameter > 0 ? feature.Diameter : data.BodyPhysicalDiameter / 6) / data.BodyPhysicalDiameter * r;
+
+                            // distance, in pixels, between center of the feature and current mouse position
+                            double d = (p + pFeature).Distance(map.MouseScreenCoordinates);
+
+                            if (fr > 100 || d < fr)
+                            {
+                                GL.PushMatrix();
+                                GL.Translate(p.X, p.Y, 0);
+
+                                if (outlinedFeatures.Contains(feature.TypeCode))
+                                {
+                                    // visible flattening of feature outline,
+                                    // depends on angular distance between feature and visible center of the body disk
+                                    float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                                    // rotation of a feature outline
+                                    double rot = 90 + Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X));
+
+                                    GL.DrawEllipse(pFeature, pen, fr, fr * f, rot);
+                                    GL.DrawString(feature.Name, fontLabel, brush, pFeature);
+                                }
+                                else if (centeredFeatures.Contains(feature.TypeCode))
+                                {
+                                    string label = feature.Name.Contains("Mare") || feature.TypeCode == "MA" || feature.TypeCode == "OC" ? feature.Name.ToUpper() : feature.Name;
+                                    GL.DrawString($"  {label}  ", fontLabel, brush, pFeature, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center);
+                                }
+
+                                GL.PopMatrix();
                             }
                         }
                     }
@@ -485,39 +1081,330 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private PointF GetCartesianFeatureCoordinates(float r, CrdsGeographical c, float axisRotation)
+        private void RenderSolarFeatures(SphereParameters data)
         {
-            // convert to orthographic polar coordinates 
-            float Y = r * (float)(-Math.Sin(Angle.ToRadians(c.Latitude)));
-            float X = r * (float)(Math.Cos(Angle.ToRadians(c.Latitude)) * Math.Sin(Angle.ToRadians(c.Longitude)));
+            if (!settings.Get("SunFeatures")) return;
 
-            // polar coordinates rotated around of visible center of the body disk
-            float X_ = (float)(X * Math.Cos(Angle.ToRadians(axisRotation)) - Y * Math.Sin(Angle.ToRadians(axisRotation)));
-            float Y_ = (float)(X * Math.Sin(Angle.ToRadians(axisRotation)) + Y * Math.Cos(Angle.ToRadians(axisRotation)));
+            var prj = map.Projection;
 
-            return new PointF(X_, Y_);
+            // radius of sun disk, in pixels
+            float r = prj.GetDiskSize(sun.Semidiameter) / 2;
+
+            // center of the sun in screen coordinates
+            var p = prj.Project(sun.Equatorial);
+
+            if (p == null) return;
+
+            // Sunspots and active H-alpha regions
+            if (r > 100)
+            {
+                var srs = solarRegionSummaryManager.GetSRSForJulianDate(prj.Context.JulianDay, prj.Context.GeoLocation.UtcOffset);
+                if (srs != null)
+                {
+                    // TODO: move color to settings
+                    Color featureColor = Color.Brown;
+
+                    Brush brush = new SolidBrush(featureColor);
+                    Pen pen = new Pen(Color.FromArgb(100, featureColor));
+
+                    // TODO: create separate setting for feature labels font
+                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+
+                    // visible coordinates of body disk center, assume as zero point 
+                    CrdsGeographical c = new CrdsGeographical(0, 0);
+
+                    var regions = srs.RegionsI.Cast<ActiveSolarRegion>().Concat(srs.RegionsIa.Cast<ActiveSolarRegion>());
+
+                    foreach (var region in regions)
+                    {
+                        // visible coordinates of the feature relative to body disk center
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(region.Location.Latitude, -region.Location.Longitude, data);
+
+                        // angular distance between disk center and feature
+                        double sep = Angle.Separation(v, c);
+
+                        // if feature is not too close to disk edge
+                        if (sep < 85)
+                        {
+                            Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data);
+
+                            if (prj.IsInsideScreen(p + pFeature))
+                            {
+                                GL.PushMatrix();
+                                GL.Translate(p.X, p.Y, 0);
+
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                                // rotation of a feature outline
+                                double rot = 90 + Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X));
+
+                                // feature radius, in pixels
+                                double fr = 0;
+                                if (region is SolarRegionI regionI)
+                                {
+                                    fr = regionI.LL / 90.0 * r;
+                                }
+
+                                // sunspot group outline
+                                if (fr > 10 || SelectedSolarRegion == region)
+                                {
+                                    var featurePen = SelectedSolarRegion == region ? new Pen(Color.Red, 2) : pen;
+                                    GL.DrawEllipse(pFeature, featurePen, fr, fr * f, rot);
+                                }
+
+                                // label
+                                var featureBrush = SelectedSolarRegion == region ? new SolidBrush(Color.Red) : (region is SolarRegionI ? brush : new SolidBrush(Color.FromArgb(50, featureColor)));
+
+                                GL.DrawString(region.Nmbr.ToString(), fontLabel, featureBrush, pFeature, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center, antiAlias: true);
+
+                                GL.PopMatrix();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        private CrdsGeographical GetVisibleFeatureCoordinates(double latitude, double longitude, double latitudeShift, double longitudeShift)
+        private void RenderLibrationPoint(SphereParameters data)
+        {
+            librationPoint = null;
+
+            if (!settings.Get("MoonMaxLibrationPoint")) return;
+
+            var prj = map.Projection;
+            double r = prj.GetDiskSize(moon.Semidiameter) / 2;
+            if (prj.Fov > 1) return;
+
+            var p = prj.Project(data.Equatorial);
+            if (p == null) return;
+
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+            Vec2 vecLibration = new Vec2(moon.Libration.l, moon.Libration.b);
+            vecLibration.Normalize();
+
+            double librationWeight = Math.Abs(moon.Libration.l) + Math.Abs(moon.Libration.b);
+            double librationDirection = Math.Atan2(vecLibration.Y, vecLibration.X);
+
+            double ax = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(librationDirection);
+            double ay = (prj.FlipVertical ? -1 : 1) * Math.Sin(librationDirection);
+
+            librationDirection = Math.Atan2(ay, ax);
+            double ang = librationDirection + rotAxis;
+
+            const double lineLen = 15;
+
+            Vec2[] v = new Vec2[2];
+            for (int i = 0; i < 2; i++)
+            {
+                v[i] = new Vec2((r + i * lineLen) * Math.Cos(ang), (r + i * lineLen) * Math.Sin(ang));
+
+                if (prj.UseRefraction)
+                {
+                    v[i] = GetRefractionMatrix(data) * v[i];
+                }
+            }
+
+            // TODO: move color to settings
+            Color labelColor = Color.AntiqueWhite.Tint(settings.Get("NightMode"));
+
+            GL.PushMatrix();
+            GL.Translate(p.X, p.Y, 0);
+            GL.DrawLine(v[0], v[1], new Pen(labelColor));
+            GL.PointSize((float)librationWeight);
+            GL.Begin(GL.POINTS);
+            GL.Vertex2(v[1].X, v[1].Y);
+            GL.End();
+
+            GL.PopMatrix();
+
+            librationPoint = v[1] + p;
+        }
+
+        private Vec2 librationPoint;
+
+        private void RenderSaturnRings(SphereParameters data, int sign)
+        {
+            int j;
+            double x, y;
+
+            // number or segments
+            const int segments = 64;
+
+            // radius of outer ring relative to Saturn equatorial radius
+            const double ringsRatio = 2.320;
+
+            var prj = map.Projection;
+
+            GL.Disable(GL.LIGHTING);
+            int textureId = GL.GetTexture(Path.Combine(dataPath, "Rings.png"), readyCallback: OnBodyTextureReady);
+            if (textureId > 0)
+            {
+                GL.Enable(GL.TEXTURE_2D);
+                GL.BindTexture(GL.TEXTURE_2D, textureId);
+            }
+            else
+            {
+                float r = data.Color.R / 255f;
+                float g = data.Color.G / 255f;
+                float b = data.Color.B / 255f;
+                GL.Disable(GL.TEXTURE_2D);
+                GL.Enable(GL.LIGHTING);
+                GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });
+                GL.Light(GL.LIGHT0, GL.DIFFUSE, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
+            }
+
+            if (settings.Get("NightMode"))
+            {
+                GL.Color3(Color.DarkRed);
+            }
+            else
+            {
+                GL.Color3(Color.White);
+            }
+
+            GL.Begin(GL.TRIANGLE_FAN);
+
+            GL.TexCoord2(1, 0);
+            GL.Vertex3(0, 0, 0);
+
+            // radius of outer ring, in pixels
+            double sd = prj.GetDiskSize(saturn.Semidiameter, data.MinimalDiskSize) / 2 * ringsRatio;
+
+            // rotation of axis
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+            // rotation matrix for rings vision
+            var matRings = Mat4.ZRotation(rotAxis) * Mat4.XRotation(Angle.ToRadians(data.LatitudeShift - 90));
+
+            if (prj.UseRefraction)
+            {
+                matRings = GetRefractionMatrix(data) * matRings;
+            }
+
+            for (j = 0; j <= segments / 2; j++)
+            {
+                double ang = j / (double)segments * 2 * Math.PI - sign * Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? -1 : 1);
+                x = -Math.Sin(ang);
+                y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
+                Vec3 vecVision = matRings * new Vec3(x, y, 0);
+                GL.TexCoord2(0, 0);
+                GL.Vertex3(sd * vecVision.X, sd * vecVision.Y, 0);
+            }
+            GL.End();
+
+            GL.Enable(GL.LIGHTING);
+        }
+
+        private Color GradientColor(Color color1, Color color2, double percent)
+        {
+            double r = color1.R + percent * (color2.R - color1.R);
+            double g = color1.G + percent * (color2.G - color1.G);
+            double b = color1.B + percent * (color2.B - color1.B);
+            double a = color1.A + percent * (color2.A - color1.A);
+            return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
+        }
+
+        private bool drawLunarFeatures = false;
+        private bool DrawLunarFeatures
+        {
+            get => drawLunarFeatures;
+            set
+            {
+                if (value || value != drawLunarFeatures)
+                {
+                    drawLunarFeatures = value;
+                    map.Invalidate();
+                }
+            }
+        }
+
+        private bool drawMartianFeatures = false;
+        private bool DrawMartianFeatures
+        {
+            get => drawMartianFeatures;
+            set
+            {
+                if (value || value != drawMartianFeatures)
+                {
+                    drawMartianFeatures = value;
+                    map.Invalidate();
+                }
+            }
+        }
+
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        {
+            if (mouseButton == MouseButton.None)
+            {
+                PointF mouse = map.MouseScreenCoordinates;
+
+                // Moon surface features
+                {
+                    var p = map.Projection.Project(moon.Equatorial);
+                    if (p != null)
+                    {
+                        double r = map.Projection.GetDiskSize(moon.Semidiameter) / 2;
+                        DrawLunarFeatures = p.Distance(mouse) <= r + 50;
+                    }
+                }
+
+                // Mars surface features
+                {
+                    var p = map.Projection.Project(mars.Equatorial);
+                    if (p != null)
+                    {
+                        double r = map.Projection.GetDiskSize(mars.Semidiameter) / 2;
+                        DrawMartianFeatures = p.Distance(mouse) <= r + 50;
+                    }
+                }
+
+                if (librationPoint != null && librationPoint.Distance(mouse) < 5)
+                {
+                    ViewManager.ShowTooltipMessage(mouse, Text.Get("Moon.MaxLibrationPoint"));
+                }
+            }
+        }
+
+        private Vec2 GetCartesianFeatureCoordinates(Projection prj, float r, CrdsGeographical c, SphereParameters data)
+        {
+            // rotation of axis
+            double axisRotation = Angle.ToRadians(data.RotationAxis);
+
+            // convert to orthographic polar coordinates 
+            double X = r * Math.Cos(Angle.ToRadians(c.Latitude)) * Math.Sin(Angle.ToRadians(c.Longitude));
+            double Y = r * Math.Sin(Angle.ToRadians(c.Latitude));
+
+            X = X * (prj.FlipHorizontal ? -1 : 1);
+            Y = Y * (prj.FlipVertical ? -1 : 1);
+
+            Vec2 v = Mat4.ZRotation(axisRotation) * new Vec2(X, Y);
+
+            if (prj.UseRefraction)
+            {
+                v = GetRefractionMatrix(data) * v;
+            }
+
+            return v;
+        }
+
+        private CrdsGeographical GetVisibleFeatureCoordinates(double latitude, double longitude, SphereParameters data)
         {
             double theta = Angle.ToRadians(90 - latitude); // [0...180]
             double phi = Angle.ToRadians(Angle.To360(longitude)); // [0...360]
+
+            double latitudeShift = Angle.ToRadians(data.LatitudeShift);
+            double longitudeShift = Angle.ToRadians(data.LongitudeShift);
 
             // Cartesian coordinates
             double x = Math.Sin(theta) * Math.Cos(phi);
             double y = Math.Sin(theta) * Math.Sin(phi);
             double z = Math.Cos(theta);
-            double[] v = new double[] { x, y, z };
+            Vec3 v = new Vec3(x, y, z);
 
-            // rotate around Z axis (longitude / phi)
-            double aZ = Angle.ToRadians(longitudeShift);
-            double[,] mZ = new double[3, 3] { { Math.Cos(aZ), -Math.Sin(aZ), 0 }, { Math.Sin(aZ), Math.Cos(aZ), 0 }, { 0, 0, 1 } };
-            Rotate(v, mZ);
-
-            // rotate around Y axis (latitude / theta)
-            double aY = Angle.ToRadians(-latitudeShift);
-            double[,] mY = new double[3, 3] { { Math.Cos(aY), 0, Math.Sin(aY) }, { 0, 1, 0 }, { -Math.Sin(aY), 0, Math.Cos(aY) } };
-            Rotate(v, mY);
+            v = Mat4.YRotation(latitudeShift).Transpose() * Mat4.ZRotation(-longitudeShift).Transpose() * v;
 
             x = v[0];
             y = v[1];
@@ -530,411 +1417,193 @@ namespace Astrarium.Plugins.SolarSystem
             return new CrdsGeographical(phi, theta);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="m">First index: row, second: column</param>
-        private void Rotate(double[] v, double[,] m)
-        {
-            double x = v[0] * m[0, 0] + v[1] * m[1, 0] + v[2] * m[2, 0];
-            double y = v[0] * m[0, 1] + v[1] * m[1, 1] + v[2] * m[2, 1];
-            double z = v[0] * m[0, 2] + v[1] * m[1, 2] + v[2] * m[2, 2];
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
-        }
-
-        private Brush GetShadowBrush(IMapContext map)
-        {
-            return new SolidBrush(Color.FromArgb(220, map.GetSkyColor()));
-        }
-
-        private void RenderEarthShadow(IMapContext map)
-        {
-            // here and below suffixes meanings are: "M" = Moon, "P" = penumbra, "U" = umbra
-
-            // angular distance from center of map to earth shadow center
-            double ad = Angle.Separation(moon.EarthShadowCoordinates, map.Center);
-
-            // semidiameter of penumbra in seconds of arc
-            double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
-
-            bool isGround = settings.Get("Ground");
-            Graphics g = map.Graphics;
-
-            if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
-                ad < map.ViewAngle + sdP / 3600)
-            {
-                PointF p = map.Project(moon.EarthShadowCoordinates);
-                PointF pMoon = map.Project(moon.Horizontal);
-
-                // size of penumbra, in pixels
-                float szP = map.GetDiskSize(sdP);
-
-                // size of umbra, in pixels
-                float szU = szP / (float)moon.EarthShadow.Ratio;
-
-                // size of Moon, in pixels 
-                float szM = map.GetDiskSize(moon.Semidiameter);
-
-                // fraction of the penumbra ring (without umbra part)
-                float fr = 1 - szU / szP;
-
-                // do not render on large view angle
-                if (szM >= 10)
-                {
-                    // if eclipse takes place
-                    if (Angle.Separation(moon.Horizontal, moon.EarthShadowCoordinates) <= sdP / 3600)
-                    {
-                        var gpM = new GraphicsPath();
-                        var gpP = new GraphicsPath();
-                        var gpU = new GraphicsPath();
-
-                        gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
-                        gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                        gpM.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
-
-                        gpP.Flatten();
-                        gpU.Flatten();
-                        gpM.Flatten();
-
-                        var brushP = new PathGradientBrush(gpP);
-                        brushP.CenterPoint = p;
-                        brushP.CenterColor = clrPenumbraGrayDark;
-                        brushP.SurroundColors = new Color[] { clrPenumbraTransp };
-
-                        var blendP = new ColorBlend();
-                        blendP.Colors = new Color[] { clrPenumbraTransp, clrPenumbraTransp, clrPenumbraGrayLight, clrPenumbraGrayDark, clrPenumbraGrayDark };
-                        blendP.Positions = new float[] { 0, fr / 2, fr * 0.95f, fr, 1 };
-                        brushP.InterpolationColors = blendP;
-
-                        var brushU = new PathGradientBrush(gpU);
-                        brushU.CenterColor = clrUmbraRed;
-                        brushU.SurroundColors = new Color[] { clrUmbraGray };
-                        brushU.Blend.Factors = new float[] { 0, 0.8f, 1 };
-                        brushU.Blend.Positions = new float[] { 0, 0.8f, 1 };
-
-                        var regionP = new Region(gpP);
-                        var regionU = new Region(gpU);
-
-                        regionP.Exclude(regionU);
-                        regionP.Intersect(gpM);
-                        regionU.Intersect(gpM);
-
-                        regionP.Intersect(new Rectangle(0, 0, map.Width, map.Height));
-                        regionU.Intersect(new Rectangle(0, 0, map.Width, map.Height));
-
-                        g.FillRegion(brushP, regionP);
-                        g.FillRegion(brushU, regionU);
-
-                        gpM.Dispose();
-                        gpP.Dispose();
-                        gpU.Dispose();
-
-                        brushP.Dispose();
-                        brushU.Dispose();
-                        regionP.Dispose();
-                        regionU.Dispose();
-
-                        // outline circles
-                        if (settings.Get("EarthShadowOutline") && map.ViewAngle > 0.5)
-                        {
-                            var brush = new SolidBrush(map.GetColor(clrShadowOutline));
-                            var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
-
-                            g.TranslateTransform(p.X, p.Y);
-                            g.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
-                            g.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
-                            g.ResetTransform();
-                            if (map.ViewAngle <= 10)
-                            {
-                                map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private void RenderPlanet<TPlanet>(IMapContext map, TPlanet planet) where TPlanet : SizeableCelestialObject, IPlanet
-        {
-            if (!settings.Get("Planets"))
-            {
-                return;
-            }
-
-            Graphics g = map.Graphics;
-            double ad = Angle.Separation(planet.Horizontal, map.Center);
-            bool isGround = settings.Get("Ground");
-            bool useTextures = settings.Get("PlanetsTextures");
-            bool drawAll = settings.Get("PlanetsDrawAll");
-            bool drawLabelMag = settings.Get("PlanetsLabelsMag");
-
-            if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) &&
-                ad < map.ViewAngle + planet.Semidiameter / 3600)
-            {
-                float size = map.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
-                float diam = map.GetDiskSize(planet.Semidiameter);
-
-                // if "draw all" setting is enabled, draw planets anyway
-                if (drawAll && size < 1)
-                {
-                    size = 1;
-                }
-
-                string label = drawLabelMag ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
-
-                // diameter is to small to render as planet disk, 
-                // but point size caclulated from magnitude is enough to be drawn
-                if (size > diam && (int)size > 0)
-                {
-                    PointF p = map.Project(planet.Horizontal);
-                    g.FillEllipse(GetPlanetColor(map, planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
-                    if (settings.Get("PlanetsLabels"))
-                    {
-                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                        map.DrawObjectCaption(fontLabel, brushLabel, label, p, size);
-                    }
-                    map.AddDrawnObject(planet);
-                }
-
-                // planet should be rendered as disk
-                else if (diam >= size && (int)diam > 0)
-                {
-                    PointF p = map.Project(planet.Horizontal);
-                    map.Rotate(p, planet.Equatorial, (float)planet.Appearance.P);
-                    DrawRotationAxis(map, diam);
-
-                    if (planet.Number == Planet.SATURN)
-                    {
-                        var rings = planetsCalc.SaturnRings;
-
-                        double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
-
-                        // scale value to convert visible size of ring to screen pixels
-                        double scale = 1.0 / 3600 / map.ViewAngle * r / 4;
-
-                        // draw rings by halfs arcs, first half is farther one
-                        for (int half = 0; half < 2; half++)
-                        {
-                            // draw planets textures
-                            if (useTextures)
-                            {
-                                float a = (float)(rings.GetRingSize(0, RingEdge.Outer, RingAxis.Major) * scale);
-                                float b = (float)(rings.GetRingSize(0, RingEdge.Outer, RingAxis.Minor) * scale);
-
-                                Image textureRings = imagesCache.RequestImage("Rings", map.Schema, RingsTextureProvider, map.Redraw);
-                                if (textureRings != null)
-                                {
-                                    // half of source image: 0 = top, 1 = bottom
-                                    int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
-
-                                    map.DrawImage(textureRings,
-                                        // destination rectangle
-                                        new RectangleF(-a, -b + h * b, a * 2, b),
-                                        // source rectangle
-                                        new RectangleF(0, h * textureRings.Height / 2f, textureRings.Width, textureRings.Height / 2f));
-                                }
-                                else
-                                {
-                                    int h = (half + (rings.B * (map.IsInverted ? -1 : 1) > 0 ? 0 : 1)) % 2;
-                                    DrawRingsUntextured(map.Graphics, rings, h, scale);
-                                }
-                            }
-                            // do not use textures
-                            else
-                            {
-                                int h = (half + (rings.B * (map.IsInverted ? -1 : 1) > 0 ? 0 : 1)) % 2;
-                                DrawRingsUntextured(map.Graphics, rings, h, scale);
-                            }
-
-                            // draw planet disk after first half of rings
-                            if (half == 0)
-                            {
-                                DrawPlanetGlobe(map, planet, diam);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        DrawPlanetGlobe(map, planet, diam);
-                    }
-
-                    g.ResetTransform();
-
-                    if (planet.Number <= Planet.MARS)
-                    {
-                        float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
-                        GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
-                        map.Rotate(p, planet.Ecliptical);
-                        map.Flip();
-                        g.FillPath(GetShadowBrush(map), shadow);
-                        g.ResetTransform();
-                    }
-
-                    if (settings.Get("PlanetsLabels"))
-                    {
-                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                        map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
-                    }
-                    map.AddDrawnObject(planet);
-
-                    if (planet.Number == Planet.MARS)
-                    {
-                        DrawMartianSurfaceFeatures(map);
-                    }
-
-                    if (planet.Number == Planet.JUPITER)
-                    {
-                        // render shadows on Jupiter
-                        RenderJupiterMoonShadow(map, planet);
-                    }
-                }
-            }
-        }
-
-        private bool RenderPlanetMoon<TPlanet, TPlanetMoon>(IMapContext map, TPlanet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanet : SizeableCelestialObject, IPlanet where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
-        {
-            if (!settings.Get("Planets")) return false;
-            if (!settings.Get("PlanetMoons")) return false;
-
-            bool isDrawn = false;
-            bool isGround = settings.Get("Ground");
-            bool useTextures = settings.Get("PlanetsTextures");
-            double ad = Angle.Separation(moon.Horizontal, map.Center);
-            Graphics g = map.Graphics;
-
-            if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
-                ad < map.ViewAngle + moon.Semidiameter / 3600)
-            {
-                PointF p = map.Project(moon.Horizontal);
-                PointF pPlanet = map.Project(planet.Horizontal);
-
-                float size = map.GetPointSize(moon.Magnitude, 2);
-                float diam = map.GetDiskSize(moon.Semidiameter);
-
-                // diameter is to small to render moon disk, 
-                // but point size caclulated from magnitude is enough to be drawn
-                if (size > diam && (int)size > 0)
-                {
-                    // do not draw moon point if eclipsed
-                    if (!moon.IsEclipsedByPlanet)
-                    {
-                        // satellite is distant enough from the planet
-                        // but too small to be drawn as disk
-                        if (map.DistanceBetweenPoints(p, pPlanet) >= 5)
-                        {
-                            g.TranslateTransform(p.X, p.Y);
-                            g.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -size / 2, -size / 2, size, size);
-                            g.ResetTransform();
-
-                            var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
-                            map.AddDrawnObject(moon);
-                            isDrawn = true;
-                        }
-                    }
-                }
-                // moon should be rendered as disk
-                else if (diam >= size && (int)diam > 0)
-                {
-                    map.Rotate(p, planet.Equatorial, (float)planet.Appearance.P);
-                    if (hasTexture && useTextures)
-                    {
-                        Image texture = imagesCache.RequestImage($"{planet.Number}-{moon.Number}", new PlanetTextureToken($"{planet.Number}-{moon.Number}", moon.CM, planet.Appearance.D, map.Schema), PlanetTextureProvider, map.Redraw);
-                        if (texture != null)
-                        {
-                            var gs = g.Save();
-                            using (GraphicsPath gp = new GraphicsPath())
-                            {
-                                gp.AddEllipse(-diam / 2, -diam / 2, diam, diam);
-                                g.SetClip(gp);
-                            }
-                            map.DrawImage(texture, -diam / 2, -diam / 2, diam, diam);
-                            g.Restore(gs);
-                        }
-                        else
-                        {
-                            g.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
-                        }
-                        DrawVolume(map, diam, 0);
-                    }
-                    else
-                    {
-                        g.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
-                        if (diam > 2)
-                        {
-                            g.DrawEllipse(new Pen(map.GetSkyColor()), -diam / 2, -diam / 2, diam, diam);
-                        }
-                        DrawVolume(map, diam, 0);
-                    }
-
-                    g.ResetTransform();
-
-                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                    map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
-                    map.AddDrawnObject(moon);
-                    isDrawn = true;
-                }
-            }
-
-            return isDrawn;
-        }
-
-        private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
+        private void RenderJupiterShadow(JupiterMoon moon, SphereParameters data)
         {
             if (!moon.IsEclipsedByPlanet) return;
-            if (!settings.Get("Planets")) return;
-            if (!settings.Get("PlanetMoons")) return;
 
+            var prj = map.Projection;
             Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
-            float diam = map.GetDiskSize(jupiter.Semidiameter);
-            float diamEquat = diam;
-            float diamPolar = (1 - jupiter.Flattening) * diam;
+            // Jupiter radius, in pixels, and also radius of its shadow
+            float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
 
-            // Jupiter radius, in pixels
-            float sd = diam / 2;
+            // Center of shadow, relative to Jupiter center
+            Vec2 pShadow = new Vec2(-moon.RectangularS.X * sd * (prj.FlipHorizontal ? -1 : 1), -moon.RectangularS.Y * sd * (prj.FlipVertical ? -1 : 1));
 
-            // Center of eclipsed moon
-            PointF pMoon = map.Project(moon.Horizontal);
+            // rotation angle of shadow center respect to center of Jupiter
+            double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
 
-            // elipsed moon size, in pixels
-            float szB = map.GetDiskSize(moon.Semidiameter);
+            // Center of Moon
+            var pMoon = prj.Project(moon.Equatorial);
+            if (pMoon == null) return;
 
-            // Center of shadow
-            PointF p = new PointF(-(float)moon.RectangularS.X * sd * (map.IsMirrored ? -1 : 1), (float)moon.RectangularS.Y * sd * (map.IsInverted ? -1 : 1));
+            pShadow = Mat4.ZRotation(Angle.ToRadians(rot)) * pShadow;
 
-            Graphics g = map.Graphics;
-
-            map.Rotate(pMoon, jupiter.Equatorial, (float)jupiter.Appearance.P);
-
-            var gpM = new GraphicsPath();
-            var gpU = new GraphicsPath();
-
-            gpU.AddEllipse(p.X - diamEquat / 2 - 1, p.Y - diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
-            gpM.AddEllipse(-szB / 2 - 0.5f, -szB / 2 - 0.5f, szB + 1, szB + 1);
-
-            var regionU = new Region(gpU);
-            regionU.Intersect(gpM);
-
-            if (!regionU.IsEmpty(map.Graphics))
+            if (prj.UseRefraction)
             {
-                g.FillRegion(new SolidBrush(clrJupiterShadow), regionU);
+                pShadow = GetRefractionMatrix(data) * pShadow;
             }
 
-            g.ResetTransform();
-            if (!regionU.IsEmpty(map.Graphics))
+            pShadow += pMoon;
+
+            // Radius of eclipsing moon
+            float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
+
+            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening, data);
+
+            if (pShadow.Distance(pMoon) <= sd + sdMoon)
             {
-                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EclipsedByJupiter"), pMoon, szB);
+                bool isNightMode = settings.Get("NightMode");
+                Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
+                map.DrawObjectLabel(Text.Get("EclipsedByJupiter"), fontShadowLabel, brushLabel, pMoon, 2 * sdMoon);
             }
         }
 
-        private void RenderJupiterMoonShadow(IMapContext map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle, double flattening, SphereParameters data)
         {
-            if (!settings.Get("Planets")) return;
-            if (!settings.Get("PlanetMoons")) return;
+            var prj = map.Projection;
+
+            var matRefraction = GetRefractionMatrix(data);
+
+            GL.PushMatrix();
+            GL.Translate(pBody.X, pBody.Y, 0);
+
+            // initiate stencil
+            GL.Enable(GL.STENCIL_TEST);
+            GL.Clear(GL.STENCIL_BUFFER_BIT);
+            GL.StencilMask(0xFF);
+            GL.ColorMask(false, false, false, false);
+
+            GL.StencilFunc(GL.ALWAYS, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
+
+            // draw stencil pattern (body outline)
+
+            GL.Begin(GL.TRIANGLE_FAN);
+           
+            for (int i = 0; i <= 64; i++)
+            {
+                double t = i / 64.0 * 2 * Math.PI;
+
+                // unit vector
+                Vec2 v = new Vec2(1, 0);
+
+                // stretch to equatorial radius
+                v = Mat4.StretchX(radiusBody) * v;
+
+                // rotate for 't' radians
+                v = Mat4.ZRotation(t) * v;
+
+                if (prj.UseRefraction)
+                {
+                    v = matRefraction * v;
+                }
+
+                GL.Vertex2(v.X, v.Y);
+            }
+
+            GL.End();
+            GL.PopMatrix();
+
+            // draw shadow
+
+            GL.StencilFunc(GL.EQUAL, 1, 0xFF);
+            GL.StencilOp(GL.KEEP, GL.REPLACE, GL.REPLACE);
+            GL.ColorMask(true, true, true, true);
+
+            GL.PushMatrix();
+            GL.Translate(pShadow.X, pShadow.Y, 0);
+
+            // enable blending because shadow is semitransparent
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+            // rotation angle of the shadow
+            double rot = Angle.ToRadians(rotAngle);
+
+            for (int i = 0; i < shadowRadii.Length; i++)
+            {
+                GL.Begin(GL.TRIANGLE_STRIP);
+
+                for (int j = 0; j <= 63; j++)
+                {
+                    double t = j / (double)63 * (2 * Math.PI);
+
+                    // outer
+                    {
+                        // unit vector
+                        Vec2 v = new Vec2(1, 0);
+
+                        // stretch to equatorial radius
+                        v = Mat4.StretchX(shadowRadii[i]) * v;
+
+                        // rotate for 't' radians
+                        v = Mat4.ZRotation(t) * v;
+
+                        // body flattening
+                        v = Mat4.StretchY(1 - flattening) * v;
+
+                        // rotate around axis
+                        v = Mat4.ZRotation(rot) * v;
+
+                        // refraction flattening
+                        if (prj.UseRefraction)
+                        {
+                            v = matRefraction * v;
+                        }
+
+                        GL.Color4(shadowColors[i]);
+                        GL.Vertex2(v.X, v.Y);
+                    }
+
+                    // inner
+                    if (i > 0)
+                    {
+                        // unit vector
+                        Vec2 v = new Vec2(1, 0);
+
+                        // stretch to equatorial radius
+                        v = Mat4.StretchX(shadowRadii[i - 1]) * v;
+
+                        // rotate for 't' radians
+                        v = Mat4.ZRotation(t) * v;
+
+                        // body flattening
+                        v = Mat4.StretchY(1 - flattening) * v;
+
+                        // rotate around axis
+                        v = Mat4.ZRotation(rot) * v;
+
+                        // refraction flattening
+                        if (prj.UseRefraction)
+                        {
+                            v = matRefraction * v;
+                        }
+
+                        GL.Color4(shadowColors[i - 1]);
+                        GL.Vertex2(v.X, v.Y);
+                    }
+                    else
+                    {
+                        GL.Color4(shadowColors[0]);
+                        GL.Vertex2(0, 0);
+                    }
+                }
+
+                GL.End();
+            }
+
+            // disable stencil
+
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.STENCIL_TEST);
+
+            GL.PopMatrix();
+        }
+
+        private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, SphereParameters data, CrdsRectangular rect = null)
+        {
+            Projection prj = map.Projection;
 
             if (rect == null)
             {
@@ -943,20 +1612,21 @@ namespace Astrarium.Plugins.SolarSystem
 
             // collect moons than can produce a shadow
             var ecliptingMoons = planetsCalc.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
-            Graphics g = map.Graphics;
 
             if (ecliptingMoons.Any())
             {
                 Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
                 // Jupiter radius, in pixels
-                float sd = map.GetDiskSize(jupiter.Semidiameter) / 2;
+                float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
 
                 // Center of eclipsed body
-                PointF pBody = map.Project(eclipsedBody.Horizontal);
+                Vec2 pBody = prj.Project(eclipsedBody.Equatorial);
+
+                if (pBody == null) return;
 
                 // elipsed body size, in pixels
-                float szB = map.GetDiskSize(eclipsedBody.Semidiameter);
+                float radiusBody = prj.GetDiskSize(eclipsedBody.Semidiameter) / 2;
 
                 foreach (var moon in ecliptingMoons)
                 {
@@ -964,450 +1634,60 @@ namespace Astrarium.Plugins.SolarSystem
                     var shadow = GalileanMoons.Shadow(jupiter.Ecliptical.Distance, jupiter.DistanceFromSun, moon.Number - 1, moon.RectangularS, rect);
 
                     // umbra and penumbra size, in pixels
-                    float szU = map.GetDiskSize(shadow.Umbra);
-                    float szP = map.GetDiskSize(shadow.Penumbra);
+                    float radiusUmbra = prj.GetDiskSize(shadow.Umbra) / 2;
+                    float radiusPenumbra = prj.GetDiskSize(shadow.Penumbra) / 2;
 
                     // coordinates of shadow relative to eclipsed body
                     CrdsRectangular shadowRelative = moon.RectangularS - rect;
 
-                    // Center of shadow
-                    PointF p = new PointF((map.IsMirrored ? -1 : 1) * (float)shadowRelative.X * sd, (map.IsInverted ? -1 : 1) * -(float)shadowRelative.Y * sd);
+                    // Center of shadow, relative to Jupiter center
+                    Vec2 pShadow = new Vec2(shadowRelative.X * sd * (prj.FlipHorizontal ? -1 : 1), shadowRelative.Y * sd * (prj.FlipVertical ? -1 : 1));
 
-                    map.Rotate(pBody, jupiter.Equatorial, (float)jupiter.Appearance.P);
+                    // rotation angle of shadow center respect to center of Jupiter
+                    double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
+
+                    // Center of shadow
+                    pShadow = Mat4.ZRotation(Angle.ToRadians(rot)) * pShadow;
+
+                    if (prj.UseRefraction)
+                    {
+                        pShadow = GetRefractionMatrix(data) * pShadow;
+                    }
+
+                    pShadow += pBody;
 
                     // shadow has enough size to be rendered
-                    if ((int)szP > 0)
+                    if ((int)radiusPenumbra > 0)
                     {
-                        var gpB = new GraphicsPath();
-                        var gpP = new GraphicsPath();
-                        var gpU = new GraphicsPath();
+                        double[] shadowRadii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
+                        Color[] shadowColors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
 
-                        gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                        gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
-                        gpB.AddEllipse(-szB / 2 - 0.5f, -szB / 2 - 0.5f, szB + 1, szB + 1);
+                        RenderEclipseShadow(pBody, pShadow, radiusBody, shadowRadii, shadowColors, 0, 0, data);
 
-                        var regionP = new Region(gpP);
-                        regionP.Intersect(gpB);
-
-                        if (!regionP.IsEmpty(map.Graphics))
+                        if (pShadow.Distance(pBody) <= radiusBody + radiusUmbra)
                         {
-                            float f1 = 1 - (szU + szP) / 2 / szP;
-                            float f2 = 1 - szU / szP;
-
-                            var brushP = new PathGradientBrush(gpP);
-                            brushP.CenterPoint = p;
-                            brushP.CenterColor = clrJupiterMoonShadowLight;
-
-                            brushP.InterpolationColors = new ColorBlend()
-                            {
-                                Colors = new[]
-                                {
-                                    Color.Transparent,
-                                    clrJupiterMoonShadowDark,
-                                    clrJupiterMoonShadowLight,
-                                    clrJupiterMoonShadowLight
-                                },
-                                Positions = new float[] { 0, f1, f2, 1 }
-                            };
-
-                            var regionU = new Region(gpU);
-                            regionU.Intersect(gpB);
-
-                            var brushU = new SolidBrush(clrJupiterMoonShadowLight);
-
-                            g.FillRegion(brushP, regionP);
-                            g.FillRegion(brushU, regionU);
-
-                            // outline circles
-                            if (settings.Get("JupiterMoonsShadowOutline") && szP > 20)
-                            {
-                                g.DrawEllipse(penShadowOutline, p.X - (szP + szU) / 4, p.Y - (szP + szU) / 4, (szP + szU) / 2, (szP + szU) / 2);
-                                g.DrawEllipse(penShadowOutline, p.X - szU / 2, p.Y - szU / 2, szU, szU);
-
-                                PointF[] points = new PointF[] { new PointF(p.X, p.Y) };
-                                g.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
-                                g.ResetTransform();
-                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, moon.ShadowName, points[0], szP);
-                            }
+                            bool isNightMode = settings.Get("NightMode");
+                            Brush brushLabel = new SolidBrush(Color.Brown.Tint(isNightMode));
+                            map.DrawObjectLabel(Text.Get($"JupiterMoon.{moon.Number}.Shadow"), fontShadowLabel, brushLabel, pShadow, 2 * radiusUmbra);
                         }
                     }
-
-                    g.ResetTransform();
                 }
             }
         }
 
-        private void DrawRingsUntextured(Graphics g, RingsAppearance rings, int half, double scale)
+        private Color GetPlanetColor(int planet)
         {
-            float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
-
-            // three rings
-            for (int r = 0; r < 3; r++)
-            {
-                float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
-                float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
-
-                float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
-                float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
-
-                GraphicsPath gp = new GraphicsPath();
-                gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
-                gp.Reverse();
-                gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
-                g.FillPath(brushRings[r], gp);
-            }
-        }
-
-        private void DrawPlanetGlobe<TPlanet>(IMapContext map, TPlanet planet, float diam) where TPlanet : SizeableCelestialObject, IPlanet
-        {
-            Graphics g = map.Graphics;
-            float diamEquat = diam;
-            float diamPolar = (1 - planet.Flattening) * diam;
-            bool useTextures = settings.Get("PlanetsTextures");
-
-            if (!(useTextures && (map.Schema == ColorSchema.Red || map.Schema == ColorSchema.White)))
-            {
-                g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-            }
-
-            if (useTextures)
-            {
-                PlanetTextureToken token;
-                if (planet.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"))
-                {
-                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, map.Schema, planetsCalc.MarsNPCWidth, planetsCalc.MarsSPCWidth);
-                }
-                else if (planet.Number == Planet.JUPITER)
-                {
-                    token = new PlanetTextureToken(planet.Number.ToString(), planetsCalc.GreatRedSpotLongitude - planet.Appearance.CM, planet.Appearance.D, map.Schema);
-                }
-                else
-                {
-                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, map.Schema);
-                }
-
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), token, PlanetTextureProvider, map.Redraw);
-
-                if (texturePlanet != null)
-                {
-                    var gs = g.Save();
-                    using (GraphicsPath gp = new GraphicsPath())
-                    {
-                        gp.AddEllipse(-diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                        g.SetClip(gp);
-                    }
-                    g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                    map.DrawImage(texturePlanet, -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                    g.Restore(gs);
-                    DrawVolume(map, diam, planet.Flattening);
-                }
-            }
-            else
-            {
-                DrawVolume(map, diam, planet.Flattening);
-            }
-        }
-
-        private void DrawVolume(IMapContext map, float diam, float flattening)
-        {
-            if (map.Schema == ColorSchema.White) return;
-
-            Image textureVolume = imagesCache.RequestImage("volume", map.GetSkyColor(), VolumeTextureProvider, map.Redraw);
-            if (textureVolume != null)
-            {
-                float diamEquat = diam;
-                float diamPolar = (1 - flattening) * diam;
-                Graphics g = map.Graphics;
-
-                var gs = g.Save();
-                using (GraphicsPath gp = new GraphicsPath())
-                {
-                    gp.AddEllipse(-diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
-                    g.SetClip(gp);
-                }
-                map.DrawImage(textureVolume, -diamEquat / 2 * 1.2f, -diamPolar / 2 * 1.2f, diamEquat * 1.2f, diamPolar * 1.2f);
-                g.Restore(gs);
-            }
-        }
-
-        private void DrawRotationAxis(IMapContext map, float diam)
-        {
-            if (settings.Get("ShowRotationAxis"))
-            {
-                var p1 = new PointF(0, -(diam / 2 + 10));
-                var p2 = new PointF(0, diam / 2 + 10);
-                map.Graphics.DrawLine(new Pen(map.GetColor("ColorSolarSystemLabel")), p1, p2);
-            }
-        }
-
-        private Image PlanetTextureProvider(PlanetTextureToken token)
-        {
-            return sphereRenderer.Render(new RendererOptions()
-            {
-                LatitudeShift = token.Latitude,
-                LongutudeShift = token.Longitude,
-                OutputImageSize = 1024,
-                RenderPolarCaps = token.RenderPolarCaps,
-                NorthernPolarCap = token.NorthernPolarCap,
-                SouthernPolarCap = token.SouthernPolarCap,
-                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg"),
-                ColorSchema = token.ColorSchema
-            });
-        }
-
-        private Image RingsTextureProvider(ColorSchema schema)
-        {
-            Image image = Image.FromFile(Path.Combine(dataPath, "Rings.png"), true);
-            image.Colorize(schema);
-            return image;
-        }
-
-        private Image MoonTextureProvider(PlanetTextureToken token)
-        {
-            uint imageSize;
-            switch (token.TextureName)
-            {
-                case "Moon-2k":
-                    imageSize = 1024;
-                    break;
-                default:
-                case "Moon-4k":
-                    imageSize = 2048;
-                    break;
-                case "Moon-8k":
-                    imageSize = 4096;
-                    break;
-            }
-
-            return sphereRenderer.Render(new RendererOptions()
-            {
-                LatitudeShift = token.Latitude,
-                LongutudeShift = token.Longitude,
-                OutputImageSize = imageSize,
-                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg"),
-                ColorSchema = token.ColorSchema
-            });
-        }
-
-        private Image SunImageProvider(DateTime date)
-        {
-            return solarTextureDownloader.Download(date);
-        }
-
-        private Image VolumeTextureProvider(Color skyColor)
-        {
-            Bitmap bitmap = new Bitmap(256, 256);
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-                using (GraphicsPath gpVolume = new GraphicsPath())
-                {
-                    gpVolume.AddEllipse(-128, -128, 512, 512);
-                    using (PathGradientBrush brushVolume = new PathGradientBrush(gpVolume))
-                    {
-                        brushVolume.CenterPoint = new PointF(128, 128);
-                        brushVolume.CenterColor = skyColor;
-                        brushVolume.SetSigmaBellShape(0.3f, 1);
-                        brushVolume.SurroundColors = new Color[] { Color.Transparent };
-                        g.FillEllipse(brushVolume, 0, 0, 256, 256);
-                    }
-                }
-            }
-            return bitmap;
-        }
-
-        private Brush GetPlanetColor(IMapContext map, int planet)
-        {
-            Color color = Color.Empty;
-
             switch (planet)
             {
-                case 1:
-                    color = Color.FromArgb(132, 131, 131);
-                    break;
-                case 2:
-                    color = Color.FromArgb(228, 189, 127);
-                    break;
-                case 4:
-                    color = Color.FromArgb(183, 98, 71);
-                    break;
-                case 5:
-                    color = Color.FromArgb(166, 160, 149);
-                    break;
-                case 6:
-                    color = Color.FromArgb(207, 192, 162);
-                    break;
-                case 7:
-                    color = Color.FromArgb(155, 202, 209);
-                    break;
-                case 8:
-                    color = Color.FromArgb(54, 79, 167);
-                    break;
-                case 9:
-                    color = Color.FromArgb(207, 192, 162);
-                    break;
-                default:
-                    color = Color.Gray;
-                    break;
-            }
-
-            return new SolidBrush(map.GetColor(color));
-        }
-
-        /// <summary>
-        /// Gets graphics path for drawing shadowed part of a planet / Moon.
-        /// </summary>
-        /// <param name="phase">Phase of celestial object (signed).</param>
-        /// <param name="rotation">
-        /// Rotation angle in degrees. 
-        /// Resulting graphics path will be rotated clockwise on this angle around central point of the planet / Moon disk.</param>
-        /// <param name="size">Size of a drawn planet / Moon disk</param>
-        /// <param name="flattening">Flattening value of a planet globe.</param>
-        /// <returns>Graphics path for drawing shadowed part of a planet / Moon.</returns>
-        private GraphicsPath GetPhaseShadow(float phase, float size, float flattening = 0)
-        {
-            float sizeEquat = size;
-            float sizePolar = (1 - flattening) * size;
-
-            GraphicsPath gp = new GraphicsPath();
-
-            // растущий серп
-            if (phase >= 0 && phase <= 0.5)
-            {
-                float width = (0.5f - phase) * sizeEquat * 2;
-                float height = sizePolar;
-                float x = -width / 2;
-                float y = -height / 2;
-
-                // terminator arc
-                gp.AddArc(x, y, width, height, -90, 180);
-
-                // dark side arc
-                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, 90, 180);
-            }
-
-            // растущая горбушка
-            if (phase > 0.5 && phase <= 1.0)
-            {
-                float width = (phase - 0.5f) * sizeEquat * 2;
-                float height = sizePolar;
-                float x = -width / 2;
-                float y = -height / 2;
-
-                // terminator arc 
-                gp.AddArc(x, y, width, height, 90, 180);
-                gp.Reverse();
-
-                // dark side arc 
-                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, 90, 180);
-            }
-
-            // убывающая горбушка 
-            if (phase > -1.0 && phase <= -0.5)
-            {
-                float width = -(phase + 0.5f) * sizeEquat * 2;
-                float height = sizePolar;
-                float x = -width / 2;
-                float y = -height / 2;
-
-                // terminator arc
-                gp.AddArc(x, y, width, height, -90, 180);
-                gp.Reverse();
-
-                // dark side arc
-                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, -90, 180);
-            }
-
-            // убывающий серп
-            if (phase > -0.5 && phase <= 0)
-            {
-                float width = (phase + 0.5f) * sizeEquat * 2;
-                float height = sizePolar;
-                float x = -width / 2;
-                float y = -height / 2;
-
-                // dark side arc
-                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, -90, 180);
-
-                // terminator arc
-                gp.AddArc(x, y, width, height, 90, 180);
-            }
-
-            gp.CloseAllFigures();
-
-            return gp;
-        }
-
-        private struct PlanetTextureToken
-        {
-            public string TextureName { get; private set; }
-            public double Longitude { get; private set; }
-            public double Latitude { get; private set; }
-
-            /// <summary>
-            /// Flag indicating polar caps rendering is needed
-            /// </summary>
-            public bool RenderPolarCaps { get; private set; }
-
-            /// <summary>
-            /// Radius of northern polar cap, in degrees
-            /// </summary>
-            public double NorthernPolarCap { get; private set; }
-
-            /// <summary>
-            /// Radius of southern polar cap, in degrees
-            /// </summary>
-            public double SouthernPolarCap { get; private set; }
-
-            /// <summary>
-            /// Color schema
-            /// </summary>
-            public ColorSchema ColorSchema { get; private set; }
-
-            public PlanetTextureToken(string name, double longitude, double latitude, ColorSchema colorSchema)
-            {
-                TextureName = name;
-                Longitude = longitude;
-                Latitude = latitude;
-                RenderPolarCaps = false;
-                NorthernPolarCap = 0;
-                SouthernPolarCap = 0;
-                ColorSchema = colorSchema;
-            }
-
-            public PlanetTextureToken(string name, double longitude, double latitude, ColorSchema colorSchema, double northernPolarCap, double southernPolarCap)
-            {
-                TextureName = name;
-                Longitude = longitude;
-                Latitude = latitude;
-                RenderPolarCaps = true;
-                NorthernPolarCap = northernPolarCap;
-                SouthernPolarCap = southernPolarCap;
-                ColorSchema = colorSchema;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is PlanetTextureToken other)
-                {
-                    return
-                        TextureName.Equals(other.TextureName) &&
-                        ColorSchema == other.ColorSchema &&
-                        RenderPolarCaps == other.RenderPolarCaps &&
-                        Math.Abs(NorthernPolarCap - other.NorthernPolarCap) < 1 &&
-                        Math.Abs(SouthernPolarCap - other.SouthernPolarCap) < 1 &&
-                        Math.Abs(Longitude - other.Longitude) < 0.01 &&
-                        Math.Abs(Latitude - other.Latitude) < 0.01;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
+                case 1: return Color.FromArgb(132, 131, 131);
+                case 2: return Color.FromArgb(228, 189, 127);
+                case 4: return Color.FromArgb(183, 98, 71);
+                case 5: return Color.FromArgb(166, 160, 149);
+                case 6: return Color.FromArgb(207, 192, 162);
+                case 7: return Color.FromArgb(155, 202, 209);
+                case 8: return Color.FromArgb(54, 79, 167);
+                case 9: return Color.FromArgb(207, 192, 162);
+                default: return Color.Gray;
             }
         }
     }

@@ -3,7 +3,7 @@ using Astrarium.Types;
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
+using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.Constellations
 {
@@ -11,89 +11,49 @@ namespace Astrarium.Plugins.Constellations
     {
         private readonly ConstellationsCalc constellationsCalc;
         private readonly ISettings settings;
-        private readonly Func<string, Constellation> GetConstellation;
+        private readonly ISky sky;
+
+        public override RendererOrder Order => RendererOrder.Grids;
 
         public ConstellationsRenderer(ConstellationsCalc constellationsCalc, ISky sky, ISettings settings)
         {
             this.constellationsCalc = constellationsCalc;
+            this.sky = sky;
             this.settings = settings;
-            GetConstellation = sky.GetConstellation;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            if (settings.Get<bool>("ConstBorders"))
+            if (settings.Get("ConstBorders"))
             {
                 RenderBorders(map);
             }
-            if (settings.Get<bool>("ConstLabels"))
+            if (settings.Get("ConstLabels"))
             {
-                RenderConstLabels(map);
+                RenderLabels(map);
             }
         }
 
-        public override RendererOrder Order => RendererOrder.Grids;
-
-        /// <summary>
-        /// Renders constellation borders on the map
-        /// </summary>
-        private void RenderBorders(IMapContext map)
+        private void RenderLabels(ISkyMap map)
         {
-            PointF p1, p2;
-            CrdsHorizontal h1, h2;
-            var borders = constellationsCalc.ConstBorders;
-            bool isGround = settings.Get<bool>("Ground");
-            Pen penBorder = new Pen(map.GetColor("ColorConstBorders"));
-
-            foreach (var block in borders)
-            {
-                for (int i = 0; i < block.Count - 1; i++)
-                {
-                    h1 = block.ElementAt(i).Horizontal;
-                    h2 = block.ElementAt(i + 1).Horizontal;
-
-                    if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
-                        Angle.Separation(map.Center, h1) < 90 &&
-                        Angle.Separation(map.Center, h2) < 90)
-                    {
-                        p1 = map.Project(h1);
-                        p2 = map.Project(h2);
-
-                        var points = map.SegmentScreenIntersection(p1, p2);
-                        if (points.Length == 2)
-                        {
-                            map.Graphics.DrawLine(penBorder, points[0], points[1]);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Renders constellations labels on the map
-        /// </summary>
-        private void RenderConstLabels(IMapContext map)
-        {
-            var constellations = constellationsCalc.ConstLabels;
-            bool isGround = settings.Get<bool>("Ground");
-
-            StringFormat format = new StringFormat();
-            format.LineAlignment = StringAlignment.Center;
-            format.Alignment = StringAlignment.Center;
-
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
             Font defFont = settings.Get<Font>("ConstLabelsFont");
-            float fontSize = (float)Math.Min((int)(800 / map.ViewAngle), defFont.Size);
+            float fontSize = Math.Max(8, (float)Math.Min((int)(800 / prj.Fov), defFont.Size));
             Font font = new Font(defFont.FontFamily, fontSize, defFont.Style);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
-            Brush brushLabel = new SolidBrush(map.GetColor("ColorConstLabels"));
+            Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorConstLabels").Tint(nightMode));
+            WF.TextFormatFlags formatFlags = WF.TextFormatFlags.HorizontalCenter | WF.TextFormatFlags.VerticalCenter;
+
+            var constellations = constellationsCalc.ConstLabels;
 
             foreach (var c in constellations)
             {
-                var h = c.Horizontal;                
-                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle)
+                var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, prj.Context.PrecessionElements);
+                var p = prj.Project(eq);
+                if (prj.IsInsideScreen(p))
                 {
-                    var p = map.Project(h);
-                    var constellation = GetConstellation(c.Code);
+                    var constellation = sky.GetConstellation(c.Code);
                     string label;
                     switch (labelType)
                     {
@@ -109,9 +69,53 @@ namespace Astrarium.Plugins.Constellations
                             break;
                     }
 
-                    map.Graphics.DrawString(label, font, brushLabel, p, format);
+                    GL.DrawString(label, font, brushLabel, p, horizontalAlign: StringAlignment.Center, verticalAlign: StringAlignment.Center);
                 }
             }
+        }
+
+        private void RenderBorders(ISkyMap map)
+        {
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+
+            GL.Enable(GL.BLEND);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+            double fov = prj.RealFov;
+
+            var color = settings.Get<Color>("ColorConstBorders").Tint(nightMode);
+
+            GL.Color3(color);
+
+            CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
+
+            GL.Begin(GL.LINES);
+
+            foreach (var block in constellationsCalc.Borders)
+            {
+                for (int i = 0; i < block.Count - 1; i++)
+                {
+                    if (Angle.Separation(eqCenter0, block[i]) < fov ||
+                        Angle.Separation(eqCenter0, block[i + 1]) < fov)
+                    {
+                        var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsB1950ToCurrent);
+                        var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsB1950ToCurrent);
+
+                        var p1 = prj.Project(eq1);
+                        var p2 = prj.Project(eq2);
+
+                        if (p1 != null && p2 != null)
+                        {
+                            GL.Vertex2(p1.X, p1.Y);
+                            GL.Vertex2(p2.X, p2.Y);
+                        }
+                    }
+                }
+            }
+            GL.End();
         }
 
         /// <summary>

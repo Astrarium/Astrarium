@@ -35,7 +35,7 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
             set
             {
                 joystickManager.SelectedDevice = value;
-                Settings.Set("TelescopeControlJoystickDevice", value.Id);
+                Settings.Set("TelescopeControlJoystickDevice", value?.Index ?? 0);
                 NotifyPropertyChanged(nameof(SelectedDevice));
             }
         }

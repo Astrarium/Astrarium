@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject
+    public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => "Sun";
@@ -12,14 +12,14 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string CommonName => "Sun";
 
         /// <summary>
-        /// Apparent topocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Ecliptical coordinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }
+
+        /// <summary>
+        /// Heliographical coordinates of the solar disk center
+        /// </summary>
+        public CrdsHeliographical CenterDisk { get; set; }
 
         /// <summary>
         /// Average daily motion of the Sun
@@ -34,7 +34,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <summary>
         /// Distance from Earth
         /// </summary>
-        public double DistanceFromEarth => Ecliptical.Distance; 
+        public double DistanceFromEarth => Ecliptical.Distance;
 
         /// <summary>
         /// Primary name

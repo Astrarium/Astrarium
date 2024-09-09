@@ -26,5 +26,10 @@ namespace Astrarium.Plugins.Horizon.Controls
         {
             InitializeComponent();
         }
+
+        private void ComboBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+        }
     }
 }

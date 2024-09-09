@@ -64,10 +64,25 @@ namespace Astrarium.Algorithms
             return ToDegrees(Atan2(MR[i], r * AU + z * SR)) * 3600;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <param name="earth"></param>
+        /// <param name="saturn"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// See https://adsabs.harvard.edu/full/1993A%26A...268..326H
+        /// </remarks>
         public static CrdsRectangular[] Positions(double jd, CrdsHeliocentrical earth, CrdsHeliocentrical saturn)
         {
-            // p.324
+            // distance from Earth to Saturn
+            double distance = saturn.ToRectangular(earth).ToEcliptical().Distance;
 
+            // take light-time effect into account
+            jd -= PlanetPositions.LightTimeEffect(distance);
+
+            // ecliptical coordinates of Saturn
             var e0 = saturn.ToRectangular(earth).ToEcliptical();
 
             // Convert coordinates to B1950 epoch = 2433282.4235;
@@ -99,10 +114,16 @@ namespace Astrarium.Algorithms
             W[7] = 2.4891 + 0.002435 * t7;
             W[8] = 113.35 - 0.2597 * t7;
 
-            double s1 = Sin(ToRadians(28.0817));
-            double c1 = Cos(ToRadians(28.0817));
-            double s2 = Sin(ToRadians(168.8112));
-            double c2 = Cos(ToRadians(168.8112));
+            // inclination of the equator plane of Saturn (Dourneau)
+            double ie = ToRadians(28.0817);
+
+            // node of the equator plane of Saturn (Dourneau)
+            double omegae = ToRadians(168.8112);
+
+            double s1 = Sin(ie);
+            double c1 = Cos(ie);
+            double s2 = Sin(omegae);
+            double c2 = Cos(omegae);
             double e1 = 0.05589 - 0.000346 * t7;
 
             double[] lambda = new double[9];

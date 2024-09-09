@@ -262,7 +262,7 @@ namespace Astrarium.Plugins.ASCOM
                     {
                         telescope.SiteLongitude = geo.Longitude;
                         telescope.SiteLatitude = geo.Latitude;
-                        telescope.SiteElevation = geo.Elevation;                        
+                        telescope.SiteElevation = geo.Elevation;
                     }
                 }
             }

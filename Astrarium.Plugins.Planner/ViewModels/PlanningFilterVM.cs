@@ -84,7 +84,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
                 SkipUnknownMagnitude = value.SkipUnknownMagnitude;
 
-
                 CelestialObjectsTypes = value.CelestialObjectsTypes.ToArray();
             }
         }
@@ -142,7 +141,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public double JulianDay
         {
             get => GetValue<double>(nameof(JulianDay));
-            set => SetValue(nameof(JulianDay), value);
+            set
+            {
+                if (value > 0)
+                {
+                    Date date = new Date(value, UtcOffset);
+                    double midnight = value - (date.Day - Math.Truncate(date.Day));
+                    SetValue(nameof(JulianDay), midnight);
+                }
+            }
         }
 
         public double UtcOffset
@@ -252,7 +259,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void BuildTree()
         {
-            string[] types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
+            string[] types = sky.CelestialObjects.Where(c => c is IObservableObject).Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
             var groups = types.GroupBy(t => t.Split('.').First());
 
             Node root = new Node(Text.Get("Planner.PlanningFilter.ObjectsTypes.All"));

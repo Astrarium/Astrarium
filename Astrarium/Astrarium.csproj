@@ -50,9 +50,13 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Remove="Logging\**" />
     <Compile Remove="Logo\**" />
+    <EmbeddedResource Remove="Logging\**" />
     <EmbeddedResource Remove="Logo\**" />
+    <None Remove="Logging\**" />
     <None Remove="Logo\**" />
+    <Page Remove="Logging\**" />
   </ItemGroup>
   
   <ItemGroup>
@@ -74,9 +78,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="NLog" Version="4.7.13" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Ninject" Version="3.3.6" />
+    <PackageReference Include="NLog" Version="5.3.2" />
   </ItemGroup>
       
   <ItemGroup>
@@ -85,6 +89,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Atmosphere\Astrarium.Plugins.Atmosphere.csproj">
+	  <Private>false</Private>
+	  <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+	  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
@@ -150,6 +159,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.SuperNovae\Astrarium.Plugins.SuperNovae.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.Tycho2\Astrarium.Plugins.Tycho2.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -171,6 +185,16 @@
       <Private>false</Private>
     </ProjectReference>
 	<ProjectReference Include="..\Astrarium.Plugins.Planner\Astrarium.Plugins.Planner.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Satellites\Astrarium.Plugins.Satellites.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Journal\Astrarium.Plugins.Journal.csproj">
 		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		<Private>false</Private>

@@ -1,12 +1,11 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
+﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Astrarium.Plugins.BrightStars
 {
-    public class Star : CelestialObject, IMagnitudeObject
+    public class Star : CelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <summary>
         /// Greek alphabet abbreviations
@@ -101,9 +100,14 @@ namespace Astrarium.Plugins.BrightStars
         public ushort FK5Number { get; set; }
 
         /// <summary>
-        /// Equatorial coordinates for the catalogue epoch
+        /// RA for the catalogue epoch, in degrees 
         /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
+        public float Alpha0 { get; set; }
+
+        /// <summary>
+        /// Dec for the catalogue epoch, in degrees 
+        /// </summary>
+        public float Delta0 { get; set; }
 
         /// <summary>
         /// Annual proper motion in RA J2000, FK5 system, arcsec/yr

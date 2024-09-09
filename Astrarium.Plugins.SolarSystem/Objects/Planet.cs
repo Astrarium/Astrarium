@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the major planet for given instant of time.
     /// </summary>
-    public class Planet : SizeableCelestialObject, IPlanet, ISolarSystemObject, IMovingObject, IMagnitudeObject
+    public class Planet : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         public Planet(int number)
         {
@@ -40,11 +40,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
         /// <summary>
-        /// Apparent topocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Ecliptical coordinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }
@@ -63,6 +58,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Current phas of the planet.
         /// </summary>
         public double Phase { get; set; }
+
+        /// <summary>
+        /// Phase angle of the planet, signed.
+        /// </summary>
+        public double PhaseAngle { get; set; }
 
         /// <summary>
         /// Magnitude of planet
@@ -89,6 +89,15 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public PlanetAppearance Appearance { get; set; }
 
+        /// <inheritdoc />
+        public override float? PositionAngle => (float)Appearance.P - 90;
+
+        /// <inheritdoc />
+        public override float? LargeSemidiameter => Semidiameter;
+
+        /// <inheritdoc />
+        public override float? SmallSemidiameter => Semidiameter * (1 - Flattening);
+
         /// <summary>
         /// Mean daily motion of the planet, in degrees
         /// </summary>
@@ -98,6 +107,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Average daily motions of planets
         /// </summary>
         public static readonly double[] DAILY_MOTIONS = new[] { 1.3833, 1.2, 0, 0.542, 0.0831, 0.0336, 0.026666, 0.006668 };
+
+        /// <summary>
+        /// Equatorial radii of planets, in kilometers
+        /// </summary>
+        public static readonly double[] EQUATORIAL_RADIUS = new[] { 2439.7, 6051.8, 6371, 3389.5, 69911, 58232, 25362, 24622, 1188 };
 
         public const int MERCURY    = 1;
         public const int VENUS      = 2;
