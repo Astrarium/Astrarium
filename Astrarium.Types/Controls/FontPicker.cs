@@ -14,21 +14,10 @@ namespace Astrarium.Types.Controls
 {
     public class FontPicker : Control
     {
-        public FontPicker()
-        {
-
-        }
-
         public Font SelectedFont
         {
-            get
-            {
-                return (Font)GetValue(SelectedFontProperty);
-            }
-            set
-            {
-                SetValue(SelectedFontProperty, value);
-            }
+            get => (Font)GetValue(SelectedFontProperty);
+            set => SetValue(SelectedFontProperty, value);
         }
 
         public readonly static DependencyProperty SelectedFontProperty = DependencyProperty.Register(
@@ -38,17 +27,14 @@ namespace Astrarium.Types.Controls
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                 AffectsRender = true
             });
-        
-        TextBox _TextBox;
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _TextBox = Template.FindName("TextBox", this) as TextBox;
-            _TextBox.PreviewMouseDown += _TextBox_PreviewMouseDown;
+            (Template.FindName("Container", this) as UIElement).PreviewMouseDown += OnMouseDown;
         }
 
-        private void _TextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {

@@ -84,5 +84,29 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(new DMS("199* 54' 32.19''"), new DMS(ecl.Lambda));
             Assert.AreEqual(0.99766, ecl.Distance, 1e-5);
         }
+
+        /// <summary>
+        /// AA(II), example 29.a
+        /// </summary>
+        [TestMethod]
+        public void Center_1()
+        {
+            var hel = SolarEphem.Center(2448908.50068);
+
+            Assert.AreEqual(5.99, hel.Latitude, 1e-2);
+            Assert.AreEqual(238.63, hel.Longitude, 1e-2);
+        }
+
+        /// <summary>
+        /// Test from Duffeth-Smith book, ex. 37A (p. 73)
+        /// </summary>
+        [TestMethod]
+        public void Center_2()
+        {
+            var hel = SolarEphem.Center(2443994.5);
+
+            Assert.AreEqual(-4.196, hel.Latitude, 1e-2);
+            Assert.AreEqual(301.097, hel.Longitude, 1e-2);
+        }
     }
 }

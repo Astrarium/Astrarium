@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -118,11 +121,7 @@ namespace Astrarium.Types.Themes
             {
                 decimal value = (decimal)values[0];
                 uint decimalPlaces = (uint)values[1];
-
-                if (value > 0)
-                    return string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)decimalPlaces)}}}", (decimal)value);
-                else
-                    return ((int)value).ToString();
+                return string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)decimalPlaces)}}}", (decimal)value);
             }
             else
             {
@@ -132,10 +131,11 @@ namespace Astrarium.Types.Themes
 
         public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty((string)value))
+            string strValue = (string)value;
+            if (string.IsNullOrEmpty(strValue) || strValue == "-")
                 return new object[] { 0 };
             else
-                return new object[] { decimal.Parse(value as string, NumberStyles.Float, CultureInfo.InvariantCulture) };
+                return new object[] { decimal.Parse(strValue, NumberStyles.Float, CultureInfo.InvariantCulture) };
         }
     }
 
@@ -196,6 +196,15 @@ namespace Astrarium.Types.Themes
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value == null ? Text.Get("NoSelectedObject") : (value as CelestialObject).Names.First();
+        }
+    }
+
+    [ValueConversion(typeof(Astrarium.Algorithms.CrdsGeographical), typeof(string))]
+    public class GeoLocationNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as Astrarium.Algorithms.CrdsGeographical).Name;
         }
     }
 
@@ -300,32 +309,59 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class ColorConverter : MultiValueConverterBase
-    {
-        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            var schema = (ColorSchema)values[1];
-            var color = ((SkyColor)values[0]).GetColor(schema);
-            return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
-        }
-    }
-
-    public class FontToStringConverter : ValueConverterBase
+    public class FontStyleConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var font = (System.Drawing.Font)value;
-            return $"{font.Name} - {font.Style} - {font.Size} pt";
+            var fontStyle = (System.Drawing.FontStyle)value;
+            if (fontStyle.HasFlag(System.Drawing.FontStyle.Italic))
+                return FontStyles.Italic;
+            else
+                return FontStyles.Normal;
         }
     }
 
-    public class ColorToStringConverter : MultiValueConverterBase
+    public class FontWeightConverter : ValueConverterBase
     {
-        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var schema = (ColorSchema)values[1];
-            var color = ((SkyColor)values[0]).GetColor(schema);
+            var fontStyle = (System.Drawing.FontStyle)value;
+            if (fontStyle.HasFlag(System.Drawing.FontStyle.Bold))
+                return FontWeights.Bold;
+            else
+                return FontWeights.Normal;
+        }
+    }
+
+    public class FontDecorationsConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var font = (Font)value;
+            var decorations = new TextDecorationCollection();
+            if (font.Underline)
+                decorations.Add(TextDecorations.Underline);
+            if (font.Strikeout)
+                decorations.Add(TextDecorations.Strikethrough);
+            return decorations;
+        }
+    }
+
+    public class ColorToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var color = (Color)value;
             return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
+        }
+    }
+
+    public class ColorToMediaColorConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var color = (Color)value;
+            return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
     }
 
@@ -365,14 +401,10 @@ namespace Astrarium.Types.Themes
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             CelestialObject body = value as CelestialObject;
-            if (body != null)
+            if (body != null && body.Type != null)
             {
-                string key = new[] { body.GetType() }
-                     .Concat(body.GetType().GetInterfaces())
-                     .Select(inf => $"Icon{inf.Name}")
-                     .FirstOrDefault(k => Application.Current.Resources.Contains(k));
-
-                if (key != null)
+                string key = $"Icon{body.Type.Split('.').First()}";
+                if (key != null && Application.Current.Resources.Contains(key))
                 {
                     return Application.Current.Resources[key];
                 }
@@ -385,14 +417,35 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string bodyType = value as string;
-            if (bodyType != null)
+            string key = null;
+            if (value is string bodyType)
             {
-                string key = $"Icon{bodyType.Split('.').First()}";
-                if (Application.Current.Resources.Contains(key))
-                {
-                    return Application.Current.Resources[key];
-                }
+                key = $"Icon{bodyType.Split('.').First()}";
+            }
+            else if (value is Type type)
+            {
+                key = $"Icon{type.Name}";
+            }
+
+            if (key != null && Application.Current.Resources.Contains(key))
+            {
+                return Application.Current.Resources[key];
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    public class StringCollectionToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            ICollection<string> collection = value as ICollection<string>;
+            if (collection != null)
+            {
+                return string.Join(", ", collection);
             }
             return null;
         }
@@ -415,18 +468,118 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string type)
+            if (value is string strType)
             {
-                return Text.Get($"{type}.Type");
+                return Text.Get($"{strType}.Type");
             }
             else if (value is CelestialObject body)
             {
                 return Text.Get($"{body.Type}.Type");
             }
+            else if (value is Type type)
+            {
+                return Text.Get($"{type.Name}.Type");
+            }
             else
             {
                 throw new NotImplementedException("Value type is not supported");
             }
+        }
+    }
+
+    public class TimeSpanToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return ((TimeSpan)value).ToString(@"hh\:mm");
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DateToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Formatters.Date.Format(value);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DateTimeToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Formatters.DateTime.Format(value);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LongitudeConverter : ValueConverterBase
+    {
+        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double longitude = (double)value;
+            return $"{formatter.Format(Math.Abs(longitude))} {Text.Get(longitude <= 0 ? "LocationWindow.East" : "LocationWindow.West")}";
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LatitudeConverter : ValueConverterBase
+    {
+        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double latitude = (double)value;
+            return $"{formatter.Format(Math.Abs(latitude))} {Text.Get(latitude < 0 ? "LocationWindow.South" : "LocationWindow.North")}";
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TimeZoneConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return null;
+            if (value is TimeSpan)
+            {
+                TimeSpan offset = (TimeSpan)value;
+                return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+            }
+            else if (value is double)
+            {
+                TimeSpan offset = TimeSpan.FromHours((double)value);
+                return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+            }
+            else
+                return null;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

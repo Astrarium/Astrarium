@@ -4,32 +4,74 @@ using System.Windows.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using System.Security;
-using System.Reflection;
 using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System.Linq;
-using System.Threading.Tasks;
+using Astrarium.Algorithms;
+using System.Windows.Forms.Integration;
+using Astrarium.Types.Controls;
 
 namespace Astrarium
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, WF.IMessageFilter
+    public partial class MainWindow : MouseEventsInterceptableWindow
     {
-        public static readonly DependencyProperty MousePositionProperty = DependencyProperty.RegisterAttached(
-            "MousePosition", typeof(PointF), typeof(MainWindow), new PropertyMetadata(PointF.Empty));
+        private const uint WM_EXIT_SIZE_MOVE = 0x232;
+        private const uint SWP_SHOWWINDOW = 0x0040;
 
-        public static void SetMousePosition(DependencyObject target, PointF value)
+        public static readonly DependencyProperty MouseEquatorialPositionProperty = DependencyProperty.RegisterAttached(
+            "MouseEquatorialPosition", typeof(CrdsEquatorial), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMouseEquatorialPosition(DependencyObject target, CrdsEquatorial value)
         {
-            target.SetValue(MousePositionProperty, value);
+            target.SetValue(MouseEquatorialPositionProperty, value);
         }
 
-        public static PointF GetMousePosition(DependencyObject target)
+        public static CrdsEquatorial GetMouseEquatorialPosition(DependencyObject target)
         {
-            return (PointF)target.GetValue(MousePositionProperty);
+            return (CrdsEquatorial)target.GetValue(MouseEquatorialPositionProperty);
+        }
+
+        public static readonly DependencyProperty MouseHorizontalPositionProperty = DependencyProperty.RegisterAttached(
+            "MouseHorizontalPosition", typeof(CrdsHorizontal), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMouseHorizontalPosition(DependencyObject target, CrdsHorizontal value)
+        {
+            target.SetValue(MouseHorizontalPositionProperty, value);
+        }
+
+        public static CrdsHorizontal GetMouseHorizontalPosition(DependencyObject target)
+        {
+            return (CrdsHorizontal)target.GetValue(MouseHorizontalPositionProperty);
+        }
+
+        public static readonly DependencyProperty MousePositionConstellationProperty = DependencyProperty.RegisterAttached(
+            "MousePositionConstellation", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMousePositionConstellation(DependencyObject target, string value)
+        {
+            target.SetValue(MousePositionConstellationProperty, value);
+        }
+
+        public static string GetMousePositionConstellation(DependencyObject target)
+        {
+            return (string)target.GetValue(MousePositionConstellationProperty);
+        }
+
+        public static readonly DependencyProperty FPSProperty = DependencyProperty.RegisterAttached(
+            "FPS", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetFPS(DependencyObject target, string value)
+        {
+            target.SetValue(FPSProperty, value);
+        }
+
+        public static string GetFPS(DependencyObject target)
+        {
+            return (string)target.GetValue(FPSProperty);
         }
 
         public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
@@ -101,7 +143,7 @@ namespace Astrarium
                         window.Left = bounds.Left;
                         window.Top = bounds.Top;
                         window.Width = bounds.Width;
-                        window.Height = bounds.Height;                        
+                        window.Height = bounds.Height;
                     }
 
                     WindowProperties.SetIsFullScreen(window, true);
@@ -145,140 +187,147 @@ namespace Astrarium
         private static readonly IntPtr HWND_TOPMOST = (IntPtr)(-1);
         private static readonly IntPtr HWND_NOTOPMOST = (IntPtr)(-2);
 
-        private const uint MK_LBUTTON = 0x0001;
-        private const uint MK_MBUTTON = 0x0010;
-        private const uint MK_RBUTTON = 0x0002;
-        private const uint MK_XBUTTON1 = 0x0020;
-        private const uint MK_XBUTTON2 = 0x0040;
-        private const uint WM_MOUSEWHEEL = 0x020A;
-        private const uint WM_EXIT_SIZE_MOVE = 0x232;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-
         private Rectangle SavedBounds;
         private WindowState SavedState;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
 
-        [DllImport("user32.dll"), SuppressUnmanagedCodeSecurity]
-        private static extern IntPtr WindowFromPoint(System.Drawing.Point point);
-
-        private MethodInfo onMouseWheelMethod = typeof(WF.Control).GetMethod("OnMouseWheel", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private System.Drawing.Point LocationFromLParam(IntPtr lParam)
-        {
-            short x = (short)((((long)lParam) >> 0) & 0xffff); 
-            short y = (short)((((long)lParam) >> 16) & 0xffff); 
-            return new System.Drawing.Point(x, y);
-        }
-
-        private bool ConsiderRedirect(WF.Integration.WindowsFormsHost host)
-        {
-            var control = host.Child;
-            return control != null &&
-                  !control.IsDisposed &&
-                   control.IsHandleCreated &&
-                   control.Visible &&
-                  !control.Focused;
-        }
-
-        private int DeltaFromWParam(IntPtr wParam)
-        {
-            return (short)((((long)wParam) >> 16) & 0xffff);
-        }
-
-        private WF.MouseButtons MouseButtonsFromWParam(IntPtr wParam)
-        {
-            int buttonFlags = (int)((((long)wParam) >> 0) & 0xffff);
-            var buttons = WF.MouseButtons.None;
-            if (buttonFlags != 0)
-            {
-                if ((buttonFlags & MK_LBUTTON) == MK_LBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Left;
-                }
-                if ((buttonFlags & MK_MBUTTON) == MK_MBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Middle;
-                }
-                if ((buttonFlags & MK_RBUTTON) == MK_RBUTTON)
-                {
-                    buttons |= WF.MouseButtons.Right;
-                }
-                if ((buttonFlags & MK_XBUTTON1) == MK_XBUTTON1)
-                {
-                    buttons |= WF.MouseButtons.XButton1;
-                }
-                if ((buttonFlags & MK_XBUTTON2) == MK_XBUTTON2)
-                {
-                    buttons |= WF.MouseButtons.XButton2;
-                }
-            }
-            return buttons;
-        }
-
-        public bool PreFilterMessage(ref WF.Message m)
-        {
-            if (m.Msg == WM_MOUSEWHEEL)
-            {
-                var location = LocationFromLParam(m.LParam);
-                var hwnd = WindowFromPoint(location);
-                {
-                    if (ConsiderRedirect(Host)) 
-                    {
-                        if (hwnd == Host.Child.Handle)
-                        {
-                            var delta = DeltaFromWParam(m.WParam);
-
-                            // raise event for WPF control
-                            {
-                                var mouse = InputManager.Current.PrimaryMouseDevice;
-                                var args = new MouseWheelEventArgs(mouse, Environment.TickCount, delta);
-                                args.RoutedEvent = MouseWheelEvent;
-                                Host.RaiseEvent(args);
-                            }
-
-                            // raise event for winforms control
-                            {
-                                var buttons = MouseButtonsFromWParam(m.WParam);
-                                var args = new WF.MouseEventArgs(buttons, 0, location.X, location.Y, delta);
-                                onMouseWheelMethod.Invoke(Host.Child, new object[] { args });
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
         public static WF.Screen CurrentScreen(Window window)
         {
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
-        private readonly ISkyMap map;
+        internal readonly SkyView skyView;
+        private readonly SkyMap map;
 
-        public MainWindow(SkyMap map)
+        protected override WindowsFormsHost Host => MapHost;
+
+        public MainWindow(ISettings settings, SkyMap map)
         {
             InitializeComponent();
 
             this.map = map;
             this.StateChanged += MainWindow_StateChanged;
-            var skyView = new SkyView();
-            skyView.SkyMap = map;
-            skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
-            skyView.MouseClick += SkyView_MouseClick;
+
+            skyView = new SkyView();
+            skyView.Render += SkyView_Render;
+            skyView.Resize += SkyView_Resize;
+            skyView.MouseDown += SkyView_MouseDown;
+            skyView.MouseUp += SkyView_MouseUp;
             skyView.MouseMove += SkyView_MouseMove;
-            skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
+            skyView.MouseWheel += SkyView_MouseWheel;
+            skyView.MouseClick += SkyView_MouseClick;
+            skyView.MouseDoubleClick += SkyView_MouseDoubleClick;
+            map.OnInvalidate += skyView.Invalidate;
+
+            settings.SettingValueChanged += (s, v) => skyView.Invalidate();
+
+            Host.Child = skyView;
+
             Host.Loaded += (o, e) => WF.Application.AddMessageFilter(this);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
-            Host.Child = skyView;
 
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
+
+        private void SkyView_Render(object sender, EventArgs e)
+        {
+            renderStopWatch.Restart();
+            map.Render();
+            renderStopWatch.Stop();
+            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+            SetFPS(this, $"FPS = {fps}");
+        }
+
+        private void SkyView_MouseDoubleClick(object sender, WF.MouseEventArgs e)
+        {
+            GetMapDoubleClick(this)?.Execute(new PointF(e.X, map.Projection.ScreenHeight - e.Y));
+        }
+
+        private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
+        {
+            map.Projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
+            map.Invalidate();
+        }
+
+        private void SkyView_MouseDown(object sender, WF.MouseEventArgs e)
+        {
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.RaiseMouseDown();
+        }
+
+        private void SkyView_MouseUp(object sender, WF.MouseEventArgs e)
+        {
+            pOld = PointF.Empty;
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.RaiseMouseUp();
+        }
+
+        private PointF pOld = new PointF();
+
+        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
+        {
+            long tooltipTag = skyToolTip.Tag as long? ?? 0;
+
+            var p = new PointF(e.X, map.Projection.ScreenHeight - e.Y);
+
+            map.MouseButton = e.Button == WF.MouseButtons.Left ? Types.MouseButton.Left : Types.MouseButton.None;
+            map.MouseScreenCoordinates = p;
+            var eq = map.Projection.WithoutRefraction(map.MouseEquatorialCoordinates);
+            var hor = map.MouseHorizontalCoordinates;
+
+            map.RaiseMouseMove();
+
+            SetMouseEquatorialPosition(this, eq);
+            SetMouseHorizontalPosition(this, hor);
+            SetMousePositionConstellation(this, Constellations.FindConstellation(eq, map.Projection.Context.JulianDay));
+
+            if (e.Button == WF.MouseButtons.Left)
+            {
+                if (pOld != PointF.Empty)
+                {
+                    map.Move(new Vec2(pOld.X, pOld.Y), new Vec2(p.X, p.Y));
+                }
+
+                pOld = new PointF(p.X, p.Y);
+            }
+
+            if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
+            {
+                var body = map.FindObject(p);
+                if (body != null)
+                {
+                    if (body is IMagnitudeObject mo)
+                    {
+                        skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
+                    }
+                    else
+                    {
+                        skyToolTip.Content = body.Names.First();
+                    }
+                    skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
+                    skyToolTip.IsOpen = true;
+                    skyView.Cursor = WF.Cursors.Help;
+                    skyToolTip.Tag = tooltipTag + 1;
+                }
+            }
+
+            if (skyToolTip.Tag as long? <= tooltipTag)
+            {
+                skyToolTip.IsOpen = false;
+                skyView.Cursor = WF.Cursors.Cross;
+            }
+        }
+
+        private void SkyView_Resize(object sender, EventArgs e)
+        {
+            map.Projection.SetScreenSize(skyView.Width, skyView.Height);
+        }
+
+        private System.Diagnostics.Stopwatch renderStopWatch = new System.Diagnostics.Stopwatch();
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -366,47 +415,11 @@ namespace Astrarium
         {
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
-                GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
+                GetMapRightClick(this)?.Execute(map.MouseScreenCoordinates);
                 // setting placement target is needed to update context menu colors:
                 // see https://github.com/MahApps/MahApps.Metro/issues/2244
                 Host.ContextMenu.PlacementTarget = Host;
                 Host.ContextMenu.IsOpen = true;
-            }
-        }
-
-        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
-        {
-            SetMousePosition(this, new PointF(e.X, e.Y));
-            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
-            {
-                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
-                ViewManager.ShowPopupMessage(text);
-            }
-
-            if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
-            {
-                var body = map.FindObject(new PointF(e.X, e.Y));
-                if (body != null)
-                {
-                    if (body is IMagnitudeObject mo)
-                    {
-                        skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
-                    }
-                    else
-                    {
-                        skyToolTip.Content = body.Names.First();
-                    }
-                    skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
-                    skyToolTip.IsOpen = true;
-                }
-                else
-                {
-                    skyToolTip.IsOpen = false;
-                }
-            }
-            else
-            {
-                skyToolTip.IsOpen = false;
             }
         }
 

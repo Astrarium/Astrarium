@@ -9,6 +9,7 @@ namespace Astrarium.Types
         public string Title { get; protected set; }
         public string Subtitle { get; protected set; }
         public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
+        public abstract string ObjectType { get; }
     }
 
     public class CelestialObjectInfo<T> : CelestialObjectInfo where T : CelestialObject
@@ -28,6 +29,11 @@ namespace Astrarium.Types
         /// </summary>
         private IEnumerable<Ephemeris> Ephemeris { get; set; }
 
+        /// <summary>
+        /// Gets object type
+        /// </summary>
+        public override string ObjectType => Body.Type;
+
         public CelestialObjectInfo(SkyContext context, T body, IEnumerable<Ephemeris> ephemeris)
         {
             Context = context;
@@ -45,6 +51,11 @@ namespace Astrarium.Types
         {
             Subtitle = subtitle;
             return this;
+        }
+
+        public void Clear()
+        {
+            InfoElements.Clear();
         }
 
         public CelestialObjectInfo<T> AddHeader(string text)
@@ -97,6 +108,28 @@ namespace Astrarium.Types
             });
             return this;
         }
+
+        public CelestialObjectInfo<T> AddRow(string text, Uri uri, string uriText)
+        {
+            InfoElements.Add(new InfoElementLink()
+            {
+                Caption = text,
+                Uri = uri,
+                UriText = uriText
+            });
+            return this;
+        }
+
+        public CelestialObjectInfo<T> AddRow(string text, Action command, string commandText)
+        {
+            InfoElements.Add(new InfoElementCommand()
+            {
+                Caption = text,
+                Command = command,
+                Text = commandText
+            });
+            return this;
+        }
     }
 
     public abstract class InfoElement { }
@@ -112,5 +145,19 @@ namespace Astrarium.Types
         public string Caption { get; set; }
         public object Value { get; set; }
         public string StringValue { get { return Formatter.Format(Value); } }
+    }
+
+    public class InfoElementLink : InfoElement
+    {
+        public string Caption { get; set; }
+        public Uri Uri { get; set; }
+        public string UriText { get; set; }
+    }
+
+    public class InfoElementCommand : InfoElement
+    {
+        public string Caption { get; set; }
+        public Action Command { get; set; }
+        public string Text { get; set; }
     }
 }

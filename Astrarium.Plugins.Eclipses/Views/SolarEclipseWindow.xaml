@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window 
+﻿<c:MouseEventsInterceptableWindow 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -80,6 +79,8 @@
                             Grid.Row="0"
                             BackColor="{Binding MapThumbnailBackColor}"                       
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
+                            OverlayTileServer="{Binding OverlayTileServer, Mode=TwoWay}"
+                            OverlayOpacity="{Binding OverlayOpacity, Mode=TwoWay}"
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
                             IsUpdating="{Binding IsCalculating}"
                             Markers="{Binding Markers}"
@@ -106,18 +107,37 @@
                             </c:MapControl.ContextMenu>
                         </c:MapControl>
 
-                        <Grid Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
+                        <Grid Height="26" Background="{StaticResource BrushControlDarkBackground}" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="1*" />
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" MinWidth="200" MaxWidth="400" />
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0" Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="{t:Text LocationWindow.Map}" Margin="2 0 4 0" />
+                                <ComboBox Padding="4 -1" Margin="2 0" Width="140" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                                <TextBlock Text="{t:Text LocationWindow.Overlay}" Margin="4 0 4 0" />
+
+                                <c:NullItemSelectorAdapter NullItem="{t:Text LocationWindow.Overlay.None}" ItemsSource="{Binding OverlayTileServers, Mode=OneTime}">
+                                    <ComboBox Padding="4 -1" Margin="2 0" Width="100" Height="18" SelectedItem="{Binding OverlayTileServer}" />
+                                </c:NullItemSelectorAdapter>
+
+                                <ComboBox Padding="4 -1" Margin="2 0" Width="60" Height="18" ItemsSource="{Binding OverlayOpacities, Mode=OneTime}" SelectedItem="{Binding OverlayOpacity}" Visibility="{Binding OverlayTileServer, Converter={s:NotNullToVisibilityConverter}}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StringFormat='P0'}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                            </StackPanel>
+
                             <Slider Padding="16 0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="1" Orientation="Horizontal" 
                                 Minimum="{Binding ElementName=Map, Path=MinZoomLevel, Mode=OneWay}"
                                 Maximum="{Binding ElementName=Map, Path=MaxZoomLevel, Mode=OneWay}"
                                 Value="{Binding ElementName=Map, Path=ZoomLevel, Mode=TwoWay}" />
-                            <c:HtmlTextBlock Grid.Column="2" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                            <c:HtmlTextBlock Grid.Column="3" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
                         </Grid>
                     </Grid>
                     <GridSplitter 
@@ -153,7 +173,7 @@
                             </Grid>
 
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
-                            
+
                             <!-- Local details expander -->
                             <Expander Margin="0 6 0 4" Header="{t:Text EclipseView.LocalDetails}" IsExpanded="True">
                                 <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
@@ -380,7 +400,7 @@
             <TabItem Header="{t:Text EclipseView.Tab.SarosSeries}">
 
                 <Grid>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -461,7 +481,7 @@
                         <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="{t:Text EclipseView.Clear}" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
                         <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
                     </Grid>
-                    
+
                     <!-- Import options view, displayed if no locations loaded -->
                     <Grid Grid.Row="1" Margin="0 10" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
@@ -473,7 +493,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        
+
                         <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="{t:Text EclipseView.Import}" Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Padding="0 " VerticalAlignment="Center">     
                             <Run Text="{t:Text EclipseView.Import.Text}" /> <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}"><Run Text="{t:Text EclipseView.Import.Format}" /></Hyperlink>.
@@ -483,7 +503,7 @@
                         <TextBlock IsEnabled="{Binding IsFindLocationsOnPathEnabled}" Grid.Row="1" Grid.Column="1" Padding="0" VerticalAlignment="Center" Text="{t:Text SolarEclipseView.FindLocationsOnPath.Text}" />
                         <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center" Text="{t:Text EclipseView.AddLocationFromMap}" />
                     </Grid>
-                    
+
                     <!-- Locations list table -->
                     <DataGrid Grid.Row="2"
                         VerticalScrollBarVisibility="Auto"
@@ -616,6 +636,5 @@
                 </Grid>
             </TabItem>
         </TabControl>
-
     </Grid>
-</Window>
+</c:MouseEventsInterceptableWindow>

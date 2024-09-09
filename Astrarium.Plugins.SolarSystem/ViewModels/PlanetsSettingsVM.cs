@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using Astrarium.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,13 +9,18 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem.ViewModels
 {
     public class PlanetsSettingsVM : SettingsViewModel
     {
+        private readonly PlanetsCalc calc;
+        private readonly OrbitalElementsManager orbitalElementsManager;
+
         public Command UpdateGRSLongitudeCommand { get; private set; }
+        public Command UpdateGenericMoonsOrbitalElementsCommand { get; private set; }
 
         public bool IsGRSSectionEnabled
         {
@@ -22,21 +28,46 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => SetValue(nameof(IsGRSSectionEnabled), value);
         }
 
-        public PlanetsSettingsVM(ISettings settings) : base(settings)
+        public bool OrbitalElementsIsReady
         {
+            get => GetValue<bool>(nameof(OrbitalElementsIsReady));
+            set => SetValue(nameof(OrbitalElementsIsReady), value);
+        }
+
+        public string GenericMoonsOrbitalElementsLastUpdated
+        {
+            get
+            {
+                var timestamp = Settings.Get<DateTime>("GenericMoonsOrbitalElementsLastUpdated");
+                return timestamp < new DateTime(2000, 1, 1) ? Text.Get("GenericMoonsOrbitalElementsLastUpdated.Unknown") : Formatters.DateTime.Format(timestamp);
+            }
+        }
+
+        public GreatRedSpotSettings GRSLongitude
+        {
+            get => Settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            set => Settings.Set("GRSLongitude", value);
+        }
+
+        public PlanetsSettingsVM(PlanetsCalc calc, OrbitalElementsManager orbitalElementsManager, ISettings settings) : base(settings)
+        {
+            this.calc = calc;
+            this.orbitalElementsManager = orbitalElementsManager;
             UpdateGRSLongitudeCommand = new Command(UpdateGRSLongitude);
+            UpdateGenericMoonsOrbitalElementsCommand = new Command(UpdateGenericMoonsOrbitalElements);
+            OrbitalElementsIsReady = true;
             IsGRSSectionEnabled = true;
         }
 
         private async void UpdateGRSLongitude()
         {
-            var grs = Settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            var grs = GRSLongitude;
 
             IsGRSSectionEnabled = false;
             double jd = grs.Epoch;
             double longitude = grs.Longitude;
             double drift = grs.MonthlyDrift;
-            bool isError = false;
+            string error = null;
 
             await Task.Run(() =>
             {
@@ -44,11 +75,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 try
                 {
                     tempFile = Path.GetTempFileName();
-                    using (var client = new WebClient())
-                    {
-                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                        client.DownloadFile("https://www.ap-i.net/pub/virtualplanet/grs.txt", tempFile);
-                    }
+
+                    Downloader.Download(new Uri("https://www.ap-i.net/pub/virtualplanet/grs.txt"), tempFile);
 
                     Dictionary<string, string> data = File.ReadAllLines(tempFile)
                         .Skip(1)
@@ -65,8 +93,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"Unable to update GRS data. Reason: {ex}");
-                    isError = true;
+                    error = $"Unable to update GRS data. Reason: {ex.Message}";
+                    Log.Error(error);
                 }
                 finally
                 {
@@ -78,23 +106,42 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                         }
                         catch { }
                     }
+
+                    if (error == null)
+                    {
+                        grs.Epoch = jd;
+                        grs.MonthlyDrift = drift;
+                        grs.Longitude = longitude;
+
+                        GRSLongitude = grs;
+
+                        NotifyPropertyChanged(nameof(GRSLongitude));
+                    }
                 }
             });
 
             IsGRSSectionEnabled = true;
 
-            if (isError)
+            if (error != null)
             {
-                ViewManager.ShowMessageBox("$Error", "Unable to update GRS data.");
+                ViewManager.ShowMessageBox("$Error", error);
             }
-            else
-            {
-                grs.Epoch = jd;
-                grs.MonthlyDrift = drift;
-                grs.Longitude = longitude;
+        }
 
-                Settings.Set("GRSLongitude", grs);
-            }
+        private void UpdateGenericMoonsOrbitalElements()
+        {
+            orbitalElementsManager.Update(calc.GenericMoons.Select(x => x.Data), OnBeforeUpdate, OnAfterUpdate);
+        }
+
+        private void OnBeforeUpdate()
+        {
+            OrbitalElementsIsReady = false;
+        }
+
+        private void OnAfterUpdate()
+        {
+            NotifyPropertyChanged(nameof(GenericMoonsOrbitalElementsLastUpdated));
+            OrbitalElementsIsReady = true;
         }
     }
 }

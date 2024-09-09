@@ -6,39 +6,23 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium
 {
     public class SkyMap : ISkyMap
     {
-        /// <summary>
-        /// Minimal allowed field of view, in degrees
-        /// </summary>
-        private const double MIN_VIEW_ANGLE = 1.0 / 1024;
+        // TODO: remove if not used
+        public event Action<double> FovChanged;
+
+        public event Action ContextChanged;
 
         /// <summary>
-        /// Max allowed field of view, in degrees
+        /// Flag indicating rendering is in progress
         /// </summary>
-        private const double MAX_VIEW_ANGLE = 90;
-
-        /// <summary>
-        /// Stopwatch to measure rendering time
-        /// </summary>
-        private Stopwatch renderStopWatch = new Stopwatch();
-
-        /// <summary>
-        /// Mean rendering time, in milliseconds
-        /// </summary>
-        private double meanRenderTime = 0;
-
-        /// <summary>
-        /// Total count of calls of <see cref="Render(Graphics)"/> method.
-        /// Needed for calculating mean rendering time.
-        /// </summary>
-        private long rendersCount = 0;
+        private bool isRendering = false;
 
         /// <summary>
         /// Collection of bounding rectangles of labels displayed on the map
@@ -50,79 +34,27 @@ namespace Astrarium
         /// </summary>
         private readonly RenderersCollection renderers = new RenderersCollection();
 
-        /// <summary>
-        /// Font used to display diagnostic info
-        /// </summary>
-        private Font fontDiagnosticText = new Font("Monospace", 8);
-
-        private Font fontMapInformationText = new Font("Arial", 14);
-
-        private Font fontMag = new Font("Arial", 8);
-
-        public int Width { get; set; }
-        public int Height { get; set; }
-
-        /// <summary>
-        /// Backing field for <see cref="ViewAngle"/> property
-        /// </summary>
-        private double viewAngle = 90;
-
-        /// <summary>
-        /// Gets or sets current FOV of the map
-        /// </summary>
-        public double ViewAngle
+        private bool timeSync = false;
+        public bool TimeSync
         {
-            get
-            {
-                return viewAngle;
-            }
+            get => timeSync;
             set
             {
-                viewAngle = value;
-                if (value >= MAX_VIEW_ANGLE)
-                {
-                    viewAngle = MAX_VIEW_ANGLE;
-                }
-                if (value < MIN_VIEW_ANGLE)
-                {
-                    viewAngle = MIN_VIEW_ANGLE;
-                }
+                timeSync = value;
+                timeSyncWaitEvent.Set();
 
-                ViewAngleChanged?.Invoke(viewAngle);
-                Invalidate();
+                if (value)
+                {
+                    timeSyncResetEvent.Set();
+                }
+                else
+                {
+                    timeSyncResetEvent.Reset();
+                }
             }
         }
 
-        /// <summary>
-        /// Gets magnitude limit depending on current field of view (zoom level).
-        /// </summary>
-        /// <param name="map">IMapContext instance</param>
-        /// <returns>Magnitude limit</returns>
-        /// <remarks>
-        /// This method based on empiric formula, coefficients found with https://www.wolframalpha.com
-        /// </remarks>
-        public float MagLimit
-        {
-            get
-            {
-                // no limit
-                float limitMag = float.MaxValue;
-
-                // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
-                return Math.Min(limitMag, (float)(-1.73494 * Math.Log(0.000462398 * ViewAngle)));
-
-                // OLD formula:
-                // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
-                // return (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
-            }
-        }
-
-        /// <summary>
-        /// Occurs when map's View Angle is changed.
-        /// </summary>
-        public event Action<double> ViewAngleChanged;
-
-        public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
+        public float DaylightFactor { get; set; }
         public bool Antialias { get; set; } = true;
 
         private CelestialObject selectedObject;
@@ -143,95 +75,201 @@ namespace Astrarium
             }
         }
 
+        private CelestialObject lockedObject;
+        
         /// <summary>
-        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// Locked Object 
         /// </summary>
-        public CelestialObject LockedObject { get; set; }
-
-        /// <summary>
-        /// Backing field for <see cref="MousePosition"/> property.
-        /// </summary>
-        private CrdsHorizontal mousePosition = new CrdsHorizontal(0, 0);
-
-        /// <summary>
-        /// Last result of needRedraw flag
-        /// </summary>
-        private bool lastNeedRedraw = false;
-
-        /// <summary>
-        /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
-        /// Setting new value can raise redraw of map
-        /// </summary>
-        public CrdsHorizontal MousePosition
+        public CelestialObject LockedObject
         {
-            get { return mousePosition; }
+            get => lockedObject;
             set
             {
-                mousePosition = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition, MouseButton));
-                if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
+                if (lockedObject != value)
                 {
-                    lastNeedRedraw = needRedraw;
-                    Invalidate();
+                    lockedObject = value;
+                    if (lockedObject != null)
+                    {
+                        var eq = lockedObject.Equatorial;
+                        lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                        lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                    }
+                    LockedObjectChanged?.Invoke(lockedObject);
                 }
             }
         }
 
+        public void Move(Vec2 pOld, Vec2 pNew)
+        {
+            Projection.Move(pOld, pNew);
+
+            if (LockedObject != null)
+            {
+                var eq = LockedObject.Equatorial;
+
+                var sep = Angle.Separation(Projection.CenterEquatorial, eq);
+                if (sep < 90)
+                {
+                    lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                    lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                }
+                else
+                {
+                    LockedObject = null;
+                }
+            }
+
+            Invalidate();
+        }
+
+        /// <summary>
+        /// Shift between screen center and locked object by Right Ascention, in degrees
+        /// </summary>
+        private double lockedObjectShiftAlpha;
+
+        /// <summary>
+        /// Shift between screen center and locked object by Declination, in degrees
+        /// </summary
+        private double lockedObjectShiftDelta;
+
+        /// <inheritdoc/>
+        public CrdsEquatorial MouseEquatorialCoordinates => Projection.UnprojectEquatorial(MouseScreenCoordinates.X, MouseScreenCoordinates.Y);
+
+        /// <inheritdoc/>
+        public CrdsHorizontal MouseHorizontalCoordinates => Projection.UnprojectHorizontal(MouseScreenCoordinates.X, MouseScreenCoordinates.Y);
+
+        /// <inheritdoc/>
+        public PointF MouseScreenCoordinates { get; set; }
+
+        /// <summary>
+        /// Propagates MouseMove event to renderers
+        /// </summary>
+        public void RaiseMouseMove()
+        {
+            renderers.ForEach(r => r.OnMouseMove(this, MouseButton));
+        }
+
+        /// <summary>
+        /// Propagates MouseDown event to renderers
+        /// </summary>
+        public void RaiseMouseDown()
+        {
+            renderers.ForEach(r => r.OnMouseDown(this, MouseButton));
+        }
+
+        /// <summary>
+        /// Propagates MouseUp event to renderers
+        /// </summary>
+        public void RaiseMouseUp()
+        {
+            renderers.ForEach(r => r.OnMouseUp(this, MouseButton));
+        }
+
+        /// <summary>
+        /// Gets or sets current mouse button
+        /// </summary>
         public MouseButton MouseButton { get; set; }
 
-        /// <summary>
-        /// Occurs when selected celestial object is changed
-        /// </summary>
+        // <inheritdoc />
         public event Action<CelestialObject> SelectedObjectChanged;
 
-        /// <summary>
-        /// Projection used to render the map
-        /// </summary>
-        public IProjection Projection { get; set; } = null;
+        // <inheritdoc />
+        public event Action<CelestialObject> LockedObjectChanged;
+
+        // <inheritdoc />
+        public Projection Projection { get; private set; }
 
         public event Action OnInvalidate;
 
-        public event Action OnRedraw;
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Collection of celestial objects drawn on the map
         /// </summary>
-        private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
-
-        /// <summary>
-        /// <see cref="MapContext"/> instance
-        /// </summary>
-        private MapContext mapContext = null;
+        private ICollection<CelestialObject> celestialObjects = new List<CelestialObject>();
 
         /// <summary>
         /// Application settings
         /// </summary>
         private ISettings settings = null;
 
-        /// <summary>
-        /// Command line args
-        /// </summary>
-        private ICommandLineArgs commandLineArgs = null;
-
-        public SkyMap(ISettings settings, ICommandLineArgs commandLineArgs)
+        public SkyMap(ISettings settings)
         {
             this.settings = settings;
-            this.commandLineArgs = commandLineArgs;
+        }
+
+        /// <summary>
+        /// Sky context instance used for rendering purposes
+        /// </summary>
+        private SkyContext context;
+
+        public void SetProjection(Type type)
+        {
+            var fov = Projection?.Fov ?? 90;
+            var vision = Projection?.CenterHorizontal ?? new CrdsHorizontal(0, 0);
+            int w = Projection?.ScreenWidth ?? 1;
+            int h = Projection?.ScreenHeight ?? 1;
+            if (Projection != null)
+            {
+                Projection.Context.ContextChanged -= Projection_ContextChanged;
+                Projection.FovChanged -= Projection_FovChanged;
+            }
+
+            Projection = (Projection)Activator.CreateInstance(type, context);
+            Projection.Fov = fov;
+            Projection.SetVision(vision);
+            Projection.FlipVertical = settings.Get("FlipVertical");
+            Projection.FlipHorizontal = settings.Get("FlipHorizontal");
+            Projection.UseRefraction = settings.Get("Refraction");
+            Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
+            Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+            Projection.UseExtinction = settings.Get("Extinction");
+            Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
+            Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
+            Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
+            Projection.SetScreenSize(w, h);
+            Projection.FovChanged += Projection_FovChanged;
+            Projection.Context.ContextChanged += Projection_ContextChanged;
+            Projection_FovChanged(Projection.Fov);
+            Invalidate();
+        }
+
+        private void Projection_ContextChanged()
+        {
+            ContextChanged?.Invoke();
+        }
+
+        private void Projection_FovChanged(double fov)
+        {
+            FovChanged?.Invoke(fov);
         }
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
-            mapContext = new MapContext(this, skyContext);
+            context = new SkyContext(skyContext.JulianDay, skyContext.GeoLocation);
 
-            Projection = new ArcProjection(mapContext);
-            Projection.IsInverted = settings.Get("IsInverted");
-            Projection.IsMirrored = settings.Get("IsMirrored");
+            // Keep current context synchronized with global instance
+            skyContext.ContextChanged += () =>
+            {
+                context.Set(skyContext.JulianDay, skyContext.GeoLocation);
+
+                if (LockedObject != null)
+                {
+                    Projection.SetVision(new CrdsEquatorial(
+                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
+                }
+            };
+
+            var projectionTypeName = settings.Get("Projection", nameof(StereographicProjection));
+
+            var projectionType = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).FirstOrDefault(t => t.Name == projectionTypeName) ?? typeof(StereographicProjection);
+
+            SetProjection(projectionType);
 
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
-
-            Schema = settings.Get<ColorSchema>("Schema");
 
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
@@ -254,174 +292,217 @@ namespace Astrarium
                     Invalidate();
                 }
 
-                if (name == "Schema")
+                if (name == "NightMode")
                 {
-                    Schema = settings.Get<ColorSchema>("Schema");
                     Invalidate();
                 }
 
-                if (name == "IsMirrored")
+                if (name == "ViewMode")
                 {
-                    Projection.IsMirrored = settings.Get("IsMirrored");
+                    Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
+                }
+
+                if (name == "FlipHorizontal")
+                {
+                    Projection.FlipHorizontal = settings.Get("FlipHorizontal");
                     Invalidate();
                 }
 
-                if (name == "IsInverted")
+                if (name == "FlipVertical")
                 {
-                    Projection.IsInverted = settings.Get("IsInverted");
+                    Projection.FlipVertical = settings.Get("FlipVertical");
+                    Invalidate();
+                }
+
+                if (name == "Refraction")
+                {
+                    Projection.UseRefraction = settings.Get("Refraction");
+                    Invalidate();
+                }
+
+                if (name == "RefractionPressure")
+                {
+                    Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
+                    Invalidate();
+                }
+
+                if (name == "RefractionTemperature")
+                {
+                    Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+                    Invalidate();
+                }
+
+                if (name == "Extinction")
+                {
+                    Projection.UseExtinction = settings.Get("Extinction");
+                    Invalidate();
+                }
+
+                if (name == "ExtinctionCoefficient")
+                {
+                    Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
+                    Invalidate();
+                }
+
+                if (name == "AirmassModel")
+                {
+                    Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
                     Invalidate();
                 }
             };
+
+            new Thread(TimeSyncWorker) { IsBackground = true }.Start();
         }
 
-        public ColorSchema Schema { get; private set; } = ColorSchema.Night;
+        private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
+        private AutoResetEvent timeSyncWaitEvent = new AutoResetEvent(false);
 
-        public void Render(Graphics g)
+        private void TimeSyncWorker()
         {
-            try
+            while (true)
             {
-                renderStopWatch.Restart();
-
-                mapContext.Graphics = g;
-
-                g.Clear(mapContext.GetSkyColor());
-                g.PageUnit = GraphicsUnit.Display;
-                g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-                drawnObjects.Clear();
-                labels.Clear();
-
-                bool needDrawSelectedObject = true;
+                timeSyncResetEvent.WaitOne();
+                double rate = Math.Min(100, Math.Max(100, Projection.Fov * 100));
+                context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
 
                 if (LockedObject != null)
                 {
-                    Center.Altitude = LockedObject.Horizontal.Altitude;
-                    Center.Azimuth = LockedObject.Horizontal.Azimuth;
+                    Projection.SetVision(new CrdsEquatorial(
+                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
                 }
 
-                for (int i = 0; i < renderers.Count(); i++)
+                Invalidate();
+                timeSyncWaitEvent.WaitOne((int)rate);
+            }
+        }
+
+        public void Render()
+        {
+            isRendering = true;
+
+            GL.ClearColor(Color.Black);
+            GL.Clear(GL.COLOR_BUFFER_BIT);
+            GL.Clear(GL.STENCIL_BUFFER_BIT);
+
+            GL.MatrixMode(GL.PROJECTION);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(0, Projection.ScreenWidth, 0, Projection.ScreenHeight, -1, 1);
+
+            celestialObjects.Clear();
+            labels.Clear();
+
+            for (int i = 0; i < renderers.Count(); i++)
+            {
+                try
                 {
-                    try
-                    {
-                        renderers.ElementAt(i).Render(mapContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-                        {
-                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
-                        }
-                        Log.Debug($"Rendering error: {ex}");
-                    }
-                    if (needDrawSelectedObject)
-                    {
-                        needDrawSelectedObject = !DrawSelectedObject(g);
-                    }
+                    renderers.ElementAt(i).Render(this);
                 }
-
-// TODO: this should be refactored and moved to separate "Printing" plugin
-#if DEBUG
-                // Map information
-                if (mapContext.Schema == ColorSchema.White) 
+                catch (Exception ex)
                 {
-                    float headerHeight = (int)(mapContext.GetPointSize(0) + 35);
-                    float margin = 10;
-                    
-                    g.FillRectangle(Brushes.White, new RectangleF(0, 0, mapContext.Width, headerHeight));
-                    g.DrawLine(Pens.Black, 0, headerHeight, mapContext.Width, headerHeight);
-
-                    var location = settings.Get<CrdsGeographical>("ObserverLocation");
-                    var date = new Date(mapContext.JulianDay, location.UtcOffset);
-                    double offset = location.UtcOffset;
-                    string tz = offset != 0 ? $"UTC{(offset < 0 ? "-" : "+")}{TimeSpan.FromHours(offset):h\\:mm}" : "UTC";
-                    string dateText = $"{Formatters.DateTime.Format(date)} {tz}";
-
-                    var dateTextSize = g.MeasureString(dateText, fontMapInformationText);
-                    g.DrawString(dateText, fontMapInformationText, Brushes.Black, margin, (headerHeight - dateTextSize.Height) / 2);
-
-                    var mapTransformSb = new StringBuilder();
-                    if (mapContext.IsInverted)
-                    {
-                        mapTransformSb.Append(" inverted");
-                    }
-                    if (mapContext.IsMirrored)
-                    {
-                        mapTransformSb.Append(" mirrored");
-                    }
-                    string mapTransformText = mapTransformSb.ToString().Trim();
-                    if (string.IsNullOrEmpty(mapTransformText))
-                    {
-                        mapTransformText = "Direct";
-                    }
-
-                    var mapTransformTextSize = g.MeasureString(mapTransformText, fontMapInformationText);
-
-                    g.DrawString(mapTransformText, fontMapInformationText, Brushes.Black, mapContext.Width - margin - mapTransformTextSize.Width, (headerHeight - mapTransformTextSize.Height) / 2);
-                    g.DrawRectangle(Pens.Black, new Rectangle(0, 0, mapContext.Width, mapContext.Height));
-
-                    var magLimit = mapContext.MagLimit;
-                    float r0 = mapContext.GetPointSize(0);
-                    float gap = r0 * 1.1f;
-
-                    float yLabel = headerHeight / 2 - r0 / 2 - fontMag.Height / 2 - 3;
-
-                    float scaleWidth = ((int)magLimit) * gap;
-
-                    int magStep = 1;
-                    if (magLimit >= 14)
-                    {
-                        magStep = 2;
-                        scaleWidth = scaleWidth / 2;
-                    }
-
-                    int c = 0;
-                    for (int m = 0; m <= magLimit + magStep; m += magStep)
-                    {
-                        float r = mapContext.GetPointSize(m);
-                        if ((int)r > 0)
-                        {
-                            string label = m.ToString();
-                            float labelWidth = g.MeasureString(label, fontMag).Width;
-
-                            float xCircle = mapContext.Width / 2 - scaleWidth / 2 + c * gap - r / 2;
-                            float xLabel = mapContext.Width / 2 - scaleWidth / 2 + c * gap - labelWidth / 2;
-
-                            float yCircle = headerHeight / 2 - r / 2 + fontMag.Height / 2 + 3;
-                            
-                            g.DrawString(label, fontMag, Brushes.Black, xLabel, yLabel);
-                            g.FillEllipse(Brushes.Gray, xCircle, yCircle, r, r);
-                        }
-                        c++;
-                    }
-                }
-#endif
-
-                renderStopWatch.Stop();
-                rendersCount++;
-
-                int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-
-                // Calculate mean time of rendering with Cumulative Moving Average formula
-                meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
-
-                // Diagnostic info
-                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-                {
-                    g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+                    Log.Error($"Rendering error: {ex}");
                 }
             }
-            catch (Exception ex)
+
+            DrawSelectedObject();
+
+            GL.PopMatrix();
+            GL.Flush();
+
+            isRendering = false;
+        }
+
+        private void DrawSelectedObject()
+        {
+            if (SelectedObject != null && celestialObjects.Any() && !SelectedObject.Equals(LockedObject))
             {
-                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                var body = celestialObjects.FirstOrDefault(x => x.Equals(SelectedObject));
+                if (body != null)
                 {
-                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                    DrawObjectOutline(body, Color.Red);
                 }
-                Log.Error($"Rendering error: {ex}");
+            }
+
+            if (LockedObject != null && celestialObjects.Any())
+            {
+                var body = celestialObjects.FirstOrDefault(x => x.Equals(LockedObject));
+                if (body != null)
+                {
+                    DrawObjectOutline(body, Color.LightGreen);
+                }
+            }
+        }
+
+        private void DrawObjectOutline(CelestialObject body, Color color)
+        {
+            bool isNightMode = settings.Get("NightMode");
+            var prj = Projection;
+            Vec2 p = prj.Project(body.Equatorial);
+            var clr = color.Tint(isNightMode);
+            Pen pen = new Pen(clr);
+
+            float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : Projection.MagLimit;
+            float sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
+            double diskSize = Projection.GetDiskSize(sd, 0);
+            double pointSize = Math.Max(16, Projection.GetPointSize(double.IsNaN(mag) ? Projection.MagLimit : mag));
+
+            if (diskSize > pointSize && body is SizeableCelestialObject sizeableBody)
+            {
+                // has complex shape
+                if (sizeableBody.Shape != null && sizeableBody.Shape.Any())
+                {
+                    double epoch = sizeableBody.ShapeEpoch.GetValueOrDefault(prj.Context.JulianDay);
+                    var pe = Precession.ElementsFK5(epoch, prj.Context.JulianDay);
+
+                    GL.Enable(GL.BLEND);
+                    GL.Enable(GL.LINE_SMOOTH);
+                    GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+                    GL.Color4(clr);
+                    GL.Begin(GL.LINE_LOOP);
+
+                    foreach (var sp in sizeableBody.Shape)
+                    {
+                        Vec2 op = prj.Project(Precession.GetEquatorialCoordinates(sp, pe));
+                        if (op != null)
+                        {
+                            GL.Vertex2(op.X, op.Y);
+                        }
+                    }
+
+                    GL.End();
+                }
+                // no complex shape
+                else
+                {
+                    float lgSd = sizeableBody.LargeSemidiameter.GetValueOrDefault(sd);
+                    float smSd = sizeableBody.SmallSemidiameter.GetValueOrDefault(sd);
+
+                    // non-circular object
+                    if (lgSd != smSd)
+                    {
+                        float posAngle = sizeableBody.PositionAngle.GetValueOrDefault(0);
+                        float rx = prj.GetDiskSize(lgSd) / 2 + 4;
+                        float ry = prj.GetDiskSize(smSd) / 2 + 4;
+                        double rot = prj.GetAxisRotation(body.Equatorial, 90 + posAngle);
+                        GL.DrawEllipse(p, pen, rx, ry, rot);
+                    }
+                    // circular object
+                    else
+                    {
+                        GL.DrawEllipse(p, pen, (diskSize + 8) / 2);
+                    }
+                }
+            }
+            else
+            {
+                GL.DrawEllipse(p, pen, (pointSize + 8) / 2);
             }
         }
 
         public void Invalidate()
         {
-            if (!renderStopWatch.IsRunning)
+            if (!isRendering)
             {
                 OnInvalidate?.Invoke();
             }
@@ -429,20 +510,14 @@ namespace Astrarium
 
         public CelestialObject FindObject(PointF point)
         {
-            var hor = Projection.Invert(point);
-
-            foreach (var body in drawnObjects.OrderBy(c => Angle.Separation(hor, c.Horizontal)))
+            foreach (var x in celestialObjects.OrderBy(c => Projection.Project(c.Equatorial).Distance(point)))
             {
-                double sd = (body is SizeableCelestialObject) ?
-                    (body as SizeableCelestialObject).Semidiameter : 0;
-
-                double size = Math.Max(10, sd / 3600.0 / ViewAngle * Width);
-
-                PointF p = Projection.Project(body.Horizontal);
-
-                if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
+                var p = Projection.Project(x.Equatorial);
+                float sd = (x is SizeableCelestialObject) ? (x as SizeableCelestialObject).Semidiameter : 0;
+                float size = Projection.GetDiskSize(sd, 10);
+                if (p.Distance(point) < size / 2)
                 {
-                    return body;
+                    return x;
                 }
             }
 
@@ -451,217 +526,111 @@ namespace Astrarium
 
         public void GoToObject(CelestialObject body, TimeSpan animationDuration)
         {
-            double sd = (body is SizeableCelestialObject) ?
-                        (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
+            float sd = (body is SizeableCelestialObject) ?
+                       (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
-            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MIN_VIEW_ANGLE);
+            double viewAngleTarget = sd == 0 ? 1 / 1024.0 : Math.Max(sd * 10, 1 / 1024.0);
 
-            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, animationDuration, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, double viewAngleTarget)
         {
-            GoToPoint(body.Horizontal, TimeSpan.Zero, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, TimeSpan.Zero, viewAngleTarget);
         }
 
         public void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget)
         {
-            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+            var eq = Projection.WithRefraction(body.Equatorial);
+            GoToPoint(eq, animationDuration, viewAngleTarget);
         }
 
-        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
+        public void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration)
         {
-            GoToPoint(hor, animationDuration, Math.Min(viewAngle, 90));
+            GoToPoint(eq, animationDuration, Math.Min(Projection.Fov, 90));
         }
 
-        public void GoToPoint(CrdsHorizontal hor, double viewAngleTarget)
+        public void GoToPoint(CrdsEquatorial eq, double viewAngleTarget)
         {
-            GoToPoint(hor, TimeSpan.Zero, viewAngleTarget);
+            GoToPoint(eq, TimeSpan.Zero, viewAngleTarget);
         }
 
-        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
+        public void GoToPoint(CrdsEquatorial eq, TimeSpan animationDuration, double viewAngleTarget)
         {
             if (viewAngleTarget == 0)
             {
-                viewAngleTarget = ViewAngle;
+                viewAngleTarget = Projection.Fov;
             }
+
+            LockedObject = null;
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {
-                Center.Set(hor);
-                ViewAngle = viewAngleTarget;
+                Projection.SetVision(eq);
+                Projection.Fov = viewAngleTarget;
+                Invalidate();
             }
             else
             {
-                CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
-                double ad = Angle.Separation(hor, centerOriginal);
-                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
-                double[] x = new double[] { 0, steps / 2, steps };
-                double[] y = (ad < ViewAngle) ?
+                CrdsEquatorial centerOriginal = new CrdsEquatorial(Projection.CenterEquatorial);
+                double ad = Angle.Separation(eq, centerOriginal);
+
+                double duration = animationDuration.TotalMilliseconds;
+
+                double[] x = new double[] { 0, duration / 2, duration };
+                double[] y = (ad < Projection.Fov) ?
                     // linear zooming if body is already on the screen:
-                    new double[] { ViewAngle, (ViewAngle + viewAngleTarget) / 2, viewAngleTarget } :
+                    new double[] { Projection.Fov, (Projection.Fov + viewAngleTarget) / 2, viewAngleTarget } :
                     // parabolic zooming with jumping to 90 degrees view angle at the middle of path:
-                    new double[] { ViewAngle, 90, viewAngleTarget };
+                    new double[] { Projection.Fov, 90, viewAngleTarget };
 
-                for (int i = 0; i <= steps; i++)
+                Task.Run(() =>
                 {
-                    Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
-                    ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
-                }
-            }
-        }
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
 
-        public void AddDrawnObject(CelestialObject obj)
-        {
-            drawnObjects.Add(obj);
-        }
-
-        private bool DrawSelectedObject(Graphics g)
-        {
-            if (SelectedObject != null && drawnObjects.Contains(SelectedObject))
-            {
-                var body = SelectedObject;
-
-                double sd = (body is SizeableCelestialObject) ?
-                    (body as SizeableCelestialObject).Semidiameter : 0;
-
-                double size = Math.Max(10, mapContext.GetDiskSize(sd));
-
-                // do not draw selection circle if image is too large
-                bool drawCircle = true; // diam / 2 < diag;
-
-                if (drawCircle)
-                {
-                    PointF p = Projection.Project(body.Horizontal);
-                    Pen pen = new Pen(Brushes.DarkRed, 2);
-                    pen.DashStyle = DashStyle.Dash;
-
-                    g.DrawEllipse(pen, (float)(p.X - (size + 6) / 2), (float)(p.Y - (size + 6) / 2), (float)(size + 6), (float)(size + 6));
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private class MapContext : IMapContext
-        {
-            private readonly SkyMap map;
-            private readonly SkyContext skyContext;
-
-            public MapContext(SkyMap map, SkyContext skyContext)
-            {
-                this.map = map;
-                this.skyContext = skyContext;
-            }
-
-            public Graphics Graphics { get; set; }
-
-            public int Width => map.Width;
-            public int Height => map.Height;
-            public double ViewAngle => map.ViewAngle;
-            public float MagLimit => map.MagLimit;
-            public CrdsHorizontal Center => map.Center;
-            public double JulianDay => skyContext.JulianDay;
-            public double Epsilon => skyContext.Epsilon;
-            public CrdsGeographical GeoLocation => skyContext.GeoLocation;
-            public double SiderealTime => skyContext.SiderealTime;
-            public float DayLightFactor => skyContext.DayLightFactor;
-            public ColorSchema Schema => map.Schema;
-            public CrdsHorizontal MousePosition => map.MousePosition;
-            public MouseButton MouseButton => map.MouseButton;
-            public CelestialObject LockedObject => map.LockedObject;
-            public CelestialObject SelectedObject => map.SelectedObject;
-            public bool IsMirrored
-            {
-                get => map.Projection.IsMirrored;
-                set => map.Projection.IsMirrored = value;
-            }
-
-            public bool IsInverted
-            {
-                get => map.Projection.IsInverted;
-                set => map.Projection.IsInverted = value;
-            }
-
-            public PointF Project(CrdsHorizontal hor)
-            {
-                return map.Projection.Project(hor);
-            }
-
-            public void AddDrawnObject(CelestialObject obj)
-            {
-                map.AddDrawnObject(obj);
-            }
-
-            public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size, StringFormat format = null)
-            {
-                if (format != null)
-                {
-                    SizeF b = Graphics.MeasureString(caption, font, p, format);
-                    RectangleF r = new RectangleF(p.X, p.Y, b.Width, b.Height);
-
-                    if (format.Alignment == StringAlignment.Center)
-                        r.X = p.X - b.Width / 2;
-                    if (format.Alignment == StringAlignment.Far)
-                        r.X = p.X - b.Width / 2;
-
-                    if (format.LineAlignment == StringAlignment.Center)
-                        r.Y = p.Y - b.Height / 2;
-                    if (format.LineAlignment == StringAlignment.Far)
-                        r.Y = p.Y - b.Height / 2;
-
-                    Graphics.DrawString(caption, font, brush, p, format);
-                    map.labels.Add(r);
-                }
-                else
-                {
-                    SizeF b = Graphics.MeasureString(caption, font);
-                    float s = size > 5 ? (size / 2.8284f + 2) : 1;
-                    for (int x = 0; x < 2; x++)
+                    double fraction;
+                    do
                     {
-                        for (int y = 0; y < 2; y++)
-                        {
-                            float dx = x == 0 ? s : -s - b.Width;
-                            float dy = y == 0 ? s : -s - b.Height;
-                            RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                            if (!map.labels.Any(l => l.IntersectsWith(r)))
-                            {
-                                Graphics.DrawString(caption, font, brush, r.Location);
-                                map.labels.Add(r);
-                                return;
-                            }
-                        }
+                        fraction = Math.Min(1, sw.ElapsedMilliseconds / duration);
+                        Projection.SetVision(Angle.Intermediate(centerOriginal, eq, fraction));
+                        Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, Math.Min(duration, sw.ElapsedMilliseconds)));
+                        Invalidate();
+                    }
+                    while (fraction < 1);
+
+                    sw.Stop();
+                });
+            }
+        }
+
+        public void AddDrawnObject(PointF p, CelestialObject obj)
+        {
+            celestialObjects.Add(obj);
+        }
+
+        /// <inheritdoc />
+        public void DrawObjectLabel(string label, Font font, Brush brush, PointF p, float size)
+        {
+            SizeF b = System.Windows.Forms.TextRenderer.MeasureText($"{label} ", font);
+
+            float s = size > 5 ? (size / 2.8284f + 2) : 1;
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    float dx = x == 0 ? s : -s - b.Width;
+                    float dy = y == 0 ? -s : s + b.Height;
+                    RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
+                    if (!labels.Any(l => l.IntersectsWith(r)))
+                    {
+                        GL.DrawString($"{label} ", font, brush, r.Location);
+                        labels.Add(r);
+                        return;
                     }
                 }
-            }
-
-            public Color GetColor(string colorName)
-            {
-                return map.settings.Get<SkyColor>(colorName).GetColor(Schema, DayLightFactor);
-            }
-
-            public Color GetColor(Color colorNight)
-            {
-                return SkyColor.GetColor(Schema, colorNight, DayLightFactor);
-            }
-
-            public Color GetColor(Color colorNight, Color colorDay)
-            {
-                return SkyColor.GetColor(Schema, colorNight, colorDay, DayLightFactor);
-            }
-
-            public Color GetSkyColor()
-            {
-                // TODO: move to settings
-                return GetColor(Color.Black);
-            }
-
-            public void Redraw()
-            {
-                map.Invalidate();
-                map.OnRedraw();
             }
         }
     }

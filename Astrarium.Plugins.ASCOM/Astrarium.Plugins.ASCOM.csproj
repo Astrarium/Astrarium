@@ -4,6 +4,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
+	<UseWindowsForms>true</UseWindowsForms>
     <Product>ASCOM Plugin</Product>
     <Description>Allows to control telescope via ASCOM platform</Description>
     <Authors>Alexander Krutov</Authors>
@@ -29,8 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="OpenTK" Version="3.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +65,14 @@
     <Compile Update="Controls\AscomSettingsSection.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+	<ContentWithTargetPath Include="Libs\glfw.dll">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		<TargetPath>glfw.dll</TargetPath>
+	  </ContentWithTargetPath>
+	  <None Include="Libs\glfw.dll" />
   </ItemGroup>
 
   <ItemGroup>

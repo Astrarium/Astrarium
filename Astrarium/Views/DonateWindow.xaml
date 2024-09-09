@@ -1,0 +1,38 @@
+﻿<Window x:Class="Astrarium.Views.DonateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Width="600" Height="350"
+        SizeToContent="Height"
+        MinWidth="300" MinHeight="200"
+        Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"
+        Title="{t:Text DonateWindow.Title}"
+        ResizeMode="CanResizeWithGrip"
+        s:WindowProperties.CloseButtonVisible="Collapsed"
+        s:WindowProperties.MinButtonVisible="Collapsed"
+        s:WindowProperties.MaxButtonVisible="Collapsed">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="20">
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Text="{t:Text DonateWindow.Text}" />
+            <Button Width="Auto" MinWidth="200" Height="Auto" Padding="10 10" HorizontalAlignment="Center" Margin="30" Background="#FFBC49" Foreground="Black" Cursor="Hand" Command="{Binding DonateCommand}">
+                <TextBlock FontSize="16" FontWeight="Bold" Text="{t:Text DonateWindow.DonateButton}" />
+            </Button>
+            <StackPanel Visibility="{Binding OpenedByUser, Converter={s:InverseBoolToVisibilityConverter}}" Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Visibility="{Binding AlreadyDelayed, Converter={s:BoolToVisibilityConverter}}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="50 0">
+                    <Hyperlink Foreground="{StaticResource BrushControlLightBackground}" Command="{Binding BlockCommand}"><Run Text="{t:Text DonateWindow.NeverRemind}" /></Hyperlink>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="50 0">
+                    <Hyperlink Foreground="{StaticResource BrushControlLightBackground}" Command="{Binding DelayCommand}"><Run Text="{t:Text DonateWindow.Delay}" /></Hyperlink>
+                </TextBlock>
+            </StackPanel>
+            <TextBlock Visibility="{Binding OpenedByUser, Converter={s:BoolToVisibilityConverter}}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center">
+                    <Hyperlink Foreground="{StaticResource BrushControlLightBackground}" Command="{Binding DismissCommand}"><Run Text="{t:Text DonateWindow.Dismiss}" /></Hyperlink>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>

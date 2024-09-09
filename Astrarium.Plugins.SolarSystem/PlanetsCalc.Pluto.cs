@@ -158,9 +158,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Calculates apparent semidiameter of Pluto
         /// </summary>
-        private double Pluto_Semidiameter(SkyContext c)
+        private float Pluto_Semidiameter(SkyContext c)
         {
-            return PlutoPosition.Semidiameter(c.Get(Pluto_DistanceFromEarth));
+            return (float)PlutoPosition.Semidiameter(c.Get(Pluto_DistanceFromEarth));
         }
 
         /// <summary>

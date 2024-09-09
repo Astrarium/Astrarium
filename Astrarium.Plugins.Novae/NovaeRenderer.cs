@@ -1,11 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Novae
 {
@@ -17,82 +14,63 @@ namespace Astrarium.Plugins.Novae
         private ISettings settings;
 
         private const int limitAllNames = 40;
-        private Brush brushStarNames;
-
+       
         public NovaeRenderer(NovaeCalculator calc, ISettings settings)
         {
             this.calc = calc;
             this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            Graphics g = map.Graphics;
-            bool isGround = settings.Get<bool>("Ground");
-            bool showNovae = settings.Get("Stars") && settings.Get<bool>("Novae");
+            if (!settings.Get("Stars") || !settings.Get("Novae")) return;
+            if (map.DaylightFactor == 1) return;
 
-            if (!showNovae) return;
+            var prj = map.Projection;
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var nightMode = settings.Get("NightMode");
+            bool drawLabels = settings.Get("StarsLabels") && settings.Get("NovaeLabels") && prj.Fov <= limitAllNames;
+            bool drawAll = settings.Get("NovaeDrawAll");
+            Color labelColor = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
+            Brush brushLabel = new SolidBrush(labelColor);
+            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
+            double fov = prj.RealFov;
 
-            var novae = calc.Novae.Where(m => Angle.Separation(map.Center, m.Horizontal) < map.ViewAngle);
-            if (isGround)
-            {
-                novae = novae.Where(m => m.Horizontal.Altitude >= 0);
-            }
+            // filter novae by magnitude and FOV
+            var novae = calc.Novae.Where(n => (n.Magnitude < prj.MagLimit || drawAll) && Angle.Separation(eqCenter, n.Equatorial) < fov);
 
-            var font = SystemFonts.DefaultFont;
-            var brush = new SolidBrush(map.Schema == ColorSchema.White ? Color.Black : Color.White);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
 
             foreach (var star in novae)
             {
-                float size = map.GetPointSize(star.Magnitude);
-                if (size > 0)
+                double alt = prj.ToHorizontal(star.Equatorial).Altitude;
+                float size = prj.GetPointSize(star.Magnitude, altitude: alt);
+                if (size > 0 || drawAll)
                 {
-                    PointF p = map.Project(star.Horizontal);
-                    if (!map.IsOutOfScreen(p))
+                    if ((int)size == 0) size = 1;
+
+                    // screen coordinates, for current epoch
+                    Vec2 p = prj.Project(star.Equatorial);
+
+                    if (prj.IsInsideScreen(p))
                     {
-                        if (map.Schema == ColorSchema.White)
+                        GL.PointSize(size);
+                        GL.Begin(GL.POINTS);
+                        GL.Color3(Color.White.Tint(nightMode));
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        if (drawLabels)
                         {
-                            g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
+                            map.DrawObjectLabel(star.ProperName, fontStarNames, brushLabel, p, size);
                         }
 
-                        g.FillEllipse(brush, p.X - size / 2, p.Y - size / 2, size, size);
-
-                        map.AddDrawnObject(star);
+                        map.AddDrawnObject(p, star);
                     }
                 }
-            }
-
-            if (settings.Get<bool>("StarsLabels") && settings.Get<bool>("NovaeLabels") && map.ViewAngle <= limitAllNames)
-            {
-                brushStarNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
-
-                foreach (var nova in novae)
-                {
-                    float diam = map.GetPointSize(nova.Magnitude);
-                    if ((int)diam > 0)
-                    {
-                        PointF p = map.Project(nova.Horizontal);
-                        if (!map.IsOutOfScreen(p))
-                        {
-                            DrawStarName(map, p, nova, diam);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Draws nova name
-        /// </summary>
-        private void DrawStarName(IMapContext map, PointF point, Nova nova, float diam)
-        {
-            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-
-            // Star has proper name
-            if (map.ViewAngle < limitAllNames && settings.Get<bool>("StarsProperNames") && nova.ProperName != null)
-            {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, nova.ProperName, point, diam);
-                return;
             }
         }
     }

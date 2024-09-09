@@ -72,10 +72,10 @@ namespace Astrarium.Plugins.SolarSystem
             return new CrdsRectangular(x, y, z);
         }
 
-        private double NeptuneMoon_Semidiameter(SkyContext c, int m)
+        private float NeptuneMoon_Semidiameter(SkyContext c, int m)
         {
             var ecl = c.Get(NeptuneMoon_Ecliptical, m);
-            return NeptunianMoons.Semidiameter(ecl.Distance, m);
+            return (float)NeptunianMoons.Semidiameter(ecl.Distance, m);
         }
 
         private float NeptuneMoon_Magnitude(SkyContext c, int m)

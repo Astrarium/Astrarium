@@ -6,6 +6,11 @@
     public struct GeoPoint
     {
         /// <summary>
+        /// Represents a new instance of the <see cref="GeoPoint" /> class with member data left uninitialized.
+        /// </summary>
+        public static readonly GeoPoint Empty;
+
+        /// <summary>
         /// Longitude of the point, in degrees, from 0 to ±180, positive East, negative West. 0 is a point on prime meridian.
         /// </summary>
         public float Longitude { get; set; }

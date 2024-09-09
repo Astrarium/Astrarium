@@ -187,6 +187,8 @@ namespace Astrarium.Types
         {
             public virtual string Format(object value)
             {
+                if (value == null) return null;
+
                 double angle = Convert.ToDouble(value);
                 var a = new DMS(angle);
                 
@@ -296,8 +298,10 @@ namespace Astrarium.Types
                 this.units = units;
             }
 
-            public string Format(object value)
+            public virtual string Format(object value)
             {
+                if (value == null) return null;
+
                 double v = Convert.ToDouble(value);
                 if (double.IsInfinity(v) || double.IsNaN(v))
                 {
@@ -322,7 +326,7 @@ namespace Astrarium.Types
                 this.units = units;
             }
 
-            public string Format(object value)
+            public virtual string Format(object value)
             {
                 if ((value == null) ||
                     (value is DBNull) ||
@@ -488,5 +492,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
         public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
+        public static readonly IEphemFormatter JulianDay = new UnsignedDoubleFormatter(6, " JDE");
+        public static readonly IEphemFormatter Inclination = new UnsignedDoubleFormatter(2, "\u00B0");
     }
 }

@@ -12,9 +12,19 @@ namespace Astrarium.Types
 {
     public class Text : MarkupExtension
     {
-        private static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
+        private const string FileName = "Text";
+        private const string FileExtension = "ini";
+        private const string DefaultLanguage = "en";
 
+        private static CultureInfo currentCulture;
+        private static List<string> languages = new List<string>();
+        private static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
         private static List<LocalizedObjectHolder> LocalizedObjectsRefs = new List<LocalizedObjectHolder>();
+
+        static Text()
+        {
+            SetLocale(CultureInfo.GetCultureInfo(DefaultLanguage));
+        }
 
         public static string Get(string key)
         {
@@ -48,20 +58,17 @@ namespace Astrarium.Types
                 return localizations.First().Value;
         }
 
-        public static string FileName { get; set; } = "Text";
-        public static string FileExtension { get; set; } = "ini";
-        public static string DefaultLanguage { get; set; } = "en";
-
-        private static CultureInfo currentCulture = CultureInfo.GetCultureInfo("en");
-
         public static CultureInfo GetCurrentLocale() => currentCulture;
 
-        public static void SetLocale(CultureInfo culture)
+        public static void SetLocale(CultureInfo locale)
         {
+            CultureInfo culture = new CultureInfo(locale.Name, true);
+            culture.NumberFormat = NumberFormatInfo.InvariantInfo;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             if (!culture.Equals(currentCulture))
             {
-                CultureInfo.DefaultThreadCurrentCulture = culture;
-                CultureInfo.DefaultThreadCurrentUICulture = culture;
                 LoadLocalizationStrings();
                 currentCulture = culture;
                 LocaleChanged?.Invoke();
@@ -116,7 +123,6 @@ namespace Astrarium.Types
 
         public static event Action LocaleChanged;
 
-        private static List<string> languages = new List<string>();
         public static CultureInfo[] GetLocales()
         {
             return languages
@@ -126,11 +132,6 @@ namespace Astrarium.Types
                     catch { return null; }
                 })
                 .Where(ci => ci != null).Distinct().ToArray();
-        }
-
-        static Text()
-        {
-            LoadLocalizationStrings();
         }
 
         private static void LoadLocalizationStrings()
@@ -163,14 +164,14 @@ namespace Astrarium.Types
                                     if (!string.IsNullOrEmpty(line) && commentSigns.All(comment => !line.StartsWith(comment)))
                                     {
                                         var match = keyRegex.Match(line);
-                                        
+
                                         // key string
                                         if (match.Success)
                                         {
                                             key = match.Groups[1].Value.Trim();
                                         }
                                         // value string
-                                        else 
+                                        else
                                         {
                                             string[] langValue = line.Split(new[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
@@ -192,11 +193,11 @@ namespace Astrarium.Types
                                                         LocalizationStrings[key] = value;
                                                     }
                                                 }
-                                                
+
                                                 if (!languages.Contains(lang))
                                                 {
                                                     languages.Add(lang);
-                                                } 
+                                                }
                                             }
                                         }
                                     }

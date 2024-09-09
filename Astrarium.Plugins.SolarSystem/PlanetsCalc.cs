@@ -17,7 +17,9 @@ namespace Astrarium.Plugins.SolarSystem
         ICelestialObjectCalc<NeptuneMoon>,
         ICelestialObjectCalc<GenericMoon>
     {
-        private ISettings settings;
+        private readonly ISettings settings;
+        private readonly OrbitalElementsManager orbitalElementsManager;
+
         private Planet[] planets = new Planet[8];
         private Pluto pluto = new Pluto();
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
@@ -53,8 +55,18 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
         private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
 
-        public PlanetsCalc(ISettings settings)
+        public override void Initialize()
         {
+            var orbits = orbitalElementsManager.Load();
+            foreach (var orbit in orbits)
+            {
+                genericMoons.Add(new GenericMoon() { Data = orbit });
+            }
+        }
+
+        public PlanetsCalc(OrbitalElementsManager orbitalElementsManager, ISettings settings)
+        {
+            this.orbitalElementsManager = orbitalElementsManager;
             this.settings = settings;
 
             for (int i = 0; i < planets.Length; i++)
@@ -87,12 +99,6 @@ namespace Astrarium.Plugins.SolarSystem
                 neptuneMoons[i] = new NeptuneMoon(i + 1);
             }
 
-            var orbits = new OrbitalElementsManager(settings).Load();
-            foreach (var orbit in orbits)
-            {
-                genericMoons.Add(new GenericMoon() { Data = orbit });
-            }
-
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
         }
@@ -106,12 +112,12 @@ namespace Astrarium.Plugins.SolarSystem
                 int n = p.Number;
 
                 p.Equatorial = context.Get(Planet_Equatorial, n);
-                p.Horizontal = context.Get(Planet_Horizontal, n);
                 p.Appearance = context.Get(Planet_Appearance, n);
                 p.Magnitude = context.Get(Planet_Magnitude, n);
                 p.DistanceFromSun = context.Get(Planet_DistanceFromSun, n);
                 p.Semidiameter = context.Get(Planet_Semidiameter, n);
                 p.Phase = context.Get(Planet_Phase, n);
+                p.PhaseAngle = Math.Sign(context.Get(Planet_Elongation, n)) * context.Get(Planet_PhaseAngle, n);
                 p.Elongation = context.Get(Planet_Elongation, n);
                 p.Ecliptical = context.Get(Planet_Ecliptical, n);
 
@@ -122,7 +128,6 @@ namespace Astrarium.Plugins.SolarSystem
                         int mn = m.Number;
                         m.Rectangular = context.Get(MarsMoon_Rectangular, mn);
                         m.Equatorial = context.Get(MarsMoon_Equatorial, mn);
-                        m.Horizontal = context.Get(MarsMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(MarsMoon_Semidiameter, mn);
                         m.Magnitude = context.Get(MarsMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(MarsMoon_Ecliptical, mn).Distance;
@@ -140,7 +145,6 @@ namespace Astrarium.Plugins.SolarSystem
                         m.Rectangular = context.Get(JupiterMoon_Rectangular, mn);
                         m.RectangularS = context.Get(JupiterMoonShadow_Rectangular, mn);
                         m.Equatorial = context.Get(JupiterMoon_Equatorial, mn);
-                        m.Horizontal = context.Get(JupiterMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(JupiterMoon_Semidiameter, mn);
                         m.CM = context.Get(JupiterMoon_CentralMeridian, mn);
                         m.Magnitude = context.Get(JupiterMoon_Magnitude, mn);
@@ -157,7 +161,6 @@ namespace Astrarium.Plugins.SolarSystem
                         int mn = m.Number;
                         m.Rectangular = context.Get(SaturnMoon_Rectangular, mn);
                         m.Equatorial = context.Get(SaturnMoon_Equatorial, mn);
-                        m.Horizontal = context.Get(SaturnMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(SaturnMoon_Semidiameter, mn);
                         m.Magnitude = context.Get(SaturnMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(SaturnMoon_DistanceFromEarth, mn);
@@ -173,7 +176,6 @@ namespace Astrarium.Plugins.SolarSystem
                         int mn = m.Number;
                         m.Rectangular = context.Get(UranusMoon_Rectangular, mn);
                         m.Equatorial = context.Get(UranusMoon_Equatorial, mn);
-                        m.Horizontal = context.Get(UranusMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(UranusMoon_Semidiameter, mn);
                         m.Magnitude = context.Get(UranusMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(UranusMoon_Ecliptical, mn).Distance;
@@ -186,7 +188,6 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         int mn = m.Number;
                         m.Equatorial = context.Get(NeptuneMoon_Equatorial, mn);
-                        m.Horizontal = context.Get(NeptuneMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(NeptuneMoon_Semidiameter, mn);
                         m.Magnitude = context.Get(NeptuneMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical, mn).Distance;                        
@@ -196,7 +197,6 @@ namespace Astrarium.Plugins.SolarSystem
                 foreach (var m in genericMoons)
                 {
                     m.Equatorial = context.Get(GenericMoon_Equatorial, m.Id);
-                    m.Horizontal = context.Get(GenericMoon_Horizontal, m.Id);
                     m.Semidiameter = context.Get(GenericMoon_Semidiameter, m.Id);
                     m.Magnitude = context.Get(GenericMoon_Magnitude, m.Id);
                     m.DistanceFromEarth = context.Get(GenericMoon_Ecliptical, m.Id).Distance;
@@ -204,7 +204,6 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             pluto.Equatorial = context.Get(Pluto_Equatorial);
-            pluto.Horizontal = context.Get(Pluto_Horizontal);
             pluto.Appearance = context.Get(Pluto_Appearance);
             pluto.Semidiameter = context.Get(Pluto_Semidiameter);
             pluto.Magnitude = context.Get(Pluto_Magnitude);

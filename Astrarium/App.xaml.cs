@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using NLog;
+using System.Threading;
 
 namespace Astrarium
 {
@@ -21,21 +22,13 @@ namespace Astrarium
     public partial class App : Application
     {
         private IKernel kernel = new StandardKernel();
-        private ICommandLineArgs commandLineArgs = null;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            commandLineArgs = new CommandLineArgs(e.Args);
-
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
             Log.SetImplementation((DefaultLogger)LogManager.GetLogger("", typeof(DefaultLogger)));
-            if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-            {
-                Log.Level = "Debug";
-            }
-
             Log.Info($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
 
             var splashVM = new SplashScreenVM();
@@ -68,10 +61,10 @@ namespace Astrarium
             base.OnExit(e);
         }
 
-        private void SetColorSchema(ColorSchema schema, string appTheme)
+        private void SetColorSchema(bool nightMode, string appTheme)
         {
-            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : appTheme)}.xaml");
-            if (schema == ColorSchema.Red)
+            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(nightMode ? "Red" : appTheme)}.xaml");
+            if (nightMode)
             {
                 CursorsHelper.SetCustomCursors();
             }
@@ -107,12 +100,13 @@ namespace Astrarium
 
         private void ConfigureContainer(IProgress<string> progress)
         {
-            kernel.Bind<ICommandLineArgs>().ToConstant(commandLineArgs).InSingletonScope();
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
             kernel.Bind<IAppUpdater>().To<AppUpdater>().InSingletonScope();
+            kernel.Bind<IDonationsHelper>().To<DonationsHelper>().InSingletonScope();
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
+            kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
@@ -141,7 +135,7 @@ namespace Astrarium
                             {
                                 throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
                             }
-                            kernel.Bind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
+                            kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
                         }
                         else
                         {
@@ -198,7 +192,7 @@ namespace Astrarium
 
             foreach (Type pluginType in pluginTypes)
             {
-                progress.Report($"Creating plugin {pluginType}");
+                progress.Report($"Creating plugin {AbstractPlugin.GetName(pluginType)}");
 
                 try
                 {
@@ -218,6 +212,9 @@ namespace Astrarium
                     // add menu items
                     uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
+                    // add object info extensions
+                    uiIntegration.ObjectInfoExtensions.AddRange(plugin.ObjectInfoExtensions);
+
                     plugins.Add(plugin);
                 }
                 catch (Exception ex)
@@ -229,7 +226,7 @@ namespace Astrarium
 
             progress.Report($"Creating renderers");
 
-            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().ToArray();
+            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().OrderBy(x => x.Order).ToArray();
             var defaultRenderingOrder = new RenderingOrder(renderers.OrderBy(r => r.Order).Select(r => new RenderingOrderItem(r)));
             uiIntegration.SettingDefinitions.Add(new SettingDefinition("RenderingOrder", defaultRenderingOrder, false));
 
@@ -242,7 +239,7 @@ namespace Astrarium
             settings.Load();
 
             SetLanguage(settings.Get<string>("Language"));
-            SetColorSchema(settings.Get<ColorSchema>("Schema"), settings.Get("AppTheme", "DeepBlue"));
+            SetColorSchema(settings.Get("NightMode"), settings.Get("AppTheme", "DeepBlue"));
 
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
@@ -274,9 +271,9 @@ namespace Astrarium
 
             settings.SettingValueChanged += (settingName, value) =>
             {
-                if (settingName == "Schema" || settingName == "AppTheme")
+                if (settingName == "NightMode" || settingName == "AppTheme")
                 {
-                    SetColorSchema(settings.Get("Schema", ColorSchema.Night), settings.Get("AppTheme", "DeepBlue"));
+                    SetColorSchema(settings.Get("NightMode"), settings.Get("AppTheme", "DeepBlue"));
                 }
                 else if (settingName == "Language")
                 {
@@ -286,6 +283,7 @@ namespace Astrarium
 
             foreach (var plugin in plugins)
             {
+                progress.Report($"Initializing plugin {AbstractPlugin.GetName(plugin.GetType())}");
                 plugin.Initialize();
             }
         }

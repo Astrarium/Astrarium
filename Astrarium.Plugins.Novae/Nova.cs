@@ -11,7 +11,7 @@ namespace Astrarium.Plugins.Novae
     /// <summary>
     /// Represents nova star
     /// </summary>
-    public class Nova : CelestialObject, IMagnitudeObject
+    public class Nova : CelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => "Nova";

@@ -9,21 +9,24 @@ namespace Astrarium.Types
     {
         SkyContext Context { get; }
         event Action Calculated;
-        event Action DateTimeSyncChanged;
+        event Action<bool> TimeSyncChanged;
+
         void SetDate(double jd);
         void Calculate();
-        bool DateTimeSync { get; set; }
+        bool TimeSync { get; set; }
 
         /// <summary>
         /// Gets ephemerides of specified celestial object
         /// </summary>
-        List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
+        ICollection<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
         Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories);
         ICollection<string> GetEphemerisCategories(CelestialObject body);
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null);
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
+
+        // TODO: move to ISkyMap
         ICollection<Tuple<int, int>> ConstellationLines { get; set; }
         IDictionary<string, string> StarNames { get; }
         IEnumerable<CelestialObject> CelestialObjects { get; }
@@ -50,6 +53,11 @@ namespace Astrarium.Types
         /// Function that gets equatorial coordinates of the Sun
         /// </summary>
         Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; }
+
+        /// <summary>
+        /// Function that gets equatorial coordinates of the Moon
+        /// </summary>
+        Func<SkyContext, CrdsEquatorial> MoonEquatorial { get; set; }
 
         /// <summary>
         /// Searches celestial objects by string.

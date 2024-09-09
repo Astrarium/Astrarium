@@ -65,11 +65,6 @@ namespace Astrarium.Plugins.Planner.ImportExport
                 double linesCount = File.ReadLines(filePath).Count();
                 long counter = 0;
 
-                //Func<string, string, bool> CompareString = (string s1, string s2) =>
-                //{
-
-                //};
-
                 while ((line = file.ReadLine()) != null)
                 {
                     if (token.HasValue && token.Value.IsCancellationRequested)

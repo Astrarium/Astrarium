@@ -38,6 +38,11 @@ namespace System.Windows.Forms
         public virtual TimeSpan TileExpirationPeriod { get; set; } = TimeSpan.FromDays(30);
 
         /// <summary>
+        /// Gets projection used by the tile server
+        /// </summary>
+        public virtual IProjection Projection => SphericalMercatorProjection.Instance;
+
+        /// <summary>
         /// Displayable name of the tile server, i.e. human-readable map name, for example, "Open Street Map".
         /// </summary>
         public abstract string Name { get; }

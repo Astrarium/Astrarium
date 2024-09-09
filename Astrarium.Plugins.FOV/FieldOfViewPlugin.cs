@@ -64,11 +64,11 @@ namespace Astrarium.Plugins.FOV
             {
                 double w = cameraFovFrame.Width;
                 double h = cameraFovFrame.Height;
-                fov = Math.Sqrt(w * w + h * h);
+                fov = Math.Sqrt(w * w + h * h) / 2;
             }
             else
             {
-                double scale = Math.Min(map.Width, map.Height) / (Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / 2);
+                double scale = Math.Min(map.Projection.ScreenWidth, map.Projection.ScreenHeight) / (Math.Sqrt(map.Projection.ScreenWidth * map.Projection.ScreenWidth + map.Projection.ScreenHeight * map.Projection.ScreenHeight) / 2);
                 if (param.Frame is CircularFovFrame circularFovFrame)
                 {
                     fov = circularFovFrame.Size / scale;
@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.FOV
             }
             else
             {
-                map.GoToPoint(map.MousePosition, TimeSpan.FromSeconds(1), fov);
+                map.GoToPoint(map.MouseEquatorialCoordinates, TimeSpan.FromSeconds(1), fov);
             }
         }
 
@@ -95,16 +95,17 @@ namespace Astrarium.Plugins.FOV
             param.Frame.Enabled = param.MenuItem.IsChecked;
 
             settings.SetAndSave("FovFrames", fovFrames);
+            map.Invalidate();
 
             NotifyPropertyChanged(
-                nameof(FrameContextMenuItems), 
+                nameof(FrameContextMenuItems),
                 nameof(IsContextMenuVisible));
         }
 
         private void AddFovFrame()
         {
             var viewModel = ViewManager.CreateViewModel<FovSettingsVM>();
-            viewModel.Frame = new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = new SkyColor(Color.Purple) };
+            viewModel.Frame = new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = Color.Purple };
             if (ViewManager.ShowDialog(viewModel) ?? false)
             {
                 fovFrames.Add(viewModel.Frame);

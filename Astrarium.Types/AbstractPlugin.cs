@@ -1,6 +1,8 @@
 ﻿using Astrarium.Types.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 
 namespace Astrarium.Types
@@ -29,7 +31,12 @@ namespace Astrarium.Types
         /// Gets configurations of menu items
         /// </summary>
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
-        
+
+        /// <summary>
+        /// Gets collection of extensions for Object Info Window.
+        /// </summary>
+        public List<ObjectInfoExtension> ObjectInfoExtensions { get; } = new List<ObjectInfoExtension>();
+
         /// <summary>
         /// Exports resource dictionaries to the application
         /// </summary>
@@ -43,13 +50,18 @@ namespace Astrarium.Types
             }
         }
 
+        protected void ExtendObjectInfo<TViewControl, TViewModel>(string title, Func<SkyContext, CelestialObject, TViewModel> viewModelProvider)
+        {
+            ObjectInfoExtensions.Add(new ObjectInfoExtension(title, typeof(TViewControl), viewModelProvider));
+        }
+
         /// <summary>
         /// Defines a setting with specified name and default value.
         /// </summary>
         /// <param name="name">Unique setting name.</param>
         /// <param name="defaultValue">Default setting name.</param>
         /// <param name="isPermanent">Flag indicating the setting should not be resetted.</param>
-        public void DefineSetting(string name, object defaultValue, bool isPermanent = false)
+        protected void DefineSetting(string name, object defaultValue, bool isPermanent = false)
         {
             SettingDefinitions.Add(new SettingDefinition(name, defaultValue, isPermanent));
         }
@@ -59,7 +71,7 @@ namespace Astrarium.Types
         /// </summary>
         /// <typeparam name="TSectionControl">Type of UI control responsive for displaying settings.</typeparam>
         /// <typeparam name="TViewModel">Type of ViewModel for the UI control.</typeparam>
-        public void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
+        protected void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
         {
             SettingSections.Add(new SettingSectionDefinition(typeof(TSectionControl), typeof(TViewModel)));
         }
@@ -68,5 +80,10 @@ namespace Astrarium.Types
         /// Called when the plugin is ready to be initialized
         /// </summary>
         public virtual void Initialize() { }
+
+        /// <summary>
+        /// Gets plugin name
+        /// </summary>
+        public static string GetName(Type pluginType) => FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(pluginType).Location).ProductName;
     }
 }

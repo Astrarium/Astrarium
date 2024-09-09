@@ -39,22 +39,9 @@ namespace Astrarium.Plugins.Tracks
             MenuItems.Add(MenuItemPosition.MainMenuTools, toolsMenuTracks);
         }
 
-        public bool IsMotionTrackEnabled
-        {
-            get
-            {
-                var body = map.SelectedObject;
-                return body != null && body is IMovingObject;
-            }
-        }
+        public bool IsMotionTrackEnabled => map.SelectedObject != null && map.SelectedObject is IMovingObject;
 
-        public bool IsTracksListEnabled
-        {
-            get
-            {
-                return trackCalc.Tracks.Count > 0;
-            }
-        }
+        public bool IsTracksListEnabled => trackCalc.Tracks.Count > 0;
 
         private void ShowMotionTrackWindow()
         {

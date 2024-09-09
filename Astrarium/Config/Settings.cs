@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace Astrarium.Config
 {
@@ -94,11 +95,23 @@ namespace Astrarium.Config
             return Get<bool>(settingName, defaultValue);
         }
 
+        public Color GetColor(string settingName)
+        {
+            return Get<Color>(settingName).Tint(Get("NightMode"));
+        }
+
         public T Get<T>(string settingName, T defaultValue = default(T))
         {
             if (SettingsValues.ContainsKey(settingName))
             {
-                return (T)SettingsValues[settingName];
+                try
+                {
+                    return (T)SettingsValues[settingName];
+                }
+                catch
+                {
+                    return defaultValue;
+                }
             }
             else
             {

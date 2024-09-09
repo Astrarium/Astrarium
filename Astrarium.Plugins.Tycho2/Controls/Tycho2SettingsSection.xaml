@@ -11,20 +11,23 @@
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
-    <StackPanel Orientation="Vertical" Margin="6">
+    <StackPanel Orientation="Vertical" Margin="6" IsEnabled="{Binding IsEnabled}">
         <CheckBox Content="{t:Text Settings.Tycho2}" IsChecked="{Binding Settings.Tycho2}" Margin="2" />
 
         <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.Tycho2}">
             <TextBlock Margin="2 8 2 2" Text="{t:Text Settings.Tycho2.RootDir.Title}" />
             <c:FilePathPicker Caption="{t:Text Settings.Tycho2.RootDir.DialogCaption}" Mode="Directory" SelectedPath="{Binding Settings.Tycho2RootDir}" Validator="{Binding ValidateCatalogPath}" />
 
-            <TextBlock Visibility="{Binding Catalog.IsLoaded, Converter={s:InverseBoolToVisibilityConverter}}" Margin="2 8 2 2" TextWrapping="Wrap">            
-                <Run Text="{t:Text Settings.Tycho2.NotFound}" />
-                <LineBreak />
-                <Hyperlink Command="{Binding OpenCatalogUrlCommand}"><Run Text="https://github.com/Astrarium/Tycho2" /></Hyperlink>
-            </TextBlock>
+            <StackPanel Orientation="Vertical" Visibility="{Binding Catalog.IsLoaded, Converter={s:InverseBoolToVisibilityConverter}}">
+                <TextBlock Margin="2 8 2 2" TextWrapping="Wrap" Text="{t:Text Settings.Tycho2.NotFound}" />
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{t:Text Tycho2.DownloadAutoButton}" Command="{Binding DownloadCatalogCommand}" MinWidth="100" Padding="8 0" Margin="0 8 0 0" Width="Auto" HorizontalAlignment="Left" />
+                    <Button Content="{t:Text Tycho2.DownloadManualButton}" Command="{Binding OpenCatalogUrlCommand}" MinWidth="100" Padding="8 0" Margin="4 8 0 0" Width="Auto" HorizontalAlignment="Left" />
+                </StackPanel>
+            </StackPanel>
 
             <TextBlock Text="{t:Text Settings.Tycho2.Loaded}" Visibility="{Binding Catalog.IsLoaded, Converter={s:BoolToVisibilityConverter}}" Margin="2 8 2 2" TextWrapping="Wrap" />
+
         </StackPanel>
     </StackPanel>
 </c:SettingsSection>

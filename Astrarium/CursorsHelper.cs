@@ -100,6 +100,7 @@ namespace Astrarium
             [OCR_IBEAM] = "IBeam.cur",
             [OCR_CROSS] = "Cross.cur",
             [OCR_HAND] = "Hand.cur",
+            [OCR_HELP] = "Help.cur",
             [OCR_NO] = "No.cur"
         };
 

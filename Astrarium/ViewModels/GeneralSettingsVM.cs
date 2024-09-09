@@ -30,8 +30,6 @@ namespace Astrarium.ViewModels
 
         public string[] Themes { get; private set; }
 
-        public DateTimeSyncPeriodItem[] DateTimeSyncPeriods { get; private set; }
-
         public string SelectedTheme
         {
             get => Settings.Get("AppTheme", "DeepBlue");
@@ -46,20 +44,9 @@ namespace Astrarium.ViewModels
         {
             Settings = settings;
             Languages = Text.GetLocales();
-            Themes = new string[] { "DeepBlue", "Graphite" };
-            DateTimeSyncPeriods = new int[] { 1, 5, 10, 15, 30, 60, 300, 600 }.Select(v => new DateTimeSyncPeriodItem(v)).ToArray();
+            Themes = new string[] { "DeepBlue", "Graphite", "Marsh" };
             NotifyPropertyChanged(nameof(SelectedLanguage));
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SelectedLanguage));
-        }
-
-        public class DateTimeSyncPeriodItem
-        {
-            public int Value { get; set; }
-            public string Text => Types.Text.Get($"Settings.DateTimeSyncPeriod.{Value}");
-            public DateTimeSyncPeriodItem(int val)
-            {
-                Value = val;
-            }
         }
     }
 }

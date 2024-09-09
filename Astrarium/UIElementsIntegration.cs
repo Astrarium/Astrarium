@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Config.Controls;
+using Astrarium.Projections;
 using Astrarium.Types;
 using Astrarium.ViewModels;
 using System;
@@ -8,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Astrarium
 {
@@ -17,6 +19,7 @@ namespace Astrarium
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
         public List<SettingDefinition> SettingDefinitions { get; } = new List<SettingDefinition>();
         public List<SettingSectionDefinition> SettingSections { get; } = new List<SettingSectionDefinition>();
+        public List<ObjectInfoExtension> ObjectInfoExtensions { get; } = new List<ObjectInfoExtension>();
 
         public UIElementsIntegration()
         {
@@ -25,9 +28,6 @@ namespace Astrarium
 
             // App theme
             SettingDefinitions.Add(new SettingDefinition("AppTheme", "DeepBlue"));
-
-            // DateTime sync period
-            SettingDefinitions.Add(new SettingDefinition("DateTimeSyncPeriod", 1));
 
             // Flag indicating main window should be maximized on startup
             SettingDefinitions.Add(new SettingDefinition("StartMaximized", false));
@@ -48,17 +48,34 @@ namespace Astrarium
             SettingDefinitions.Add(new SettingDefinition("IsStatusBarVisible", true));
 
             // Default observer location
-            SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"), isPermanent: true));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Nizhny Novgorod"), isPermanent: true));
+
+            // Favorite locations
+            SettingDefinitions.Add(new SettingDefinition("FavoriteLocations", new List<CrdsGeographical>(), isPermanent: true));
+
+            // Default tile server
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationTileServer", "Offline map"));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationOverlayTileServer", ""));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationOverlayOpacity", 0.5f));
 
             // Default size of main window
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
 
-            // Default color schema
-            SettingDefinitions.Add(new SettingDefinition("Schema", ColorSchema.Night));
+            // Projection
+            SettingDefinitions.Add(new SettingDefinition("Projection", nameof(StereographicProjection)));
+
+            // Night mode flag
+            SettingDefinitions.Add(new SettingDefinition("NightMode", false));
 
             // Map transformation
-            SettingDefinitions.Add(new SettingDefinition("IsMirrored", false));
-            SettingDefinitions.Add(new SettingDefinition("IsInverted", false));
+            SettingDefinitions.Add(new SettingDefinition("FlipHorizontal", false));
+            SettingDefinitions.Add(new SettingDefinition("FlipVertical", false));
+
+            // View mode
+            SettingDefinitions.Add(new SettingDefinition("ViewMode", ProjectionViewType.Horizontal));
+
+            // Time sync on start
+            SettingDefinitions.Add(new SettingDefinition("TimeSyncOnStart", false));
 
             SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));

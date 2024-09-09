@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
@@ -40,9 +41,9 @@ namespace Astrarium.Types
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
         /// </summary>
         /// <typeparam name="TViewModel"></typeparam>
-        public static void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase
+        public static void ShowWindow<TViewModel>(ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            viewManager.ShowWindow<TViewModel>(isSingleInstance);
+            viewManager.ShowWindow<TViewModel>(flags);
         }
 
         public static bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
@@ -50,9 +51,9 @@ namespace Astrarium.Types
             return viewManager.ShowDialog<TViewModel>();
         }
 
-        public static void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
+        public static void ShowWindow<TViewModel>(TViewModel viewModel, ViewFlags flags = ViewFlags.None) where TViewModel : ViewModelBase
         {
-            viewManager.ShowWindow(viewModel);
+            viewManager.ShowWindow(viewModel, flags);
         }
 
         public static bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
@@ -80,6 +81,11 @@ namespace Astrarium.Types
         public static void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null)
         {
             viewManager.ShowProgress(caption, text, tokenSource, progress);
+        }
+
+        public static void ShowProgress(string caption, Progress<string> textProgress, CancellationTokenSource tokenSource, Progress<double> progress = null)
+        {
+            viewManager.ShowProgress(caption, textProgress, tokenSource, progress);
         }
 
         /// <summary>
@@ -146,6 +152,11 @@ namespace Astrarium.Types
             return viewManager.ShowSearchDialog(filter);
         }
 
+        public static CrdsGeographical ShowLocationDialog(CrdsGeographical location)
+        {
+            return viewManager.ShowLocationDialog(location);
+        }
+
         public static TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
         {
             return viewManager.ShowTimeSpanDialog(timeSpan);
@@ -154,6 +165,11 @@ namespace Astrarium.Types
         public static void ShowPopupMessage(string message)
         {
             viewManager.ShowPopupMessage(message);
+        }
+
+        public static void ShowTooltipMessage(PointF mouse, string message)
+        {
+            viewManager.ShowTooltipMessage(mouse, message);
         }
     }
 }

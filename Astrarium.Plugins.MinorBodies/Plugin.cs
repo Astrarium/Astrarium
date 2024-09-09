@@ -38,11 +38,11 @@ namespace Astrarium.Plugins.MinorBodies
             DefineSetting("AsteroidsDownloadOrbitalElementsUrl", "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT");
             DefineSetting("AsteroidsDownloadOrbitalElementsTimestamp", DateTime.MinValue, isPermanent: true);
 
-            DefineSetting("ColorAsteroidsLabels", new SkyColor(10, 44, 37));
-            DefineSetting("ColorCometsLabels", new SkyColor(78, 84, 99));
+            DefineSetting("ColorAsteroidsLabels", Color.SlateBlue);
+            DefineSetting("ColorCometsLabels", Color.Turquoise);
 
-            DefineSetting("AsteroidsLabelsFont", new Font("Arial", 8));
-            DefineSetting("CometsLabelsFont", new Font("Arial", 8));
+            DefineSetting("AsteroidsLabelsFont", new Font("Arial", 9));
+            DefineSetting("CometsLabelsFont", new Font("Arial", 9));
 
             DefineSettingsSection<CometsSettingsSection, CometsSettingsVM>();
             DefineSettingsSection<AsteroidsSettingsSection, AsteroidsSettingsVM>();

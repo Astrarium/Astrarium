@@ -2,7 +2,7 @@
 
 namespace Astrarium.Plugins.UCAC4
 {
-    public class UCAC4Star : CelestialObject, IMagnitudeObject
+    public class UCAC4Star : CelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
         public override string Type => "Star";

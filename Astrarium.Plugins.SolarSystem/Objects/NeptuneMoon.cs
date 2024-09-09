@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class NeptuneMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject, IMagnitudeObject
+    public class NeptuneMoon : SizeableCelestialObject, ISolarSystemObject, IMovingObject, IMagnitudeObject, IObservableObject
     {
         public NeptuneMoon(int number)
         {
@@ -25,11 +25,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Moon index, 1-based
         /// </summary>
         public int Number { get; private set; }
-
-        /// <summary>
-        /// Apparent equatorial coordinates of the moon
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
         /// Planetocentric rectangular coordinates of the moon
@@ -57,8 +52,6 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string[] Names => new[] { Name };
 
         public double DistanceFromEarth { get; internal set; }
-
-        public bool IsEclipsedByPlanet => false;
 
         public double AverageDailyMotion => 0.006668;
 

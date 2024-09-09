@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System.Drawing;
 
 namespace Astrarium.Types
 {
@@ -9,10 +10,10 @@ namespace Astrarium.Types
     public abstract class BaseRenderer : PropertyChangedBase
     {
         /// <summary>
-        /// Does rendering logic.
+        /// Does the rendering logic
         /// </summary>
-        /// <param name="map"><see cref="IMapContext"/> instance.</param>
-        public abstract void Render(IMapContext map);
+        /// <param name="map"></param>
+        public abstract void Render(ISkyMap map);
 
         /// <summary>
         /// Intitialization logic should be placed here.
@@ -24,15 +25,9 @@ namespace Astrarium.Types
         /// </summary>
         public abstract RendererOrder Order { get; }
 
-        /// <summary>
-        /// The function is called each time when position of mouse is changed.
-        /// Mouse position, converted to horizontal coordinates on map, is passed as parameter.
-        /// The function should return true if repaint of map is required, 
-        /// otherwise it should return false (default behaviour).
-        /// </summary>
-        /// <param name="mouse">Current mouse position on sky map</param>
-        /// <returns>True if repaint of map is required, otherwise false.</returns>
-        public virtual bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton) { return false; }
+        public virtual void OnMouseMove(ISkyMap map, MouseButton mouseButton) { }
+        public virtual void OnMouseDown(ISkyMap map, MouseButton mouseButton) { }
+        public virtual void OnMouseUp(ISkyMap map, MouseButton mouseButton) { }
     }
 
     /// <summary>
@@ -71,13 +66,23 @@ namespace Astrarium.Types
         EarthOrbit = 5,
 
         /// <summary>
+        /// Rendering layer for atmosphere
+        /// </summary>
+        Atmosphere = 6,
+
+        /// <summary>
         /// Rendering layer for terrestrial objects
         /// </summary>
-        Terrestrial = 6,
+        Terrestrial = 7,
+
+        /// <summary>
+        /// Rendering layer for surrounding objects, like fog, solar rays flares and etc.
+        /// </summary>
+        Surround = 8,
 
         /// <summary>
         /// Rendering layer for foreground objects which overlap all previous layers
         /// </summary>
-        Foreground = 7
+        Foreground = 9
     }
 }

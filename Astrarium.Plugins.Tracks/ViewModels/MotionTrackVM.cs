@@ -15,14 +15,14 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
-        public ColorSchema ColorSchema { get; private set; }
+        public bool NightMode { get; private set; }
 
         public MotionTrackVM(ISky sky, ISettings settings, TrackCalc trackCalc)
         {
-            this.sky = sky;            
+            this.sky = sky;
             this.trackCalc = trackCalc;
-            
-            ColorSchema = settings.Get<ColorSchema>("Schema");
+
+            NightMode = settings.Get("NightMode");
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
@@ -47,7 +47,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
-        public SkyColor TrackColor { get; set; } = new SkyColor(Color.DimGray);
+        public Color TrackColor { get; set; } = Color.DimGray;
         public bool DrawLabels { get; set; }
         public TimeSpan LabelsStep { get; set; } = TimeSpan.FromDays(1);
 
@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
                 foreach (var eq in positions)
                 {
-                    track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
+                    track.Points.Add(new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")));
                 }
 
                 Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);

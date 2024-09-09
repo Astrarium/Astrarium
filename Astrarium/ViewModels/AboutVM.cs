@@ -16,6 +16,7 @@ namespace Astrarium.ViewModels
     public class AboutVM : ViewModelBase
     {
         public string ProductName => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductName;
+        public string ProductDescription => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).Comments;
         public string Version => Text.Get("AboutWindow.Version", ("version", FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion));
         public string Copyright => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).LegalCopyright;
 

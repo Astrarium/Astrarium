@@ -14,7 +14,6 @@
     SizeToContent="Height"
     s:WindowProperties.MinButtonVisible="Collapsed"
     s:WindowProperties.MaxButtonVisible="Collapsed"
-    v:ColorPickerWindow.SliderOnly="{Binding SliderOnly}"
     v:ColorPickerWindow.SelectedColor="{Binding SelectedColor, Mode=TwoWay}"
     v:ColorPickerWindow.SliderBorderColor="{DynamicResource ColorControlDarkBackground}"
     v:ColorPickerWindow.SliderThumbsColor="{DynamicResource ColorControlLightBackground}"

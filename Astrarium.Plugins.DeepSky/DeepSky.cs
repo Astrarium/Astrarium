@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace Astrarium.Plugins.DeepSky
 {
-    public class DeepSky : SizeableCelestialObject, IMagnitudeObject
+    public class DeepSky : SizeableCelestialObject, IMagnitudeObject, IObservableObject
     {
         /// <inheritdoc />
-        public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";
+        public override string Type => $"DeepSky.{Status}";
 
         /// <inheritdoc />
         public override string CommonName => CatalogName;
@@ -24,25 +24,29 @@ namespace Astrarium.Plugins.DeepSky
         public bool IC { get => RecordNumber >= 9106; }
 
         /// <summary>
-        /// Catalog number
+        /// NGC/IC Catalog number
         /// </summary>
         public ushort Number { get; set; }
 
+        /// <summary>
+        /// NGC/IC component letter, if applicable
+        /// </summary>
         public char Letter { get; set; }
 
+        /// <summary>
+        /// NGC/IC component name, if applicable (A, B, etc.)
+        /// </summary>
         public char Component { get; set; }
 
+        /// <summary>
+        /// Messier catalog number
+        /// </summary>
         public byte Messier { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for epoch J2000.0
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; }
-
-        /// <summary>
-        /// Equatorial coordinates for current epoch
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
         /// Status of deep sky object
@@ -53,21 +57,6 @@ namespace Astrarium.Plugins.DeepSky
         /// Visual (if present) or photographic magnitude
         /// </summary>
         public float Magnitude { get; set; }
-
-        /// <summary>
-        /// Larger diameter, in seconds of arc
-        /// </summary>
-        public float SizeA { get; set; }
-
-        /// <summary>
-        /// Smaller diameter, in seconds of arc
-        /// </summary>
-        public float SizeB { get; set; }
-
-        /// <summary>
-        /// Position angle
-        /// </summary>
-        public short PA { get; set; }
 
         /// <summary>
         /// Proper name of NGC/IC object
@@ -117,9 +106,11 @@ namespace Astrarium.Plugins.DeepSky
             }
         }
 
-        public override double Semidiameter { get => Math.Max(SizeA, SizeB) * 30; }
+        /// <inheritdoc />
+        public override float Semidiameter => Math.Max(LargeSemidiameter ?? 0, SmallSemidiameter ?? 0);
 
-        public ICollection<CelestialPoint> Outline { get; set; }
+        /// <inheritdoc />
+        public override double? ShapeEpoch => Date.EPOCH_J2000;
 
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object

@@ -1,222 +1,213 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.BrightStars
 {
     public class StarsRenderer : BaseRenderer
     {
         private readonly ISky sky;
+        private readonly ISkyMap map;
         private readonly StarsCalc starsCalc;
         private readonly ISettings settings;
 
-        private Pen penConLine;
-        private Color starColor;
-        private Brush brushStarNames;
-
-        private const int limitAllNames = 40;
-        private const int limitBayerNames = 40;
+        private const int limitBayerNames = 20;
         private const int limitProperNames = 20;
         private const int limitFlamsteedNames = 10;
         private const int limitVarNames = 5;
 
-        public StarsRenderer(ISky sky, StarsCalc starsCalc, ISettings settings)
+        public StarsRenderer(ISky sky, ISkyMap map, StarsCalc starsCalc, ISettings settings)
         {
             this.sky = sky;
+            this.map = map;
             this.starsCalc = starsCalc;
             this.settings = settings;
-
-            penConLine = new Pen(new SolidBrush(Color.Transparent));
-            penConLine.DashStyle = DashStyle.Custom;
-            penConLine.DashPattern = new float[] { 2, 2 };
-            starColor = Color.White;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            Graphics g = map.Graphics;
-            var allStars = starsCalc.Stars;
-            bool isGround = settings.Get<bool>("Ground");
+            var prj = map.Projection;
+            bool nightMode = settings.Get("NightMode");
 
-            if (settings.Get<bool>("ConstLines"))
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+            GL.Enable(GL.CULL_FACE);
+
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
             {
-                PointF p1, p2;
-                CrdsHorizontal h1, h2;
-                penConLine.Brush = new SolidBrush(map.GetColor("ColorConstLines"));
+                GL.CullFace(GL.BACK);
+            }
+            else
+            {
+                GL.CullFace(GL.FRONT);
+            }
+
+            var allStars = starsCalc.Stars;
+
+            double maxFov = prj.MaxFov * 0.7;
+            double fov = prj.RealFov;
+
+            // equatorial coordinates of screen center for current epoch
+            CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+
+            if (settings.Get("ConstLines"))
+            {
+                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(nightMode), 1) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
-                    h1 = allStars.ElementAt(line.Item1).Horizontal;
-                    h2 = allStars.ElementAt(line.Item2).Horizontal;
+                    var s1 = allStars.ElementAt(line.Item1);
+                    var s2 = allStars.ElementAt(line.Item2);
 
-                    if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) &&
-                        Angle.Separation(map.Center, h1) < 90 &&
-                        Angle.Separation(map.Center, h2) < 90)
+                    if (Angle.Separation(eqCenter, s1.Equatorial) < maxFov &&
+                        Angle.Separation(eqCenter, s2.Equatorial) < maxFov)
                     {
-                        p1 = map.Project(h1);
-                        p2 = map.Project(h2);
-
-                        var points = map.SegmentScreenIntersection(p1, p2);
-                        if (points.Length == 2)
+                        var p1 = prj.Project(s1.Equatorial);
+                        var p2 = prj.Project(s2.Equatorial);
+                        if (p1 != null && p2 != null)
                         {
-                            g.DrawLine(penConLine, points[0], points[1]);
+                            GL.DrawLine(p1, p2, linePen);
                         }
                     }
                 }
             }
 
-            if (settings.Get<bool>("Stars") && !(map.Schema == ColorSchema.Day && map.DayLightFactor == 1))
+            if (settings.Get("Stars"))
             {
-                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle);
-                if (isGround)
-                {
-                    stars = stars.Where(s => s.Horizontal.Altitude >= 0);
-                }
+                float daylightFactor = map.DaylightFactor;
+
+                // no stars if the Sun above horizon
+                if (daylightFactor == 1) return;
+
+                float starDimming = 1 - daylightFactor;
+                float minStarSize = daylightFactor * 10; // empiric
+
+                var fontStarNames = settings.Get<Font>("StarsLabelsFont");
+                var color = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
+                var brushStarNames = new SolidBrush(color);
+                bool properNames = settings.Get("StarsProperNames");
+                float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
+
+                float magLimit = prj.MagLimit;
+                var stars = starsCalc.GetStars(eqCenter, fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
-                    float size = map.GetPointSize(star.Magnitude);
-                    if (size > 0)
+                    double alt = prj.ToHorizontal(star.Equatorial).Altitude;
+                    float size = prj.GetPointSize(star.Magnitude, altitude: alt) * starDimming;
+                    if (size > minStarSize)
                     {
-                        PointF p = map.Project(star.Horizontal);
-                        if (!map.IsOutOfScreen(p))
+                        var p = prj.Project(star.Equatorial);
+
+                        if (prj.IsInsideScreen(p))
                         {
-                            if (map.Schema == ColorSchema.White)
-                            {
-                                g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
-                            }
+                            GL.PointSize(size * starsScalingFactor);
+                            GL.Color3(GetColor(star.Color).Tint(nightMode));
 
-                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - size / 2, p.Y - size / 2, size, size);
+                            GL.Begin(GL.POINTS);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
 
-                            map.AddDrawnObject(star);
-                        }
-                    }
-                }
+                            map.AddDrawnObject(p, star);
 
-                if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
-                {
-                    brushStarNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
-
-                    foreach (var star in stars)
-                    {
-                        float size = map.GetPointSize(star.Magnitude);
-                        if (size > 0)
-                        {
-                            PointF p = map.Project(star.Horizontal);
-                            if (!map.IsOutOfScreen(p))
-                            {
-                                DrawStarName(map, p, star, size);
-                            }
+                            DrawStarName(prj, fontStarNames, brushStarNames, properNames, p, star, size);
                         }
                     }
                 }
             }
+
+            GL.Disable(GL.POINT_SMOOTH);
+            GL.Disable(GL.BLEND);
+            GL.Disable(GL.CULL_FACE);
         }
 
-        private Color GetColor(IMapContext map, char spClass)
+        private Color GetColor(char spClass)
         {
-            if (map.Schema == ColorSchema.White)
-            {
-                return Color.Black;
-            }
-
             if (settings.Get("StarsColors"))
             {
                 switch (spClass)
                 {
                     case 'O':
                     case 'W':
-                        starColor = Color.LightBlue;
-                        break;
+                        return Color.LightBlue;
                     case 'B':
-                        starColor = Color.LightCyan;
-                        break;
+                        return Color.LightCyan;
                     case 'A':
-                        starColor = Color.White;
-                        break;
+                        return Color.White;
                     case 'F':
-                        starColor = Color.LightYellow;
-                        break;
+                        return Color.LightYellow;
                     case 'G':
-                        starColor = Color.Yellow;
-                        break;
+                        return Color.Yellow;
                     case 'K':
-                        starColor = Color.Orange;
-                        break;
+                        return Color.Orange;
                     case 'M':
-                        starColor = Color.OrangeRed;
-                        break;
+                        return Color.OrangeRed;
                     default:
-                        starColor = Color.White;
-                        break;
+                        return Color.White;
                 }
             }
             else
             {
-                starColor = Color.White;
+                return Color.White;
             }
-
-            return map.GetColor(starColor, Color.Transparent);
         }
 
         /// <summary>
         /// Draws star name
         /// </summary>
-        private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
+        private void DrawStarName(Projection prj, Font font, Brush brush, bool properNames, PointF point, Star s, float diam)
         {
-            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-
             // Star has proper name
-            if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
+            if (properNames && s.ProperName != null && prj.Fov < limitProperNames)
             {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, s.ProperName, point, diam);
+                map.DrawObjectLabel(s.ProperName, font, brush, point, diam);
                 return;
             }
 
             // Star has Bayer name (greek letter)
-            if (map.ViewAngle < limitBayerNames)
+            if (prj.Fov < limitBayerNames)
             {
                 string bayerName = s.BayerName;
                 if (bayerName != null)
                 {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, bayerName, point, diam);
+                    map.DrawObjectLabel(bayerName, font, brush, point, diam);
                     return;
                 }
             }
+
             // Star has Flamsteed number
-            if (map.ViewAngle < limitFlamsteedNames)
+            if (prj.Fov < limitFlamsteedNames)
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
+                    map.DrawObjectLabel(flamsteedNumber, font, brush, point, diam);
                     return;
                 }
             }
 
             // Star has variable id
-            if (map.ViewAngle < limitVarNames && s.VariableName != null)
+            if (prj.Fov < limitVarNames && s.VariableName != null)
             {
                 string varName = s.VariableName.Split(' ')[0];
                 if (!varName.All(char.IsDigit))
                 {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, varName, point, diam);
+                    map.DrawObjectLabel(varName, font, brush, point, diam);
                     return;
                 }
             }
 
             // Star doesn't have any names
-            if (map.ViewAngle < 2)
+            if (prj.Fov < 2)
             {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
+                map.DrawObjectLabel($"HR {s.Number}", font, brush, point, diam);
             }
         }
 

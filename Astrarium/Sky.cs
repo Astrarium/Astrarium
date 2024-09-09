@@ -31,27 +31,27 @@ namespace Astrarium
         public SkyContext Context { get; private set; }
 
         public event Action Calculated;
-        public event Action DateTimeSyncChanged;
+        public event Action<bool> TimeSyncChanged;
 
-        private ManualResetEvent dateTimeSyncResetEvent = new ManualResetEvent(false);
-        private bool dateTimeSync = false;
-        public bool DateTimeSync
+        private ManualResetEvent timeSyncResetEvent = new ManualResetEvent(false);
+        private bool timeSync = false;
+        public bool TimeSync
         {
-            get { return dateTimeSync; }
+            get => timeSync;
             set
             {
-                if (dateTimeSync != value)
+                if (timeSync != value)
                 {
-                    dateTimeSync = value;
-                    if (dateTimeSync)
+                    timeSync = value;
+                    if (timeSync)
                     {
-                        dateTimeSyncResetEvent.Set();
+                        timeSyncResetEvent.Set();
                     }
                     else
                     {
-                        dateTimeSyncResetEvent.Reset();
+                        timeSyncResetEvent.Reset();
                     }
-                    DateTimeSyncChanged?.Invoke();
+                    TimeSyncChanged?.Invoke(value);
                 }
             }
         }
@@ -73,25 +73,27 @@ namespace Astrarium
         /// <inheritdoc />
         public Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
 
+        /// <inheritdoc />
+        public Func<SkyContext, CrdsEquatorial> MoonEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
+
         private ISettings settings;
 
         public Sky(ISettings settings)
         {
             this.settings = settings;
+            new Thread(TimeSyncWorker) { IsBackground = true }.Start();
+        }
 
-            new Thread(() =>
+        private void TimeSyncWorker()
+        {
+            do
             {
-                do
-                {
-                    dateTimeSyncResetEvent.WaitOne();
-                    Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-                    Calculate();
-                    int period = settings.Get("DateTimeSyncPeriod", 1) * 1000;
-                    Thread.Sleep(period);
-                }
-                while (true);
-            })
-            { IsBackground = true }.Start();
+                timeSyncResetEvent.WaitOne();
+                Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                Calculate();
+                Thread.Sleep(5000);
+            }
+            while (true);
         }
 
         public void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders)
@@ -207,50 +209,51 @@ namespace Astrarium
 
         public void SetDate(double jd)
         {
-            DateTimeSync = false;
+            TimeSync = false;
             Context.JulianDay = jd;
             Calculate();
         }
 
         public void Calculate()
         {
-            foreach (var calc in Calculators)
-            {
-                calc.Calculate(Context);
-            }
+            Calculators.ForEach(x => x.Calculate(Context));
             Calculated?.Invoke();
         }
 
         // TODO: add ability to specify location and preferFast flag
-        public List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        public ICollection<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<Ephemerides> all = new List<Ephemerides>();
+            Type bodyType = body.GetType();
 
-            var config = EphemConfigs[body.GetType()];
-
-            var itemsToBeCalled = config.Filter(categories);
-
-            for (double jd = from; jd < to; jd += step)
+            if (EphemConfigs.ContainsKey(bodyType))
             {
-                if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                var config = EphemConfigs[bodyType];
+
+                var itemsToBeCalled = config.Filter(categories);
+
+                for (double jd = from; jd < to; jd += step)
                 {
-                    break;
+                    if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        progress?.Report((jd - from) / (to - from) * 100);
+                    }
+
+                    var context = new SkyContext(jd, Context.GeoLocation);
+
+                    Ephemerides ephemerides = new Ephemerides(body);
+
+                    foreach (var item in itemsToBeCalled)
+                    {
+                        ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                    }
+
+                    all.Add(ephemerides);
                 }
-                else
-                {
-                    progress?.Report((jd - from) / (to - from) * 100);
-                }
-
-                var context = new SkyContext(jd, Context.GeoLocation);
-
-                Ephemerides ephemerides = new Ephemerides(body);
-
-                foreach (var item in itemsToBeCalled)
-                {
-                    ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
-                }
-
-                all.Add(ephemerides);
             }
 
             return all;
@@ -258,12 +261,17 @@ namespace Astrarium
 
         public Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories)
         {
-            var config = EphemConfigs[body.GetType()];
-            var itemsToBeCalled = config.Filter(categories);
             Ephemerides ephemerides = new Ephemerides(body);
-            foreach (var item in itemsToBeCalled)
+            Type bodyType = body.GetType();
+            if (EphemConfigs.ContainsKey(bodyType))
             {
-                ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                var config = EphemConfigs[bodyType];
+                var itemsToBeCalled = config.Filter(categories);
+
+                foreach (var item in itemsToBeCalled)
+                {
+                    ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
+                }
             }
             return ephemerides;
         }
@@ -274,7 +282,7 @@ namespace Astrarium
 
             if (InfoProviders.ContainsKey(bodyType))
             {
-                var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).First();
+                var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).FirstOrDefault();
 
                 var infoType = typeof(CelestialObjectInfo<>).MakeGenericType(bodyType);
                 var info = (CelestialObjectInfo)Activator.CreateInstance(infoType, Context, body, ephem);
@@ -370,7 +378,7 @@ namespace Astrarium
         /// <inheritdoc />
         public CelestialObject Search(string objectType, string commonName = null)
         {
-            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName == commonName : true), 1).FirstOrDefault();
+            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName.Equals(commonName, StringComparison.OrdinalIgnoreCase) : true), 1).FirstOrDefault();
         }
 
         /// <inheritdoc />

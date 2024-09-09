@@ -1,5 +1,7 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Plugins.SolarSystem.Objects;
+using Astrarium.Plugins.SolarSystem.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -30,9 +32,9 @@ namespace Astrarium.Plugins.SolarSystem
         public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);
-            Sun.Horizontal = c.Get(Horizontal);
             Sun.Ecliptical = c.Get(Ecliptical);
             Sun.Semidiameter = c.Get(Semidiameter);
+            Sun.CenterDisk = CenterDisk(new SkyContext(c.JulianDayMidnight - c.GeoLocation.UtcOffset / 24, c.GeoLocation));
         }
 
         public CrdsEcliptical Ecliptical(SkyContext c)
@@ -81,14 +83,19 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(Equatorial).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        public double Semidiameter(SkyContext c)
+        public float Semidiameter(SkyContext c)
         {
-            return SolarEphem.Semidiameter(c.Get(Ecliptical).Distance);
+            return (float)SolarEphem.Semidiameter(c.Get(Ecliptical).Distance);
         }
 
         private double CarringtonNumber(SkyContext c)
         {
             return SolarEphem.CarringtonNumber(c.JulianDay);
+        }
+
+        private CrdsHeliographical CenterDisk(SkyContext c)
+        {
+            return SolarEphem.Center(c.JulianDay);
         }
 
         private Date Seasons(SkyContext c, Season s)
@@ -175,6 +182,8 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Distance")
             .AddRow("HorizontalParallax")
             .AddRow("AngularDiameter")
+            .AddRow("CenterDisk.Latitude")
+            .AddRow("CenterDisk.Longitude")
             .AddRow("CRN")
 
             .AddHeader(Text.Get("Sun.Seasons"))
@@ -209,6 +218,8 @@ namespace Astrarium.Plugins.SolarSystem
             e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
             e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
             e["CRN"] = (c, s) => c.Get(CarringtonNumber);
+            e["CenterDisk.Latitude", Formatters.Latitude] = (c, s) => c.Get(CenterDisk).Latitude;
+            e["CenterDisk.Longitude", Formatters.Longitude] = (c, s) => c.Get(CenterDisk).Longitude;
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)

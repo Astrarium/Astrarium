@@ -1,0 +1,40 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d">
+    
+    <!-- Captions, icons, etc. -->
+    <Color x:Key="ColorForeground">#ABED95</Color>
+
+    <!-- Window border -->
+    <Color x:Key="ColorWindowBorder">#333333</Color>
+
+    <!-- Window background -->
+    <Color x:Key="ColorWindowBackground">#233C20</Color>
+
+    <!-- Window title background -->
+    <Color x:Key="ColorWindowTitleBackground">#142A11</Color>
+
+    <!-- Window title text -->
+    <Color x:Key="ColorWindowTitleForeground">#CAF5A4</Color>
+
+    <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
+    <Color x:Key="ColorControlBackground">#3B5A38</Color>
+
+    <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
+    <Color x:Key="ColorControlLightBackground">#568251</Color>
+
+    <!-- Scrollbar background, disable tabs background-->
+    <Color x:Key="ColorControlDarkBackground">#2A4726</Color>
+
+    <!-- Selected list items background, hovered menu items -->
+    <Color x:Key="ColorSelection">#568251</Color>
+
+    <!-- Color of text over selected background -->
+    <Color x:Key="ColorSelectionForeground">#CAF5A4</Color>
+
+    <!-- Hovered checkbox and radiobutton outline -->
+    <Color x:Key="ColorHighlight">#CAF5A4</Color>
+
+</ResourceDictionary>

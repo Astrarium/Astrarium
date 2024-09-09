@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(SaturnMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double SaturnMoon_Semidiameter(SkyContext c, int m)
+        private float SaturnMoon_Semidiameter(SkyContext c, int m)
         {
             // distance from Earth to  Saturn, in a.u.
             double r = c.Get(Planet_DistanceFromEarth, Planet.SATURN);
@@ -46,7 +46,7 @@ namespace Astrarium.Plugins.SolarSystem
             double z = c.Get(SaturnMoon_Rectangular, m).Z;
 
             // visible moon semidiameter
-            return SaturnianMoons.MoonSemidiameter(r, z, m - 1);
+            return (float)SaturnianMoons.MoonSemidiameter(r, z, m - 1);
         }
 
         private float SaturnMoon_Magnitude(SkyContext c, int m)

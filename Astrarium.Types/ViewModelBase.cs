@@ -34,5 +34,10 @@ namespace Astrarium.Types
         {
             Closing?.Invoke(dialogResult);
         }
+
+        /// <summary>
+        /// Called when associated dialog or window is activated
+        /// </summary>
+        public virtual void OnActivated() { }
     }
 }

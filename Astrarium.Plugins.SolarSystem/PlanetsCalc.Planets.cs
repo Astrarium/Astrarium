@@ -135,9 +135,9 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visible semidianeter of planet
         /// </summary>
-        private double Planet_Semidiameter(SkyContext c, int p)
+        private float Planet_Semidiameter(SkyContext c, int p)
         {
-            return PlanetEphem.Semidiameter(p, c.Get(Planet_DistanceFromEarth, p));
+            return (float)PlanetEphem.Semidiameter(p, c.Get(Planet_DistanceFromEarth, p));
         }
 
         /// <summary>

@@ -83,10 +83,10 @@ namespace Astrarium.Plugins.SolarSystem
             return c.Get(MarsMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double MarsMoon_Semidiameter(SkyContext c, int m)
+        private float MarsMoon_Semidiameter(SkyContext c, int m)
         {
             var distance = c.Get(MarsMoon_Ecliptical, m).Distance;
-            return MartianMoons.Semidiameter(m, distance);
+            return (float)MartianMoons.Semidiameter(m, distance);
         }
 
         internal float MarsMoon_Magnitude(SkyContext c, int m)

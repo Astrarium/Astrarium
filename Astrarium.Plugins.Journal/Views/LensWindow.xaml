@@ -1,0 +1,43 @@
+﻿<Window x:Class="Astrarium.Plugins.Journal.Views.LensWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}"
+        Title="Lens" 
+        SnapsToDevicePixels="True"
+        MinHeight="400" Height="400"
+        MinWidth="450" Width="400">
+
+    <Grid Margin="4" SnapsToDevicePixels="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Margin="0 3" Content="Manufacturer" Grid.Row="0" Grid.Column="0" />
+        <TextBox Text="{Binding Lens.Vendor}" Grid.Row="0" Grid.Column="1" />
+
+        <Label Content="Model" Grid.Row="1" Grid.Column="0" />
+        <TextBox Text="{Binding Lens.Model}" Grid.Row="1" Grid.Column="1" />
+
+        <Label Content="Factor" Grid.Row="2" Grid.Column="0" />
+        <c:NumericUpDown HorizontalAlignment="Left" Width="60" Value="{Binding Lens.Factor}" Minimum="0.25" Maximum="5" DecimalPlaces="2" Step="0.5" Grid.Row="2" Grid.Column="1" />
+
+        <Separator Grid.Row="4" Grid.ColumnSpan="2" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="OK" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

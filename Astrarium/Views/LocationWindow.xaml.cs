@@ -1,24 +1,39 @@
-﻿using Astrarium.ViewModels;
+﻿using Astrarium.Types.Controls;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms.Integration;
 
 namespace Astrarium.Views
 {
     /// <summary>
     /// Interaction logic for LocationWindow.xaml
     /// </summary>
-    public partial class LocationWindow : Window
+    public partial class LocationWindow : MouseEventsInterceptableWindow
     {
         public LocationWindow()
         {
             InitializeComponent();
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Map.Dispose();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+        }
+
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            if (Map.ContextMenu.DataContext == null)
+            {
+                Map.ContextMenu.DataContext = DataContext;
+            }
+        }
+
+        protected override WindowsFormsHost Host => Map;
     }
 }

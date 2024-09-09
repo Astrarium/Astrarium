@@ -97,8 +97,8 @@ namespace Astrarium.Plugins.ASCOM
             ascom.PropertyChanged += Ascom_PropertyChanged;
             ascom.OnMessageShow += Ascom_OnMessageShow;
 
-            DefineSetting("TelescopeMarkerColor", new SkyColor(Color.DarkOrange));
-            DefineSetting("TelescopeMarkerFont", SystemFonts.DefaultFont);
+            DefineSetting("TelescopeMarkerColor", Color.DarkOrange);
+            DefineSetting("TelescopeMarkerFont", new Font("Arial", 9));
 
             DefineSetting("TelescopeMarkerLabel", true);
             DefineSetting("TelescopeFindCurrentPointAfterConnect", false);
@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.ASCOM
         {
             this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
             this.joystickManager.SelectedDeviceChanged += JoystickManager_SelectedDeviceChanged;
-            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
+            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Index == settings.Get<int>("TelescopeControlJoystickDevice"));
             this.joystickManager.IsEnabled = settings.Get("TelescopeControlJoystick");
         }
 
@@ -254,7 +254,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private void FindCurrentPoint()
         {
-            map.GoToPoint(ascom.Position.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime), TimeSpan.FromSeconds(1));
+            map.GoToPoint(ascom.Position, TimeSpan.FromSeconds(1));
         }
 
         private void AbortSlew()
@@ -328,9 +328,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private CrdsEquatorial GetMouseCoordinates()
         {
-            var hor = map.SelectedObject?.Horizontal ?? map.MousePosition;
-            var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-            return eq;
+            return map.SelectedObject?.Equatorial ?? map.MouseEquatorialCoordinates;
         }
 
         private void SyncToPosition()

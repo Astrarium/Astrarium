@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,8 @@ namespace Astrarium.Views
         {
             InitializeComponent();
         }
-        
-        public string Text 
+
+        public string Text
         {
             set
             {
@@ -39,7 +40,7 @@ namespace Astrarium.Views
         {
             get { return _Progress; }
             set
-            {                
+            {
                 _Progress = value;
 
                 ProgressBar.Value = 0;
@@ -49,6 +50,17 @@ namespace Astrarium.Views
                 {
                     _Progress.ProgressChanged += _Progress_ProgressChanged;
                 }
+            }
+        }
+
+        private Progress<string> _TextProgress;
+        public Progress<string> TextProgress
+        {
+            get { return _TextProgress; }
+            set
+            {
+                _TextProgress = value;
+                _TextProgress.ProgressChanged += _TextProgress_ProgressChanged;
             }
         }
 
@@ -77,6 +89,11 @@ namespace Astrarium.Views
             Dispatcher.Invoke(() => { ProgressBar.Value = double.IsInfinity(progress) ? 0 : progress; });
         }
 
+        private void _TextProgress_ProgressChanged(object sender, string textProgress)
+        {
+            Dispatcher.Invoke(() => { Text = textProgress; });
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             ProgressBar.IsIndeterminate = false;
@@ -85,12 +102,15 @@ namespace Astrarium.Views
             {
                 _Progress.ProgressChanged -= _Progress_ProgressChanged;
             }
+
+            _CancellationTokenSource?.Cancel();
+
             base.OnClosed(e);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            _CancellationTokenSource?.Cancel();          
+            _CancellationTokenSource?.Cancel();
         }
     }
 }

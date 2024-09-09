@@ -88,13 +88,13 @@ namespace Astrarium.Plugins.BrightStars
                             star.VariableName = varName;
                         }
 
-                        star.Equatorial0.Alpha = new HMS(
-                                                    Convert.ToUInt32(line.Substring(75, 2)),
-                                                    Convert.ToUInt32(line.Substring(77, 2)),
-                                                    Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
-                                                ).ToDecimalAngle();
+                        star.Alpha0 = (float)new HMS(
+                                            Convert.ToUInt32(line.Substring(75, 2)),
+                                            Convert.ToUInt32(line.Substring(77, 2)),
+                                            Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
+                                        ).ToDecimalAngle();
 
-                        star.Equatorial0.Delta = (line[83] == '-' ? -1 : 1) * new DMS(
+                        star.Delta0 = (line[83] == '-' ? -1 : 1) * (float)new DMS(
                                                     Convert.ToUInt32(line.Substring(84, 2)),
                                                     Convert.ToUInt32(line.Substring(86, 2)),
                                                     Convert.ToUInt32(line.Substring(88, 2))

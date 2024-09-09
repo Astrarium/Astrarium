@@ -10,8 +10,6 @@ namespace Astrarium.ViewModels
 {
     public class ColorPickerVM : ViewModelBase
     {
-        private readonly ISettings settings;
-
         /// <summary>
         /// Called when user selects time span in the dialog.
         /// </summary>
@@ -23,18 +21,9 @@ namespace Astrarium.ViewModels
             set => SetValue(nameof(SelectedColor), value);
         }
 
-        public bool SliderOnly 
-        {
-            get
-            {
-                var schema = settings.Get<ColorSchema>("Schema");
-                return schema != ColorSchema.Night && schema != ColorSchema.Day;
-            }
-        }
-
         public int Height
         {
-            get => SliderOnly ? 50 : 270;
+            get => 270;
         }
 
         public string Title { get; set; }
@@ -47,9 +36,8 @@ namespace Astrarium.ViewModels
             Close(true);
         }
 
-        public ColorPickerVM(ISettings settings)
+        public ColorPickerVM()
         {
-            this.settings = settings;
             SelectCommand = new Command(Select);
         }
     }

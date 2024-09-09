@@ -7,6 +7,7 @@
     <!--#region Colors-->
 
     <Color x:Key="ColorForeground">#EF0000</Color>
+    <Color x:Key="ColorWindowBorder">#330000</Color>
     <Color x:Key="ColorWindowBackground">#330000</Color>
     <Color x:Key="ColorWindowTitleBackground">#1B0000</Color>
     <Color x:Key="ColorWindowTitleForeground">#EF0000</Color>

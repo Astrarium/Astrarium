@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,14 @@ namespace Astrarium.Types
         /// <param name="body"></param>
         /// <returns>True if object was found on the sky and can be centered, false otherwise.</returns>
         bool CenterOnObject(CelestialObject body);
+
+        /// <summary>
+        /// Centers sky map on the specified point
+        /// </summary>
+        /// <param name="hor">Equatorial coordinates of the target point</param>
+        /// <param name="targetViewAngle">Target view angle to be set.</param>
+        void CenterOnPoint(CrdsEquatorial eq, double targetViewAngle);
+
+        void Focus();
     }
 }

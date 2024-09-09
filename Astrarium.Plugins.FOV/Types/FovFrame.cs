@@ -1,7 +1,7 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
-using System.ComponentModel;
+using System.Drawing;
 
 namespace Astrarium.Plugins.FOV
 {
@@ -25,12 +25,7 @@ namespace Astrarium.Plugins.FOV
         /// Frame color
         /// </summary>
         [JsonConverter(typeof(FovFrameColorJsonConverter))]
-        public SkyColor Color { get; set; }
-
-        /// <summary>
-        /// Shading level, from 0 to 100 percent
-        /// </summary>
-        public short Shading { get; set; }
+        public Color Color { get; set; }
 
         /// <summary>
         /// Frame label, to be shown on sky map
@@ -59,6 +54,11 @@ namespace Astrarium.Plugins.FOV
         /// Frame diameter, in degrees of arc
         /// </summary>
         public float Size { get; set; }
+
+        /// <summary>
+        /// Shading level, from 0 to 100 percent
+        /// </summary>
+        public short Shading { get; set; }
     }
 
     /// <summary>
@@ -98,8 +98,20 @@ namespace Astrarium.Plugins.FOV
     /// </summary>
     public class FinderFovFrame : FovFrame
     {
+        /// <summary>
+        /// List of circles
+        /// </summary>
         public float[] Sizes { get; set; } = new float[1];
+
+        /// <summary>
+        /// Display crosslines or not
+        /// </summary>
         public bool Crosslines { get; set; }
+
+        /// <summary>
+        /// Shading level, from 0 to 100 percent
+        /// </summary>
+        public short Shading { get; set; }
     }
 
     /// <summary>

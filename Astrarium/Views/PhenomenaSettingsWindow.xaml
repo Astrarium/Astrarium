@@ -7,7 +7,7 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="{t:Text PhenomenaSettingsWindow.Title}" 
-        Height="350" Width="400"
+        Height="500" Width="500"
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner">

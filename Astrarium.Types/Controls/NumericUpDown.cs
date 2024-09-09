@@ -193,6 +193,7 @@ namespace Astrarium.Types.Controls
         protected virtual bool OnValidateText(string text)
         {
             var numberStyles = (DecimalPlaces == 0) ? NumberStyles.Integer : NumberStyles.Float;
+            if (text == "-") return true;
             bool isMatch = decimal.TryParse(text, numberStyles, CultureInfo.InvariantCulture, out decimal result);
             return isMatch;
         }

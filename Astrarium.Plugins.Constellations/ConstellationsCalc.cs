@@ -19,7 +19,7 @@ namespace Astrarium.Plugins.Constellations
         /// <summary>
         /// Constellations borders coordinates
         /// </summary>
-        public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
+        public List<List<CrdsEquatorial>> Borders { get; private set; } = new List<List<CrdsEquatorial>>();
 
         /// <summary>
         /// List of constellation lines (traditional)
@@ -31,15 +31,23 @@ namespace Astrarium.Plugins.Constellations
         /// </summary>
         public List<Tuple<int, int>> ConstLinesRey { get; private set; } = new List<Tuple<int, int>>();
 
-        private ISky sky;
+        /// <summary>
+        /// Precession elements for conversion Current Epoch -> B1950.0
+        /// </summary>
+        public PrecessionalElements PrecessionElementsCurrentToB1950 { get; private set; }
 
-        private ISettings settings;
+        /// <summary>
+        /// Precession elements for conversion B1950.0 -> Current Epoch
+        /// </summary>
+        public PrecessionalElements PrecessionElementsB1950ToCurrent { get; private set; }
+
+        private readonly ISky sky;
+        private readonly ISettings settings;
 
         public ConstellationsCalc(ISky sky, ISettings settings)
         {
             this.sky = sky;
             this.settings = settings;
-
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
@@ -53,28 +61,11 @@ namespace Astrarium.Plugins.Constellations
 
         public override void Calculate(SkyContext context)
         {
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            // precessional elements from J2000 to current epoch
+            PrecessionElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            foreach (var b in ConstBorders)
-            {
-                foreach (var bp in b)
-                {
-                    // Equatorial coordinates for the mean equinox and epoch of the target date
-                    var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
-
-                    // Apparent horizontal coordinates
-                    bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
-            }
-
-            foreach (var c in ConstLabels)
-            {
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, p);
-
-                // Apparent horizontal coordinates
-                c.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-            }
+            // precessional elements from current epoch to J2000
+            PrecessionElementsCurrentToB1950 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
         }
 
         public override void Initialize()
@@ -106,23 +97,22 @@ namespace Astrarium.Plugins.Constellations
         private void LoadBordersData()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Borders.dat");
-
+            
             using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
-                List<CelestialPoint> block = null;
+                List<CrdsEquatorial> block = null;
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
                     bool start = sr.ReadBoolean();
                     if (start)
                     {
-                        block = new List<CelestialPoint>();
-                        ConstBorders.Add(block);
+                        block = new List<CrdsEquatorial>();
+                        Borders.Add(block);
                     }
 
-                    block.Add(new CelestialPoint()
-                    {
-                        Equatorial0 = new CrdsEquatorial(sr.ReadDouble(), sr.ReadDouble())
-                    });
+                    double ra = sr.ReadDouble();
+                    double dec = sr.ReadDouble();
+                    block.Add(new CrdsEquatorial(ra, dec));
                 }
             }
         }
@@ -137,7 +127,7 @@ namespace Astrarium.Plugins.Constellations
             {
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
-                    string code = sr.ReadString();                
+                    string code = sr.ReadString();
                     ConstLabels.Add(new ConstellationLabel()
                     {
                         Code = code.Substring(0, 3),
@@ -151,7 +141,7 @@ namespace Astrarium.Plugins.Constellations
         {
             List<Tuple<int, int>> lines = new List<Tuple<int, int>>();
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"Data/{fileName}");
-            string[] chunks = null;
+            string[] chunks;
             int from, to;
             string line = "";
 

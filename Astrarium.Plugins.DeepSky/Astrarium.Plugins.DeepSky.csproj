@@ -37,6 +37,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Data\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

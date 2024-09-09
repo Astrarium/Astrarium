@@ -16,6 +16,7 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Gets stars in specified circular area
         /// </summary>
+        /// <param name="context">Current observation context</param>
         /// <param name="eq">Equatorial coordinates of area center, at epoch J2000.0</param>
         /// <param name="angle">Area radius, in degrees</param>
         /// <param name="magFilter">Magnitude filter function, returns true if star is visible and should be included in results</param>
@@ -23,14 +24,14 @@ namespace Astrarium.Plugins.Tycho2
         ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
 
         /// <summary>
-        /// Gets or sets Tycho2Star object that the map is locked on
+        /// Calculates number of years since J2000.0 epoch
         /// </summary>
-        Tycho2Star LockedStar { get; set; }
+        double YearsSince2000(SkyContext c);
 
         /// <summary>
-        /// Gets or sets Tycho2Star object that currently selected
+        /// Precessional elements for J2000.0 epoch
         /// </summary>
-        Tycho2Star SelectedStar { get; set; }
+        PrecessionalElements PrecessionalElements0 { get; }
     }
 
     public class Tycho2Calc : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -74,22 +75,22 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Parsed index file: collection of star regions
         /// </summary>
-        private ICollection<Tycho2Region> IndexRegions = new List<Tycho2Region>();
+        private ICollection<Tycho2Region> indexRegions = new List<Tycho2Region>();
 
         /// <summary>
         /// Star entries that have cross-identifiers with Bright Star Catalog. Should be excluded.
         /// </summary>
-        private HashSet<string> SkippedEntries = new HashSet<string>();
+        private HashSet<string> skippedEntries = new HashSet<string>();
 
         /// <summary>
         /// Dictionary of proper names of Tycho2 stars
         /// </summary>
-        private Dictionary<string, string> ProperNames = null;
+        private Dictionary<string, string> properNames = null;
 
         /// <summary>
         /// Binary Reader for accessing catalog data
         /// </summary>
-        private BinaryReader CatalogReader;
+        private BinaryReader catalogReader;
 
         /// <summary>
         /// Flag indicating the catalog has been initialized
@@ -109,22 +110,17 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Settings instance
         /// </summary>
-        private readonly ISettings Settings;
+        private readonly ISettings settings;
 
         /// <summary>
         /// Sky instance
         /// </summary>
-        private readonly ISky Sky;
+        private readonly ISky sky;
 
         /// <summary>
-        /// Gets or sets Tycho2Star object that the map is locked on
+        /// Precessional elements for J2000.0 epoch
         /// </summary>
-        public Tycho2Star LockedStar { get; set; }
-
-        /// <summary>
-        /// Gets or sets Tycho2Star object that currently selected
-        /// </summary>
-        public Tycho2Star SelectedStar { get; set; }
+        public PrecessionalElements PrecessionalElements0 { get; private set; }
 
         /// <inheritdoc />
         public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
@@ -143,9 +139,9 @@ namespace Astrarium.Plugins.Tycho2
 
         public Tycho2Calc(ISettings settings, ISky sky)
         {
-            Settings = settings;
-            Settings.SettingValueChanged += Settings_SettingValueChanged;
-            Sky = sky;
+            this.settings = settings;
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
+            this.sky = sky;
         }
 
         private void Settings_SettingValueChanged(string settingName, object settingValue)
@@ -211,7 +207,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             try
             {
-                string rootDir = Settings.Get<string>("Tycho2RootDir", null);
+                string rootDir = settings.Get<string>("Tycho2RootDir", null);
                 IsLoaded = false;
 
                 if (Validate(rootDir))
@@ -223,10 +219,10 @@ namespace Astrarium.Plugins.Tycho2
                     LoadIndex(indexFile);
                     LoadCrossReference(crossRefFile);
 
-                    ProperNames = Sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
+                    properNames = sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
 
                     // Open Tycho2 catalog file
-                    CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+                    catalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
 
                     IsLoaded = true;
                 }
@@ -252,7 +248,7 @@ namespace Astrarium.Plugins.Tycho2
                 {
                     string line = sr.ReadLine();
                     string[] chunks = line.Split(';');
-                    IndexRegions.Add(new Tycho2Region()
+                    indexRegions.Add(new Tycho2Region()
                     {
                         FirstStarId = Convert.ToInt64(chunks[0].Trim()),
                         LastStarId = Convert.ToInt64(chunks[1].Trim()),
@@ -280,36 +276,27 @@ namespace Astrarium.Plugins.Tycho2
                     string[] chunks = line.Split(' ');
                     ushort hrIdentifier = ushort.Parse(chunks[0]);
                     string tyc2Identifier = chunks[1];
-                    SkippedEntries.Add(tyc2Identifier);
+                    skippedEntries.Add(tyc2Identifier);
                     starsCrossRefs.Add($"HR {hrIdentifier}", $"TYC {tyc2Identifier}");
                 }
             }
             
-            Sky.AddCrossReferences("Star", starsCrossRefs);
+            sky.AddCrossReferences("Star", starsCrossRefs);
         }
 
-        private void CalculateCoordinates(SkyContext c, Tycho2Star star)
-        {
-            // current equatorial coordinates
-            star.Equatorial = c.Get(Equatorial, star);
-
-            // current horizontal coordinates
-            star.Horizontal = c.Get(Horizontal, star);
-        }
-
-        public ICollection<Tycho2Star> GetStars(SkyContext c, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        public ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             // take current field of view plus half of a segment
             double ang = angle + SEGMENT_DIAM / 2.0;
 
             // regions that intersect the current FOV
-            var regions = IndexRegions.Where(r => Angle.Separation(eq, new CrdsEquatorial((r.RAmax + r.RAmin) / 2.0, (r.DECmax + r.DECmin) / 2.0)) <= ang);
+            var regions = indexRegions.Where(r => Angle.Separation(eq, new CrdsEquatorial((r.RAmax + r.RAmin) / 2.0, (r.DECmax + r.DECmin) / 2.0)) <= ang);
 
             // take stars from each region by applying magnitude and FOV filters
             var stars = new List<Tycho2Star>();
             foreach (Tycho2Region r in regions)
             {
-                stars.AddRange(GetStarsInRegion(c, r, eq, ang, magFilter));
+                stars.AddRange(GetStarsInRegion(context, r, eq, ang, magFilter));
             }
 
             return stars;
@@ -318,7 +305,7 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
         /// </summary>
-        private PrecessionalElements PrecessionalElements(SkyContext context)
+        private PrecessionalElements CalcPrecessionalElements(SkyContext context)
         {
             return Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
         }
@@ -328,16 +315,15 @@ namespace Astrarium.Plugins.Tycho2
         /// </summary>
         private CrdsEquatorial Equatorial(SkyContext context, Tycho2Star star)
         {
-            PrecessionalElements p = context.Get(PrecessionalElements);
-            double years = context.Get(YearsSince2000);
-
+            double t = (context.JulianDay - Date.EPOCH_J2000) / 365.25;
             double pmDec = star.PmDec / 3600000.0;
-            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Equatorial0.Delta)) / 3600000.0;
+            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Delta0)) / 3600000.0;
 
-            var eq0 = star.Equatorial0 + new CrdsEquatorial(pmRa * years, pmDec * years);
+            // Equatorial coordinates for J2000.0 epoch, but with respect of proper motion
+            var eq0 = new CrdsEquatorial(star.Alpha0 + pmRa * t, star.Delta0 + pmDec * t);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, context.PrecessionElements);
 
             // Nutation effect
             var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
@@ -375,27 +361,27 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
-        private double YearsSince2000(SkyContext c)
+        public double YearsSince2000(SkyContext c)
         {
             return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(SkyContext c, Tycho2Region region, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        private ICollection<Tycho2Star> GetStarsInRegion(SkyContext context, Tycho2Region region, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             // seek reading position 
-            CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
+            catalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
             // count of records in current region
             int count = (int)(region.LastStarId - region.FirstStarId);
 
             // read region in memory for fast access
-            byte[] buffer = CatalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
+            byte[] buffer = catalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
 
             var stars = new List<Tycho2Star>();
 
             for (int i = 0; i < count; i++)
             {
-                Tycho2Star star = GetStar(c, buffer, i * CATALOG_RECORD_LEN, eq, angle, magFilter);
+                Tycho2Star star = GetStar(context, buffer, i * CATALOG_RECORD_LEN, eq, angle, magFilter);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -405,22 +391,22 @@ namespace Astrarium.Plugins.Tycho2
             return stars;
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, SkyContext c, short? tyc2, string tyc3)
+        private ICollection<Tycho2Star> GetStarsInRegion(SkyContext context, Tycho2Region region, short? tyc2, string tyc3)
         {
             // seek reading position 
-            CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
+            catalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
             // count of records in current region
             int count = (int)(region.LastStarId - region.FirstStarId);
 
             // read region in memory for fast access
-            byte[] buffer = CatalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
+            byte[] buffer = catalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
 
             var stars = new List<Tycho2Star>();
 
             for (int i = 0; i < count && stars.Count < 50; i++)
             {
-                Tycho2Star star = GetStar(c, buffer, i * CATALOG_RECORD_LEN, tyc2, tyc3);
+                Tycho2Star star = GetStar(context, buffer, i * CATALOG_RECORD_LEN, tyc2, tyc3);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -442,7 +428,7 @@ namespace Astrarium.Plugins.Tycho2
         /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][BTMag][VTMag]
         /// [   2][   2][   1][ 8][  8][   4][    4][    4][    4]
         /// </remarks>
-        private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
+        private Tycho2Star GetStar(SkyContext context, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
         {
             float btmag = BitConverter.ToSingle(buffer, offset + 29);
             float vtmag = BitConverter.ToSingle(buffer, offset + 33);
@@ -456,7 +442,7 @@ namespace Astrarium.Plugins.Tycho2
 
                 if (Angle.Separation(eq0, eqCenter) <= angle)
                 {
-                    return ReadStar(c, buffer, offset);
+                    return ReadStar(context, buffer, offset);
                 }
                 else
                 {
@@ -469,14 +455,14 @@ namespace Astrarium.Plugins.Tycho2
             }
         }
 
-        private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, short? tyc2, string tyc3)
+        private Tycho2Star GetStar(SkyContext context, byte[] buffer, int offset, short? tyc2, string tyc3)
         {
             short t2 = BitConverter.ToInt16(buffer, offset + 2);
             char t3 = (char)buffer[offset + 4];
 
             if ((tyc2 == null || tyc2.Value == t2) && (string.IsNullOrEmpty(tyc3) || tyc3[0] == t3))
             {
-                return ReadStar(c, buffer, offset);
+                return ReadStar(context, buffer, offset);
             }
             else
             {
@@ -484,16 +470,21 @@ namespace Astrarium.Plugins.Tycho2
             }
         }
 
-        private Tycho2Star ReadStar(SkyContext c, byte[] buffer, int offset)
+        private Tycho2Star ReadStar(SkyContext context, byte[] buffer, int offset)
         {
             Tycho2Star star = new Tycho2Star();
 
-            star.Equatorial0 = new CrdsEquatorial(
-            BitConverter.ToDouble(buffer, offset + 5),
-            BitConverter.ToDouble(buffer, offset + 13));
             star.Tyc1 = BitConverter.ToInt16(buffer, offset);
             star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
             star.Tyc3 = (char)buffer[offset + 4];
+
+            if (skippedEntries.Contains($"{star.Tyc1}-{star.Tyc2}-{star.Tyc3}"))
+            {
+                return null;
+            }
+
+            star.Alpha0 = BitConverter.ToDouble(buffer, offset + 5);
+            star.Delta0 = BitConverter.ToDouble(buffer, offset + 13);
             float btmag = BitConverter.ToSingle(buffer, offset + 29);
             float vtmag = BitConverter.ToSingle(buffer, offset + 33);
             float mag = (float)(vtmag - 0.090 * (btmag - vtmag));
@@ -502,17 +493,9 @@ namespace Astrarium.Plugins.Tycho2
             star.Magnitude = mag;
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
-            star.ProperName = ProperNames.ContainsKey(star.Names[0]) ? ProperNames[star.Names[0]] : null;
-
-            if (SkippedEntries.Contains($"{star.Tyc1}-{star.Tyc2}-{star.Tyc3}"))
-            {
-                return null;
-            }
-            else
-            {
-                CalculateCoordinates(c, star);
-                return star;
-            }
+            star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
+            star.Equatorial = Equatorial(context, star);
+            return star;
         }
 
         private char SpectralClass(double B_V)
@@ -551,15 +534,8 @@ namespace Astrarium.Plugins.Tycho2
 
         public override void Calculate(SkyContext context)
         {
-            if (LockedStar != null)
-            {
-                CalculateCoordinates(context, LockedStar);
-            }
-
-            if (SelectedStar != null)
-            {
-                CalculateCoordinates(context, SelectedStar);
-            }
+            // precessional elements from current epoch to J2000
+            PrecessionalElements0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
@@ -580,7 +556,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             Tycho2Star s = info.Body;
             SkyContext c = info.Context;
-            string constellation = Constellations.FindConstellation(s.Equatorial, c.JulianDay);
+            string constellation = Constellations.FindConstellation(c.Get(Equatorial, s), c.JulianDay);
 
             info
             .SetTitle(string.Join(", ", s.Names))
@@ -593,8 +569,8 @@ namespace Astrarium.Plugins.Tycho2
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
 
             .AddHeader(Text.Get("Tycho2Star.Equatorial0"))
-            .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
-            .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
+            .AddRow("Equatorial0.Alpha", s.Alpha0)
+            .AddRow("Equatorial0.Delta", s.Delta0)
 
             .AddHeader(Text.Get("Tycho2Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
@@ -619,7 +595,7 @@ namespace Astrarium.Plugins.Tycho2
                 return new CelestialObject[0];
             }
 
-            var starWithProperName = ProperNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var starWithProperName = properNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
             if (starWithProperName.Key != null)
             {
                 searchString = starWithProperName.Key;
@@ -633,9 +609,8 @@ namespace Astrarium.Plugins.Tycho2
                 string tyc3 = match.Groups["tyc3"].Value;
                 if (tyc1 > 0 && tyc1 <= 9537)
                 {
-                    Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
-                    var stars = GetStarsInRegion(region, c, tyc2, tyc3);
-                    return stars.Where(filterFunc).Take(maxCount).ToArray();
+                    Tycho2Region region = indexRegions.ElementAt(tyc1 - 1);
+                    return GetStarsInRegion(c, region, tyc2, tyc3).Where(filterFunc).Take(maxCount).ToArray();
                 }
             }
             return new CelestialObject[0];

@@ -1,126 +1,132 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.MinorBodies
 {
     public class AsteroidsRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
         private readonly AsteroidsCalc asteroidsCalc;
         private readonly ISettings settings;
 
         private readonly Color colorAsteroid = Color.FromArgb(100, 100, 100);
+        private readonly Color colorAsteroidEdge = Color.FromArgb(50, 50, 50);
 
-        public AsteroidsRenderer(AsteroidsCalc asteroidsCalc, ISettings settings)
+        public AsteroidsRenderer(ISkyMap map, AsteroidsCalc asteroidsCalc, ISettings settings)
         {
+            this.map = map;
             this.asteroidsCalc = asteroidsCalc;
             this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            Graphics g = map.Graphics;
-            var allAsteroids = asteroidsCalc.Asteroids;
-            bool isGround = settings.Get<bool>("Ground");
-            bool drawAsteroids = settings.Get<bool>("Asteroids");
-            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
+            if (!settings.Get("Asteroids")) return;
+            if (map.DaylightFactor == 1) return;
+
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+            var colorNames = settings.Get<Color>("ColorAsteroidsLabels").Tint(nightMode);
+            Brush brushNames = new SolidBrush(colorNames);
+            bool drawLabels = settings.Get("AsteroidsLabels");
             bool drawAll = settings.Get<bool>("AsteroidsDrawAll");
             decimal drawAllMagLimit = settings.Get<decimal>("AsteroidsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");
-            Brush brushNames = new SolidBrush(map.GetColor("ColorAsteroidsLabels"));
             var font = settings.Get<Font>("AsteroidsLabelsFont");
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+            var asteroids = asteroidsCalc.Asteroids;
+            double fov = prj.RealFov;
+            Color clrEdge = colorAsteroidEdge.Tint(nightMode);
+            Color clrCenter = colorAsteroid.Tint(nightMode);
+            Color clrPoint = Color.White.Tint(nightMode);
 
-            if (drawAsteroids)
+            foreach (var a in asteroids)
             {
-                var asteroids = allAsteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle);
+                double ad = Angle.Separation(a.Equatorial, eqCenter);
 
-                foreach (var a in asteroids)
+                if (ad < fov + a.Semidiameter / 3600)
                 {
-                    double ad = Angle.Separation(a.Horizontal, map.Center);
+                    float diam = prj.GetDiskSize(a.Semidiameter);
+                    float size = prj.GetPointSize(a.Magnitude);
 
-                    if ((!isGround || a.Horizontal.Altitude + a.Semidiameter / 3600 > 0) &&
-                        ad < map.ViewAngle + a.Semidiameter / 3600)
+                    // if "draw all" setting is enabled, draw asteroids brighter than limit
+                    if (drawAll && size < 1 && a.Magnitude <= (float)drawAllMagLimit)
                     {
-                        float diam = map.GetDiskSize(a.Semidiameter);
-                        float size = map.GetPointSize(a.Magnitude);
+                        size = 1;
+                    }
 
-                        // if "draw all" setting is enabled, draw asteroids brighter than limit
-                        if (drawAll && size < 1 && a.Magnitude <= (float)drawAllMagLimit)
+                    // asteroid should be rendered as disk
+                    if ((int)diam > 0 && diam > size)
+                    {
+                        Vec2 p = prj.Project(a.Equatorial);
+
+                        GL.Enable(GL.BLEND);
+                        GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+
+                        GL.Begin(GL.TRIANGLE_FAN);
+
+                        // center
+                        GL.Color3(clrCenter);
+                        GL.Vertex2(p.X, p.Y);
+                        double r = diam / 2;
+                        for (int i = 0; i <= 64; i++)
                         {
-                            size = 1;
+                            double ang = i / 32.0 * Math.PI;
+                            Vec2 v = new Vec2(p.X + r * Math.Cos(ang), p.Y + r * Math.Sin(ang));
+                            GL.Color3(clrEdge);
+                            GL.Vertex2(v.X, v.Y);
                         }
 
-                        string label = drawLabelMag ? $"{a.Name} {Formatters.Magnitude.Format(a.Magnitude)}" : a.Name;
-                        
-                        // asteroid should be rendered as disk
-                        if ((int)diam > 0 && diam > size)
+                        GL.End();
+
+                        if (drawLabels)
                         {
-                            PointF p = map.Project(a.Horizontal);
-                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(colorAsteroid)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                            DrawVolume(map, diam, 0);
+                            DrawLabel(a, font, brushNames, p, diam, drawLabelMag);
+                        }
+
+                        map.AddDrawnObject(p, a);
+                    }
+                    // asteroid should be rendered as point
+                    else if (size > 0)
+                    {
+                        if ((int)size == 0) size = 1;
+
+                        Vec2 p = prj.Project(a.Equatorial);
+
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(GL.POINT_SMOOTH);
+                            GL.Enable(GL.BLEND);
+                            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+                            GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
+
+                            GL.PointSize(size);
+                            GL.Begin(GL.POINTS);
+                            GL.Color3(clrPoint);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
 
                             if (drawLabels)
                             {
-                                map.DrawObjectCaption(font, brushNames, label, p, diam);
+                                DrawLabel(a, font, brushNames, p, size, drawLabelMag);
                             }
 
-                            map.AddDrawnObject(a);
+                            map.AddDrawnObject(p, a);
                             continue;
-                        }
-                        // asteroid should be rendered as point
-                        else if (size > 0)
-                        {
-                            if ((int)size == 0) size = 1;
-
-                            PointF p = map.Project(a.Horizontal);
-
-                            if (!map.IsOutOfScreen(p))
-                            {
-                                g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
-
-                                if (drawLabels)
-                                {
-                                    map.DrawObjectCaption(font, brushNames, label, p, size);
-                                }
-
-                                map.AddDrawnObject(a);
-                                continue;
-                            }
                         }
                     }
                 }
             }
         }
 
-        private void DrawVolume(IMapContext map, float diam, float flattening)
+        private void DrawLabel<T>(T body, Font font, Brush brush, Vec2 p, float size, bool drawMagInLabel) where T : CelestialObject, IMagnitudeObject
         {
-            if (map.Schema == ColorSchema.White) return;
-
-            Graphics g = map.Graphics;
-            float diamEquat = diam * 1.01f;
-            float diamPolar = (1 - flattening) * diam * 1.01f;
-
-            using (GraphicsPath gpVolume = new GraphicsPath())
-            {
-                gpVolume.AddEllipse(-diamEquat, -diamPolar, 2 * diamEquat, 2 * diamPolar);
-                using (PathGradientBrush brushVolume = new PathGradientBrush(gpVolume))
-                {
-                    brushVolume.CenterPoint = new PointF(0, 0);
-                    brushVolume.CenterColor = map.GetSkyColor();
-                    brushVolume.SetSigmaBellShape(0.3f, 1);
-                    brushVolume.SurroundColors = new Color[] { Color.Transparent };
-                    g.FillEllipse(brushVolume, -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                }
-            }
+            string name = body.Names.First();
+            string label = drawMagInLabel ? $"{name} {Formatters.Magnitude.Format(body.Magnitude)}" : name;
+            map.DrawObjectLabel(label, font, brush, p, size);
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;

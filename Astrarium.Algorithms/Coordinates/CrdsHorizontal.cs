@@ -75,7 +75,7 @@ namespace Astrarium.Algorithms
 
         public override string ToString()
         {
-            return $"Az: {new DMS(Angle.To360(Azimuth + (MeasureAzimuthFromNorth ? 180 : 0)))}; Alt:{new DMS(Altitude)}";
+            return $"Az: {new DMS(Angle.To360(Azimuth + (MeasureAzimuthFromNorth ? 180 : 0)))}; Alt: {new DMS(Altitude)}";
         }
 
         public override bool Equals(object obj)
@@ -97,6 +97,17 @@ namespace Astrarium.Algorithms
                 hash = hash * 23 + Azimuth.GetHashCode();
                 return hash;
             }
-        }        
+        }
+
+        /// <summary>
+        /// Adds corrections to horizontal coordinates
+        /// </summary>
+        public static CrdsHorizontal operator +(CrdsHorizontal lhs, CrdsHorizontal rhs)
+        {
+            CrdsHorizontal h = new CrdsHorizontal();
+            h.Azimuth = Angle.To360(lhs.Azimuth + rhs.Azimuth);
+            h.Altitude = lhs.Altitude + rhs.Altitude;
+            return h;
+        }
     }
 }

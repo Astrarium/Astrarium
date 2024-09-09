@@ -1,0 +1,432 @@
+{
+	"version": "1",
+	"limit": 12.0,
+	"shortName": "Bright historical supernovae data",
+	"supernova":
+	{
+		"185A":
+		{
+			"type": "Ia",
+			"maxMagnitude": -6,
+			"peakJD": 1788969,
+			"alpha": "14h45m02.30s",
+			"delta": "-62d20m32.00s",
+			"distance": 8.2
+		},
+		"386A":
+		{
+			"type": "II",
+			"maxMagnitude": 1.5,
+			"peakJD": 1862158,
+			"alpha": "18h11m30.4s",
+			"delta": "-19d25m24s",
+			"distance": 16
+		},
+		"393A":
+		{
+			"type": "II",
+			"maxMagnitude": -1,
+			"peakJD": 1864673,
+			"alpha": "17h14m0s",
+			"delta": "-39d48m0s",
+			"distance": 34
+		},
+		"1006A":
+		{
+			"type": "I",
+			"maxMagnitude": -7.5,
+			"peakJD": 2088618,
+			"alpha": "15h02m48.00s",
+			"delta": "-41d57m00.0s",
+			"distance": 7.2
+		},
+		"1054A":
+		{
+			"type": "II",
+			"maxMagnitude": -6,
+			"peakJD": 2106215,
+			"alpha": "05h34m30.00s",
+			"delta": "22d01m00.0s",
+			"distance": 6.5
+		},
+		"1181A":
+		{
+			"type": "II",
+			"maxMagnitude": -2,
+			"peakJD": 2152634,
+			"alpha": "00h53m11.2058008512s",
+			"delta": "67d30m02.381310972s",
+			"distance": 8.5
+		},
+		"1572A":
+		{
+			"type": "I",
+			"note": "Tycho's Supernova",
+			"maxMagnitude": -4,
+			"peakJD": 2295540,
+			"alpha": "00h25m18.00s",
+			"delta": "+64d09m00.0s",
+			"distance": 8
+		},
+		"1604A":
+		{
+			"type": "I",
+			"note": "Kepler's Supernova",
+			"maxMagnitude": -2,
+			"peakJD": 2307190,
+			"alpha": "17h30m36.00s",
+			"delta": "-21d29m00.0s",
+			"distance": 14
+		},
+		"1680A":
+		{
+			"type": "IIb",
+			"note": "Cassiopeia A",
+			"maxMagnitude": 6,
+			"peakJD": 2334895,
+			"alpha": "23h23m24.00s",
+			"delta": "58d48m54s",
+			"distance": 9
+		},
+		"1885A":
+		{
+			"type": "IPec",
+			"note": "S Andromedae",
+			"maxMagnitude": 5.8,
+			"peakJD": 2409771,
+			"alpha": "00h42m43.00s",
+			"delta": "+41d16m04.0s",
+			"distance": 2400
+		},
+		"1895B":
+		{
+			"type": "I",
+			"maxMagnitude": 8,
+			"peakJD": 2413380,
+			"alpha": "13h39m57.30s",
+			"delta": "-31d38m06.0s"
+		},
+		"1937C":
+		{
+			"type": "Ia",
+			"maxMagnitude": 8.5,
+			"peakJD": 2428768,
+			"alpha": "13h05m53.20s",
+			"delta": "+37d36m07.0s"
+		},
+		"1972E":
+		{
+			"type": "Ia",
+			"maxMagnitude": 8.4,
+			"peakJD": 2441446,
+			"alpha": "13h39m52.70s",
+			"delta": "-31d40m09.0s",
+			"distance": 10900
+		},
+		"1987A":
+		{
+			"type": "IIPec",
+			"maxMagnitude": 2.9,
+			"peakJD": 2446851,
+			"alpha": "05h35m27.97s",
+			"delta": "-69d16m11.0s",
+			"distance": 160
+		},
+		"2011fe":
+		{
+			"type": "Ia",
+			"maxMagnitude": 9.7,
+			"peakJD": 2455810.5,
+			"alpha": "14h03m5.81s",
+			"delta": "+54d16m25.4s"
+		},
+		"1920A":
+		{
+			"type": "II",
+			"maxMagnitude": 11.7,
+			"peakJD": 2422676,
+			"alpha": "08h35m15.75s",
+			"delta": "+28d28m31.3s"
+		},
+		"1921C":
+		{
+			"type": "I",
+			"maxMagnitude": 11.0,
+			"peakJD": 2423035,
+			"alpha": "10h18m24.01s",
+			"delta": "+41d21m32.1s"
+		},
+		"1960F":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.6,
+			"peakJD": 2437046,
+			"alpha": "12h31m42.06s",
+			"delta": "+03d56m47.9s"
+		},
+		"1960R":
+		{
+			"type": "I",
+			"maxMagnitude": 12.0,
+			"peakJD": 2437288,
+			"alpha": "12h25m24.85s",
+			"delta": "+18d09m19.6s"
+		},
+		"1961H":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.8,
+			"peakJD": 2437428,
+			"alpha": "12h36m27.32s",
+			"delta": "+11d26m24.9s"
+		},
+		"1962M":
+		{
+			"type": "II",
+			"maxMagnitude": 11.4,
+			"peakJD": 2438005.5,
+			"alpha": "03h18m15.45s",
+			"delta": "-66d32m20.7s"
+		},
+		"1966J":
+		{
+			"type": "I",
+			"maxMagnitude": 11.3,
+			"peakJD": 2439462,
+			"alpha": "10h19m45.49s",
+			"delta": "+45d30m14.4s"
+		},
+		"1968L":
+		{
+			"type": "IIP",
+			"maxMagnitude": 11.9,
+			"peakJD": 2440050,
+			"alpha": "13h37m00.51s",
+			"delta": "-29d51m59.0s"
+		},
+		"1970G":
+		{
+			"type": "IIL",
+			"maxMagnitude": 11.47,
+			"peakJD": 2440800.37,
+			"alpha": "14h03m00.83s",
+			"delta": "+54d14m32.8s"
+		},
+		"1971I":
+		{
+			"type": "Ia",
+			"maxMagnitude": 10.9,
+			"peakJD": 2441104.67,
+			"alpha": "13h15m49.60s",
+			"delta": "+41d59m15.0s"
+		},
+		"1979C":
+		{
+			"type": "IIL",
+			"maxMagnitude": 11.6,
+			"peakJD": 2443979,
+			"alpha": "12h22m58.63s",
+			"delta": "+15d47m51.7s"
+		},
+		"1980K":
+		{
+			"type": "IIL",
+			"maxMagnitude": 11.38,
+			"peakJD": 2444551.3,
+			"alpha": "20h35m30.07s",
+			"delta": "+60d06m23.8s"
+		},
+		"1981B":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.75,
+			"peakJD": 2444673.47,
+			"alpha": "12h34m29.62s",
+			"delta": "+02d11m59.6s"
+		},
+		"1983N":
+		{
+			"type": "Ib",
+			"maxMagnitude": 10.73,
+			"peakJD": 2445528.56,
+			"alpha": "13h36m51.24s",
+			"delta": "-29d54m02.7s"
+		},
+		"1989B":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.2,
+			"peakJD": 2447565.58,
+			"alpha": "11h20m13.94s",
+			"delta": "-69d16m11.0s"
+		},
+		"1991T":
+		{
+			"type": "Ia Pec",
+			"maxMagnitude": 11.44,
+			"peakJD": 2448375.72,
+			"alpha": "12h34m10.21s",
+			"delta": "+02d39m56.6s"
+		},
+		"1993J":
+		{
+			"type": "IIb",
+			"maxMagnitude": 10.75,
+			"peakJD": 2449096.5,
+			"alpha": "09h55m25.00s",
+			"delta": "+69d01m12.9s"
+		},
+		"1994D":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.8,
+			"peakJD": 2449443,
+			"alpha": "12h34m02.45s",
+			"delta": "+07d42m04.7s"
+		},
+		"1998bu":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.76,
+			"peakJD": 2450953.97,
+			"alpha": "10h46m46.03s",
+			"delta": "+11d50m07.1s"
+		},
+		"2004dj":
+		{
+			"type": "IIP",
+			"maxMagnitude": 11.2,
+			"peakJD": 2453218.26,
+			"alpha": "07h37m17.02s",
+			"delta": "+65d35m57.8s"
+		},
+		"2013aa":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.616,
+			"peakJD": 2456343.6,
+			"alpha": "14h32m33.88s",
+			"delta": "-44d13m27.8s"
+		},
+		"2014j":
+		{
+			"type": "Ia",
+			"maxMagnitude": 10.5,
+			"peakJD": 2456687.2916667,
+			"alpha": "09h55m42.087s",
+			"delta": "+69d40m26.54s"
+		},
+		"2017cbv":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.5,
+			"peakJD": 2457834.95833,
+			"alpha": "14h32m34.42s",
+			"delta": "-44d08m02.74s"
+		},
+		"1937D":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.87,
+			"peakJD": 2428791.2,
+			"alpha": "02h39m21s",
+			"delta": "+40d52m20s"
+		},
+		"1986G":
+		{
+			"type": "Ia Pec",
+			"maxMagnitude": 11.44,
+			"peakJD": 2446562.57,
+			"alpha": "13h25m36.46s",
+			"delta": "-43d01m54.2s"
+		},
+		"1919A":
+		{
+			"type": "I",
+			"maxMagnitude": 11,
+			"peakJD": 2422031.5,
+			"alpha": "12h30m48.7s",
+			"delta": "+12d25m04s"
+		},
+		"2004et":
+		{
+			"type": "II",
+			"maxMagnitude": 11.57,
+			"peakJD": 2453280.71,
+			"alpha": "20h35m25.33s",
+			"delta": "+60d07m17.7s"
+		},
+		"2012cg":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.954,
+			"peakJD": 2456084.37,
+			"alpha": "12h27m12.83s",
+			"delta": "+09d25m13.2s"
+		},
+		"2012fr":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.95,
+			"peakJD": 2456247.72,
+			"alpha": "03h33m35.99s",
+			"delta": "-36d07m37.7s"
+		},
+		"1965I":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.8,
+			"peakJD": 2438930.4,
+			"alpha": "12h52m15.4s",
+			"delta": "-01d10m52.0s"
+		},
+		"1974G":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.8,
+			"peakJD": 2442164.37,
+			"alpha": "12h26m28.3s",
+			"delta": "+31d12m22.0s"
+		},
+		"1994ae":
+		{
+			"type": "Ia",
+			"maxMagnitude": 12,
+			"peakJD": 2449687.35,
+			"alpha": "10h47m01.95s",
+			"delta": "+17d16m31.0s"
+		},
+		"2017cbv":
+		{
+			"type": "Ia",
+			"maxMagnitude": 11.657,
+			"peakJD": 2457838.74,
+			"alpha": "14h32m34.42s",
+			"delta": "-44d08m02.74s"
+		},
+		"2013cq":
+		{
+			"type": "Ic",
+			"maxMagnitude": 12,
+			"peakJD": 2456425.01,
+			"alpha": "11h32m32.839s",
+			"delta": "+27d41m56.18s"
+		},
+		"2011fe":
+		{
+			"type": "Ia",
+			"maxMagnitude": 9.903,
+			"peakJD": 2455817.08,
+			"alpha": "14h03m05.711s",
+			"delta": "+54d16m25.22s"
+		},
+		"2023ixf":
+		{
+			"type": "II",
+			"maxMagnitude": 10.6,
+			"peakJD": 2460088.45417,
+			"alpha": "14h03m38.51s",
+			"delta": "+54d18m42.10s"
+		}
+	}
+}
