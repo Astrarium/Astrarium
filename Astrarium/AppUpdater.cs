@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 
@@ -61,14 +62,20 @@ namespace Astrarium
                 string releaseName = jObject["name"].ToString();
                 string releaseNotes = jObject["body"].ToString();
                 DateTime publishDate = jObject["published_at"].Value<DateTime>();
+                string releaseVersion = GetNumericVersion(releaseName);
 
                 return new LastRelease()
                 {
-                    Version = Version.Parse(releaseName),
+                    Version = Version.Parse(releaseVersion),
                     ReleaseNotes = releaseNotes,
                     PublishDate = publishDate
                 };
             }
+        }
+
+        public string GetNumericVersion(string version)
+        {
+            return new string(version.Where(p => char.IsDigit(p) || p == '.').ToArray());
         }
     }
 
