@@ -139,6 +139,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Notes\Astrarium.Plugins.Notes.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.SolarSystem\Astrarium.Plugins.SolarSystem.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

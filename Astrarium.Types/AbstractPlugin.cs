@@ -50,6 +50,13 @@ namespace Astrarium.Types
             }
         }
 
+        /// <summary>
+        /// Extends object info window with custom view
+        /// </summary>
+        /// <typeparam name="TViewControl">View control to be added as dedicated tab to the object info window</typeparam>
+        /// <typeparam name="TViewModel">View Model to be used</typeparam>
+        /// <param name="title">Tab title</param>
+        /// <param name="viewModelProvider">Function to be called to build the view model.</param>
         protected void ExtendObjectInfo<TViewControl, TViewModel>(string title, Func<SkyContext, CelestialObject, TViewModel> viewModelProvider)
         {
             ObjectInfoExtensions.Add(new ObjectInfoExtension(title, typeof(TViewControl), viewModelProvider));
