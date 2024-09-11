@@ -43,36 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Controls\CometsSettingsSection - Copy %282%29 - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection - Copy (2).xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Controls\CometsSettingsSection - Copy %282%29.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Controls\AsteroidsSettingsSection.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Controls\CometsSettingsSection - Copy - Copy %282%29.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection - Copy.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Controls\CometsSettingsSection - Copy - Copy - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection - Copy - Copy.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Controls\CometsSettingsSection - Copy - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection - Copy.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Controls\CometsSettingsSection - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>CometsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="Controls\AsteroidsSettingsSection.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
