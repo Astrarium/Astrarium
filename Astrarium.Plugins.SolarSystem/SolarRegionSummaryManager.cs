@@ -84,6 +84,13 @@ namespace Astrarium.Plugins.SolarSystem
         public SolarRegionSummary GetSRSForJulianDate(double jd, double utcOffset)
         {
             Date date = new Date(jd, utcOffset);
+
+            // no SRS prior 1996 Jan 02
+            if (date.ToJulianDay() < 2450084.5)
+            {
+                return SolarRegionSummary.Empty;
+            }
+
             DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
 
             // no SRS data for future dates

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Astrarium.Algorithms;
 
 namespace Astrarium.ViewModels
 {
@@ -48,6 +49,12 @@ namespace Astrarium.ViewModels
 
         public void Ok()
         {
+            if (new Date(JulianDayFrom).Year <= 0)
+            {
+                ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.NoPhenomenaForBCDates", System.Windows.MessageBoxButton.OK);
+                return;
+            }
+
             if (JulianDayFrom > JulianDayTo)
             {
                 ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.WarningText", System.Windows.MessageBoxButton.OK);
