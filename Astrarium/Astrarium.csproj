@@ -220,16 +220,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Config\Controls\ColorsSettingsSection - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>ColorsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Config\Controls\FontsSettingsSection - Copy.xaml.cs">
-      <DependentUpon>FontsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="Config\Controls\GeneralSettingsSection.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
