@@ -613,9 +613,7 @@ namespace Astrarium.ViewModels
         {
             double jd = map.Projection.Context.JulianDay;
             double utcOffset = map.Projection.Context.GeoLocation.UtcOffset;
-            var months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
-            var d = new Date(jd, utcOffset);
-            DateString = $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year} {d.Hour:00}:{d.Minute:00}:{d.Second:00}";
+            DateString = Formatters.DateTimeWithSeconds.Format(new Date(jd, utcOffset));
             NotifyPropertyChanged(nameof(DateString));
         }
 
