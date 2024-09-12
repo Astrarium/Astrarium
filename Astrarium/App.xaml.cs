@@ -111,6 +111,8 @@ namespace Astrarium
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
 
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -283,9 +285,15 @@ namespace Astrarium
 
             foreach (var plugin in plugins)
             {
-                progress.Report($"Initializing plugin {AbstractPlugin.GetName(plugin.GetType())}");
+                string name = AbstractPlugin.GetName(plugin.GetType());
+                progress.Report($"Initializing plugin {name}");
                 plugin.Initialize();
             }
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.Error($"Unhandled exception: {e.ExceptionObject}");
         }
     }
 }
