@@ -80,10 +80,14 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ninject" Version="3.3.6" />
-    <PackageReference Include="NLog" Version="5.3.2" />
   </ItemGroup>
       
   <ItemGroup>
+	<ProjectReference Include="..\Astrarium.Plugins.Logger\Astrarium.Plugins.Logger.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.ASCOM\Astrarium.Plugins.ASCOM.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

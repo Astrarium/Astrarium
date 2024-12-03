@@ -16,6 +16,12 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public Command AddNoteCommand { get; private set; }
 
+        public bool IsEditMode
+        {
+            get => GetValue<bool>(nameof(IsEditMode));
+            set => SetValue(nameof(IsEditMode), value);
+        }
+
         public ObservableCollection<Note> Notes 
         {
             get => GetValue<ObservableCollection<Note>>(nameof(Notes));
@@ -37,9 +43,12 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void AddNote()
         {
-            var note = new Note() { BodyType = body.Type, BodyName = body.CommonName, Date = DateTime.Now, Description = "test " + DateTime.Now, Title = "test " + DateTime.Now };
-            Notes.Add(note);
-            notesManager.AddNote(note);
+            IsEditMode = true;
+
+            //var note = new Note() { BodyType = body.Type, BodyName = body.CommonName, Date = DateTime.Now, Description = "test " + DateTime.Now, Title = "test " + DateTime.Now };
+            //Notes.Add(note);
+            //notesManager.AddNote(note);
+            //NotifyPropertyChanged(nameof(Notes));
         }
     }
 }

@@ -36,193 +36,195 @@
             </StackPanel>
         </DockPanel>
 
-        <Grid Visibility="{Binding IsLoading, Converter={s:InverseBoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Collapsed}}" >
+        <ScrollViewer x:Name="scroll_viewer" VerticalScrollBarVisibility="Auto">
 
-            <!-- No data thumb -->
-            <DockPanel Visibility="{Binding IsEmpty, Converter={s:BoolToVisibilityConverter}}" LastChildFill="True" >
-                <TextBlock IsEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Text="{t:Text SolarActivity.NoDataText}" />
-            </DockPanel>
+            <Grid Visibility="{Binding IsLoading, Converter={s:InverseBoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Collapsed}}" >
 
-            <!-- SRS data view  -->
-            <StackPanel Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}"  Orientation="Vertical">
+                <!-- No data thumb -->
+                <DockPanel Visibility="{Binding IsEmpty, Converter={s:BoolToVisibilityConverter}}" LastChildFill="True" >
+                    <TextBlock IsEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Text="{t:Text SolarActivity.NoDataText}" />
+                </DockPanel>
 
-                <Expander IsExpanded="True" Margin="8 4">
-                    <Expander.Header>
-                        <TextBlock Text="{t:Text SolarActivity.SolarRegionI}" Margin="0 8" />
-                    </Expander.Header>
-                    <StackPanel Orientation="Vertical">
-                        <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsI}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
-                            <ListView.View>
-                                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
-                                    <GridView.Columns>
+                <!-- SRS data view  -->
+                <StackPanel Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}"  Orientation="Vertical">
+                    <Expander IsExpanded="True" Margin="8 4">
+                        <Expander.Header>
+                            <TextBlock Text="{t:Text SolarActivity.SolarRegionI}" Margin="0 8" />
+                        </Expander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <c:BindableListView PreviewMouseWheel="BindableListView_PreviewMouseWheel" Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsI}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                                <ListView.View>
+                                    <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+                                        <GridView.Columns>
 
-                                        <!-- Group number -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Nmbr" ToolTip="{t:Text SolarActivity.Nmbr}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock ToolTip="{t:Text SolarActivity.Nmbr}">
-                                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.OpenRegionLinkCommand}" CommandParameter="{Binding Nmbr}"><Run Text="{Binding Nmbr}" /></Hyperlink>
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <!-- Location -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Location" ToolTip="{t:Text SolarActivity.Location}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Location}" ToolTip="{t:Text SolarActivity.Location}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <!-- Lo -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Lo" ToolTip="{t:Text SolarActivity.Lo}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Lo}" ToolTip="{t:Text SolarActivity.Lo}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <!-- Area -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Area" ToolTip="{t:Text SolarActivity.Area}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Area}" ToolTip="{t:Text SolarActivity.Area}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Z" ToolTip="{t:Text SolarActivity.Z}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock ToolTip="{t:Text SolarActivity.Z}">
-                                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.ZurichClassificationCommand}" CommandParameter="{Binding Z}"><Run Text="{Binding Z}" /></Hyperlink>
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <!-- LL -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="LL" ToolTip="{t:Text SolarActivity.LL}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding LL}" ToolTip="{t:Text SolarActivity.LL}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <!-- NN -->
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="NN" ToolTip="{t:Text SolarActivity.NN}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding NN}" ToolTip="{t:Text SolarActivity.NN}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-
-                                        <GridViewColumn Width="Auto">
-                                            <GridViewColumn.HeaderTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="Mag Type" ToolTip="{t:Text SolarActivity.MagType}" />
-                                                </DataTemplate>
-                                            </GridViewColumn.HeaderTemplate>
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{Binding MagType, Converter={p:MagTypeColorConverter}}" CornerRadius="2" Padding="4 2" Margin="2">
-                                                        <TextBlock ToolTip="{t:Text SolarActivity.MagType}">
-                                                    <Hyperlink Foreground="{StaticResource BrushForeground}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.MagTypeInfoCommand}" CommandParameter="{Binding MagType}"><Run Text="{Binding MagType, Converter={p:MagTypeConverter}}" /></Hyperlink>
+                                            <!-- Group number -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Nmbr" ToolTip="{t:Text SolarActivity.Nmbr}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock ToolTip="{t:Text SolarActivity.Nmbr}">
+                                                            <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.OpenRegionLinkCommand}" CommandParameter="{Binding Nmbr}"><Run Text="{Binding Nmbr}" /></Hyperlink>
                                                         </TextBlock>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <!-- Location -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Location" ToolTip="{t:Text SolarActivity.Location}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Location}" ToolTip="{t:Text SolarActivity.Location}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <!-- Lo -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Lo" ToolTip="{t:Text SolarActivity.Lo}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Lo}" ToolTip="{t:Text SolarActivity.Lo}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <!-- Area -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Area" ToolTip="{t:Text SolarActivity.Area}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Area}" ToolTip="{t:Text SolarActivity.Area}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Z" ToolTip="{t:Text SolarActivity.Z}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock ToolTip="{t:Text SolarActivity.Z}">
+                                                    <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.ZurichClassificationCommand}" CommandParameter="{Binding Z}"><Run Text="{Binding Z}" /></Hyperlink>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <!-- LL -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="LL" ToolTip="{t:Text SolarActivity.LL}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding LL}" ToolTip="{t:Text SolarActivity.LL}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <!-- NN -->
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="NN" ToolTip="{t:Text SolarActivity.NN}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding NN}" ToolTip="{t:Text SolarActivity.NN}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Width="Auto">
+                                                <GridViewColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="Mag Type" ToolTip="{t:Text SolarActivity.MagType}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.HeaderTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{Binding MagType, Converter={p:MagTypeColorConverter}}" CornerRadius="2" Padding="4 2" Margin="2">
+                                                            <TextBlock ToolTip="{t:Text SolarActivity.MagType}">
+                                                        <Hyperlink Foreground="{StaticResource BrushForeground}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.MagTypeInfoCommand}" CommandParameter="{Binding MagType}"><Run Text="{Binding MagType, Converter={p:MagTypeConverter}}" /></Hyperlink>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView.Columns>
+                                    </GridView>
+                                </ListView.View>
+                            </c:BindableListView>
+
+                            <Separator />
+
+                            <StackPanel Margin="8" Orientation="Horizontal">
+                                <TextBlock Text="{t:Text SolarActivity.WolfNumber}" Margin="0 0 4 0" />
+                                <TextBlock Text="{Binding WolfNumber}" />
+                            </StackPanel>
+
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander IsExpanded="True" Margin="8 4">
+                        <Expander.Header>
+                            <TextBlock Text="{t:Text SolarActivity.SolarRegionIa}" Margin="0 8" />
+                        </Expander.Header>
+                        <c:BindableListView PreviewMouseWheel="BindableListView_PreviewMouseWheel" Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsIa}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                            <ListView.View>
+                                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
+                                    <GridView.Columns>
+                                        <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                                        <GridViewColumn Header="Location" Width="Auto" DisplayMemberBinding="{Binding Location}" />
+                                        <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
                                     </GridView.Columns>
                                 </GridView>
                             </ListView.View>
                         </c:BindableListView>
+                    </Expander>
 
-                        <Separator />
-
-                        <StackPanel Margin="8" Orientation="Horizontal">
-                            <TextBlock Text="{t:Text SolarActivity.WolfNumber}" Margin="0 0 4 0" />
-                            <TextBlock Text="{Binding WolfNumber}" />
-                        </StackPanel>
-
-                    </StackPanel>
-                </Expander>
-
-                <Expander IsExpanded="True" Margin="8 4">
-                    <Expander.Header>
-                        <TextBlock Text="{t:Text SolarActivity.SolarRegionIa}" Margin="0 8" />
-                    </Expander.Header>
-                    <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsIa}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
-                        <ListView.View>
-                            <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
-                                <GridView.Columns>
-                                    <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
-                                    <GridViewColumn Header="Location" Width="Auto" DisplayMemberBinding="{Binding Location}" />
-                                    <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
-                                </GridView.Columns>
-                            </GridView>
-                        </ListView.View>
-                    </c:BindableListView>
-                </Expander>
-
-                <Expander IsExpanded="True" Margin="8 4">
-                    <Expander.Header>
-                        <TextBlock Text="{t:Text SolarActivity.SolarRegionII}" Margin="0 8" />
-                    </Expander.Header>
-                    <c:BindableListView Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsII}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
-                        <ListView.View>
-                            <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
-                                <GridView.Columns>
-                                    <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
-                                    <GridViewColumn Header="Lat" Width="Auto" DisplayMemberBinding="{Binding Lat}" />
-                                    <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
-                                </GridView.Columns>
-                            </GridView>
-                        </ListView.View>
-                    </c:BindableListView>
-                </Expander>
-            </StackPanel>
-        </Grid>
+                    <Expander IsExpanded="True" Margin="8 4">
+                        <Expander.Header>
+                            <TextBlock Text="{t:Text SolarActivity.SolarRegionII}" Margin="0 8" />
+                        </Expander.Header>
+                        <c:BindableListView PreviewMouseWheel="BindableListView_PreviewMouseWheel" Style="{StaticResource ResourceKey=SolarActivityListViewStyle}" ItemsSource="{Binding RegionsII}" SelectionMode="Single" SelectedValue="{Binding SelectedSolarRegion, Mode=TwoWay}">
+                            <ListView.View>
+                                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
+                                    <GridView.Columns>
+                                        <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                                        <GridViewColumn Header="Lat" Width="Auto" DisplayMemberBinding="{Binding Lat}" />
+                                        <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
+                                    </GridView.Columns>
+                                </GridView>
+                            </ListView.View>
+                        </c:BindableListView>
+                    </Expander>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
     
     

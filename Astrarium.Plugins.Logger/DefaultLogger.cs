@@ -1,18 +1,19 @@
-﻿using NLog;
-using NLog.Config;
+﻿using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NLog;
 using System;
-using System.IO;
 using System.Linq;
+using System.IO;
+using Astrarium.Types;
 
-namespace Astrarium
+namespace Astrarium.Plugins.Logger
 {
     /// <summary>
     /// Logger wrapper for log4net.
     /// Incapsulates logging logic dependant from the log4net
     /// </summary>
-    public class DefaultLogger : Logger, Types.ILog
+    public partial class DefaultLogger : NLog.Logger, ILog
     {
         /// <summary>
         /// Path to log file
@@ -29,7 +30,13 @@ namespace Astrarium
                 Layout = Layout.FromString("[${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}] - [${level}] ${logger}: ${message}")
             };
 
-            var rule = new LoggingRule("*", LogLevel.Info, target);
+            var logLevel
+#if DEBUG
+            = LogLevel.Debug;
+#else
+            = LogLevel.Info;
+#endif
+            var rule = new LoggingRule("*", logLevel, target);
             config.LoggingRules.Add(rule);
             config.AddTarget("File", target);
             LogManager.Configuration = config;

@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net451</TargetFrameworks>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<UseWpf>true</UseWpf>
+		<Product>Logger</Product>
+		
+		<Description>Adds application logging capabilities</Description>
+		<Authors>Alexander Krutov</Authors>
+		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NLog" Version="5.3.2" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Deploy)' == 'True'">
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>None</DebugType>
+		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+	</PropertyGroup>
+
+	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+	</Target>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+
+</Project>

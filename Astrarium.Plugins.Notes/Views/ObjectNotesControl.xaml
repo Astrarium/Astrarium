@@ -5,7 +5,7 @@
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Astrarium.Plugins.Notes.Views"
+             xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <c:DisposableUserControl.Resources>
@@ -23,43 +23,95 @@
         </ResourceDictionary>
     </c:DisposableUserControl.Resources>
 
-    <StackPanel Orientation="Vertical">
-        <c:BindableListView Style="{StaticResource ResourceKey=ObjectNotesListViewStyle}" ItemsSource="{Binding Notes}" SelectionMode="Single">
-            <ListView.View>
-                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
-                    <GridView.Columns>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-                        <GridViewColumn Width="Auto">
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Date" />
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Date, Converter={s:DateTimeToStringConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+        <!-- View notes mode -->
+        <Grid Visibility="{Binding IsEditMode, Converter={t:InverseBoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-                        <GridViewColumn Width="Auto">
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Note" />
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Title}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView.Columns>
-                </GridView>
-            </ListView.View>
-        </c:BindableListView>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="There are no notes for this object" Visibility="{Binding Notes, Converter={t:EmptyCollectionToVisibilityConverter}}" />
 
-        <Button Content="Add note" Command="{Binding AddNoteCommand}" />
-    </StackPanel>
-    
+            <c:BindableListView 
+                ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                Style="{StaticResource ResourceKey=ObjectNotesListViewStyle}" 
+                ItemsSource="{Binding Notes}"
+                Visibility="{Binding Notes, Converter={t:NotEmptyCollectionToVisibilityConverter}}"
+                SelectionMode="Single">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+                        <GridView.Columns>
+                            <GridViewColumn Width="Auto">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="Date" />
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Date, Converter={s:DateTimeToStringConverter}}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Width="Auto">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="Note" />
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Title}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </c:BindableListView>
+            <Button Grid.Row="1" Margin="4 0" Content="Add note" Command="{Binding AddNoteCommand}" />
+        </Grid>
+
+        <!-- Edit mode -->
+        <Grid Visibility="{Binding IsEditMode, Converter={t:BoolToVisibilityConverter}}">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            
+            <Label Grid.Column="0" Grid.Row="0" Content="Date and Time" Margin="0 0 8 0" />
+            <c:DatePicker Grid.Column="1" Grid.Row="0" JulianDay="{Binding EditingNote.Date}" />
+
+            <Label Grid.Column="0" Grid.Row="1" Content="Short note title" Margin="0 0 8 0"  />
+            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding EditingNote.Title}" />
+
+            <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Content="Note content:" />
+           
+            
+            <TextBox 
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                Height="Auto"
+                VerticalScrollBarVisibility="Visible" 
+                VerticalAlignment="Stretch" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" 
+                Text="{Binding EditingNote.Title}" />
+
+        </Grid>
+        
+    </Grid>
+
 </c:DisposableUserControl>

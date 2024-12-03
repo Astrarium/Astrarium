@@ -190,6 +190,24 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(ICollection), typeof(Visibility))]
+    public class EmptyCollectionToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null || (value is ICollection collection && collection.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    [ValueConversion(typeof(ICollection), typeof(Visibility))]
+    public class NotEmptyCollectionToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is ICollection collection && collection.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     [ValueConversion(typeof(CelestialObject), typeof(string))]
     public class CelestialObjectNameConverter : ValueConverterBase
     {
