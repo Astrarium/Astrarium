@@ -75,8 +75,12 @@ namespace Astrarium
             }
         }
 
+        private bool autoLockEnabled = true;
+
+        private CrdsEquatorial autoLockCoordinates;
+
         private CelestialObject lockedObject;
-        
+
         /// <summary>
         /// Locked Object 
         /// </summary>
@@ -91,8 +95,8 @@ namespace Astrarium
                     if (lockedObject != null)
                     {
                         var eq = lockedObject.Equatorial;
-                        lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                        lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                        lockCoordinatesShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                        lockCoordinatesShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
                     }
                     LockedObjectChanged?.Invoke(lockedObject);
                 }
@@ -110,27 +114,33 @@ namespace Astrarium
                 var sep = Angle.Separation(Projection.CenterEquatorial, eq);
                 if (sep < 90)
                 {
-                    lockedObjectShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
-                    lockedObjectShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+                    lockCoordinatesShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                    lockCoordinatesShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
                 }
                 else
                 {
                     LockedObject = null;
                 }
             }
+            else if (settings.Get("AutoLock") && autoLockEnabled && autoLockCoordinates != null)
+            {
+                var eq = new CrdsEquatorial(autoLockCoordinates);
+                lockCoordinatesShiftAlpha = Projection.CenterEquatorial.Alpha - eq.Alpha;
+                lockCoordinatesShiftDelta = Projection.CenterEquatorial.Delta - eq.Delta;
+            }
 
             Invalidate();
         }
 
         /// <summary>
-        /// Shift between screen center and locked object by Right Ascention, in degrees
+        /// Shift between screen center and lock-point by Right Ascention, in degrees
         /// </summary>
-        private double lockedObjectShiftAlpha;
+        private double lockCoordinatesShiftAlpha;
 
         /// <summary>
-        /// Shift between screen center and locked object by Declination, in degrees
+        /// Shift between screen center and lock-point by Declination, in degrees
         /// </summary
-        private double lockedObjectShiftDelta;
+        private double lockCoordinatesShiftDelta;
 
         /// <inheritdoc/>
         public CrdsEquatorial MouseEquatorialCoordinates => Projection.UnprojectEquatorial(MouseScreenCoordinates.X, MouseScreenCoordinates.Y);
@@ -196,6 +206,24 @@ namespace Astrarium
         public SkyMap(ISettings settings)
         {
             this.settings = settings;
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        private void Settings_SettingValueChanged(string name, object value)
+        {
+            if (name == "AutoLock" && LockedObject == null)
+            {
+                if ((bool)value)
+                {
+                    autoLockCoordinates = new CrdsEquatorial(Projection.CenterEquatorial);
+                }
+                else
+                {
+                    autoLockCoordinates = null;
+                    lockCoordinatesShiftAlpha = 0;
+                    lockCoordinatesShiftDelta = 0;
+                }
+            }
         }
 
         /// <summary>
@@ -242,6 +270,18 @@ namespace Astrarium
         private void Projection_FovChanged(double fov)
         {
             FovChanged?.Invoke(fov);
+            
+            if (settings.Get("AutoLock") && autoLockEnabled && LockedObject == null && autoLockCoordinates == null)
+            {
+                if (Projection?.Fov <= 1)
+                {
+                    autoLockCoordinates = new CrdsEquatorial(Projection.CenterEquatorial);
+                }
+                else
+                {
+                    autoLockCoordinates = null;
+                }
+            }
         }
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
@@ -256,8 +296,8 @@ namespace Astrarium
                 if (LockedObject != null)
                 {
                     Projection.SetVision(new CrdsEquatorial(
-                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
-                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
+                        LockedObject.Equatorial.Alpha + lockCoordinatesShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockCoordinatesShiftDelta));
                 }
             };
 
@@ -365,11 +405,20 @@ namespace Astrarium
                 double rate = Math.Min(100, Math.Max(100, Projection.Fov * 100));
                 context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
 
+                // if locked object is set, sync map with it
                 if (LockedObject != null)
                 {
                     Projection.SetVision(new CrdsEquatorial(
-                        LockedObject.Equatorial.Alpha + lockedObjectShiftAlpha,
-                        LockedObject.Equatorial.Delta + lockedObjectShiftDelta));
+                        LockedObject.Equatorial.Alpha + lockCoordinatesShiftAlpha,
+                        LockedObject.Equatorial.Delta + lockCoordinatesShiftDelta));
+                }
+                // otherwise, keep the map centered on the same equatorial coordinates
+                // if "AutoLock" setting is enabled and zoom level is less than 1 degree
+                else if (settings.Get("AutoLock") && autoLockEnabled && autoLockCoordinates != null && Projection.Fov <= 1)
+                {
+                    Projection.SetVision(new CrdsEquatorial(
+                        autoLockCoordinates.Alpha + lockCoordinatesShiftAlpha,
+                        autoLockCoordinates.Delta + lockCoordinatesShiftDelta));
                 }
 
                 Invalidate();
@@ -565,6 +614,10 @@ namespace Astrarium
             }
 
             LockedObject = null;
+            autoLockEnabled = false;
+            autoLockCoordinates = null;
+            lockCoordinatesShiftAlpha = 0;
+            lockCoordinatesShiftDelta = 0;
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {
@@ -602,6 +655,12 @@ namespace Astrarium
                     while (fraction < 1);
 
                     sw.Stop();
+
+                    autoLockEnabled = true;
+                    if (settings.Get("AutoLock"))
+                    {
+                        autoLockCoordinates = new CrdsEquatorial(eq);
+                    }
                 });
             }
         }

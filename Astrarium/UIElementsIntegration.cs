@@ -77,6 +77,9 @@ namespace Astrarium
             // Time sync on start
             SettingDefinitions.Add(new SettingDefinition("TimeSyncOnStart", false));
 
+            // Auto lock map
+            SettingDefinitions.Add(new SettingDefinition("AutoLock", false));
+
             SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(FontsSettingsSection), typeof(FontsSettingsVM)));

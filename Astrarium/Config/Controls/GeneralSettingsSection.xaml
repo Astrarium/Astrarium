@@ -18,6 +18,7 @@
 
         <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.CheckUpdatesOnStart}" IsChecked="{Binding Settings.CheckUpdatesOnStart}" />
         <CheckBox Margin="2" Content="{t:Text Settings.TimeSyncOnStart}" IsChecked="{Binding Settings.TimeSyncOnStart}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.AutoLock}" IsChecked="{Binding Settings.AutoLock}" />
         <CheckBox Margin="2" Content="{t:Text Settings.StartMaximized}" IsChecked="{Binding Settings.StartMaximized}" />
         <CheckBox Margin="2" Content="{t:Text Settings.RememberWindowSize}" IsChecked="{Binding Settings.RememberWindowSize}" IsEnabled="{Binding Settings.StartMaximized, Converter={s:InverseBoolConverter}}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsCompactMenu}" IsChecked="{Binding Settings.IsCompactMenu}" />
