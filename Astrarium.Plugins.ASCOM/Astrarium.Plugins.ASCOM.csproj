@@ -72,7 +72,6 @@
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		<TargetPath>glfw.dll</TargetPath>
 	  </ContentWithTargetPath>
-	  <None Include="Libs\glfw.dll" />
   </ItemGroup>
 
   <ItemGroup>

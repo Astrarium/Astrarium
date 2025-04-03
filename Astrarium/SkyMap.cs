@@ -211,7 +211,7 @@ namespace Astrarium
 
         private void Settings_SettingValueChanged(string name, object value)
         {
-            if (name == "AutoLock" && LockedObject == null)
+            if (name == "AutoLock" && LockedObject == null && Projection != null)
             {
                 if ((bool)value)
                 {
@@ -271,15 +271,20 @@ namespace Astrarium
         {
             FovChanged?.Invoke(fov);
             
-            if (settings.Get("AutoLock") && autoLockEnabled && LockedObject == null && autoLockCoordinates == null)
+            if (settings.Get("AutoLock") && autoLockEnabled && LockedObject == null)
             {
-                if (Projection?.Fov <= 1)
+                if (autoLockCoordinates == null && Projection?.Fov <= 5)
                 {
+
+                    ViewManager.ShowPopupMessage("$Settings.AutoLockOnMessage");
                     autoLockCoordinates = new CrdsEquatorial(Projection.CenterEquatorial);
                 }
-                else
+                else if (autoLockCoordinates != null && Projection?.Fov > 5)
                 {
+                    ViewManager.ShowPopupMessage("$Settings.AutoLockOffMessage");
                     autoLockCoordinates = null;
+                    lockCoordinatesShiftAlpha = 0;
+                    lockCoordinatesShiftDelta = 0;
                 }
             }
         }
@@ -413,8 +418,8 @@ namespace Astrarium
                         LockedObject.Equatorial.Delta + lockCoordinatesShiftDelta));
                 }
                 // otherwise, keep the map centered on the same equatorial coordinates
-                // if "AutoLock" setting is enabled and zoom level is less than 1 degree
-                else if (settings.Get("AutoLock") && autoLockEnabled && autoLockCoordinates != null && Projection.Fov <= 1)
+                // if "AutoLock" setting is enabled and zoom level is less than 5 degrees
+                else if (settings.Get("AutoLock") && autoLockEnabled && autoLockCoordinates != null && Projection.Fov <= 5)
                 {
                     Projection.SetVision(new CrdsEquatorial(
                         autoLockCoordinates.Alpha + lockCoordinatesShiftAlpha,
