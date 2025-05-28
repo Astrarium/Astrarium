@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.IO;
 using Astrarium.Types;
+using System.Reflection;
 
 namespace Astrarium.Plugins.Logger
 {
@@ -40,6 +41,7 @@ namespace Astrarium.Plugins.Logger
             config.LoggingRules.Add(rule);
             config.AddTarget("File", target);
             LogManager.Configuration = config;
+            LoggerExtensions.Logger.Setup(Assembly.GetEntryAssembly());
         }
 
         public string Level
@@ -50,6 +52,11 @@ namespace Astrarium.Plugins.Logger
                 LogManager.Configuration.LoggingRules[0].SetLoggingLevels(LogLevel.FromString(value), LogLevel.Fatal);
                 LogManager.ReconfigExistingLoggers();
             }
+        }
+
+        public void Action(string action, string payload)
+        {
+            LoggerExtensions.Logger.Action(action, payload);
         }
     }
 }

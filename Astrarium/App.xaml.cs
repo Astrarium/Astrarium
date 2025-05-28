@@ -28,7 +28,6 @@ namespace Astrarium
 
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
             
-
             var splashVM = new SplashScreenVM();
             ViewManager.ShowWindow(splashVM);
 

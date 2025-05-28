@@ -12,6 +12,7 @@
         void Info(string format, params object[] args);
         void Trace(string format, params object[] args);
         void Warn(string format, params object[] args);
+        void Action(string action, string payload);
     }
 
     public static class Log
@@ -35,5 +36,6 @@
         public static void Info(string format, params object[] args) => log?.Info(format, args);
         public static void Trace(string format, params object[] args) => log?.Trace(format, args);
         public static void Warn(string format, params object[] args) => log?.Warn(format, args);
+        public static void Action(string action, string payload) => log?.Action(action, payload);
     }
 }

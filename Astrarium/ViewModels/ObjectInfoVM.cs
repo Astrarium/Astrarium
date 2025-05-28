@@ -1,10 +1,6 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
 using System.Diagnostics;
@@ -17,6 +13,7 @@ namespace Astrarium.ViewModels
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
         public string ObjectType { get; private set; }
+        public string ObjectCommonName { get; private set; }
         public double JulianDay { get; private set; }
 
         public ICommand CopyNameCommand { get; private set; }
@@ -29,6 +26,7 @@ namespace Astrarium.ViewModels
             Title = info.Title;
             Subtitle = info.Subtitle;
             ObjectType = info.ObjectType;
+            ObjectCommonName = info.ObjectCommonName;
 
             CopyNameCommand = new Command(CopyName);
             CloseCommand = new Command(Close);
@@ -104,5 +102,7 @@ namespace Astrarium.ViewModels
                 IsHeaderVisible = isHeaderVisible;
             }
         }
+
+        public override object Payload => new { Body = $"{ObjectCommonName}/{ObjectType}" };
     }
 }

@@ -39,5 +39,10 @@ namespace Astrarium.Types
         /// Called when associated dialog or window is activated
         /// </summary>
         public virtual void OnActivated() { }
+
+        /// <summary>
+        /// Gets ViewModel payload for debug purposes
+        /// </summary>
+        public virtual object Payload => null;
     }
 }

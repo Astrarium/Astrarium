@@ -15,6 +15,7 @@ using System.Drawing.Printing;
 using System.Drawing;
 using System.IO;
 using Astrarium.Algorithms;
+using Newtonsoft.Json;
 
 namespace Astrarium
 {
@@ -143,10 +144,12 @@ namespace Astrarium
 
                 if (isDialog)
                 {
+                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
                     return window.ShowDialog();
                 }
                 else
                 {
+                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
                     window.Show();
                     return null;
                 }
