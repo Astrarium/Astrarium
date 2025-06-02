@@ -64,6 +64,8 @@ namespace Astrarium.ViewModels
             Close(true);
         }
 
+        public override object Payload => new { From = new Date( JulianDayFrom, UtcOffset).ToString(), To = new Date(JulianDayTo, UtcOffset).ToString(), Categories = string.Join("; ", Categories) };
+
         private void BuildCategoriesTree()
         {
             Nodes.Clear();

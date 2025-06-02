@@ -44,5 +44,10 @@ namespace Astrarium.Types
         /// Gets ViewModel payload for debug purposes
         /// </summary>
         public virtual object Payload => null;
+
+        /// <summary>
+        /// Determines the view model is loggable or not
+        /// </summary>
+        public virtual bool Loggable => true;
     }
 }

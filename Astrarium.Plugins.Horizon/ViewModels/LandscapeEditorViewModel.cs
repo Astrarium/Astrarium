@@ -34,5 +34,7 @@ namespace Astrarium.Plugins.Horizon.ViewModels
 
             Close(true);
         }
+
+        public override object Payload => new { Title = Title, Description = Description };
     }
 }

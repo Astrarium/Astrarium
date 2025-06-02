@@ -144,8 +144,14 @@ namespace Astrarium
 
                 if (isDialog)
                 {
-                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
-                    return window.ShowDialog();
+                    try
+                    {
+                        return window.ShowDialog();
+                    }
+                    finally
+                    {
+                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    }
                 }
                 else
                 {

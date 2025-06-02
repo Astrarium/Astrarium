@@ -52,7 +52,6 @@ namespace Astrarium.ViewModels
 
         public bool NoEvents => !Events.Any();
 
-
         private Type GetExportFormat(int index)
         {
             return exportFormats.ElementAt(index - 1).Value;

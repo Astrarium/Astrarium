@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Astrarium.Algorithms;
 
 namespace Astrarium.ViewModels
 {
@@ -127,5 +128,7 @@ namespace Astrarium.ViewModels
         {
             NotifyPropertyChanged(nameof(OkButtonEnabled));
         }
+
+        public override object Payload => SelectedBody != null ? new { Body = SelectedBody.ToString(), From = new Date(JulianDayFrom, UtcOffset).ToString(), To = new Date(JulianDayTo, UtcOffset).ToString(), Step = Step.ToString(), Categories = string.Join("; ", Categories) } : null;
     }
 }

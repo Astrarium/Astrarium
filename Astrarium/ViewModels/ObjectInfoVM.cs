@@ -103,6 +103,6 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public override object Payload => new { Body = $"{ObjectCommonName}/{ObjectType}" };
+        public override object Payload => new { Body = $"{ObjectType}/{ObjectCommonName}" };
     }
 }

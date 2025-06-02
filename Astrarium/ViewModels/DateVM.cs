@@ -376,5 +376,7 @@ namespace Astrarium.ViewModels
 
             SetJulianDay(jd);
         }
+
+        public override object Payload => new { Date = new Date(JulianDay, UtcOffset).ToString() };
     }
 }

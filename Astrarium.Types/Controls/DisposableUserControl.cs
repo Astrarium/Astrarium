@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,11 @@ namespace Astrarium.Types.Controls
 
         private void ControlLoaded(object sender, RoutedEventArgs e)
         {
-            Window.GetWindow(this).Closing += WindowClosing;
+            var window = Window.GetWindow(this);
+            if (window != null)
+            {
+                window.Closing += WindowClosing;
+            }
         }
 
         private void WindowClosing(object sender, EventArgs e)

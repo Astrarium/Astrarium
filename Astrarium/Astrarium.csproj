@@ -214,11 +214,14 @@
 		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		<Private>false</Private>
 	</ProjectReference>
+	  
+	<!--
 	<ProjectReference Include="..\Astrarium.Plugins.Journal\Astrarium.Plugins.Journal.csproj">
 		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		<Private>false</Private>
 	</ProjectReference>
+	-->
     
     <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />

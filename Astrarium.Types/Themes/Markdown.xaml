@@ -4,6 +4,7 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls">
 
     <Style TargetType="FlowDocument" x:Key="DocumentStyle">
+        <Setter Property="PagePadding" Value="5 5" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontFamily" Value="pack://application:,,,/Astrarium.Types;component/Themes/#Noto Sans" />
         <Setter Property="TextAlignment" Value="Left" />

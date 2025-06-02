@@ -20,6 +20,30 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
+                <Style.Setters>
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="Width" Value="18" />
+                    <Setter Property="Height" Value="18" />
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style.Setters>
+            </Style>
+
+            <Grid x:Key="BtnDelete" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="12" Height="12" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+            </Grid>
+
+            <Grid x:Key="BtnEdit" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="12" Height="12" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </Grid>
+
         </ResourceDictionary>
     </c:DisposableUserControl.Resources>
 
@@ -37,81 +61,85 @@
 
             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="There are no notes for this object" Visibility="{Binding Notes, Converter={t:EmptyCollectionToVisibilityConverter}}" />
 
-            <c:BindableListView 
+            <DataGrid 
                 ScrollViewer.VerticalScrollBarVisibility="Auto" 
-                Style="{StaticResource ResourceKey=ObjectNotesListViewStyle}" 
+                Style="{StaticResource {x:Type DataGrid}}"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Hidden"
+                EnableRowVirtualization="True"
+                EnableColumnVirtualization="True"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                VirtualizingPanel.IsVirtualizing="True"
+                AutoGenerateColumns="False"
+                CanUserReorderColumns="False"
+                CanUserSortColumns="True"
+                CanUserResizeRows="False"
+                IsReadOnly="True"
+                GridLinesVisibility="Vertical"
+                BorderThickness="1"
+                Margin="4"
+                RowHeaderWidth="0"
+                ColumnHeaderHeight="32"
+                RowHeight="26"
+                SelectionMode="Extended"
+                SelectionUnit="FullRow"
                 ItemsSource="{Binding Notes}"
-                Visibility="{Binding Notes, Converter={t:NotEmptyCollectionToVisibilityConverter}}"
-                SelectionMode="Single">
-                <ListView.View>
-                    <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
-                        <GridView.Columns>
-                            <GridViewColumn Width="Auto">
-                                <GridViewColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="Date" />
-                                    </DataTemplate>
-                                </GridViewColumn.HeaderTemplate>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Date, Converter={s:DateTimeToStringConverter}}" />
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                SelectedItem="{Binding SelectedNote}" 
+                Visibility="{Binding Notes, Converter={t:NotEmptyCollectionToVisibilityConverter}}">
+                <DataGrid.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                </DataGrid.InputBindings>
 
-                            <GridViewColumn Width="Auto">
-                                <GridViewColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="Note" />
-                                    </DataTemplate>
-                                </GridViewColumn.HeaderTemplate>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Title}" />
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView.Columns>
-                    </GridView>
-                </ListView.View>
-            </c:BindableListView>
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="Date" SortDirection="Descending" CanUserResize="False" Width="120" SortMemberPath="Date">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Date, Converter={s:DateTimeToStringConverter}}" TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Title" CanUserSort="False" MinWidth="40">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*" Header="Description" MinWidth="40" CanUserSort="False" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Description}" TextTrimming="CharacterEllipsis" />
+                                    <Button Grid.Column="1" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" 
+                                            Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
+                                            RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
+                                            Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.EditNoteCommand}"
+                                            ToolTip="Edit" />
+
+                                    <Button Grid.Column="2" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Margin="8 0 0 0"
+                                            Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
+                                            RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
+                                                                                        Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.DeleteNoteCommand}"
+                                            ToolTip="Delete" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+
+            </DataGrid>
             <Button Grid.Row="1" Margin="4 0" Content="Add note" Command="{Binding AddNoteCommand}" />
         </Grid>
-
-        <!-- Edit mode -->
-        <Grid Visibility="{Binding IsEditMode, Converter={t:BoolToVisibilityConverter}}">
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            
-            <Label Grid.Column="0" Grid.Row="0" Content="Date and Time" Margin="0 0 8 0" />
-            <c:DatePicker Grid.Column="1" Grid.Row="0" JulianDay="{Binding EditingNote.Date}" />
-
-            <Label Grid.Column="0" Grid.Row="1" Content="Short note title" Margin="0 0 8 0"  />
-            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding EditingNote.Title}" />
-
-            <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Content="Note content:" />
-           
-            
-            <TextBox 
-                TextWrapping="Wrap"
-                AcceptsReturn="True"
-                Height="Auto"
-                VerticalScrollBarVisibility="Visible" 
-                VerticalAlignment="Stretch" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" 
-                Text="{Binding EditingNote.Title}" />
-
-        </Grid>
-        
     </Grid>
 
 </c:DisposableUserControl>

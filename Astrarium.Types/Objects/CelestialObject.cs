@@ -48,9 +48,15 @@ namespace Astrarium.Types
         }
 
         /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Type}/{CommonName}";
+        }
+
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return $"{Type}/{CommonName}".GetHashCode();
+            return ToString().GetHashCode();
         }
     }
 }

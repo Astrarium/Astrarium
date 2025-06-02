@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Themes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,12 +16,9 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private readonly NotesManager notesManager;
 
         public Command AddNoteCommand { get; private set; }
-
-        public bool IsEditMode
-        {
-            get => GetValue<bool>(nameof(IsEditMode));
-            set => SetValue(nameof(IsEditMode), value);
-        }
+        public Command<Note> ViewNoteCommand { get; private set; }
+        public Command EditNoteCommand { get; private set; }
+        public Command DeleteNoteCommand { get; private set; }
 
         public ObservableCollection<Note> Notes 
         {
@@ -28,11 +26,20 @@ namespace Astrarium.Plugins.Notes.ViewModels
             private set => SetValue(nameof(Notes), value);
         }
 
+        public Note SelectedNote
+        {
+            get => GetValue<Note>(nameof(SelectedNote));
+            set => SetValue(nameof(SelectedNote), value);
+        }
+
         public ObjectNotesViewModel(NotesManager notesManager) 
         {
             this.notesManager = notesManager;
 
             AddNoteCommand = new Command(AddNote);
+            ViewNoteCommand = new Command<Note>(ViewNote);
+            EditNoteCommand = new Command(EditNote);
+            DeleteNoteCommand = new Command(DeleteNote);
         }
 
         public void SetObject(CelestialObject body)
@@ -43,12 +50,45 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void AddNote()
         {
-            IsEditMode = true;
+            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() {  BodyType = body.Type, BodyName = body.CommonName }, isEdit: true);
+            if (ViewManager.ShowDialog(vm) == true)
+            {
 
-            //var note = new Note() { BodyType = body.Type, BodyName = body.CommonName, Date = DateTime.Now, Description = "test " + DateTime.Now, Title = "test " + DateTime.Now };
-            //Notes.Add(note);
-            //notesManager.AddNote(note);
-            //NotifyPropertyChanged(nameof(Notes));
+            }
+        }
+
+        private void ViewNote(Note note)
+        {
+            if (note == null) return;
+            OpenNote(note, isEdit: false);
+        }
+
+        private void EditNote()
+        {
+            if (SelectedNote == null) return;
+            OpenNote(SelectedNote, isEdit: true);
+        }
+
+        private void OpenNote(Note note, bool isEdit)
+        {
+            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(note, isEdit);
+            if (ViewManager.ShowDialog(vm) == true)
+            {
+                Notes.Remove(note);
+                Notes.Add(vm.GetNote());
+            }
+        }
+
+        private void DeleteNote()
+        {
+            if (SelectedNote == null) return;
+
+            var note = SelectedNote;
+
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
+            {
+                Notes.Remove(note);
+            }
         }
     }
 }

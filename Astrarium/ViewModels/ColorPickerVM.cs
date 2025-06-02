@@ -40,5 +40,7 @@ namespace Astrarium.ViewModels
         {
             SelectCommand = new Command(Select);
         }
+
+        public override bool Loggable => false;
     }
 }

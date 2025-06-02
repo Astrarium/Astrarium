@@ -53,7 +53,9 @@ namespace Astrarium.Plugins.Notes
 
         public List<Note> GetNotesForObject(CelestialObject body)
         {
-            return notes.Value.Where(n => n.BodyType == body.Type && n.BodyName == body.CommonName).ToList();
+            return notes.Value
+                .Where(n => n.BodyType == body.Type && n.BodyName == body.CommonName)
+                .OrderByDescending(n => n.Date).ToList();
         }
 
         public void AddNote(Note note)
