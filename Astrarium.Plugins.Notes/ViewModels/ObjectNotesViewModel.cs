@@ -13,12 +13,15 @@ namespace Astrarium.Plugins.Notes.ViewModels
     {
         private CelestialObject body;
 
+        private readonly ISky sky;
         private readonly NotesManager notesManager;
 
         public Command AddNoteCommand { get; private set; }
         public Command<Note> ViewNoteCommand { get; private set; }
         public Command EditNoteCommand { get; private set; }
         public Command DeleteNoteCommand { get; private set; }
+
+        public double UtcOffset => sky.Context.GeoLocation.UtcOffset;
 
         public ObservableCollection<Note> Notes 
         {
@@ -32,8 +35,9 @@ namespace Astrarium.Plugins.Notes.ViewModels
             set => SetValue(nameof(SelectedNote), value);
         }
 
-        public ObjectNotesViewModel(NotesManager notesManager) 
+        public ObjectNotesViewModel(ISky sky, NotesManager notesManager) 
         {
+            this.sky = sky;
             this.notesManager = notesManager;
 
             AddNoteCommand = new Command(AddNote);
@@ -50,10 +54,11 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void AddNote()
         {
-            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() {  BodyType = body.Type, BodyName = body.CommonName }, isEdit: true);
+            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() { Date = sky.Context.JulianDay, BodyType = body.Type, BodyName = body.CommonName }, isEdit: true);
             if (ViewManager.ShowDialog(vm) == true)
             {
-
+                notesManager.AddNote(vm.GetNote());
+                Notes = new ObservableCollection<Note>(notesManager.GetNotesForObject(body));
             }
         }
 
@@ -76,6 +81,8 @@ namespace Astrarium.Plugins.Notes.ViewModels
             {
                 Notes.Remove(note);
                 Notes.Add(vm.GetNote());
+
+                
             }
         }
 
@@ -88,6 +95,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
             {
                 Notes.Remove(note);
+                
             }
         }
     }

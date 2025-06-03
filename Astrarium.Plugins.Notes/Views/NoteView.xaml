@@ -35,7 +35,7 @@
         <c:CelestialObjectPicker Grid.Column="1" Grid.Row="0" SelectedBody="{Binding Body}" IsEnabled="{Binding IsEditMode}" />
 
         <Label IsEnabled="False" Grid.Column="0" Grid.Row="1" Content="Date and Time" Margin="0 0 8 0" />
-        <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" IsEnabled="{Binding IsEditMode}" />
+        <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" IsEnabled="{Binding IsEditMode}" />
 
         <Label IsEnabled="False" Grid.Column="0" Grid.Row="2" Content="Short note title" Margin="0 0 8 0"  />
         <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Title}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />

@@ -29,17 +29,18 @@ namespace Astrarium.Plugins.Notes
             if (File.Exists(file))
             {
                 string json = File.ReadAllText(file);
-                return JsonConvert.DeserializeObject<List<Note>>(json);
+                try
+                {
+                    return JsonConvert.DeserializeObject<List<Note>>(json);
+                }
+                catch (Exception ex)
+                {
+                    return new List<Note>();
+                }
             }
             else
             {
-                var notes = new List<Note>()
-                {
-                    new Note() { BodyName = "Sun", BodyType = "Sun", Date = new DateTime(2001, 1, 1), Title = "Sun note", Description = "Description"}
-                };
-
-                SaveNotes(notes);
-                return notes;
+                return new List<Note>();
             }
         }
 

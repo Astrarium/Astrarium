@@ -10,7 +10,7 @@ namespace Astrarium.Plugins.Notes
     {
         public string BodyType { get; set; }
         public string BodyName { get; set; }
-        public DateTime Date { get; set; }
+        public double Date { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
     }

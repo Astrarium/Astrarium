@@ -13,8 +13,6 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private readonly ISky sky;
         private Note note = null;
         private bool isEdit = false;
-        private string bodyType = null;
-        private string bodyName = null;
 
         public Command EditCommand { get; private set; }
         public Command CancelCommand { get; private set; }
@@ -45,8 +43,10 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public Note GetNote()
         {
-            return new Note() { Date = Date, Description = Description, Title = Title };
+            return new Note() { Date = Date, BodyName = Body.CommonName, BodyType = Body.Type, Description = Description, Title = Title };
         }
+
+        public double UtcOffset => sky.Context.GeoLocation.UtcOffset;
 
         public CelestialObject Body
         {
@@ -60,9 +60,9 @@ namespace Astrarium.Plugins.Notes.ViewModels
             set => SetValue(nameof(IsEditMode), value);
         }
 
-        public DateTime Date
+        public double Date
         {
-            get => GetValue<DateTime>(nameof(Date));
+            get => GetValue<double>(nameof(Date));
             set => SetValue(nameof(Date), value);
         }
 
@@ -98,10 +98,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             IsEditMode = false;
             note = GetNote();
             SetValues();
-            if (isEdit)
-            {
-                Close(true);
-            }
+            Close(true);
         }
 
         private void SetValues()

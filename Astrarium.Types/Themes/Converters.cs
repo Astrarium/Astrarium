@@ -531,6 +531,22 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class JulianDayToStringConverter : MultiValueConverterBase
+    {
+
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length == 2 && values[0] is double jd && values[1] is double utcOffset)
+            {
+                return Formatters.DateTime.Format(new Algorithms.Date(jd, utcOffset));
+            }
+            else
+            {
+                return "?";
+            }
+        }
+    }
+
     public class DateTimeToStringConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)

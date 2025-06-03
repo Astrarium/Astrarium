@@ -96,7 +96,14 @@
                     <DataGridTemplateColumn Header="Date" SortDirection="Descending" CanUserResize="False" Width="120" SortMemberPath="Date">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Date, Converter={s:DateTimeToStringConverter}}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{s:JulianDayToStringConverter}">
+                                            <Binding Path="Date" />
+                                            <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=c:DisposableUserControl}" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
