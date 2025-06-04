@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types.Themes;
+using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -36,9 +37,7 @@ namespace Astrarium.Types.Controls
             }
 
             var text = (string)value;
-
             var engine = Markdown ?? mMarkdown.Value;
-
             return engine.Transform(text);
         }
 

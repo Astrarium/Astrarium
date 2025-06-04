@@ -21,7 +21,6 @@
                 </Setter>
             </Style>
 
-
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
                 <Style.Setters>
                     <Setter Property="BorderBrush" Value="Transparent" />
@@ -125,7 +124,10 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Description}" TextTrimming="CharacterEllipsis" />
+
+                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:InverseBoolToVisibilityConverter}}" Text="{Binding Description, Converter={t:SingleLineTextConverter}}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:BoolToVisibilityConverter}}" Text="{Binding Description, Converter={t:MarkdownToPlainTextConverter}}" TextTrimming="CharacterEllipsis" />
+                                    
                                     <Button Grid.Column="1" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" 
                                             Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
@@ -135,7 +137,7 @@
                                     <Button Grid.Column="2" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Margin="8 0 0 0"
                                             Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
-                                                                                        Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.DeleteNoteCommand}"
+                                            Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.DeleteNoteCommand}"
                                             ToolTip="Delete" />
                                 </Grid>
                             </DataTemplate>

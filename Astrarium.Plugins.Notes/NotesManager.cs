@@ -64,5 +64,18 @@ namespace Astrarium.Plugins.Notes
             notes.Value.Add(note);
             SaveNotes(notes.Value);
         }
+
+        public void RemoveNote(Note note)
+        {
+            notes.Value.Remove(note);
+            SaveNotes(notes.Value);
+        }
+
+        public void ChangeNote(Note old, Note @new)
+        {
+            notes.Value.Remove(old);
+            notes.Value.Add(@new);
+            SaveNotes(notes.Value);
+        }
     }
 }

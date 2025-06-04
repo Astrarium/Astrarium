@@ -14,6 +14,8 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private Note note = null;
         private bool isEdit = false;
 
+        public bool HasChanges { get; private set; }
+
         public Command EditCommand { get; private set; }
         public Command CancelCommand { get; private set; }
         public Command CloseCommand { get; private set; }
@@ -36,14 +38,13 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
             Body = sky.Search(note.BodyType, note.BodyName);
 
-            
             SetValues();
             return this;
         }
 
         public Note GetNote()
         {
-            return new Note() { Date = Date, BodyName = Body.CommonName, BodyType = Body.Type, Description = Description, Title = Title };
+            return new Note() { Date = Date, BodyName = Body.CommonName, BodyType = Body.Type, Markdown = Markdown, Description = Description, Title = Title };
         }
 
         public double UtcOffset => sky.Context.GeoLocation.UtcOffset;
@@ -64,6 +65,12 @@ namespace Astrarium.Plugins.Notes.ViewModels
         {
             get => GetValue<double>(nameof(Date));
             set => SetValue(nameof(Date), value);
+        }
+
+        public bool Markdown
+        {
+            get => GetValue(nameof(Markdown), true);
+            set => SetValue(nameof(Markdown), value);
         }
 
         public string Title
@@ -89,16 +96,20 @@ namespace Astrarium.Plugins.Notes.ViewModels
             SetValues();
             if (isEdit)
             {
-                Close(false);
+                Close();
             }
         }
 
         private void OK()
         {
             IsEditMode = false;
+            HasChanges = true;
             note = GetNote();
             SetValues();
-            Close(true);
+            if (isEdit)
+            {
+                Close();
+            }
         }
 
         private void SetValues()
@@ -106,6 +117,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             Date = note.Date;
             Description = note.Description;
             Title = note.Title;
+            Markdown = note.Markdown;
         }
     }
 }

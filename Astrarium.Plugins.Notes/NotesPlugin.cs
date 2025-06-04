@@ -8,12 +8,12 @@ namespace Astrarium.Plugins.Notes
     {
         public NotesPlugin()
         {
-            ExtendObjectInfo<ObjectNotesControl, ObjectNotesViewModel>("Notes", CreateObjectNotesViewModel);
+            ExtendObjectInfo<ObjectNotesControl, ObjectNotesVM>("Notes", CreateObjectNotesViewModel);
         }
 
-        private ObjectNotesViewModel CreateObjectNotesViewModel(SkyContext ctx, CelestialObject body)
+        private ObjectNotesVM CreateObjectNotesViewModel(SkyContext ctx, CelestialObject body)
         {
-            var viewModel = ViewManager.CreateViewModel<ObjectNotesViewModel>();
+            var viewModel = ViewManager.CreateViewModel<ObjectNotesVM>();
             viewModel.SetObject(body);
 
             return viewModel;

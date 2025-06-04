@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
-    public class ObjectNotesViewModel : ViewModelBase
+    public class ObjectNotesVM : ViewModelBase
     {
         private CelestialObject body;
 
@@ -35,7 +35,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             set => SetValue(nameof(SelectedNote), value);
         }
 
-        public ObjectNotesViewModel(ISky sky, NotesManager notesManager) 
+        public ObjectNotesVM(ISky sky, NotesManager notesManager) 
         {
             this.sky = sky;
             this.notesManager = notesManager;
@@ -49,16 +49,23 @@ namespace Astrarium.Plugins.Notes.ViewModels
         public void SetObject(CelestialObject body)
         {
             this.body = body;
+            ReloadNotes();
+        }
+
+        private void ReloadNotes()
+        {
             Notes = new ObservableCollection<Note>(notesManager.GetNotesForObject(body));
         }
 
         private void AddNote()
         {
-            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() { Date = sky.Context.JulianDay, BodyType = body.Type, BodyName = body.CommonName }, isEdit: true);
-            if (ViewManager.ShowDialog(vm) == true)
+            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() { Date = sky.Context.JulianDay, BodyType = body.Type, BodyName = body.CommonName, Markdown = true }, isEdit: true);
+            ViewManager.ShowDialog(vm);
+
+            if (vm.HasChanges)
             {
                 notesManager.AddNote(vm.GetNote());
-                Notes = new ObservableCollection<Note>(notesManager.GetNotesForObject(body));
+                ReloadNotes();
             }
         }
 
@@ -77,12 +84,11 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private void OpenNote(Note note, bool isEdit)
         {
             var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(note, isEdit);
-            if (ViewManager.ShowDialog(vm) == true)
+            ViewManager.ShowDialog(vm);
+            if (vm.HasChanges) 
             {
-                Notes.Remove(note);
-                Notes.Add(vm.GetNote());
-
-                
+                notesManager.ChangeNote(note, vm.GetNote());
+                ReloadNotes();
             }
         }
 
@@ -95,7 +101,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
             {
                 Notes.Remove(note);
-                
+                ReloadNotes();
             }
         }
     }

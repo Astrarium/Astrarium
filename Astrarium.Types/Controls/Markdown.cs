@@ -208,6 +208,27 @@ namespace Astrarium.Types.Controls
             HyperlinkCommand = NavigationCommands.GoToPage;
         }
 
+        public static string ToPlainText(string markdownText)
+        {
+            if (string.IsNullOrEmpty(markdownText))
+                return string.Empty;
+
+            string plainText = Regex.Replace(markdownText, "<.*?>", string.Empty);
+            plainText = plainText.Replace("\r", "");
+            plainText = Regex.Replace(plainText, @"^#+\s*", string.Empty, RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"^(.+)\n=+$", "$1", RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"^(.+)\n-+$", "$1", RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"(\*\*|__)(.*?)\1", "$2");
+            plainText = Regex.Replace(plainText, @"(\*|_)(.*?)\1", "$2");
+            plainText = Regex.Replace(plainText, @"`{1,3}(.*?)`{1,3}", "$1");
+            plainText = Regex.Replace(plainText, @"!?\[(.*?)\]\(.*?\)", "$1");
+            plainText = Regex.Replace(plainText, @"^\s*[\*\-\+] ", string.Empty, RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"^\s*>+", string.Empty, RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"^\s*[-*_]{3,}\s*$", string.Empty, RegexOptions.Multiline);
+            plainText = Regex.Replace(plainText, @"\s+", " ").Trim();
+            return plainText;
+        }
+
         public FlowDocument Transform(string text)
         {
             if (text is null)

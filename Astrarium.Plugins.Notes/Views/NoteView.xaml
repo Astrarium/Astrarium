@@ -35,14 +35,28 @@
         <c:CelestialObjectPicker Grid.Column="1" Grid.Row="0" SelectedBody="{Binding Body}" IsEnabled="{Binding IsEditMode}" />
 
         <Label IsEnabled="False" Grid.Column="0" Grid.Row="1" Content="Date and Time" Margin="0 0 8 0" />
-        <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" IsEnabled="{Binding IsEditMode}" />
+
+        <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
+            <Hyperlink Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">                                                 
+                <Run>
+                    <Run.Text>
+                        <MultiBinding Converter="{s:JulianDayToStringConverter}">
+                            <Binding Path="Date" />
+                            <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=Window}" Mode="OneWay" />
+                        </MultiBinding>
+                    </Run.Text>
+                </Run>
+            </Hyperlink>
+        </TextBlock>
 
         <Label IsEnabled="False" Grid.Column="0" Grid.Row="2" Content="Short note title" Margin="0 0 8 0"  />
         <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Title}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Title}" ToolTip="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
 
         <Label IsEnabled="False" Grid.Column="0" Grid.Row="3" Content="Note content" />
-        
+
+        <CheckBox VerticalAlignment="Center" Content="Use markdown syntax" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Markdown}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <Separator Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
 
         <TextBox 
@@ -58,11 +72,35 @@
             VerticalAlignment="Stretch"
             Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" 
             VerticalScrollBarVisibility="Visible"
-            BorderBrush="{StaticResource BrushControlBackground}"
             BorderThickness="0"
-            ContextMenu="{x:Null}"
-            Document="{Binding Description, Converter={StaticResource TextToFlowDocumentConverter}}"
-            Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
+            Document="{Binding Description, Converter={StaticResource TextToFlowDocumentConverter}}">
+            <FlowDocumentScrollViewer.Visibility>
+                <MultiBinding Converter="{s:MultiBoolToVisibilityConverter}">
+                    <Binding Path="IsEditMode" Converter="{s:InverseBoolConverter}" />
+                    <Binding Path="Markdown" />
+                </MultiBinding>
+            </FlowDocumentScrollViewer.Visibility>
+        </FlowDocumentScrollViewer>
+
+        <TextBox
+            IsReadOnly="True"
+            Foreground="{StaticResource BrushForeground}"
+            Height="Auto"
+            VerticalAlignment="Stretch"
+            BorderThickness="0"
+            Margin="2"
+            HorizontalAlignment="Stretch"
+            TextWrapping="Wrap"
+            Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" 
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            Text="{Binding Description}">
+            <TextBox.Visibility>
+                <MultiBinding Converter="{s:MultiBoolToVisibilityConverter}">
+                    <Binding Path="IsEditMode" Converter="{s:InverseBoolConverter}" />
+                    <Binding Path="Markdown" Converter="{s:InverseBoolConverter}" />
+                </MultiBinding>
+            </TextBox.Visibility>
+        </TextBox>
 
         <StackPanel Margin="0 8 0 0" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding EditCommand}" Content="Edit" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />

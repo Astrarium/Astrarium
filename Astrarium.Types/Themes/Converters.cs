@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types.Controls;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,6 +33,21 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class MarkdownToPlainTextConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Markdown.ToPlainText(value as string);
+        }
+    }
+
+    public class SingleLineTextConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as string)?.Replace("\r\n", " ");
+        }
+    }
 
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]
@@ -533,7 +549,6 @@ namespace Astrarium.Types.Themes
 
     public class JulianDayToStringConverter : MultiValueConverterBase
     {
-
         public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values.Length == 2 && values[0] is double jd && values[1] is double utcOffset)
