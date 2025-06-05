@@ -54,16 +54,29 @@
         <!-- View notes mode -->
         <Grid Visibility="{Binding IsEditMode, Converter={t:InverseBoolToVisibilityConverter}}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="There are no notes for this object" Visibility="{Binding Notes, Converter={t:EmptyCollectionToVisibilityConverter}}" />
+            <Grid Margin="4 8" Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <c:SearchTextBox Watermark="Type note fragment to filter" Text="{Binding FilterString, Mode=TwoWay, Delay=100, UpdateSourceTrigger=PropertyChanged}" Margin="0 0 8 0" />
+                <Button Padding="8 0" Grid.Column="1" Content="+ New note" Command="{Binding AddNoteCommand}" />
+            </Grid>
+
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Vertical" Visibility="{Binding Notes, Converter={t:EmptyCollectionToVisibilityConverter}}">
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="There are no notes yet. Click Add to create first one." />
+                <Button HorizontalAlignment="Center" Width="Auto" Content="Add" Margin="8" Padding="8 0" MinWidth="80" Command="{Binding AddNoteCommand}" />
+            </StackPanel>
 
             <DataGrid 
-                ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                Grid.Row="1"
+                ScrollViewer.VerticalScrollBarVisibility="Visible" 
                 Style="{StaticResource {x:Type DataGrid}}"
-                VerticalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Visible"
                 HorizontalScrollBarVisibility="Hidden"
                 EnableRowVirtualization="True"
                 EnableColumnVirtualization="True"
@@ -75,7 +88,7 @@
                 CanUserSortColumns="True"
                 CanUserResizeRows="False"
                 IsReadOnly="True"
-                GridLinesVisibility="Vertical"
+                GridLinesVisibility="None"
                 BorderThickness="1"
                 Margin="4"
                 RowHeaderWidth="0"
@@ -85,23 +98,29 @@
                 SelectionUnit="FullRow"
                 ItemsSource="{Binding Notes}"
                 SelectedItem="{Binding SelectedNote}" 
-                Visibility="{Binding Notes, Converter={t:NotEmptyCollectionToVisibilityConverter}}">
+                Visibility="Visible">
                 <DataGrid.InputBindings>
                     <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
                 </DataGrid.InputBindings>
 
                 <DataGrid.Columns>
 
-                    <DataGridTemplateColumn Header="Date" SortDirection="Descending" CanUserResize="False" Width="120" SortMemberPath="Date">
+                    <DataGridTemplateColumn Header="Date" SortDirection="Descending" CanUserResize="False" Width="125" SortMemberPath="Date">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{s:JulianDayToStringConverter}">
-                                            <Binding Path="Date" />
-                                            <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=c:DisposableUserControl}" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
+                                <TextBlock>
+                                     <TextBlock VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
+                                         <Hyperlink ToolTip="Click to set the date" Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}}" CommandParameter="{Binding}">                                                 
+                                             <Run>
+                                                 <Run.Text>
+                                                     <MultiBinding Converter="{s:JulianDayToStringConverter}">
+                                                         <Binding Path="Date" />
+                                                         <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=c:DisposableUserControl}" Mode="OneWay" />
+                                                     </MultiBinding>
+                                                 </Run.Text>
+                                             </Run>
+                                         </Hyperlink>
+                                     </TextBlock>
                                 </TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -127,7 +146,7 @@
 
                                     <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:InverseBoolToVisibilityConverter}}" Text="{Binding Description, Converter={t:SingleLineTextConverter}}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:BoolToVisibilityConverter}}" Text="{Binding Description, Converter={t:MarkdownToPlainTextConverter}}" TextTrimming="CharacterEllipsis" />
-                                    
+
                                     <Button Grid.Column="1" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" 
                                             Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
@@ -147,7 +166,6 @@
                 </DataGrid.Columns>
 
             </DataGrid>
-            <Button Grid.Row="1" Margin="4 0" Content="Add note" Command="{Binding AddNoteCommand}" />
         </Grid>
     </Grid>
 

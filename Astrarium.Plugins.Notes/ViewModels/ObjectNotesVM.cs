@@ -3,9 +3,11 @@ using Astrarium.Types.Themes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
@@ -14,18 +16,20 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private CelestialObject body;
 
         private readonly ISky sky;
+        private readonly ISkyMap map;
         private readonly NotesManager notesManager;
 
         public Command AddNoteCommand { get; private set; }
         public Command<Note> ViewNoteCommand { get; private set; }
         public Command EditNoteCommand { get; private set; }
         public Command DeleteNoteCommand { get; private set; }
+        public Command<Note> SelectDateCommand { get; private set; }
 
         public double UtcOffset => sky.Context.GeoLocation.UtcOffset;
 
-        public ObservableCollection<Note> Notes 
+        public ICollectionView Notes 
         {
-            get => GetValue<ObservableCollection<Note>>(nameof(Notes));
+            get => GetValue<ICollectionView>(nameof(Notes));
             private set => SetValue(nameof(Notes), value);
         }
 
@@ -35,15 +39,28 @@ namespace Astrarium.Plugins.Notes.ViewModels
             set => SetValue(nameof(SelectedNote), value);
         }
 
-        public ObjectNotesVM(ISky sky, NotesManager notesManager) 
+        public string FilterString
+        {
+            get => GetValue<string>(nameof(FilterString), "");
+            set 
+            { 
+                SetValue(nameof(FilterString), value);
+                Notes.Refresh();
+            }
+        }
+
+
+        public ObjectNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) 
         {
             this.sky = sky;
+            this.map = map;
             this.notesManager = notesManager;
 
             AddNoteCommand = new Command(AddNote);
             ViewNoteCommand = new Command<Note>(ViewNote);
             EditNoteCommand = new Command(EditNote);
             DeleteNoteCommand = new Command(DeleteNote);
+            SelectDateCommand = new Command<Note>(SelectDate);
         }
 
         public void SetObject(CelestialObject body)
@@ -54,7 +71,15 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void ReloadNotes()
         {
-            Notes = new ObservableCollection<Note>(notesManager.GetNotesForObject(body));
+            Notes = CollectionViewSource.GetDefaultView(notesManager.GetNotesForObject(body));
+            Notes.Filter = x => FilterNotes(x as Note);
+        }
+
+        private bool FilterNotes(Note note)
+        {
+            return                
+                (note.Title != null && note.Title.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1) ||
+                (note.Description != null && note.Description.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1);
         }
 
         private void AddNote()
@@ -95,13 +120,21 @@ namespace Astrarium.Plugins.Notes.ViewModels
         private void DeleteNote()
         {
             if (SelectedNote == null) return;
-
             var note = SelectedNote;
-
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
             {
-                Notes.Remove(note);
+                notesManager.RemoveNote(note);
                 ReloadNotes();
+            }
+        }
+
+        private void SelectDate(Note note)
+        {
+            var body = sky.Search(note.BodyType, note.BodyName);
+            if (body != null)
+            {
+                sky.SetDate(note.Date);
+                map.GoToObject(body, TimeSpan.Zero);
             }
         }
     }

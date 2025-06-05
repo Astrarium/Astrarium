@@ -36,7 +36,7 @@
             </StackPanel>
         </DockPanel>
 
-        <ScrollViewer x:Name="scroll_viewer" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer x:Name="scroll_viewer" VerticalScrollBarVisibility="Visible">
 
             <Grid Visibility="{Binding IsLoading, Converter={s:InverseBoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Collapsed}}" >
 
@@ -197,7 +197,23 @@
                             <ListView.View>
                                 <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
                                     <GridView.Columns>
-                                        <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                                        
+                                        <!-- Group number -->
+                                        <GridViewColumn Width="Auto">
+                                            <GridViewColumn.HeaderTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="Nmbr" ToolTip="{t:Text SolarActivity.Nmbr}" />
+                                                </DataTemplate>
+                                            </GridViewColumn.HeaderTemplate>
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock ToolTip="{t:Text SolarActivity.Nmbr}">
+                                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.OpenRegionLinkCommand}" CommandParameter="{Binding Nmbr}"><Run Text="{Binding Nmbr}" /></Hyperlink>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+
                                         <GridViewColumn Header="Location" Width="Auto" DisplayMemberBinding="{Binding Location}" />
                                         <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
                                     </GridView.Columns>
@@ -214,7 +230,21 @@
                             <ListView.View>
                                 <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
                                     <GridView.Columns>
-                                        <GridViewColumn Header="Nmbr" Width="Auto" DisplayMemberBinding="{Binding Nmbr}" />
+                                        <!-- Group number -->
+                                        <GridViewColumn Width="Auto">
+                                            <GridViewColumn.HeaderTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="Nmbr" ToolTip="{t:Text SolarActivity.Nmbr}" />
+                                                </DataTemplate>
+                                            </GridViewColumn.HeaderTemplate>
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock ToolTip="{t:Text SolarActivity.Nmbr}">
+                                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:DisposableUserControl}, Mode=FindAncestor}, Path=DataContext.OpenRegionLinkCommand}" CommandParameter="{Binding Nmbr}"><Run Text="{Binding Nmbr}" /></Hyperlink>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn Header="Lat" Width="Auto" DisplayMemberBinding="{Binding Lat}" />
                                         <GridViewColumn Header="Lo" Width="Auto" DisplayMemberBinding="{Binding Lo}" />
                                     </GridView.Columns>

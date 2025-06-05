@@ -8,7 +8,8 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="NoteView" Height="450" Width="800"
+        Title="Note" Height="450" Width="800"
+        MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}">
 
     <Window.Resources>
