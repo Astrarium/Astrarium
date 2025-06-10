@@ -12,7 +12,7 @@ namespace Astrarium.Projections
         protected override Vec2 Project(Vec3 vec, Mat4 mat)
         {
             Vec3 v = mat * vec;
-            double oneoverh = 1.0/ Math.Sqrt(v[0] * v[0] + v[1] * v[1]);
+            double oneoverh = 1.0 / Math.Sqrt(v[0] * v[0] + v[1] * v[1]);
             double a = Math.PI / 2 + Math.Atan(v[2] * oneoverh);
             double f = (a * ScreenScalingFactor) * oneoverh;
             v[0] = ScreenWidth / 2 + (FlipHorizontal ? -1 : 1) * v[0] * f;
