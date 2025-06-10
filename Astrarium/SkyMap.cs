@@ -271,11 +271,10 @@ namespace Astrarium
         {
             FovChanged?.Invoke(fov);
             
-            if (settings.Get("AutoLock") && autoLockEnabled && LockedObject == null)
+            if (settings.Get("AutoLock") && autoLockEnabled && LockedObject == null && timeSync)
             {
                 if (autoLockCoordinates == null && Projection?.Fov <= 5)
                 {
-
                     ViewManager.ShowPopupMessage("$Settings.AutoLockOnMessage");
                     autoLockCoordinates = new CrdsEquatorial(Projection.CenterEquatorial);
                 }
