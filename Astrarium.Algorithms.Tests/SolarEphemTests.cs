@@ -37,6 +37,13 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(1624, SolarEphem.CarringtonNumber(2442439.50));
         }
 
+        [TestMethod]
+        public void CarringtonLongitude()
+        {
+            Assert.AreEqual(0, Math.Abs(Angle.To180(SolarEphem.CarringtonLongitude(Date.JulianDay(2025, 5, 23, 7, 24, 0)))), 0.02);
+            Assert.AreEqual(0, Math.Abs(Angle.To180(SolarEphem.CarringtonLongitude(Date.JulianDay(2021, 4, 14, 5, 28, 0)))), 0.02);
+        }
+
         /// <summary>
         /// Test from AA(I), example 26.a and table 26.e
         /// </summary>

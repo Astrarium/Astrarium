@@ -49,6 +49,49 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// The method is taken from <see href="https://space.umd.edu/pm/crn/carrtime.html"/>
+        /// </remarks>
+        public static double CarringtonLongitude(double jd)
+        {
+            // 1 Jan 1995
+            double epoch = Date.JulianDay(1995, 1, 1);
+
+            // days since epoch
+            double X = jd - epoch;
+
+            // Carrington longitude derived from assuming a constant period of Sun rotation
+            double lon = To360(349.03 - (360.0 * X / 27.2753));
+
+            const double a = 1.91787;
+            const double b = -0.13067;
+            const double c = -8.25278E-2;
+            const double d = -0.17505;
+            const double e = 365.27116;
+            const double f = 0.26318;
+            const double g = -26379.45;
+            const double h = -5.20448E-3;
+            const double i = -5.56336E-2;
+            const double j = -1.22842E-2;
+
+            double piXe = PI * X / e;
+
+            double fit = f + X / g + 
+                a * Sin(2 * piXe) + 
+                b * Sin(4 * piXe) + 
+                h * Sin(6 * piXe) + 
+                c * Cos(2 * piXe) + 
+                d * Cos(4 * piXe) + 
+                i * Cos(6 * piXe);
+
+            return To360(lon + fit);
+        }
+
+        /// <summary>
         /// Calculates instant of beginning of astronomical season for given julian day.
         /// </summary>
         /// <param name="jd">Given year for which the date of beginning of season will be calculated.</param>
