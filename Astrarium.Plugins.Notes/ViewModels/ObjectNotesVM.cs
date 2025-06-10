@@ -1,141 +1,37 @@
 ﻿using Astrarium.Types;
-using Astrarium.Types.Themes;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
-    public class ObjectNotesVM : ViewModelBase
+    public class ObjectNotesVM : NotesVM
     {
         private CelestialObject body;
 
-        private readonly ISky sky;
-        private readonly ISkyMap map;
-        private readonly NotesManager notesManager;
+        public ObjectNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map, notesManager) { }
 
-        public Command AddNoteCommand { get; private set; }
-        public Command<Note> ViewNoteCommand { get; private set; }
-        public Command EditNoteCommand { get; private set; }
-        public Command DeleteNoteCommand { get; private set; }
-        public Command<Note> SelectDateCommand { get; private set; }
+        public override bool AllNotes => false;
 
-        public double UtcOffset => sky.Context.GeoLocation.UtcOffset;
-
-        public ICollectionView Notes 
+        protected override List<Note> GetNotes()
         {
-            get => GetValue<ICollectionView>(nameof(Notes));
-            private set => SetValue(nameof(Notes), value);
+            return notesManager.GetNotesForObject(body);
         }
 
-        public Note SelectedNote
+        protected override Note GetNewNote()
         {
-            get => GetValue<Note>(nameof(SelectedNote));
-            set => SetValue(nameof(SelectedNote), value);
+            return new Note() { Date = sky.Context.JulianDay, Body = body, BodyType = body.Type, BodyName = body.CommonName, Markdown = true };
         }
 
-        public string FilterString
-        {
-            get => GetValue<string>(nameof(FilterString), "");
-            set 
-            { 
-                SetValue(nameof(FilterString), value);
-                Notes.Refresh();
-            }
-        }
-
-
-        public ObjectNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) 
-        {
-            this.sky = sky;
-            this.map = map;
-            this.notesManager = notesManager;
-
-            AddNoteCommand = new Command(AddNote);
-            ViewNoteCommand = new Command<Note>(ViewNote);
-            EditNoteCommand = new Command(EditNote);
-            DeleteNoteCommand = new Command(DeleteNote);
-            SelectDateCommand = new Command<Note>(SelectDate);
-        }
-
-        public void SetObject(CelestialObject body)
+        public ObjectNotesVM ForBody(CelestialObject body)
         {
             this.body = body;
             ReloadNotes();
+            return this;
         }
 
-        private void ReloadNotes()
-        {
-            Notes = CollectionViewSource.GetDefaultView(notesManager.GetNotesForObject(body));
-            Notes.Filter = x => FilterNotes(x as Note);
-        }
-
-        private bool FilterNotes(Note note)
-        {
-            return                
-                (note.Title != null && note.Title.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1) ||
-                (note.Description != null && note.Description.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1);
-        }
-
-        private void AddNote()
-        {
-            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(new Note() { Date = sky.Context.JulianDay, BodyType = body.Type, BodyName = body.CommonName, Markdown = true }, isEdit: true);
-            ViewManager.ShowDialog(vm);
-
-            if (vm.HasChanges)
-            {
-                notesManager.AddNote(vm.GetNote());
-                ReloadNotes();
-            }
-        }
-
-        private void ViewNote(Note note)
-        {
-            if (note == null) return;
-            OpenNote(note, isEdit: false);
-        }
-
-        private void EditNote()
-        {
-            if (SelectedNote == null) return;
-            OpenNote(SelectedNote, isEdit: true);
-        }
-
-        private void OpenNote(Note note, bool isEdit)
-        {
-            var vm = ViewManager.CreateViewModel<NoteVM>().WithModel(note, isEdit);
-            ViewManager.ShowDialog(vm);
-            if (vm.HasChanges) 
-            {
-                notesManager.ChangeNote(note, vm.GetNote());
-                ReloadNotes();
-            }
-        }
-
-        private void DeleteNote()
-        {
-            if (SelectedNote == null) return;
-            var note = SelectedNote;
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
-            {
-                notesManager.RemoveNote(note);
-                ReloadNotes();
-            }
-        }
-
-        private void SelectDate(Note note)
-        {
-            var body = sky.Search(note.BodyType, note.BodyName);
-            if (body != null)
-            {
-                sky.SetDate(note.Date);
-                map.GoToObject(body, TimeSpan.Zero);
-            }
-        }
+        
     }
 }

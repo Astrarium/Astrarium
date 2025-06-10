@@ -44,7 +44,14 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public Note GetNote()
         {
-            return new Note() { Date = Date, BodyName = Body.CommonName, BodyType = Body.Type, Markdown = Markdown, Description = Description, Title = Title };
+            return new Note() { 
+                Date = Date, 
+                Body = Body,
+                BodyName = Body.CommonName, 
+                BodyType = Body.Type, 
+                Markdown = Markdown, 
+                Description = Description, 
+                Title = Title };
         }
 
         public double UtcOffset => sky.Context.GeoLocation.UtcOffset;

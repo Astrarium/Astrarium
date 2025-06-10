@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 namespace Astrarium.Plugins.Notes.Views
 {
     /// <summary>
-    /// Interaction logic for ObjectNotesControl.xaml
+    /// Interaction logic for NotesControl.xaml
     /// </summary>
-    public partial class ObjectNotesControl : DisposableUserControl
+    public partial class NotesControl : DisposableUserControl
     {
-        public ObjectNotesControl()
+        public NotesControl()
         {
             InitializeComponent();
         }

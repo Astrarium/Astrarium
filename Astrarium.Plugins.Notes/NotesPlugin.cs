@@ -8,15 +8,22 @@ namespace Astrarium.Plugins.Notes
     {
         public NotesPlugin()
         {
-            ExtendObjectInfo<ObjectNotesControl, ObjectNotesVM>("Notes", CreateObjectNotesViewModel);
+            ExtendObjectInfo<NotesControl, ObjectNotesVM>("Notes", CreateObjectNotesViewModel);
+
+            MenuItem menuNotes = new MenuItem("Notes", new Command(OpenNotesWindow));
+
+
+            MenuItems.Add(MenuItemPosition.MainMenuTools, menuNotes);
         }
 
         private ObjectNotesVM CreateObjectNotesViewModel(SkyContext ctx, CelestialObject body)
         {
-            var viewModel = ViewManager.CreateViewModel<ObjectNotesVM>();
-            viewModel.SetObject(body);
+            return ViewManager.CreateViewModel<ObjectNotesVM>().ForBody(body);
+        }
 
-            return viewModel;
+        private void OpenNotesWindow()
+        {
+            ViewManager.ShowWindow<AllNotesVM>();
         }
     }
 }

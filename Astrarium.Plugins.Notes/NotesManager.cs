@@ -18,8 +18,11 @@ namespace Astrarium.Plugins.Notes
 
         private Lazy<List<Note>> notes;
 
-        public NotesManager() 
+        private readonly ISky sky;
+
+        public NotesManager(ISky sky) 
         {
+            this.sky = sky;
             notes = new Lazy<List<Note>>(LoadNotes, isThreadSafe: true);
         }
 
@@ -32,16 +35,26 @@ namespace Astrarium.Plugins.Notes
                 try
                 {
                     return JsonConvert.DeserializeObject<List<Note>>(json);
+                    
                 }
                 catch (Exception ex)
                 {
                     return new List<Note>();
+                }
+                finally
+                {
+                    Task.Run(SearchBodies);
                 }
             }
             else
             {
                 return new List<Note>();
             }
+        }
+
+        private void SearchBodies()
+        {
+            notes.Value.ForEach(n => n.Body = sky.Search(n.BodyType, n.BodyName));
         }
 
         private void SaveNotes(ICollection<Note> notes)
@@ -56,6 +69,12 @@ namespace Astrarium.Plugins.Notes
         {
             return notes.Value
                 .Where(n => n.BodyType == body.Type && n.BodyName == body.CommonName)
+                .OrderByDescending(n => n.Date).ToList();
+        }
+
+        public List<Note> GetAllNotes()
+        {
+            return notes.Value
                 .OrderByDescending(n => n.Date).ToList();
         }
 

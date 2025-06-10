@@ -1,4 +1,4 @@
-﻿<c:DisposableUserControl x:Class="Astrarium.Plugins.Notes.Views.ObjectNotesControl"
+﻿<c:DisposableUserControl x:Class="Astrarium.Plugins.Notes.Views.NotesControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
@@ -10,7 +10,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <c:DisposableUserControl.Resources>
         <ResourceDictionary>
-            <Style x:Key="ObjectNotesListViewStyle" TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+            <!--<Style x:Key="NotesListViewStyle" TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
                 <Setter Property="ItemContainerStyle">
                     <Setter.Value>
                         <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}">
@@ -19,7 +19,7 @@
                         </Style>
                     </Setter.Value>
                 </Setter>
-            </Style>
+            </Style>-->
 
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
                 <Style.Setters>
@@ -58,7 +58,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Margin="4 8" Visibility="Visible">
+            <Grid Margin="4 8" Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -67,7 +67,7 @@
                 <Button Padding="8 0" Grid.Column="1" Content="+ New note" Command="{Binding AddNoteCommand}" />
             </Grid>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Vertical" Visibility="{Binding Notes, Converter={t:EmptyCollectionToVisibilityConverter}}">
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Vertical" Visibility="{Binding IsEmpty, Converter={t:BoolToVisibilityConverter}}">
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="There are no notes yet. Click Add to create first one." />
                 <Button HorizontalAlignment="Center" Width="Auto" Content="Add" Margin="8" Padding="8 0" MinWidth="80" Command="{Binding AddNoteCommand}" />
             </StackPanel>
@@ -98,12 +98,30 @@
                 SelectionUnit="FullRow"
                 ItemsSource="{Binding Notes}"
                 SelectedItem="{Binding SelectedNote}" 
-                Visibility="Visible">
+                Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
                 <DataGrid.InputBindings>
                     <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
                 </DataGrid.InputBindings>
 
                 <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="Body" CanUserSort="False" MinWidth="40" Visibility="{Binding AllNotes, Converter={s:BoolToVisibilityConverter}}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectFullNameConverter}}">
+                                    <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding CelestialObject, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                                        </Rectangle.Fill>
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Padding="4 0 0 0" Text="{Binding Body, Converter={s:CelestialObjectNameConverter}}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Header="Date" SortDirection="Descending" CanUserResize="False" Width="125" SortMemberPath="Date">
                         <DataGridTemplateColumn.CellTemplate>
