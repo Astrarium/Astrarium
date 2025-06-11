@@ -1,5 +1,6 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,57 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Notes
 {
+    public class NoteConverter : JsonConverter<Note>
+    {
+        private readonly ISky sky;
+
+        public override bool CanRead => true;
+
+        public override bool CanWrite => true;
+
+        public NoteConverter(ISky sky)
+        {
+            this.sky = sky;
+        }
+
+        public override void WriteJson(JsonWriter writer, Note value, JsonSerializer serializer)
+        {
+            var obj = new JObject
+            {
+                ["BodyType"] = value.Body?.Type,
+                ["BodyName"] = value.Body?.CommonName,
+                ["Date"] = value.Date,
+                ["Title"] = value.Title,
+                ["Markdown"] = value.Markdown,
+                ["Description"] = value.Description
+            };
+
+            obj.WriteTo(writer);
+        }
+
+        public override Note ReadJson(JsonReader reader, Type objectType, Note existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            JObject jsonObject = JObject.Load(reader);
+
+            string type = (string)jsonObject["BodyType"];
+            string name = (string)jsonObject["BodyName"];
+
+            var body = sky.Search(type, name);
+
+            var note = new Note
+            {
+                Body = body,
+                Date = (double)jsonObject["Date"],
+                Title = (string)jsonObject["Title"],
+                Markdown = (bool)jsonObject["Markdown"],
+                Description = (string)jsonObject["Description"]
+            };
+
+            return note;
+        }
+    }
+
+
     [Singleton]
     public class NotesManager
     {
@@ -18,12 +70,16 @@ namespace Astrarium.Plugins.Notes
 
         private Lazy<List<Note>> notes;
 
-        private readonly ISky sky;
+        private readonly JsonSerializerSettings serializerSettings;
 
         public NotesManager(ISky sky) 
         {
-            this.sky = sky;
-            notes = new Lazy<List<Note>>(LoadNotes, isThreadSafe: true);
+            this.serializerSettings = new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> { new NoteConverter(sky) }
+            };
+
+            this.notes = new Lazy<List<Note>>(LoadNotes, isThreadSafe: true);
         }
 
         private List<Note> LoadNotes()
@@ -34,16 +90,13 @@ namespace Astrarium.Plugins.Notes
                 string json = File.ReadAllText(file);
                 try
                 {
-                    return JsonConvert.DeserializeObject<List<Note>>(json);
                     
+
+                    return JsonConvert.DeserializeObject<List<Note>>(json, serializerSettings);
                 }
                 catch (Exception ex)
                 {
                     return new List<Note>();
-                }
-                finally
-                {
-                    Task.Run(SearchBodies);
                 }
             }
             else
@@ -52,23 +105,19 @@ namespace Astrarium.Plugins.Notes
             }
         }
 
-        private void SearchBodies()
-        {
-            notes.Value.ForEach(n => n.Body = sky.Search(n.BodyType, n.BodyName));
-        }
-
         private void SaveNotes(ICollection<Note> notes)
         {
             string file = Path.Combine(NotesDir, "Notes.json");
             Directory.CreateDirectory(NotesDir);
-            string json = JsonConvert.SerializeObject(notes, Formatting.Indented);
+            string json = JsonConvert.SerializeObject(notes, Formatting.Indented, serializerSettings);
             File.WriteAllText(file, json);
         }
 
         public List<Note> GetNotesForObject(CelestialObject body)
         {
+
             return notes.Value
-                .Where(n => n.BodyType == body.Type && n.BodyName == body.CommonName)
+                .Where(n => body.Equals(n.Body))
                 .OrderByDescending(n => n.Date).ToList();
         }
 

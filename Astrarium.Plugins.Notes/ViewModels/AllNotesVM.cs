@@ -14,6 +14,11 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public AllNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map, notesManager) 
         {
+            
+        }
+
+        public override void OnActivated()
+        {
             Task.Run(ReloadNotes);
         }
 

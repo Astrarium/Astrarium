@@ -1,10 +1,4 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Astrarium.Types;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
@@ -35,23 +29,21 @@ namespace Astrarium.Plugins.Notes.ViewModels
             this.isEdit = isEdit;
             IsEditMode = isEdit;
             this.note = note;
-
-            Body = sky.Search(note.BodyType, note.BodyName);
-
+            Body = note.Body;
             SetValues();
             return this;
         }
 
         public Note GetNote()
         {
-            return new Note() { 
+            return new Note() 
+            { 
                 Date = Date, 
-                Body = Body,
-                BodyName = Body.CommonName, 
-                BodyType = Body.Type, 
+                Body = Body, 
                 Markdown = Markdown, 
                 Description = Description, 
-                Title = Title };
+                Title = Title 
+            };
         }
 
         public double UtcOffset => sky.Context.GeoLocation.UtcOffset;

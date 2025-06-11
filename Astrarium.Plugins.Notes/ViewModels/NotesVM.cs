@@ -130,11 +130,16 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void SelectDate(Note note)
         {
-            var body = sky.Search(note.BodyType, note.BodyName);
-            if (body != null)
+            if (note.Body != null)
             {
                 sky.SetDate(note.Date);
-                map.GoToObject(body, TimeSpan.Zero);
+
+                var body = sky.Search(note.Body.Type, note.Body.CommonName);
+
+                if (body != null)
+                {
+                    map.GoToObject(body, TimeSpan.FromMilliseconds(1));
+                }
             }
         }
     }

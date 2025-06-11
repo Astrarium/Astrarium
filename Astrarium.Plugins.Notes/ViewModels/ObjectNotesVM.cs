@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         protected override Note GetNewNote()
         {
-            return new Note() { Date = sky.Context.JulianDay, Body = body, BodyType = body.Type, BodyName = body.CommonName, Markdown = true };
+            return new Note() { Date = sky.Context.JulianDay, Body = body, Markdown = true };
         }
 
         public ObjectNotesVM ForBody(CelestialObject body)
