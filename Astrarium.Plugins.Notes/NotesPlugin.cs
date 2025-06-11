@@ -23,7 +23,7 @@ namespace Astrarium.Plugins.Notes
 
         private void OpenNotesWindow()
         {
-            ViewManager.ShowWindow<AllNotesVM>();
+            ViewManager.ShowWindow<AllNotesVM>(flags: ViewFlags.TopMost);
         }
     }
 }

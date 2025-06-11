@@ -1,10 +1,11 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
+using System;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
-    public class NoteVM : ViewModelBase
+    public class NoteVM : BaseNoteVM
     {
-        private readonly ISky sky;
         private Note note = null;
         private bool isEdit = false;
 
@@ -14,14 +15,15 @@ namespace Astrarium.Plugins.Notes.ViewModels
         public Command CancelCommand { get; private set; }
         public Command CloseCommand { get; private set; }
         public Command OkCommand { get; private set; }
+        public Command SelectDateCommand { get; private set; }
 
-        public NoteVM(ISky sky) 
+        public NoteVM(ISky sky, ISkyMap map) : base(sky, map)
         {
-            this.sky = sky;
             EditCommand = new Command(Edit);
             CancelCommand = new Command(Cancel);
             CloseCommand = new Command(Close);
             OkCommand = new Command(OK);
+            SelectDateCommand = new Command(() => SelectDate(note));
         }
 
         public NoteVM WithModel(Note note, bool isEdit = false)
@@ -29,6 +31,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             this.isEdit = isEdit;
             IsEditMode = isEdit;
             this.note = note;
+            Location = note.Location;
             Body = note.Body;
             SetValues();
             return this;
@@ -40,6 +43,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
             { 
                 Date = Date, 
                 Body = Body, 
+                Location = Location,                
                 Markdown = Markdown, 
                 Description = Description, 
                 Title = Title 
@@ -52,6 +56,12 @@ namespace Astrarium.Plugins.Notes.ViewModels
         {
             get => GetValue<CelestialObject>(nameof(Body));
             set => SetValue(nameof(Body), value);
+        }
+
+        public CrdsGeographical Location
+        {
+            get => GetValue<CrdsGeographical>(nameof(Location));
+            set => SetValue(nameof(Location), value);
         }
 
         public bool IsEditMode

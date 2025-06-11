@@ -7,7 +7,7 @@ using System.Windows.Data;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
-    public class ObjectNotesVM : NotesVM
+    internal class ObjectNotesVM : BaseNotesListVM
     {
         private CelestialObject body;
 
@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         protected override Note GetNewNote()
         {
-            return new Note() { Date = sky.Context.JulianDay, Body = body, Markdown = true };
+            return new Note() { Date = sky.Context.JulianDay, Location = sky.Context.GeoLocation, Body = body, Markdown = true };
         }
 
         public ObjectNotesVM ForBody(CelestialObject body)

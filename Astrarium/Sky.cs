@@ -201,6 +201,12 @@ namespace Astrarium
             Calculate();
         }
 
+        public void SetLocation(CrdsGeographical location)
+        {
+            Context.GeoLocation = new CrdsGeographical(location);
+            Calculate();
+        }
+
         public void Calculate()
         {
             Calculators.ForEach(x => x.Calculate(Context));

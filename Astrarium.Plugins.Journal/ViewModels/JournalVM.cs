@@ -921,7 +921,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 return;
             }
 
-            bool locationChanged = false;
             if (obs.Session.SiteId != null)
             {
                 var site = await dbManager.GetSite(obs.Session.SiteId);
@@ -932,8 +931,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     if (ViewManager.ShowMessageBox("$Warning", $"The observation's location place ({site.Name}) differs than current one ({sky.Context.GeoLocation.Name}).\r\nDo you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
-                        sky.Context.GeoLocation = geo;
-                        locationChanged = true;
+                        sky.SetLocation(geo);
                     }
                     else
                     {
@@ -963,11 +961,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     ViewManager.ShowMessageBox("$Error", "Unable to resolve the observation target.", MessageBoxButton.OK);
                 }
-            }
-
-            if (locationChanged)
-            {
-                ViewManager.ShowPopupMessage($"Observer location changed to {sky.Context.GeoLocation.Name}");
             }
         }
 

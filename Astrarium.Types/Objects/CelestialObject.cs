@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using System;
 
 namespace Astrarium.Types
 {

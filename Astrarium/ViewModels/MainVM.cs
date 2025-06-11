@@ -61,7 +61,7 @@ namespace Astrarium.ViewModels
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
         public CelestialObject SelectedObject { get; private set; }
-        public CrdsGeographical ObserverLocation => settings.Get<CrdsGeographical>("ObserverLocation");
+        public CrdsGeographical ObserverLocation => sky.Context.GeoLocation;
 
         public WindowState WindowState
         {
@@ -222,6 +222,7 @@ namespace Astrarium.ViewModels
 
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
+            sky.Context.LocationChanged += Sky_LocationChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
@@ -556,6 +557,13 @@ namespace Astrarium.ViewModels
         private void Sky_TimeSyncChanged(bool timeSync)
         {
             TimeSync = timeSync;
+        }
+
+        private void Sky_LocationChanged()
+        {
+            NotifyPropertyChanged(nameof(ObserverLocation));
+            settings.SetAndSave("ObserverLocation", sky.Context.GeoLocation);
+            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", sky.Context.GeoLocation.Name)));
         }
 
         private void OnAppUpdateFound(LastRelease lastRelease)
@@ -1003,10 +1011,7 @@ namespace Astrarium.ViewModels
 
         private void SetLocation(CrdsGeographical location)
         {
-            sky.Context.GeoLocation = new CrdsGeographical(location);
-            settings.SetAndSave("ObserverLocation", location);
-            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", location.Name)));
-            sky.Calculate();
+            sky.SetLocation(location);
         }
 
         private void EditFavoriteLocations()

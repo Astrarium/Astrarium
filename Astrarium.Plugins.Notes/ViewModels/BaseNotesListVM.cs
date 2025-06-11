@@ -7,10 +7,8 @@ using System.Windows.Data;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
-    public abstract class NotesVM : ViewModelBase
+    internal abstract class BaseNotesListVM : BaseNoteVM
     {
-        protected readonly ISky sky;
-        protected readonly ISkyMap map;
         protected readonly NotesManager notesManager;
 
         public Command AddNoteCommand { get; private set; }
@@ -50,10 +48,8 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public bool IsEmpty => !notes.Any();
 
-        public NotesVM(ISky sky, ISkyMap map, NotesManager notesManager) 
+        public BaseNotesListVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map)
         {
-            this.sky = sky;
-            this.map = map;
             this.notesManager = notesManager;
 
             AddNoteCommand = new Command(AddNote);
@@ -77,7 +73,8 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private bool FilterNotes(Note note)
         {
-            return                
+            return 
+                (AllNotes ? note.Body.Names.Any(n => n.IndexOf(FilterString, StringComparison.OrdinalIgnoreCase) != -1) : false) || 
                 (note.Title != null && note.Title.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1) ||
                 (note.Description != null && note.Description.IndexOf(FilterString, StringComparison.CurrentCultureIgnoreCase) != -1);
         }
@@ -125,21 +122,6 @@ namespace Astrarium.Plugins.Notes.ViewModels
             {
                 notesManager.RemoveNote(note);
                 ReloadNotes();
-            }
-        }
-
-        private void SelectDate(Note note)
-        {
-            if (note.Body != null)
-            {
-                sky.SetDate(note.Date);
-
-                var body = sky.Search(note.Body.Type, note.Body.CommonName);
-
-                if (body != null)
-                {
-                    map.GoToObject(body, TimeSpan.FromMilliseconds(1));
-                }
             }
         }
     }

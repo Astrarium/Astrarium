@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -27,8 +28,19 @@ namespace Astrarium.Plugins.Notes
         {
             var obj = new JObject
             {
-                ["BodyType"] = value.Body?.Type,
-                ["BodyName"] = value.Body?.CommonName,
+                ["Body"] = new JObject
+                {
+                    ["Type"] = value.Body.Type,
+                    ["Name"] = value.Body.CommonName
+                },
+                ["Location"] = new JObject
+                {
+                    ["Name"] = value.Location.Name,
+                    ["Latitude"] = value.Location.Latitude,
+                    ["Longitude"] = value.Location.Longitude,
+                    ["UtcOffset"] = value.Location.UtcOffset,
+                    ["Elevation"] = value.Location.Elevation
+                },
                 ["Date"] = value.Date,
                 ["Title"] = value.Title,
                 ["Markdown"] = value.Markdown,
@@ -42,14 +54,25 @@ namespace Astrarium.Plugins.Notes
         {
             JObject jsonObject = JObject.Load(reader);
 
-            string type = (string)jsonObject["BodyType"];
-            string name = (string)jsonObject["BodyName"];
+            string type = (string)jsonObject["Body"]["Type"];
+            string name = (string)jsonObject["Body"]["Name"];
 
             var body = sky.Search(type, name);
+
+            JObject jsonLocation = jsonObject["Location"] as JObject;
+            CrdsGeographical location = new CrdsGeographical()
+            {
+                Name = (string)jsonLocation["Name"],
+                Latitude = (double)jsonLocation["Latitude"],
+                Longitude = (double)jsonLocation["Longitude"],
+                UtcOffset = (double)jsonLocation["UtcOffset"],
+                Elevation = (double)jsonLocation["Elevation"]
+            };
 
             var note = new Note
             {
                 Body = body,
+                Location = location,
                 Date = (double)jsonObject["Date"],
                 Title = (string)jsonObject["Title"],
                 Markdown = (bool)jsonObject["Markdown"],
@@ -65,8 +88,6 @@ namespace Astrarium.Plugins.Notes
     public class NotesManager
     {
         private static readonly string NotesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Notes");
-
-        private bool isLoaded = false;
 
         private Lazy<List<Note>> notes;
 
@@ -90,12 +111,11 @@ namespace Astrarium.Plugins.Notes
                 string json = File.ReadAllText(file);
                 try
                 {
-                    
-
                     return JsonConvert.DeserializeObject<List<Note>>(json, serializerSettings);
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"Unable to read notes: {ex}");
                     return new List<Note>();
                 }
             }
@@ -115,7 +135,6 @@ namespace Astrarium.Plugins.Notes
 
         public List<Note> GetNotesForObject(CelestialObject body)
         {
-
             return notes.Value
                 .Where(n => body.Equals(n.Body))
                 .OrderByDescending(n => n.Date).ToList();
@@ -130,20 +149,20 @@ namespace Astrarium.Plugins.Notes
         public void AddNote(Note note)
         {
             notes.Value.Add(note);
-            SaveNotes(notes.Value);
+            Task.Run(() => SaveNotes(notes.Value));
         }
 
         public void RemoveNote(Note note)
         {
             notes.Value.Remove(note);
-            SaveNotes(notes.Value);
+            Task.Run(() => SaveNotes(notes.Value));
         }
 
         public void ChangeNote(Note old, Note @new)
         {
             notes.Value.Remove(old);
             notes.Value.Add(@new);
-            SaveNotes(notes.Value);
+            Task.Run(() => SaveNotes(notes.Value));
         }
     }
 }

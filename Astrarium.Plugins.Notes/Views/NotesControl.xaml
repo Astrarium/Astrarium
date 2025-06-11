@@ -9,17 +9,21 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <c:DisposableUserControl.Resources>
+
         <ResourceDictionary>
-            <!--<Style x:Key="NotesListViewStyle" TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
-                <Setter Property="ItemContainerStyle">
-                    <Setter.Value>
-                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}">
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="MinHeight" Value="32" />
-                        </Style>
-                    </Setter.Value>
-                </Setter>
-            </Style>-->
+
+            <c:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
+
+            <ContextMenu x:Key="RowMenu" DataContext="{Binding Source={StaticResource DataContextProxy}, Path=Data}">
+
+                <MenuItem Header="View note" Command="{Binding ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                <Separator />
+                <MenuItem Header="Set date and go to object" Command="{Binding SelectDateCommand}" CommandParameter="{Binding SelectedNote}" />
+                <Separator />
+                <MenuItem Header="Edit note" Command="{Binding EditNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                <MenuItem Header="Delete note" Command="{Binding DeleteNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+
+            </ContextMenu>
 
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
                 <Style.Setters>
@@ -43,6 +47,10 @@
                 <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="12" Height="12" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
             </Grid>
 
+            <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+            </Style>
+
         </ResourceDictionary>
     </c:DisposableUserControl.Resources>
 
@@ -52,7 +60,7 @@
         </Grid.RowDefinitions>
 
         <!-- View notes mode -->
-        <Grid Visibility="{Binding IsEditMode, Converter={t:InverseBoolToVisibilityConverter}}">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -75,7 +83,7 @@
             <DataGrid 
                 Grid.Row="1"
                 ScrollViewer.VerticalScrollBarVisibility="Visible" 
-                Style="{StaticResource {x:Type DataGrid}}"
+                Style="{StaticResource {x:Type DataGrid}}"              
                 VerticalScrollBarVisibility="Visible"
                 HorizontalScrollBarVisibility="Hidden"
                 EnableRowVirtualization="True"
@@ -94,22 +102,23 @@
                 RowHeaderWidth="0"
                 ColumnHeaderHeight="32"
                 RowHeight="26"
-                SelectionMode="Extended"
+                RowStyle="{StaticResource DefaultRowStyle}"
+                SelectionMode="Single"
                 SelectionUnit="FullRow"
                 ItemsSource="{Binding Notes}"
                 SelectedItem="{Binding SelectedNote}" 
                 Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
                 <DataGrid.InputBindings>
-                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
                 </DataGrid.InputBindings>
 
                 <DataGrid.Columns>
 
-                    <DataGridTemplateColumn Header="Body" CanUserSort="False" MinWidth="40" Visibility="{Binding AllNotes, Converter={s:BoolToVisibilityConverter}}">
+                    <DataGridTemplateColumn Header="Body" CanUserSort="True" SortMemberPath="." MinWidth="40" Visibility="{Binding Source={StaticResource DataContextProxy}, Path=Data.AllNotes, Converter={s:BoolToVisibilityConverter}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectFullNameConverter}}">
-                                    <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding CelestialObject, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                                    <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Body, Converter={s:CelestialObjectTypeDescriptionConverter}}">
                                         <Rectangle.Fill>
                                             <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                         </Rectangle.Fill>
@@ -127,13 +136,13 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                     <TextBlock VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
-                                         <Hyperlink ToolTip="Click to set the date" Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}}" CommandParameter="{Binding}">                                                 
+                                     <TextBlock VerticalAlignment="Center" ToolTip="Click to set the date">
+                                         <Hyperlink Command="{Binding Data.SelectDateCommand, Source={StaticResource DataContextProxy}}" CommandParameter="{Binding}">                                                 
                                              <Run>
                                                  <Run.Text>
                                                      <MultiBinding Converter="{s:JulianDayToStringConverter}">
                                                          <Binding Path="Date" />
-                                                         <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=c:DisposableUserControl}" Mode="OneWay" />
+                                                         <Binding Path="Data.UtcOffset" Source="{StaticResource DataContextProxy}" Mode="OneWay" />
                                                      </MultiBinding>
                                                  </Run.Text>
                                              </Run>
@@ -168,13 +177,13 @@
                                     <Button Grid.Column="1" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" 
                                             Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
-                                            Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.EditNoteCommand}"
+                                            Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.EditNoteCommand}"
                                             ToolTip="Edit" />
 
                                     <Button Grid.Column="2" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Margin="8 0 0 0"
                                             Visibility="{Binding IsSelected, Converter={t:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
-                                            Command="{Binding RelativeSource={RelativeSource AncestorType=c:DisposableUserControl}, Path=DataContext.DeleteNoteCommand}"
+                                            Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DeleteNoteCommand}"
                                             ToolTip="Delete" />
                                 </Grid>
                             </DataTemplate>

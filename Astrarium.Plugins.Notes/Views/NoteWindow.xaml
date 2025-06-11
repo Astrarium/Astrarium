@@ -13,6 +13,7 @@
         Style="{StaticResource {x:Type Window}}">
 
     <Window.Resources>
+        <c:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
         <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
     </Window.Resources>
     
@@ -39,12 +40,12 @@
 
         <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
-            <Hyperlink Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">                                                 
+            <Hyperlink Command="{Binding Data.SelectDateCommand, Source={StaticResource DataContextProxy}}">                                                 
                 <Run>
                     <Run.Text>
                         <MultiBinding Converter="{s:JulianDayToStringConverter}">
                             <Binding Path="Date" />
-                            <Binding Path="DataContext.UtcOffset" RelativeSource="{RelativeSource AncestorType=Window}" Mode="OneWay" />
+                            <Binding Path="Data.UtcOffset" Source="{StaticResource DataContextProxy}" Mode="OneWay" />
                         </MultiBinding>
                     </Run.Text>
                 </Run>

@@ -4,10 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.Notes.Views"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
-        Title="AllNotesWindow" Height="450" Width="800">
-    <Grid>
-        <local:NotesControl DataContext="{Binding}" />
+        Title="Notes" Height="450" Width="800">
+    <Grid Margin="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <local:NotesControl Grid.Row="0" DataContext="{Binding}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+            <Button Margin="0 4 4 4" Padding="8 2" MinWidth="100" Content="{t:Text Close}" Command="{Binding CloseCommand}" />
+        </StackPanel>
     </Grid>
 </Window>

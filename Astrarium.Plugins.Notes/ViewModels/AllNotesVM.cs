@@ -8,17 +8,16 @@ using System.Threading.Tasks;
 namespace Astrarium.Plugins.Notes.ViewModels
 {
     [Singleton]
-    public class AllNotesVM : NotesVM
+    internal class AllNotesVM : BaseNotesListVM
     {
         public override bool AllNotes => true;
 
+        public Command CloseCommand { get; private set; }
+
         public AllNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map, notesManager) 
         {
-            
-        }
+            CloseCommand = new Command(Close);
 
-        public override void OnActivated()
-        {
             Task.Run(ReloadNotes);
         }
 
@@ -29,7 +28,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         protected override Note GetNewNote()
         {
-            return new Note() { Date = sky.Context.JulianDay, Markdown = true };
+            return new Note() { Date = sky.Context.JulianDay, Location = sky.Context.GeoLocation, Markdown = true };
         }
     }
 }
