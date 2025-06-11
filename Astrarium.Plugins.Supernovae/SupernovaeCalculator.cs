@@ -193,5 +193,13 @@ namespace Astrarium.Plugins.Supernovae
                 .Take(maxCount)
                 .ToArray();
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Supernova")
+                return null;
+            else
+                return Supernovae.FirstOrDefault(m => m.CommonName == bodyName);
+        }
     }
 }

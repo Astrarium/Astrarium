@@ -246,6 +246,21 @@ namespace Astrarium.Plugins.Satellites
             return satellites;
         }
 
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType == "Satellite")
+            {
+                var satellite = Satellites.FirstOrDefault(m => m.CommonName == bodyName);
+                if (satellite != null) 
+                {
+                    satellite.Equatorial = context.Get(Equatorial, satellite);
+                }
+                return satellite;
+            }
+
+            return null;
+        }
+
         private Dictionary<string, float> stdMagnitudes = new Dictionary<string, float>();
         private float averageStdMagnitude;
 

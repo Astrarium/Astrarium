@@ -244,6 +244,14 @@ namespace Astrarium.Plugins.BrightStars
                 .ToArray();
         }
 
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Star")
+                return null;
+            else
+                return Stars.Where(s => s != null).FirstOrDefault(m => m.CommonName == bodyName);
+        }
+
         private ICollection<string> GetStarNamesForSearch(Star s)
         {
             List<string> names = new List<string>();

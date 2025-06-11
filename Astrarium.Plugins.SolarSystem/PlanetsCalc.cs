@@ -278,5 +278,46 @@ namespace Astrarium.Plugins.SolarSystem
 
             return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).Concat(s8).Take(maxCount).ToArray();
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            CelestialObject body = null;
+
+            if (bodyType == "Planet")
+            {
+                body = planets.FirstOrDefault(p => p.CommonName == bodyName);
+                if (body != null) return body;
+
+                if (bodyName == "Pluto") return pluto;
+
+                return null;
+            }
+            else if (bodyType == "PlanetMoon")
+            {
+                body = marsMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                body = jupiterMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                body = saturnMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                body = uranusMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                body = neptuneMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                body = genericMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                if (body != null) return body;
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }
