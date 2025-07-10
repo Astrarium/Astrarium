@@ -32,10 +32,10 @@ namespace Astrarium.Plugins.BrightStars
             var prj = map.Projection;
             bool nightMode = settings.Get("NightMode");
 
-            GL.Enable(GL.POINT_SMOOTH);
-            GL.Enable(GL.LINE_SMOOTH);
             GL.Enable(GL.BLEND);
             GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.POINT_SMOOTH);
+            GL.Enable(GL.LINE_SMOOTH);
             GL.Hint(GL.POINT_SMOOTH_HINT, GL.NICEST);
             GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
             GL.Enable(GL.CULL_FACE);
@@ -59,7 +59,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get("ConstLines"))
             {
-                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(nightMode), 1) { DashStyle = DashStyle.Dot };
+                var linePen = new Pen(settings.Get<Color>("ColorConstLines").Tint(nightMode), 0.5f) { DashStyle = DashStyle.Dot };
 
                 foreach (var line in sky.ConstellationLines)
                 {
@@ -92,6 +92,7 @@ namespace Astrarium.Plugins.BrightStars
                 var fontStarNames = settings.Get<Font>("StarsLabelsFont");
                 var color = settings.Get<Color>("ColorStarsLabels").Tint(nightMode);
                 var brushStarNames = new SolidBrush(color);
+                bool starsLabels = settings.Get("StarsLabels");
                 bool properNames = settings.Get("StarsProperNames");
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
 
@@ -117,7 +118,10 @@ namespace Astrarium.Plugins.BrightStars
 
                             map.AddDrawnObject(p, star);
 
-                            DrawStarName(prj, fontStarNames, brushStarNames, properNames, p, star, size);
+                            if (starsLabels)
+                            {
+                                DrawStarName(prj, fontStarNames, brushStarNames, properNames, p, star, size);
+                            }
                         }
                     }
                 }

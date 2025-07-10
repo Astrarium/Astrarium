@@ -43,7 +43,6 @@ namespace Astrarium.Plugins.Constellations
             Font font = new Font(defFont.FontFamily, fontSize, defFont.Style);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
             Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorConstLabels").Tint(nightMode));
-            WF.TextFormatFlags formatFlags = WF.TextFormatFlags.HorizontalCenter | WF.TextFormatFlags.VerticalCenter;
 
             var constellations = constellationsCalc.ConstLabels;
 
@@ -80,8 +79,9 @@ namespace Astrarium.Plugins.Constellations
             var nightMode = settings.Get("NightMode");
 
             GL.Enable(GL.BLEND);
-            GL.Enable(GL.LINE_SMOOTH);
             GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
 
             double fov = prj.RealFov;
 
@@ -92,6 +92,7 @@ namespace Astrarium.Plugins.Constellations
             CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
             CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
 
+            GL.LineWidth(0.1f);
             GL.Begin(GL.LINES);
 
             foreach (var block in constellationsCalc.Borders)

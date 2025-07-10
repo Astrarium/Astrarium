@@ -33,6 +33,28 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public static class FirstCapitalLetterExtension
+    {
+        public static string ToUpperFirstLetter(this string text)
+        {
+            if (text != null)
+                return text.Length > 0 ? char.ToUpper(text[0]) + text.Substring(1) : text;
+            else
+                return null;
+        } 
+    }
+
+    public class LocaleNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string language)
+                return language.ToUpperFirstLetter();
+            else
+                return null;
+        }
+    }
+
     public class MarkdownToPlainTextConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)

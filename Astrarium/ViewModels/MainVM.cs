@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Controls;
 using Astrarium.Types;
+using Astrarium.Types.Themes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -480,7 +481,7 @@ namespace Astrarium.ViewModels
                     new MenuItem("$Menu.Language")
                     {
                         SubItems = new ObservableCollection<MenuItem>(Text.GetLocales().Select(loc => {
-                            var menuItem = new MenuItem(loc.NativeName);
+                            var menuItem = new MenuItem(loc.NativeName.ToUpperFirstLetter());
                             menuItem.Command = new Command(() => {
                                 menuItem.IsChecked = true;
                                 settings.SetAndSave("Language", loc.Name);

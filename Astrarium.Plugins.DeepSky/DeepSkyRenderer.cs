@@ -53,7 +53,7 @@ namespace Astrarium.Plugins.DeepSky
             bool drawLabels = settings.Get("DeepSkyLabels");
             var nightMode = settings.Get("NightMode");
             Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(nightMode);
-            Pen penOutline = new Pen(colorOutline);
+            Pen penOutline = new Pen(colorOutline, 0.5f);
             Color colorLabel = settings.Get<Color>("ColorDeepSkyLabel").Tint(nightMode);
             Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
@@ -175,6 +175,7 @@ namespace Astrarium.Plugins.DeepSky
                         GL.Enable(GL.LINE_SMOOTH);
                         GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
                         GL.Color4(colorOutline);
+                        GL.LineWidth(0.5f);
                         GL.Begin(GL.LINE_LOOP);
 
                         foreach (var oc in ds.Shape)
