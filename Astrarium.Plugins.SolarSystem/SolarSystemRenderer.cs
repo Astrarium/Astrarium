@@ -34,8 +34,8 @@ namespace Astrarium.Plugins.SolarSystem
         private Brush brushLabel;
         private readonly SolarTextureManager solarTextureManager;
         private readonly SolarRegionSummaryManager solarRegionSummaryManager;
-        private readonly ICollection<SurfaceFeature> lunarFeatures;
-        private readonly ICollection<SurfaceFeature> martianFeatures;
+        private ICollection<SurfaceFeature> lunarFeatures;
+        private ICollection<SurfaceFeature> martianFeatures;
         
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
@@ -63,10 +63,6 @@ namespace Astrarium.Plugins.SolarSystem
             saturn = planetsCalc.Planets.ElementAt(Planet.SATURN - 1);
             pluto = planetsCalc.Pluto;
 
-            var featuresReader = new SurfaceFeaturesReader();
-            lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
-            martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
-
             solarTextureManager = new SolarTextureManager();
             solarTextureManager.OnRequestComplete += () => map.Invalidate();
 
@@ -75,6 +71,13 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
+
+        public override void Initialize()
+        {
+            var featuresReader = new SurfaceFeaturesReader();
+            lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
+            martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
+        }
 
         public override void Render(ISkyMap map)
         {

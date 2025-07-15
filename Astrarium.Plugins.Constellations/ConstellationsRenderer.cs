@@ -1,9 +1,13 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using WF = System.Windows.Forms;
+using System.IO;
+using System.Linq;
+using System.Threading;
 
 namespace Astrarium.Plugins.Constellations
 {
@@ -12,29 +16,64 @@ namespace Astrarium.Plugins.Constellations
         private readonly ConstellationsCalc constellationsCalc;
         private readonly ISettings settings;
         private readonly ISky sky;
+        private readonly ISkyMap map;
+
+        private readonly FiguresManager figuresManager;
+
+        private string constellationUnderMouse = null;
+        private int constellationBrightness = 0;
+        private int defaultConstBrightness = 100;
+        private int maxConstBrightness = 255;
 
         public override RendererOrder Order => RendererOrder.Grids;
 
-        public ConstellationsRenderer(ConstellationsCalc constellationsCalc, ISky sky, ISettings settings)
+        public ConstellationsRenderer(ConstellationsCalc constellationsCalc, FiguresManager figuresManager, ISky sky, ISkyMap map, ISettings settings)
         {
             this.constellationsCalc = constellationsCalc;
+            this.figuresManager = figuresManager;
             this.sky = sky;
+            this.map = map;
             this.settings = settings;
+        }
+
+        public override void Initialize()
+        {
+            figuresManager.Initialize();
+            new Thread(DoWork) { IsBackground = true, Priority = ThreadPriority.Lowest }.Start();
+        }
+
+        private void DoWork()
+        {
+            do
+            {
+                if (constellationBrightness < maxConstBrightness)
+                {
+                    constellationBrightness += 5;
+                    if (constellationBrightness > maxConstBrightness) constellationBrightness = maxConstBrightness;
+                    map.Invalidate();
+                }
+                Thread.Sleep(10);
+            }
+            while (true);
         }
 
         public override void Render(ISkyMap map)
         {
+            if (settings.Get("ConstFigures"))
+            {
+                RenderFigures();
+            }
             if (settings.Get("ConstBorders"))
             {
-                RenderBorders(map);
+                RenderBorders();
             }
             if (settings.Get("ConstLabels"))
             {
-                RenderLabels(map);
+                RenderLabels();
             }
         }
 
-        private void RenderLabels(ISkyMap map)
+        private void RenderLabels()
         {
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
@@ -73,7 +112,126 @@ namespace Astrarium.Plugins.Constellations
             }
         }
 
-        private void RenderBorders(ISkyMap map)
+        private void RenderFigures()
+        {
+            var prj = map.Projection;
+            var nightMode = settings.Get("NightMode");
+
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_COLOR);
+            GL.Enable(GL.LINE_SMOOTH);
+            GL.Hint(GL.LINE_SMOOTH_HINT, GL.NICEST);
+            GL.Enable(GL.TEXTURE_2D);
+            GL.Enable(GL.CULL_FACE);
+
+            if (!prj.FlipVertical ^ prj.FlipHorizontal)
+            {
+                GL.CullFace(GL.BACK);
+            }
+            else
+            {
+                GL.CullFace(GL.FRONT);
+            }
+
+            double fov = prj.RealFov;
+            var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
+
+            foreach (var figure in figuresManager.Figures)
+            {
+                if (File.Exists(figure.File))
+                {
+                    figure.TextureId = GL.GetTexture(figure.File, permanent: false, readyCallback: map.Invalidate);
+                    GL.BindTexture(GL.TEXTURE_2D, figure.TextureId);
+                }
+
+                var pSky = figure.TextureToSkyCoords(new PointF(0.5f, 0.5f));
+                if (Angle.Separation(eqCenter, pSky) > 130) continue;
+
+                double alpha = 0;
+
+                // dimming on zoom
+                if (true)
+                {
+                    const double maxAlpha = 255;
+                    const double minAlpha = 10;
+                    const double maxFov = 90;
+                    const double minFov = 0.1;
+
+                    double a = 0;
+                    double b = maxAlpha;
+
+                    a = -(maxAlpha - minAlpha) / (minFov - maxFov);
+                    b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
+                    double z = Math.Min(prj.Fov, maxFov);
+                    alpha = Math.Min((int)(a * z + b), 255);
+
+                    if (alpha == minAlpha) return;
+                }
+
+                if (figure.Abbr.Equals(constellationUnderMouse, StringComparison.OrdinalIgnoreCase))
+                {
+                    alpha = Math.Min(constellationBrightness, alpha);
+                }
+                else
+                {
+                    alpha = Math.Min(defaultConstBrightness, alpha);
+                }
+
+                GL.Color4(Color.FromArgb((int)alpha, 255, 255, 255).Tint(nightMode));
+
+                double steps = 4;
+
+                if (figure.TextureId > 0)
+                {
+                    double step = 1 / steps;
+
+                    for (int r = 0; r < steps; r++)
+                    {
+                        GL.Begin(GL.QUAD_STRIP);
+
+                        double t1 = r * step;
+                        double t2 = (r + 1) * step;
+
+                        for (int c = 0; c <= steps; c++)
+                        {
+                            double s = c * step;
+
+                            var s1 = figure.TextureToSkyCoords(new Vec2(s, t1));
+                            var s2 = figure.TextureToSkyCoords(new Vec2(s, t2));
+
+                            // need to convert from J2000 to current
+                            s1 = Precession.GetEquatorialCoordinates(s1, constellationsCalc.PrecessionElementsJ2000ToCurrent);
+                            s2 = Precession.GetEquatorialCoordinates(s2, constellationsCalc.PrecessionElementsJ2000ToCurrent);
+
+                            var p1 = prj.Project(s1);
+                            var p2 = prj.Project(s2);
+
+                            if (p1 != null && p2 != null)
+                            {
+                                GL.TexCoord2(s, t1);
+                                GL.Vertex2(p1.X, p1.Y);
+
+                                GL.TexCoord2(s, t2);
+                                GL.Vertex2(p2.X, p2.Y);
+                            }
+                            else
+                            {
+                                GL.End();
+                                GL.Begin(GL.QUAD_STRIP);
+                            }
+                        }
+
+                        GL.End();
+                    }
+                }
+            }
+
+            GL.Disable(GL.TEXTURE_2D);
+            GL.Disable(GL.CULL_FACE);
+            GL.Disable(GL.BLEND);
+        }
+
+        private void RenderBorders()
         {
             var prj = map.Projection;
             var nightMode = settings.Get("NightMode");
@@ -90,7 +248,7 @@ namespace Astrarium.Plugins.Constellations
             GL.Color3(color);
 
             CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
-            CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToB1950);
+            CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, constellationsCalc.PrecessionElementsCurrentToJ2000);
 
             GL.LineWidth(0.1f);
             GL.Begin(GL.LINES);
@@ -102,8 +260,8 @@ namespace Astrarium.Plugins.Constellations
                     if (Angle.Separation(eqCenter0, block[i]) < fov ||
                         Angle.Separation(eqCenter0, block[i + 1]) < fov)
                     {
-                        var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsB1950ToCurrent);
-                        var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsB1950ToCurrent);
+                        var eq1 = Precession.GetEquatorialCoordinates(block[i], constellationsCalc.PrecessionElementsJ2000ToCurrent);
+                        var eq2 = Precession.GetEquatorialCoordinates(block[i + 1], constellationsCalc.PrecessionElementsJ2000ToCurrent);
 
                         var p1 = prj.Project(eq1);
                         var p2 = prj.Project(eq2);
@@ -119,6 +277,19 @@ namespace Astrarium.Plugins.Constellations
             GL.End();
         }
 
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        {
+            CrdsEquatorial eq1875 = Precession.GetEquatorialCoordinates(map.MouseEquatorialCoordinates, constellationsCalc.PrecessionElementsCurrentToB1875);
+
+            string con = Algorithms.Constellations.FindConstellation(eq1875);
+            if (con != constellationUnderMouse)
+            {
+                constellationBrightness = defaultConstBrightness;
+                constellationUnderMouse = con;
+                map.Invalidate();
+            }
+        }
+
         /// <summary>
         /// Type of constellation label
         /// </summary>
@@ -132,6 +303,15 @@ namespace Astrarium.Plugins.Constellations
 
             [Description("Settings.ConstLabelsType.LocalName")]
             LocalName = 2
+        }
+
+        public enum FigureType
+        {
+            [Description("Settings.ConstFiguresType.Hevelius")]
+            Hevelius = 0,
+
+            [Description("Settings.ConstLabelsType.Modern")]
+            Modern = 1,
         }
     }
 }

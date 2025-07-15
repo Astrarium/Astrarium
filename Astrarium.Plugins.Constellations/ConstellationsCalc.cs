@@ -32,14 +32,20 @@ namespace Astrarium.Plugins.Constellations
         public List<Tuple<int, int>> ConstLinesRey { get; private set; } = new List<Tuple<int, int>>();
 
         /// <summary>
-        /// Precession elements for conversion Current Epoch -> B1950.0
+        /// Precession elements for conversion Current Epoch -> J2000.0
         /// </summary>
-        public PrecessionalElements PrecessionElementsCurrentToB1950 { get; private set; }
+        public PrecessionalElements PrecessionElementsCurrentToJ2000 { get; private set; }
+
 
         /// <summary>
-        /// Precession elements for conversion B1950.0 -> Current Epoch
+        /// Precession elements for conversion Current Epoch -> B1875.0
         /// </summary>
-        public PrecessionalElements PrecessionElementsB1950ToCurrent { get; private set; }
+        public PrecessionalElements PrecessionElementsCurrentToB1875 { get; private set; }
+
+        /// <summary>
+        /// Precession elements for conversion J2000.0 -> Current Epoch
+        /// </summary>
+        public PrecessionalElements PrecessionElementsJ2000ToCurrent { get; private set; }
 
         private readonly ISky sky;
         private readonly ISettings settings;
@@ -62,10 +68,12 @@ namespace Astrarium.Plugins.Constellations
         public override void Calculate(SkyContext context)
         {
             // precessional elements from J2000 to current epoch
-            PrecessionElementsB1950ToCurrent = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            PrecessionElementsJ2000ToCurrent = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             // precessional elements from current epoch to J2000
-            PrecessionElementsCurrentToB1950 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+            PrecessionElementsCurrentToJ2000 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+
+            PrecessionElementsCurrentToB1875 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_B1875);
         }
 
         public override void Initialize()

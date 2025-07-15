@@ -85,6 +85,32 @@ namespace Astrarium.Plugins.Constellations.ViewModels
             }
         }
 
+        public bool IsConstFiguresTypeHevelius
+        {
+            get => Settings.Get<ConstellationsRenderer.FigureType>("ConstFiguresType") == ConstellationsRenderer.FigureType.Hevelius;
+            set
+            {
+                if (value)
+                {
+                    Settings.Set("ConstFiguresType", ConstellationsRenderer.FigureType.Hevelius);
+                    NotifyConstFiguresTypeChanged();
+                }
+            }
+        }
+
+        public bool IsConstFiguresTypeModern
+        {
+            get => Settings.Get<ConstellationsRenderer.FigureType>("ConstFiguresType") == ConstellationsRenderer.FigureType.Modern;
+            set
+            {
+                if (value)
+                {
+                    Settings.Set("ConstFiguresType", ConstellationsRenderer.FigureType.Modern);
+                    NotifyConstFiguresTypeChanged();
+                }
+            }
+        }
+
         public void NotifyConstLabelsTypeChanged()
         {
             NotifyPropertyChanged(
@@ -99,6 +125,14 @@ namespace Astrarium.Plugins.Constellations.ViewModels
             NotifyPropertyChanged(
                 nameof(IsConstLinesTypeTraditional),
                 nameof(IsConstLinesTypeRey)
+            );
+        }
+
+        public void NotifyConstFiguresTypeChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(IsConstFiguresTypeHevelius),
+                nameof(IsConstFiguresTypeModern)
             );
         }
     }
