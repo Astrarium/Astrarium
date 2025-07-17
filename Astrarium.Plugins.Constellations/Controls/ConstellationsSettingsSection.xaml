@@ -54,11 +54,15 @@
                 <RadioButton Margin="2" Content="{t:Text Settings.ConstFiguresType.Hevelius}" GroupName="ConstFiguresType" IsChecked="{Binding IsConstFiguresTypeHevelius}"/>
                 <RadioButton Margin="2" Content="{t:Text Settings.ConstFiguresType.Modern}" GroupName="ConstFiguresType" IsChecked="{Binding IsConstFiguresTypeModern}"/>
 
-                <Separator Margin="2 8" />
+                <Separator Margin="2 8 2 4" />
 
-                <CheckBox Margin="2" Content="Draw all constellations" IsChecked="{Binding Settings.ConstFiguresDrawAll}" />
-                <CheckBox Margin="2" Content="Highlight underneath constellation" IsChecked="{Binding Settings.ConstFiguresHighlightHovered}" IsEnabled="{Binding Settings.ConstFiguresDrawAll}" />
-                <CheckBox Margin="2" Content="Dim figures on zoom" IsChecked="{Binding Settings.ConstFiguresDimOnZoom}" />
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstFiguresGroupAll}" GroupName="ConstFiguresGroup" IsChecked="{Binding IsConstFiguresGroupAll}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstFiguresGroupZodiac}" GroupName="ConstFiguresGroup" IsChecked="{Binding IsConstFiguresGroupZodiac}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstFiguresGroupCurrent}" GroupName="ConstFiguresGroup" IsChecked="{Binding IsConstFiguresGroupCurrent}"/>
+                <Separator Margin="2 8 2 4" />
+
+                <CheckBox Margin="2" Content="{t:Text Settings.ConstFiguresHighlightHovered}" IsChecked="{Binding Settings.ConstFiguresHighlightHovered}" IsEnabled="{Binding Settings.ConstFiguresDrawAll}" />
+                <CheckBox Margin="2" Content="{t:Text Settings.ConstFiguresDimOnZoom}" IsChecked="{Binding Settings.ConstFiguresDimOnZoom}" />
                 
             </StackPanel>
         </GroupBox>

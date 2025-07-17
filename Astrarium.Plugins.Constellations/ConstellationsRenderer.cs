@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Documents;
 
 namespace Astrarium.Plugins.Constellations
 {
@@ -20,10 +21,8 @@ namespace Astrarium.Plugins.Constellations
 
         private readonly FiguresManager figuresManager;
 
-        private string constellationUnderMouse = null;
-        private int constellationBrightness = 0;
-        private int defaultConstBrightness = 100;
-        private int maxConstBrightness = 255;
+        private string currentConst = null;
+        private int currentConstBrightness = 0;
 
         public override RendererOrder Order => RendererOrder.Grids;
 
@@ -46,10 +45,9 @@ namespace Astrarium.Plugins.Constellations
         {
             do
             {
-                if (constellationBrightness < maxConstBrightness)
+                if (currentConstBrightness < figuresManager.MaxBrightness)
                 {
-                    constellationBrightness += 5;
-                    if (constellationBrightness > maxConstBrightness) constellationBrightness = maxConstBrightness;
+                    currentConstBrightness = Math.Min(figuresManager.MaxBrightness, currentConstBrightness + 5);
                     map.Invalidate();
                 }
                 Thread.Sleep(10);
@@ -136,7 +134,21 @@ namespace Astrarium.Plugins.Constellations
             double fov = prj.RealFov;
             var eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
 
-            foreach (var figure in figuresManager.Figures)
+            var figures = figuresManager.Figures.OrderBy(x => x.Abbr.Split(',').Any(a => a.Trim().Equals(currentConst, StringComparison.OrdinalIgnoreCase)) ? 1 : 0).ToList();
+
+            var group = settings.Get<FigureGroup>("ConstFiguresGroup");
+
+            if (group == FigureGroup.Zodiac)
+            {
+                figures = figures.Where(x => "Ari,Tau,Gem,Cnc,Leo,Vir,Lib,Sco,Sgr,Cap,Aqr,Psc".Split(',').Contains(x.Abbr)).ToList();
+            }
+            else if (group == FigureGroup.Current)
+            {
+                figures = figures.Where(x => x.Abbr.Split(',').Any(a => a.Trim().Equals(currentConst, StringComparison.OrdinalIgnoreCase))).ToList();
+            }
+
+
+            foreach (var figure in figures)
             {
                 if (File.Exists(figure.File))
                 {
@@ -144,84 +156,80 @@ namespace Astrarium.Plugins.Constellations
                     GL.BindTexture(GL.TEXTURE_2D, figure.TextureId);
                 }
 
-                var pSky = figure.TextureToSkyCoords(new PointF(0.5f, 0.5f));
-                if (Angle.Separation(eqCenter, pSky) > 130) continue;
-
-                double alpha = 0;
-
-                // dimming on zoom
-                if (true)
-                {
-                    const double maxAlpha = 255;
-                    const double minAlpha = 10;
-                    const double maxFov = 90;
-                    const double minFov = 0.1;
-
-                    double a = 0;
-                    double b = maxAlpha;
-
-                    a = -(maxAlpha - minAlpha) / (minFov - maxFov);
-                    b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
-                    double z = Math.Min(prj.Fov, maxFov);
-                    alpha = Math.Min((int)(a * z + b), 255);
-
-                    if (alpha == minAlpha) return;
-                }
-
-                if (figure.Abbr.Equals(constellationUnderMouse, StringComparison.OrdinalIgnoreCase))
-                {
-                    alpha = Math.Min(constellationBrightness, alpha);
-                }
-                else
-                {
-                    alpha = Math.Min(defaultConstBrightness, alpha);
-                }
-
-                GL.Color4(Color.FromArgb((int)alpha, 255, 255, 255).Tint(nightMode));
-
-                double steps = 4;
-
                 if (figure.TextureId > 0)
                 {
-                    double step = 1 / steps;
+                    var pSky = figure.TextureToSkyCoords(new PointF(0.5f, 0.5f));
+                    if (Angle.Separation(eqCenter, pSky) > 130) continue;
 
-                    for (int r = 0; r < steps; r++)
+                    double alpha = 0;
+                    double z = 1;
+
+                    // dimming on zoom
+                    if (settings.Get("ConstFiguresDimOnZoom"))
                     {
-                        GL.Begin(GL.QUAD_STRIP);
+                        const double maxFov = 90;
+                        const double minFov = 0;
 
-                        double t1 = r * step;
-                        double t2 = (r + 1) * step;
+                        z = (Math.Sin(Angle.ToRadians( Math.Min(maxFov, prj.Fov))) - Math.Sin(Angle.ToRadians(minFov))) / (Math.Sin(Angle.ToRadians(maxFov)) - Math.Sin(Angle.ToRadians(minFov)));
+                        if (z <= 0) return;
+                        if (z >= 1) z = 1;
+                    }
 
-                        for (int c = 0; c <= steps; c++)
+                    if (settings.Get("ConstFiguresHighlightHovered") &&
+                        figure.Abbr.Split(',').Any(a => a.Trim().Equals(currentConst, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        alpha = currentConstBrightness * z;
+                    }
+                    else
+                    {
+                        alpha = figuresManager.DefaultBrightness * z;
+                    }
+
+                    if (alpha > 1)
+                    {
+                        GL.Color4(Color.FromArgb((int)alpha, 191, 241, 255).Tint(nightMode));
+
+                        const double steps = 4;
+                        double step = 1 / steps;
+
+                        for (int r = 0; r < steps; r++)
                         {
-                            double s = c * step;
+                            GL.Begin(GL.QUAD_STRIP);
 
-                            var s1 = figure.TextureToSkyCoords(new Vec2(s, t1));
-                            var s2 = figure.TextureToSkyCoords(new Vec2(s, t2));
+                            double t1 = r * step;
+                            double t2 = (r + 1) * step;
 
-                            // need to convert from J2000 to current
-                            s1 = Precession.GetEquatorialCoordinates(s1, constellationsCalc.PrecessionElementsJ2000ToCurrent);
-                            s2 = Precession.GetEquatorialCoordinates(s2, constellationsCalc.PrecessionElementsJ2000ToCurrent);
-
-                            var p1 = prj.Project(s1);
-                            var p2 = prj.Project(s2);
-
-                            if (p1 != null && p2 != null)
+                            for (int c = 0; c <= steps; c++)
                             {
-                                GL.TexCoord2(s, t1);
-                                GL.Vertex2(p1.X, p1.Y);
+                                double s = c * step;
 
-                                GL.TexCoord2(s, t2);
-                                GL.Vertex2(p2.X, p2.Y);
+                                var s1 = figure.TextureToSkyCoords(new Vec2(s, t1));
+                                var s2 = figure.TextureToSkyCoords(new Vec2(s, t2));
+
+                                // need to convert from J2000 to current
+                                s1 = Precession.GetEquatorialCoordinates(s1, constellationsCalc.PrecessionElementsJ2000ToCurrent);
+                                s2 = Precession.GetEquatorialCoordinates(s2, constellationsCalc.PrecessionElementsJ2000ToCurrent);
+
+                                var p1 = prj.Project(s1);
+                                var p2 = prj.Project(s2);
+
+                                if (p1 != null && p2 != null)
+                                {
+                                    GL.TexCoord2(s, t1);
+                                    GL.Vertex2(p1.X, p1.Y);
+
+                                    GL.TexCoord2(s, t2);
+                                    GL.Vertex2(p2.X, p2.Y);
+                                }
+                                else
+                                {
+                                    GL.End();
+                                    GL.Begin(GL.QUAD_STRIP);
+                                }
                             }
-                            else
-                            {
-                                GL.End();
-                                GL.Begin(GL.QUAD_STRIP);
-                            }
+
+                            GL.End();
                         }
-
-                        GL.End();
                     }
                 }
             }
@@ -282,10 +290,10 @@ namespace Astrarium.Plugins.Constellations
             CrdsEquatorial eq1875 = Precession.GetEquatorialCoordinates(map.MouseEquatorialCoordinates, constellationsCalc.PrecessionElementsCurrentToB1875);
 
             string con = Algorithms.Constellations.FindConstellation(eq1875);
-            if (con != constellationUnderMouse)
+            if (con != currentConst)
             {
-                constellationBrightness = defaultConstBrightness;
-                constellationUnderMouse = con;
+                currentConstBrightness = settings.Get<FigureGroup>("ConstFiguresGroup") == FigureGroup.Current ? 0 : figuresManager.DefaultBrightness;
+                currentConst = con;
                 map.Invalidate();
             }
         }
@@ -312,6 +320,18 @@ namespace Astrarium.Plugins.Constellations
 
             [Description("Settings.ConstLabelsType.Modern")]
             Modern = 1,
+        }
+
+        public enum FigureGroup
+        {
+            [Description("Settings.ConstFiguresGroup.All")]
+            All = 0,
+
+            [Description("Settings.ConstLabelsType.Zodiac")]
+            Zodiac = 1,
+
+            [Description("Settings.ConstLabelsType.Current")]
+            Current = 2,
         }
     }
 }

@@ -16,7 +16,8 @@ namespace Astrarium.Plugins.Constellations
             DefineSetting("ConstLinesType", ConstellationsCalc.LineType.Traditional);
             DefineSetting("ConstFigures", false);
             DefineSetting("ConstFiguresType", ConstellationsRenderer.FigureType.Hevelius);
-            DefineSetting("ConstFiguresDrawAll", true);
+            DefineSetting("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.All);
+            
             DefineSetting("ConstFiguresHighlightHovered", true);
             DefineSetting("ConstFiguresDimOnZoom", true);
 

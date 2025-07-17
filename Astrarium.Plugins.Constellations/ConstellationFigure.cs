@@ -82,6 +82,8 @@ namespace Astrarium.Plugins.Constellations
         public List<LocalizedValue> Name { get; set; }
         public List<LocalizedValue> Description { get; set; }
         public List<JsonFigure> Figures { get; set; }
+        public int DefaultBrightness { get; set; }
+        public int MaxBrightness { get; set; }
     }
 
     public class JsonFigure

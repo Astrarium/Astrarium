@@ -19,6 +19,8 @@
       "Value": "Modern art of constellation figures, CC BY-SA 4.0 International Public License + Free Art License"
     }
   ],
+  "DefaultBrightness": 150,
+  "MaxBrightness": 255,
   "Figures": [
     {
       "File": "andromeda.png",
@@ -230,7 +232,7 @@
     },
     {
       "File": "argonavis.png",
-      "Abbr": "Car",
+      "Abbr": "Vel, Car, Pup, Pyx",
       "X1": 0.39453125,
       "Y1": 0.8886719,
       "RA1": 138.30101,
@@ -950,7 +952,7 @@
     },
     {
       "File": "ophiuchus.png",
-      "Abbr": "Oph",
+      "Abbr": "Oph, Ser",
       "X1": 0.009765625,
       "Y1": 0.35742188,
       "RA1": 284.05484,

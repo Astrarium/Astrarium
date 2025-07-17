@@ -19,6 +19,8 @@
       "Value": "Images from «Uranographia» of Johannes Hevelius, 1687. Pictures and metadata are based on work of Mark Crossley (www.wilmslowastro.com). High resolution images courtesy of U.S. Naval Observatory and the Space Telescope Science Institute. All other images have been derived from the document scan provided by the Polish National Digital Library."
     }
   ],
+  "DefaultBrightness": 100,
+  "MaxBrightness": 200,
   "Figures": [
     {
       "File": "andromeda.png",
@@ -806,7 +808,7 @@
     },
     {
       "File": "argo-navis.png",
-      "Abbr": "Nav",
+      "Abbr": "Vel, Car, Pup, Pyx",
       "X1": 0.6308594,
       "Y1": 0.8105469,
       "RA1": 95.98788,
@@ -1030,7 +1032,7 @@
     },
     {
       "File": "serpentarius.png",
-      "Abbr": "Ser",
+      "Abbr": "Oph, Ser",
       "X1": 0.40429688,
       "Y1": 0.18066406,
       "RA1": 263.73337,
@@ -1062,7 +1064,7 @@
     },
     {
       "File": "triangulum-australe.png",
-      "Abbr": "TAs",
+      "Abbr": "TrA",
       "X1": 0.44335938,
       "Y1": 0.28320312,
       "RA1": 229.72787,

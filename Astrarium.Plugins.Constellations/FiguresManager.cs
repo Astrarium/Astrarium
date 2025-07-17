@@ -28,6 +28,8 @@ namespace Astrarium.Plugins.Constellations
         }
 
         public string Folder { get; private set; }
+        public int DefaultBrightness { get; private set; }
+        public int MaxBrightness { get; private set; }
 
         public FiguresManager(ISettings settings) 
         {
@@ -85,7 +87,10 @@ namespace Astrarium.Plugins.Constellations
                 {
                     try
                     {
-                        figures = JsonConvert.DeserializeObject<JsonFigures>(File.ReadAllText(path)).Figures.Select(x => new ConstellationFigure(Folder, x)).ToList();
+                        var jsonData = JsonConvert.DeserializeObject<JsonFigures>(File.ReadAllText(path));
+                        DefaultBrightness = jsonData.DefaultBrightness;
+                        MaxBrightness = jsonData.MaxBrightness;
+                        figures = jsonData.Figures.Select(x => new ConstellationFigure(Folder, x)).ToList();
                     }
                     catch (Exception ex) 
                     {
