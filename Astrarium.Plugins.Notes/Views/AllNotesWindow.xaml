@@ -7,7 +7,7 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
-        Title="Notes" Height="450" Width="800">
+        Title="{t:Text Notes.NotesWindow.Title}" Height="450" Width="800">
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />

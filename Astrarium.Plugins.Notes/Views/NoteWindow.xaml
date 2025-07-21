@@ -8,7 +8,7 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="Note" Height="450" Width="800"
+        Title="{t:Text Notes.NoteWindow.Title}" Height="450" Width="800"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}">
 
@@ -33,10 +33,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Label IsEnabled="False" Grid.Column="0" Grid.Row="0" Content="Body" Margin="0 0 8 0" />
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="0" Content="{t:Text Notes.NoteWindow.Body}" Margin="0 0 8 0" />
         <c:CelestialObjectPicker Grid.Column="1" Grid.Row="0" SelectedBody="{Binding Body}" IsEnabled="{Binding IsEditMode}" />
 
-        <Label IsEnabled="False" Grid.Column="0" Grid.Row="1" Content="Date and Time" Margin="0 0 8 0" />
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="1" Content="{t:Text Notes.NoteWindow.Date}" Margin="0 0 8 0" />
 
         <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
@@ -52,13 +52,13 @@
             </Hyperlink>
         </TextBlock>
 
-        <Label IsEnabled="False" Grid.Column="0" Grid.Row="2" Content="Short note title" Margin="0 0 8 0"  />
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="2" Content="{t:Text Notes.NoteWindow.NoteTitle}" Margin="0 0 8 0"  />
         <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Title}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Title}" ToolTip="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
 
-        <Label IsEnabled="False" Grid.Column="0" Grid.Row="3" Content="Note content" />
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="3" Content="{t:Text Notes.NoteWindow.Description}" />
 
-        <CheckBox VerticalAlignment="Center" Content="Use markdown syntax" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Markdown}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        <CheckBox VerticalAlignment="Center" Content="{t:Text Notes.NoteWindow.UseMarkdown}" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Markdown}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         <Separator Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
 
         <TextBox 
@@ -105,7 +105,7 @@
         </TextBox>
 
         <StackPanel Margin="0 8 0 0" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding EditCommand}" Content="Edit" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding EditCommand}" Content="{t:Text Notes.NoteWindow.Edit}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}"  Content="{t:Text Close}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}"  />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}"  Content="{t:Text OK}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}"  />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />

@@ -8,12 +8,8 @@ namespace Astrarium.Plugins.Notes
     {
         public NotesPlugin()
         {
-            ExtendObjectInfo<NotesControl, ObjectNotesVM>("Notes", CreateObjectNotesViewModel);
-
-            MenuItem menuNotes = new MenuItem("Notes", new Command(OpenNotesWindow));
-
-
-            MenuItems.Add(MenuItemPosition.MainMenuTools, menuNotes);
+            ExtendObjectInfo<NotesControl, ObjectNotesVM>("$Notes.ObjectInfo.Title", CreateObjectNotesViewModel);
+            MenuItems.Add(MenuItemPosition.MainMenuTools, new MenuItem("$Notes.Menu.Notes", new Command(OpenNotesWindow)));
         }
 
         private ObjectNotesVM CreateObjectNotesViewModel(SkyContext ctx, CelestialObject body)
