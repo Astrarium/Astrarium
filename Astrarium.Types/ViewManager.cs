@@ -147,6 +147,19 @@ namespace Astrarium.Types
             return viewManager.ShowDateDialog(jd, utcOffset, displayMode);
         }
 
+        /// <summary>
+        /// Shows FOV dialog.
+        /// </summary>
+        /// <param name="viewAngle">Current view angle, in degrees</param>
+        /// <param name="min">Minimal allowed view angle, in degrees</param>
+        /// <param name="max">Maximal allowed view angle, in degrees</param>
+        /// <param name="applyImmediately">Apply changes immediately</param>
+        /// <returns>Selected FOV, or null</returns>
+        public static double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately = false)
+        {
+            return viewManager.ShowViewAngleDialog(viewAngle, min, max, applyImmediately);
+        }
+
         public static CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
         {
             return viewManager.ShowSearchDialog(filter);

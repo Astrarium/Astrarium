@@ -371,6 +371,12 @@ namespace Astrarium
             return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
         }
 
+        public double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately)
+        {
+            var vm = CreateViewModel<ViewAngleVM>().WithDefaults(viewAngle, min, max, applyImmediately);
+            return (ShowDialog(vm) ?? false) ? (double?)vm.ViewAngle : null;
+        }
+
         public Color? ShowColorDialog(string caption, Color color)
         {
             var vm = CreateViewModel<ColorPickerVM>();

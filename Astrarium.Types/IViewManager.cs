@@ -136,6 +136,15 @@ namespace Astrarium.Types
         double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime);
 
         /// <summary>
+        /// Show view angle dialog
+        /// </summary>
+        /// <param name="viewAngle">Current view angle, in degrees</param>
+        /// <param name="min">Minimal view angle value, in degrees</param>
+        /// <param name="max">Maximal view angle value, in degrees</param>
+        /// <returns></returns>
+        double? ShowViewAngleDialog(double viewAngle, double min, double max, bool previewValues);
+
+        /// <summary>
         /// Shows search celestial object window
         /// </summary>
         /// <param name="filter">Predicate function to filder celestial objects</param>

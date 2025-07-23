@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,6 +33,7 @@ namespace Astrarium.ViewModels
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
         public Command SetDateCommand { get; private set; }
+        public Command SetViewAngleCommand { get; private set; }
         public Command SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command CenterOnPointCommand { get; private set; }
@@ -53,6 +53,7 @@ namespace Astrarium.ViewModels
         public Command DonateCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
+        public Command SelectedObjectsMenuItemsRootMenuCommand { get; private set; }
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -202,9 +203,11 @@ namespace Astrarium.ViewModels
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
             SetDateCommand = new Command(SetDate);
+            SetViewAngleCommand = new Command(SetViewAngle);
             SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
             QuickSearchCommand = new Command<CelestialObject>(GoToObject);
+            SelectedObjectsMenuItemsRootMenuCommand = new Command(SelectedObjectsMenuItemsRootMenuClicked);
             CenterOnPointCommand = new Command(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
@@ -669,6 +672,10 @@ namespace Astrarium.ViewModels
                 {
                     SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));                
                     SelectedObjectsMenuItems.Add(null);
+
+
+                    SelectedObjectsMenuItems.Add(null);
+                    SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.SearchObject", SearchObjectCommand));
                 }
 
                 var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => body.Equals(i?.CommandParameter));
@@ -679,10 +686,10 @@ namespace Astrarium.ViewModels
 
                 SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
 
-                // 10 items of history + "clear all" + separator
-                if (SelectedObjectsMenuItems.Count > 13)
+                // 10 items of history + "clear all" + "search" + 2 separators
+                if (SelectedObjectsMenuItems.Count > 14)
                 {
-                    SelectedObjectsMenuItems.RemoveAt(0);
+                    SelectedObjectsMenuItems.RemoveAt(12);
                 }
             }
 
@@ -896,6 +903,11 @@ namespace Astrarium.ViewModels
             }
         }
 
+        private void SelectedObjectsMenuItemsRootMenuClicked()
+        {
+            if (!SelectedObjectsMenuItems.Any()) SearchObject();
+        }
+
         public bool CenterOnObject(CelestialObject celestialObject)
         {
             CelestialObject body = sky.Search(celestialObject.Type, celestialObject.CommonName);
@@ -1007,6 +1019,8 @@ namespace Astrarium.ViewModels
 
         private void ClearObjectsHistory()
         {
+            map.SelectedObject = null;
+            map.Invalidate();
             SelectedObjectsMenuItems.Clear();
         }
 
@@ -1055,6 +1069,11 @@ namespace Astrarium.ViewModels
             {
                 sky.SetDate(jd.Value);
             }
+        }
+
+        private void SetViewAngle()
+        {
+            ViewManager.ShowViewAngleDialog(map.Projection.Fov, map.Projection.MinFov, map.Projection.MaxFov, previewValues: true);
         }
 
         private void SelectLocation()

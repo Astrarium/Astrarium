@@ -613,6 +613,38 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class FormatterConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            Type type = parameter as Type;
+            if (typeof(IEphemFormatter).IsAssignableFrom(type))
+            {
+                var formatter = Activator.CreateInstance(type) as IEphemFormatter;
+                return formatter.Format(value);
+            }
+            else
+            {
+                throw new ArgumentException($"Parameter must implement {nameof(IEphemFormatter)} interface.");
+            }
+        }
+    }
+
+    public class LogScaleConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double x = (double)value;
+            return Math.Log(x);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double x = (double)value;
+            return Math.Exp(x);
+        }
+    }
+
     public class LatitudeConverter : ValueConverterBase
     {
         private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();

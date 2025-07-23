@@ -653,7 +653,7 @@ namespace Astrarium
                     {
                         fraction = Math.Min(1, sw.ElapsedMilliseconds / duration);
                         Projection.SetVision(Angle.Intermediate(centerOriginal, eq, fraction));
-                        Projection.Fov = Math.Min(90, Interpolation.Lagrange(x, y, Math.Min(duration, sw.ElapsedMilliseconds)));
+                        Projection.Fov = Math.Min(Projection.MaxFov, Interpolation.Lagrange(x, y, Math.Min(duration, sw.ElapsedMilliseconds)));
                         Invalidate();
                     }
                     while (fraction < 1);

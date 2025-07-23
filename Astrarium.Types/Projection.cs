@@ -15,6 +15,11 @@ namespace Astrarium.Types
         public abstract double MaxFov { get; }
 
         /// <summary>
+        /// Gets minimal allowed field of view, in degrees
+        /// </summary>
+        public double MinFov => new DMS(0, 0, 1).ToDecimalAngle();
+
+        /// <summary>
         /// Screen scaling factor
         /// </summary>
         protected double ScreenScalingFactor { get; private set; }
@@ -330,10 +335,8 @@ namespace Astrarium.Types
             get => fov;
             set
             {
-                const double minFov = 0.001;
-
                 if (value > MaxFov) value = MaxFov;
-                if (value < minFov) value = minFov;
+                if (value < MinFov) value = MinFov;
                 fov = value;
 
                 UpdateScreenScalingFactor();
