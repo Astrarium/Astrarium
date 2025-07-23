@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using Astrarium.Algorithms;
@@ -50,11 +51,15 @@ namespace Astrarium.Types
         /// <param name="type"></param>
         void SetProjection(Type type);
 
+        /// <summary>
+        /// Gets or sets flag indicating time synchronization
+        /// </summary>
         bool TimeSync { get; set; }
 
         void Invalidate();
 
         CelestialObject FindObject(PointF point);
+        IEnumerable<CelestialObject> FindObjects(PointF point);
 
         void GoToObject(CelestialObject body, double viewAngleTarget);
         void GoToObject(CelestialObject body, TimeSpan animationDuration);

@@ -45,6 +45,18 @@ namespace Astrarium.Plugins.DeepSky
             return (int)(100 * zf * df * ext);
         }
 
+        private DeepSky hoveredDeepSky = null;
+
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        {
+            var ds = map.FindObjects(map.MouseScreenCoordinates).FirstOrDefault(x => x is DeepSky) as DeepSky;
+            if (hoveredDeepSky != ds)
+            {
+                hoveredDeepSky = ds;
+                map.Invalidate();
+            }
+        }
+
         public override void Render(ISkyMap map)
         {
             if (!settings.Get<bool>("DeepSky")) return;
@@ -59,6 +71,7 @@ namespace Astrarium.Plugins.DeepSky
             string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
             bool drawImages = settings.Get("DeepSkyImages") && Directory.Exists(imagesPath);
             bool hideOutline = settings.Get("DeepSkyHideOutline");
+            bool hoverOutline = settings.Get("DeepSkyHoverOutline");
             Brush brushLabel = new SolidBrush(colorLabel);
             var prj = map.Projection;
 
@@ -167,7 +180,9 @@ namespace Astrarium.Plugins.DeepSky
                     }
                 }
 
-                if (!(hasImage && hideOutline))
+                bool displayOutline = !(hasImage && hideOutline);
+
+                if (displayOutline || (hoveredDeepSky == ds && hoverOutline))
                 {
                     if (ds.Shape != null && ds.Shape.Any())
                     {

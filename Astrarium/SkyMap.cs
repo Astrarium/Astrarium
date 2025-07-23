@@ -577,6 +577,22 @@ namespace Astrarium
             return null;
         }
 
+        public IEnumerable<CelestialObject> FindObjects(PointF point)
+        {
+            foreach (var x in celestialObjects.OrderBy(c => Projection.Project(c.Equatorial).Distance(point)))
+            {
+                var p = Projection.Project(x.Equatorial);
+                float sd = (x is SizeableCelestialObject) ? (x as SizeableCelestialObject).Semidiameter : 0;
+                float size = Projection.GetDiskSize(sd, 10);
+                if (p.Distance(point) < size / 2)
+                {
+                    yield return x;
+                }
+            }
+
+            yield break;
+        }
+
         public void GoToObject(CelestialObject body, TimeSpan animationDuration)
         {
             float sd = (body is SizeableCelestialObject) ?

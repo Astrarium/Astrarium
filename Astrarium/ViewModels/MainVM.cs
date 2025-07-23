@@ -1073,7 +1073,7 @@ namespace Astrarium.ViewModels
 
         private void SetViewAngle()
         {
-            ViewManager.ShowViewAngleDialog(map.Projection.Fov, map.Projection.MinFov, map.Projection.MaxFov, previewValues: true);
+            ViewManager.ShowViewAngleDialog(map.Projection.Fov, map.Projection.MinFov, map.Projection.MaxFov, applyImmediately: true);
         }
 
         private void SelectLocation()
