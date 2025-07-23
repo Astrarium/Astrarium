@@ -21,6 +21,11 @@ namespace Astrarium.Types
         float DaylightFactor { get; set; }
 
         /// <summary>
+        /// Gets limiting magnitude
+        /// </summary>
+        float MagLimit { get; }
+
+        /// <summary>
         /// Gets or sets selected celestial object.
         /// </summary>
         CelestialObject SelectedObject { get; set; }
@@ -56,6 +61,9 @@ namespace Astrarium.Types
         /// </summary>
         bool TimeSync { get; set; }
 
+        /// <summary>
+        /// Raises OnInvalidate (repaint) event that causes a graphical control to be repainted
+        /// </summary>
         void Invalidate();
 
         CelestialObject FindObject(PointF point);

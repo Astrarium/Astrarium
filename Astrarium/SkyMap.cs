@@ -54,6 +54,7 @@ namespace Astrarium
             }
         }
 
+        public float MagLimit => settings.Get("LimitMagnitude") ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
         public float DaylightFactor { get; set; }
         public bool Antialias { get; set; } = true;
 
@@ -579,12 +580,14 @@ namespace Astrarium
 
         public IEnumerable<CelestialObject> FindObjects(PointF point)
         {
-            foreach (var x in celestialObjects.OrderBy(c => Projection.Project(c.Equatorial).Distance(point)))
+            foreach (var x in celestialObjects.OrderBy(c => Projection.Project(c.Equatorial)?.Distance(point) ?? double.MaxValue))
             {
                 var p = Projection.Project(x.Equatorial);
+                if (p == null) yield break;
                 float sd = (x is SizeableCelestialObject) ? (x as SizeableCelestialObject).Semidiameter : 0;
                 float size = Projection.GetDiskSize(sd, 10);
-                if (p.Distance(point) < size / 2)
+                double dist = p.Distance(point);
+                if (dist < size / 2)
                 {
                     yield return x;
                 }

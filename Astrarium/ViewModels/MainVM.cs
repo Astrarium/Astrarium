@@ -166,12 +166,6 @@ namespace Astrarium.ViewModels
             }
         }
 
-        private void SetProjection(Type projectionType)
-        {
-            map.SetProjection(projectionType);
-            settings.SetAndSave("Projection", projectionType.Name);
-        }
-
         public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, IGeoLocationsManager geoLocationsManager, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
@@ -328,17 +322,17 @@ namespace Astrarium.ViewModels
                 })
             };
 
-            var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
+            var projections = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).Select(t => t.Name).ToArray();
 
             var projectionMenuItems = new List<MenuItem>();
-            for (int i = 0; i < projectionTypes.Length; i++)
+            for (int i = 0; i < projections.Length; i++)
             {
-                var projectionType = projectionTypes[i];
-                var projectionMenuItem = new MenuItem($"$Projection.{projectionType.Name}");
-                projectionMenuItem.Command = new Command(() => SetProjection(projectionType));
+                var projection = projections[i];
+                var projectionMenuItem = new MenuItem($"$Projection.{projection}");
+                projectionMenuItem.Command = new Command(() => settings.SetAndSave("Projection", projection));
                 var binding = new SimpleBinding(settings, "Projection", nameof(MenuItem.IsChecked));
-                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projectionType.Name;
+                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projection;
                 projectionMenuItem.AddBinding(binding);
                 projectionMenuItems.Add(projectionMenuItem);
             }
@@ -659,6 +653,13 @@ namespace Astrarium.ViewModels
             {
                 NotifyPropertyChanged(nameof(ObserverLocation));
                 FillLocationsList();
+            }
+            if (settingName == "Projection")
+            {
+                var projectionType =
+                    System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                    .FirstOrDefault(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract && t.Name == settingValue.ToString());
+                map.SetProjection(projectionType);
             }
         }
 
