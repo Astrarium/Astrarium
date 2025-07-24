@@ -46,7 +46,7 @@
                 <TextBlock Margin="4 0 4 0" VerticalAlignment="Center" Text="m" />
             </StackPanel>
         </GroupBox>
-        <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.AutoLock}" IsChecked="{Binding Settings.AutoLock}" />
+        <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.AutoLock.Description}" IsChecked="{Binding Settings.AutoLock}" />
 
     </StackPanel>
     

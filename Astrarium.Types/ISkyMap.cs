@@ -21,11 +21,6 @@ namespace Astrarium.Types
         float DaylightFactor { get; set; }
 
         /// <summary>
-        /// Gets limiting magnitude
-        /// </summary>
-        float MagLimit { get; }
-
-        /// <summary>
         /// Gets or sets selected celestial object.
         /// </summary>
         CelestialObject SelectedObject { get; set; }

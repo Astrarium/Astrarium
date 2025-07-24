@@ -50,8 +50,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             Projection prj = map.Projection;
             double fov = prj.RealFov;
-
-            float magLimit = Math.Min(map.MagLimit, (float)(-1.73494 * Math.Log(0.000462398 * fov)));
+            float magLimit = prj.MagLimit;
 
             if (magLimit > 6 && settings.Get("Stars") && settings.Get("Tycho2"))
             {
@@ -119,7 +118,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             _ = Task.Run(() =>
             {
-                int hash = $"{eq0.Alpha}{eq0.Delta}{angle}{map.MagLimit}".GetHashCode();
+                int hash = $"{eq0.Alpha}{eq0.Delta}{angle}{map.Projection.MagLimit}".GetHashCode();
                 if (!isRequested && hash != requestHash)
                 {
                     requestHash = hash;

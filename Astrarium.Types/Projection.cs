@@ -156,9 +156,19 @@ namespace Astrarium.Types
             return (float)Math.Max(minSize, (float)(Math.Min(ScreenWidth, ScreenHeight) / Fov * (2 * semidiameter / 3600)));
         }
 
-        // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
-        // TODO: check this http://www.hnsky.org/star_count.htm
-        public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
+        /// <summary>
+        /// User-defined magnitude limit. Default value is float.MaxValue (no limit).
+        /// </summary>
+        public float UserMagLimit { get; set; } = float.MaxValue;
+
+        /// <summary>
+        /// Current magnitude limit, depending of current FOV.
+        /// </summary>
+        /// <remarks>
+        /// Constructed as log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
+        /// TODO: check this http://www.hnsky.org/star_count.htm
+        /// </remarks>
+        public float MagLimit => Math.Min(UserMagLimit, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
         /// <summary>
         /// Gets magnitude extinction for a given altitude

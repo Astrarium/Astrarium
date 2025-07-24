@@ -54,7 +54,6 @@ namespace Astrarium
             }
         }
 
-        public float MagLimit => settings.Get("LimitMagnitude") ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
         public float DaylightFactor { get; set; }
         public bool Antialias { get; set; } = true;
 
@@ -255,6 +254,7 @@ namespace Astrarium
             Projection.UseExtinction = settings.Get("Extinction");
             Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
             Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
+            Projection.UserMagLimit = settings.Get("LimitMagnitude", false) ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
             Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
             Projection.SetScreenSize(w, h);
             Projection.FovChanged += Projection_FovChanged;
@@ -392,6 +392,12 @@ namespace Astrarium
                 if (name == "AirmassModel")
                 {
                     Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
+                    Invalidate();
+                }
+
+                if (name == "LimitMagnitude" || name == "LimitingMagnitude") 
+                {
+                    Projection.UserMagLimit = settings.Get("LimitMagnitude", false) ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
                     Invalidate();
                 }
             };
