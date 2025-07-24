@@ -270,6 +270,8 @@ namespace Astrarium.ViewModels
             uiIntegration.ToolbarButtons.Add("View", btnViewModeEquatorial);
             uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "$Settings.FlipHorizontal", new SimpleBinding(settings, "FlipHorizontal", "IsChecked")));
             uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "$Settings.FlipVertical", new SimpleBinding(settings, "FlipVertical", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconLimitMagnitude", "$Settings.LimitMagnitude", new SimpleBinding(settings, "LimitMagnitude", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconAutoLock", "$Settings.AutoLock", new SimpleBinding(settings, "AutoLock", "IsChecked")));
 
             foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
