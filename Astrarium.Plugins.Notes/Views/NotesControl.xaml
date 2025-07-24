@@ -136,7 +136,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                     <TextBlock VerticalAlignment="Center" ToolTip="Click to set the date">
+                                     <TextBlock VerticalAlignment="Center" ToolTip="{t:Text Notes.Table.Menu.SelectDate}">
                                          <Hyperlink Command="{Binding Data.SelectDateCommand, Source={StaticResource DataContextProxy}}" CommandParameter="{Binding}">                                                 
                                              <Run>
                                                  <Run.Text>
