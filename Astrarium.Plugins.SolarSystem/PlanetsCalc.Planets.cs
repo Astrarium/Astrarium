@@ -222,7 +222,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets rise, transit and set info for the planet
         /// </summary>
-        private RTS Planet_RiseTransitSet(SkyContext c, int p)
+        public RTS Planet_RiseTransitSet(SkyContext c, int p)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);

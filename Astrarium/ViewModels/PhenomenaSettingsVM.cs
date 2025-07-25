@@ -74,7 +74,9 @@ namespace Astrarium.ViewModels
             var groups = categories.GroupBy(cat => cat.Split('.').First());
 
             Node root = new Node(Text.Get("PhenomenaSettingsWindow.Phenomena.All"));
+            root.IsChecked = true;
             root.CheckedChanged += Root_CheckedChanged;
+            Node daily = null;
 
             foreach (var group in groups)
             {
@@ -83,14 +85,32 @@ namespace Astrarium.ViewModels
                 {
                     if (item != group.Key)
                     {
-                        node.Children.Add(new Node(Text.Get(item), item));
+                        var child = new Node(Text.Get(item), item);
+                        child.IsChecked = !item.StartsWith("Daily");
+                        node.Children.Add(child);
                     }
                 }
-                root.Children.Add(node);
+
+                // add regular (not daily) node to the root
+                if (group.Key.StartsWith("Daily")) 
+                {
+                    node.IsChecked = false;
+                    daily = node;
+                }
+                else
+                {
+                    node.IsChecked = true;
+                    root.Children.Add(node);
+                }
+            }
+
+            // add daily events node to the end
+            if (daily != null)
+            {
+                root.Children.Add(daily);
             }
 
             Nodes.Add(root);
-            root.IsChecked = true;
         }
 
         private void Root_CheckedChanged(object sender, bool? e)

@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace Astrarium.Plugins.SolarSystem
             c["PlanetEvents.Oppositions"] = Oppositions;
             c["PlanetEvents.Conjunctions"] = Conjunctions;
             c["PlanetEvents.VisibilityPeriods"] = VisibilityPeriods;
+            c["Daily.Planets.RiseSet"] = RiseSet;
         }
 
         private ICollection<AstroEvent> ConjunctionsInRightAscension(AstroEventsContext context)
@@ -693,6 +695,46 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             return results;
+        }
+
+        private ICollection<AstroEvent> RiseSet(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            for (double jd = context.From; jd < context.To; jd += 1)
+            {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
+                for (int p = Planet.MERCURY; p <= Planet.NEPTUNE; p++) 
+                {
+                    if (p == Planet.EARTH) continue;
+                    var ctx = new SkyContext(jd, context.GeoLocation);
+                    var rts = planetsCalc.Planet_RiseTransitSet(ctx, p);
+                    var planet = planetsCalc.Planets.ElementAt(p - 1);
+
+                    if (rts.Rise != RTS.None)
+                    {
+                        string text = Text.Get("Daily.Planet.Rise",
+                            ("planetName", GetPlanetName(planet.Number)),
+                            ("planetGenitiveName", GetPlanetGenitiveName(planet.Number)));
+
+                        events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Rise, text, planet));
+                    }
+
+                    if (rts.Set != RTS.None)
+                    {
+                        string text = Text.Get("Daily.Planet.Set",
+                            ("planetName", GetPlanetName(planet.Number)),
+                            ("planetGenitiveName", GetPlanetGenitiveName(planet.Number)));
+
+                        events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Set, text, planet));
+                    }
+                }
+            }
+
+            return events;
         }
 
         private CelestialObject GetPlanet(int planetNumber)

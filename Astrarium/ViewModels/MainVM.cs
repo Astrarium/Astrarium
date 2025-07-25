@@ -40,6 +40,7 @@ namespace Astrarium.ViewModels
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command GetObjectEphemerisCommand { get; private set; }
         public Command CalculatePhenomenaCommand { get; private set; }
+        public Command CalculateTodayEventsCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> LockOnObjectCommand { get; private set; }
         public Command<PointF> MeasureToolCommand { get; private set; }
@@ -206,6 +207,7 @@ namespace Astrarium.ViewModels
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
+            CalculateTodayEventsCommand = new Command(CalculateTodayEvents);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             GoToHistoryItemCommand = new Command<CelestialObject>(GoToObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
@@ -451,6 +453,7 @@ namespace Astrarium.ViewModels
                 {
                     new MenuItem("$Menu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
                     new MenuItem("$Menu.Phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
+                    new MenuItem("$Menu.TodayEvents", CalculateTodayEventsCommand) { HotKey = new KeyGesture(Key.N, ModifierKeys.Control, "Ctrl+N") },
                     new MenuItem("$Menu.Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }                
                 }
             };
@@ -834,6 +837,13 @@ namespace Astrarium.ViewModels
                     ViewManager.ShowWindow(vm);
                 }
             }
+        }
+
+        private void CalculateTodayEvents()
+        {
+            var vm = ViewManager.CreateViewModel<TodayEventsVM>();
+            vm.OnEventSelected += OnPhenomenaSelected;
+            ViewManager.ShowWindow(vm);  
         }
 
         private void OnPhenomenaSelected(AstroEvent ev)

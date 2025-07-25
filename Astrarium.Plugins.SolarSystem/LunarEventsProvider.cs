@@ -47,6 +47,7 @@ namespace Astrarium.Plugins.SolarSystem
             c["MoonEvents.ConjWithPlanets"] = ConjuntionsWithPlanets;
             c["MoonEvents.Noumenia"] = Noumenia;
             c["MoonEvents.Epimenia"] = Epimenia;
+            c["Daily.Moon.RiseSet"] = RiseSet;
         }
 
         /// <summary>
@@ -531,6 +532,33 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             return ctx.JulianDay;
+        }
+
+        private ICollection<AstroEvent> RiseSet(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            for (double jd = context.From; jd < context.To; jd += 1)
+            {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
+                var ctx = new SkyContext(jd, context.GeoLocation);
+                var rts = lunarCalc.RiseTransitSet(ctx);
+
+                if (rts.Rise != RTS.None)
+                {
+                    events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Rise, Text.Get("Daily.Moon.Rise"), lunarCalc.Moon));
+                }
+
+                if (rts.Set != RTS.None)
+                {
+                    events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Set, Text.Get("Daily.Moon.Set"), lunarCalc.Moon));
+                }
+            }
+
+            return events;
         }
 
         private PrecessionalElements PrecessionalElements(SkyContext c)
