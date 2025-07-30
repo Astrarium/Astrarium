@@ -14,7 +14,7 @@
     Title="{t:Text FovSettingsWindow.Title}" 
     Height="500" 
     Width="700" 
-    MinHeight="500" MinWidth="700" 
+    MinHeight="530" MinWidth="700" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
 
@@ -88,10 +88,9 @@
         </ResourceDictionary>
     </Window.Resources>
     
-    <Grid Margin="4" SnapsToDevicePixels="True">
+    <Grid Margin="16 8" SnapsToDevicePixels="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0" Grid.IsSharedSizeScope="True">
@@ -403,24 +402,22 @@
 
                 </StackPanel>
             </Grid>
-            
-            <!--
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <CheckBox Margin="2" Grid.Column="0" Content="Min Zoom" />
-                <c:NumericUpDown Margin="2"  Grid.Column="0" Grid.Row="1" />
 
-                <CheckBox Margin="2" Grid.Column="1" Content="Max Zoom" />
-                <c:NumericUpDown Margin="2" Grid.Column="1" Grid.Row="1" />
-            </Grid>
-            -->
+            <!--<Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" SharedSizeGroup="g1" />
+                    <ColumnDefinition Width="auto" SharedSizeGroup="g2" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <CheckBox Margin="2"  Content="Min Zoom" VerticalAlignment="Center" />
+                    <c:NumericUpDown Margin="2" VerticalAlignment="Center" MinWidth="60" HorizontalAlignment="Right" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Column="1">
+                    <CheckBox Margin="2" Content="Max Zoom" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <c:NumericUpDown Margin="2" />
+                </StackPanel>
+            </Grid>-->
 
             <!-- Details -->
             <GroupBox Header="{t:Text FovSettingsWindow.Details}" Visibility="{Binding FinderVisible, Converter={s:InverseBoolToVisibilityConverter}}" Margin="2 8 2 8">
@@ -431,8 +428,8 @@
             </GroupBox>
 
         </StackPanel>
-        <Separator Grid.Row="1" Margin="0 4 0 4" />
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" IsEnabled="{Binding FieldOfView, Converter={s:NotNullToBoolConverter}}" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
         </StackPanel>

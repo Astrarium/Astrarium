@@ -142,9 +142,9 @@ namespace Astrarium.Types
         /// <param name="utcOffset">UTC offset, in hours</param>
         /// <param name="displayMode">Dialog options</param>
         /// <returns>Julian day selected, or null</returns>
-        public static double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        public static double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime, bool applyImmediately = false)
         {
-            return viewManager.ShowDateDialog(jd, utcOffset, displayMode);
+            return viewManager.ShowDateDialog(jd, utcOffset, displayMode, applyImmediately);
         }
 
         /// <summary>

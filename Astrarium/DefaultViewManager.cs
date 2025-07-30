@@ -106,14 +106,18 @@ namespace Astrarium
                 {
                     if (isDialog || flags.HasFlag(ViewFlags.TopMost))
                     {
-                        var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
-                        window.Owner = owner ?? Application.Current.MainWindow;
                         window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     }
                 }
                 else
                 {
                     Application.Current.MainWindow = window;
+                }
+
+                if (window.WindowStartupLocation == WindowStartupLocation.CenterOwner)
+                {
+                    var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+                    window.Owner = owner ?? Application.Current.MainWindow;
                 }
 
                 EventHandler activatedEventHandler = (s, e) => viewModel.OnActivated();
@@ -365,16 +369,32 @@ namespace Astrarium
             return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
         }
 
-        public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime, bool applyImmediately = false)
         {
-            var vm = new DateVM(jd, utcOffset, displayMode);
-            return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
+            var vm = CreateViewModel<DateVM>().WithDefaults(jd, utcOffset, displayMode, applyImmediately);
+            if (applyImmediately)
+            {
+                ShowWindow(vm, flags: ViewFlags.TopMost);
+                return null;
+            }
+            else
+            {
+                return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
+            }
         }
 
         public double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately)
         {
             var vm = CreateViewModel<ViewAngleVM>().WithDefaults(viewAngle, min, max, applyImmediately);
-            return (ShowDialog(vm) ?? false) ? (double?)vm.ViewAngle : null;
+            if (applyImmediately)
+            {
+                ShowWindow(vm, flags: ViewFlags.TopMost);
+                return null;
+            }
+            else
+            {
+                return (ShowDialog(vm) ?? false) ? (double?)vm.ViewAngle : null;
+            }
         }
 
         public Color? ShowColorDialog(string caption, Color color)

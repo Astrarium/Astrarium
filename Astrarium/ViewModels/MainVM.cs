@@ -1077,11 +1077,7 @@ namespace Astrarium.ViewModels
 
         private void SetDate()
         {
-            double? jd = ViewManager.ShowDateDialog(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            if (jd != null)
-            {
-                sky.SetDate(jd.Value);
-            }
+            ViewManager.ShowDateDialog(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset, applyImmediately: true);
         }
 
         private void SetViewAngle()

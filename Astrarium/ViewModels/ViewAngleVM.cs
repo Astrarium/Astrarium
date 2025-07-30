@@ -19,6 +19,9 @@ namespace Astrarium.ViewModels
         /// </summary>
         private double defaultViewAngle;
 
+        /// <summary>
+        /// Flag indicating changes shouls be applied immediately
+        /// </summary>
         private bool applyImmediately;
 
         /// <summary>

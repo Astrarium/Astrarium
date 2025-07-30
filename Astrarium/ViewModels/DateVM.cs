@@ -1,11 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.ViewModels
 {
@@ -14,6 +11,26 @@ namespace Astrarium.ViewModels
     /// </summary>
     public class DateVM : ViewModelBase
     {
+        /// <summary>
+        /// ISky instance
+        /// </summary>
+        private readonly ISky sky;
+
+        /// <summary>
+        /// Throttler for immediate applying date/time
+        /// </summary>
+        private readonly Throttler throttler = new Throttler();
+
+        /// <summary>
+        /// Flag indicating changes shouls be applied immediately
+        /// </summary>
+        private bool applyImmediately;
+
+        /// <summary>
+        /// Default (saved) value of JD
+        /// </summary>
+        private double defaultJulianDay;
+
         /// <summary>
         /// Called when user clicks on "Set Current Date&Time" link.
         /// </summary>
@@ -260,6 +277,11 @@ namespace Astrarium.ViewModels
         /// </summary>
         private void SelectDate()
         {
+            defaultJulianDay = JulianDay;
+            if (applyImmediately)
+            {
+                sky.SetDate(defaultJulianDay);
+            }
             Close(true);
         }
 
@@ -359,22 +381,48 @@ namespace Astrarium.ViewModels
             Seconds = d.Second;
         }
 
+        protected override void NotifyPropertyChanged(params string[] propertyName)
+        {
+            base.NotifyPropertyChanged(propertyName);
+
+            if (applyImmediately && propertyName.Contains(nameof(JulianDay)))
+            {
+                throttler.Throttle(() => sky.SetDate(JulianDay));
+            }
+        }
+
+        public override void Close()
+        {
+            if (applyImmediately)
+            {
+                sky.SetDate(defaultJulianDay);
+            }
+            base.Close();
+        }
+
         /// <summary>
         /// Creates new instance of <see cref="DateVM"/>.
         /// </summary>
-        /// <param name="jd">Julian Day to be set in the editor</param>
-        /// <param name="utcOffset">UTC offset, in hours</param>
-        /// <param name="displayMode">Editor display mode</param>
-        public DateVM(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        public DateVM(ISky sky)
         {
+            this.sky = sky;
             var dateTimeFormat = CultureInfo.CurrentCulture.DateTimeFormat;
             ShortMonthsNames = dateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
             FullMonthsNames = dateTimeFormat.MonthNames.Take(12).ToArray();
+        }
 
+        /// <param name="jd">Julian Day to be set in the editor</param>
+        /// <param name="utcOffset">UTC offset, in hours</param>
+        /// <param name="displayMode">Editor display mode</param>
+        /// <param name="applyImmediately">Flag indicating date & time value should be applied immediately.</param>
+        public DateVM WithDefaults(double jd, double utcOffset, DateOptions displayMode, bool applyImmediately)
+        {
             UtcOffset = utcOffset;
-            DisplayMode = displayMode;            
-
+            DisplayMode = displayMode;
             SetJulianDay(jd);
+            this.applyImmediately = applyImmediately;
+            defaultJulianDay = jd;
+            return this;
         }
 
         public override object Payload => new { Date = new Date(JulianDay, UtcOffset).ToString() };
