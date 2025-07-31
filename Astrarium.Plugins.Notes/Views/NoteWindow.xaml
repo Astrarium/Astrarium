@@ -106,8 +106,8 @@
 
         <StackPanel Margin="0 8 0 0" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding EditCommand}" Content="{t:Text Notes.NoteWindow.Edit}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}"  Content="{t:Text Close}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}"  />
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}"  Content="{t:Text OK}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}"  />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}"  />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
         </StackPanel>
 

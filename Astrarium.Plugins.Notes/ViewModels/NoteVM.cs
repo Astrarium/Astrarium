@@ -111,13 +111,29 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         private void OK()
         {
-            IsEditMode = false;
-            HasChanges = true;
-            note = GetNote();
-            SetValues();
-            if (isEdit)
+            try
             {
-                Close();
+                if (Body == null)
+                    throw new Exception("$Notes.NoteWindow.Warning.EmptyBody");
+
+                if (string.IsNullOrWhiteSpace(Title))
+                    throw new Exception("$Notes.NoteWindow.Warning.EmptyTitle");
+
+                if (string.IsNullOrWhiteSpace(Description))
+                    throw new Exception("$Notes.NoteWindow.Warning.EmptyDescription");
+
+                IsEditMode = false;
+                HasChanges = true;
+                note = GetNote();
+                SetValues();
+                if (isEdit)
+                {
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewManager.ShowMessageBox("$Warning", ex.Message);
             }
         }
 
