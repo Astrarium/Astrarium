@@ -28,7 +28,7 @@ UninstallDisplayIcon  = {app}\Astrarium\Astrarium.exe
 Compression           = lzma2
 SolidCompression      = yes
 OutputBaseFilename    = Astrarium-setup
-AppCopyright          = "© Alexander Krutov, 2018-2024"
+AppCopyright          = "© Alexander Krutov, 2018-2025"
 AppPublisher          = Alexander Krutov
 AppPublisherURL       = https://astrarium.space/
 AppUpdatesURL         = https://astrarium.space/
@@ -113,20 +113,20 @@ en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
 #define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
 sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
 
-ru.Astrarium_Plugins_Meteors            	  = Метеорные потоки
-en.Astrarium_Plugins_Meteors            	  = Meteor showers
-#define sz_Astrarium_Plugins_Meteors    	  = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
-sz_Astrarium_Plugins_Meteors            	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
+ru.Astrarium_Plugins_Meteors                = Метеорные потоки
+en.Astrarium_Plugins_Meteors                = Meteor showers
+#define sz_Astrarium_Plugins_Meteors        = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
+sz_Astrarium_Plugins_Meteor                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
 
-ru.Astrarium_Plugins_Novae          		    = Новые звёзды
-en.Astrarium_Plugins_Novae             		  = Novae stars
-#define sz_Astrarium_Plugins_Novae     		  = CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
-sz_Astrarium_Plugins_Novae              	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
+ru.Astrarium_Plugins_Novae                  = Новые звёзды
+en.Astrarium_Plugins_Novae             		= Novae stars
+#define sz_Astrarium_Plugins_Novae     		= CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
+sz_Astrarium_Plugins_Novae              	= {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
 
-ru.Astrarium_Plugins_Supernovae          	 = Сверхновые звёзды
+ru.Astrarium_Plugins_Supernovae          	= Сверхновые звёзды
 en.Astrarium_Plugins_Supernovae             = Supernovae stars
 #define sz_Astrarium_Plugins_Supernovae     = CalcDirSize('..\Deploy\Astrarium.Plugins.Supernovae')
-sz_Astrarium_Plugins_Supernovae              = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Supernovae')}
+sz_Astrarium_Plugins_Supernovae             = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Supernovae')}
 
 ru.Astrarium_Plugins_Satellites          	= Искусственные спутники Земли
 en.Astrarium_Plugins_Satellites             = Artificial satellites
@@ -193,6 +193,11 @@ en.Astrarium_Plugins_Planner                = Observation planner
 #define sz_Astrarium_Plugins_Planner        = CalcDirSize('..\Deploy\Astrarium.Plugins.Planner')
 sz_Astrarium_Plugins_Planner                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Planner')}
 
+ru.Astrarium_Plugins_Notes                  = Заметки
+en.Astrarium_Plugins_Notes                  = Notes
+#define sz_Astrarium_Plugins_Notes          = CalcDirSize('..\Deploy\Astrarium.Plugins.Notes')
+sz_Astrarium_Plugins_Notes                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Notes')}
+
 [Components]
 Name: Astrarium;                        Description: {cm:Astrarium};                        Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium};
 Name: Astrarium_Plugins_SolarSystem;    Description: {cm:Astrarium_Plugins_SolarSystem};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_SolarSystem};  
@@ -217,7 +222,7 @@ Name: Astrarium_Plugins_Tycho2;         Description: {cm:Astrarium_Plugins_Tycho
 Name: Astrarium_Plugins_UCAC4;          Description: {cm:Astrarium_Plugins_UCAC4};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_UCAC4};
 Name: Astrarium_Plugins_ASCOM;          Description: {cm:Astrarium_Plugins_ASCOM};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_ASCOM};
 Name: Astrarium_Plugins_Planner;        Description: {cm:Astrarium_Plugins_Planner};        Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Planner};
-
+Name: Astrarium_Plugins_Notes;        Description: {cm:Astrarium_Plugins_Notes};        Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Notes};
 
 [Files]
 Source: "7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; AfterInstall: AfterInstallProc
