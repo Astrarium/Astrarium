@@ -42,6 +42,27 @@
         public LightPollutionWA2015TileServer(string userAgent) : base(userAgent) { }
     }
 
+    public class LightPollutionVIIRS2024TileServer : LightPollutionTileServer
+    {
+        public override string Name => "VIIRS 2024";
+        protected override string LayerId => "PostGIS:VIIRS_2024";
+        public LightPollutionVIIRS2024TileServer(string userAgent) : base(userAgent) { }
+    }
+
+    public class LightPollutionVIIRS2023TileServer : LightPollutionTileServer
+    {
+        public override string Name => "VIIRS 2023";
+        protected override string LayerId => "PostGIS:VIIRS_2023";
+        public LightPollutionVIIRS2023TileServer(string userAgent) : base(userAgent) { }
+    }
+
+    public class LightPollutionVIIRS2022TileServer : LightPollutionTileServer
+    {
+        public override string Name => "VIIRS 2022";
+        protected override string LayerId => "PostGIS:VIIRS_2022";
+        public LightPollutionVIIRS2022TileServer(string userAgent) : base(userAgent) { }
+    }
+
     public class LightPollutionVIIRS2021TileServer : LightPollutionTileServer
     {
         public override string Name => "VIIRS 2021";

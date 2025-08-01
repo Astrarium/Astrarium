@@ -1,87 +1,83 @@
 ﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Constellations.ViewModels
 {
     public class ConstellationsSettingsVM : SettingsViewModel
     {
-        public ConstellationsSettingsVM(ISettings settings) : base(settings)
-        {
-            Settings.SettingValueChanged += (s, v) =>
-            {
-                if (s == "ConstLabelsType")
-                {
-                    NotifyConstLabelsTypeChanged();
-                }
-            };
-        }
+        public ConstellationsSettingsVM(ISettings settings) : base(settings) { }
 
         public bool IsConstLabelsTypeInternationalCode
         {
-            get => Settings.Get<ConstellationsRenderer.LabelType>("ConstLabelsType") == ConstellationsRenderer.LabelType.InternationalCode;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalCode);
-                    NotifyConstLabelsTypeChanged();
-                }
-            }
+            get => IsPropertyValueEqual("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalCode);
+            set => SetPropertyValue("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalCode, value, NotifyConstLabelsTypeChanged);
         }
 
         public bool IsConstLabelsTypeInternationalName
         {
-            get => Settings.Get<ConstellationsRenderer.LabelType>("ConstLabelsType") == ConstellationsRenderer.LabelType.InternationalName;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName);
-                    NotifyConstLabelsTypeChanged();
-                }
-            }
+            get => IsPropertyValueEqual("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName);
+            set => SetPropertyValue("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, value, NotifyConstLabelsTypeChanged);
         }
 
         public bool IsConstLabelsTypeLocalName
         {
-            get => Settings.Get<ConstellationsRenderer.LabelType>("ConstLabelsType") == ConstellationsRenderer.LabelType.LocalName;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("ConstLabelsType", ConstellationsRenderer.LabelType.LocalName);
-                    NotifyConstLabelsTypeChanged();
-                }
-            }
+            get => IsPropertyValueEqual("ConstLabelsType", ConstellationsRenderer.LabelType.LocalName);
+            set => SetPropertyValue("ConstLabelsType", ConstellationsRenderer.LabelType.LocalName, value, NotifyConstLabelsTypeChanged);
         }
 
         public bool IsConstLinesTypeTraditional
         {
-            get => Settings.Get<ConstellationsCalc.LineType>("ConstLinesType") == ConstellationsCalc.LineType.Traditional;
-            set
-            {
-                if (value)
-                {
-                    Settings.Set("ConstLinesType", ConstellationsCalc.LineType.Traditional);
-                    NotifyConstLinesTypeChanged();
-                }
-            }
+            get => IsPropertyValueEqual("ConstLinesType", ConstellationsCalc.LineType.Traditional);
+            set => SetPropertyValue("ConstLinesType", ConstellationsCalc.LineType.Traditional, value, NotifyConstLinesTypeChanged);
         }
 
         public bool IsConstLinesTypeRey
         {
-            get => Settings.Get<ConstellationsCalc.LineType>("ConstLinesType") == ConstellationsCalc.LineType.Rey;
-            set
+            get => IsPropertyValueEqual("ConstLinesType", ConstellationsCalc.LineType.Rey);
+            set => SetPropertyValue("ConstLinesType", ConstellationsCalc.LineType.Rey, value, NotifyConstLinesTypeChanged);
+        }
+
+        public bool IsConstFiguresTypeHevelius
+        {
+            get => IsPropertyValueEqual("ConstFiguresType", ConstellationsRenderer.FigureType.Hevelius);
+            set => SetPropertyValue("ConstFiguresType", ConstellationsRenderer.FigureType.Hevelius, value, NotifyConstFiguresTypeChanged);
+        }
+
+        public bool IsConstFiguresTypeModern
+        {
+            get => IsPropertyValueEqual("ConstFiguresType", ConstellationsRenderer.FigureType.Modern);
+            set => SetPropertyValue("ConstFiguresType", ConstellationsRenderer.FigureType.Modern, value, NotifyConstFiguresTypeChanged);
+        }
+
+        public bool IsConstFiguresGroupAll
+        {
+            get => IsPropertyValueEqual("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.All);
+            set => SetPropertyValue("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.All, value, NotifyConstFiguresGroupChanged);
+        }
+
+        public bool IsConstFiguresGroupZodiac
+        {
+            get => IsPropertyValueEqual("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.Zodiac);
+            set => SetPropertyValue("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.Zodiac, value, NotifyConstFiguresGroupChanged);
+        }
+
+        public bool IsConstFiguresGroupCurrent
+        {
+            get => IsPropertyValueEqual("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.Current);
+            set => SetPropertyValue("ConstFiguresGroup", ConstellationsRenderer.FigureGroup.Current, value, NotifyConstFiguresGroupChanged);
+        }
+
+        private bool IsPropertyValueEqual<T>(string name, T value)
+        {
+            return Settings.Get<T>(name).Equals(value);
+        }
+
+        private void SetPropertyValue<T>(string name, T typeValue, bool boolValue, Action notifier)
+        {
+            if (boolValue)
             {
-                if (value)
-                {
-                    Settings.Set("ConstLinesType", ConstellationsCalc.LineType.Rey);
-                    NotifyConstLinesTypeChanged();
-                }
+                Settings.Set(name, typeValue);
+                notifier();
             }
         }
 
@@ -99,6 +95,23 @@ namespace Astrarium.Plugins.Constellations.ViewModels
             NotifyPropertyChanged(
                 nameof(IsConstLinesTypeTraditional),
                 nameof(IsConstLinesTypeRey)
+            );
+        }
+
+        public void NotifyConstFiguresTypeChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(IsConstFiguresTypeHevelius),
+                nameof(IsConstFiguresTypeModern)
+            );
+        }
+
+        public void NotifyConstFiguresGroupChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(IsConstFiguresGroupAll),
+                nameof(IsConstFiguresGroupZodiac),
+                nameof(IsConstFiguresGroupCurrent)
             );
         }
     }

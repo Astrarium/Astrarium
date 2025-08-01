@@ -255,5 +255,13 @@ namespace Astrarium.Plugins.Novae
                 .Take(maxCount)
                 .ToArray();
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Nova")
+                return null;
+            else
+                return Novae.FirstOrDefault(m => m.CommonName == bodyName);
+        }
     }
 }

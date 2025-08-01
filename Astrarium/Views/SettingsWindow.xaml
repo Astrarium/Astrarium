@@ -7,7 +7,7 @@
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="{t:Text SettingsWindow.Title}" 
-        Width="800" Height="600"
+        Width="1000" Height="600"
         MinWidth="600" MinHeight="400"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
@@ -21,7 +21,7 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" MinWidth="100" />
+                <ColumnDefinition Width="250" MinWidth="100" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
@@ -30,7 +30,6 @@
                 Padding="4"
                 Grid.Column="0"
                 ItemsSource="{Binding Path=SettingsSections, Mode=OneWay}"                               
-                DisplayMemberPath="Title"
                 SelectionMode="Single" 
                 SelectedItem="{Binding SelectedSection}"
                 VerticalContentAlignment="Top"
@@ -38,6 +37,23 @@
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="False">
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Height="20">
+                            <Rectangle Margin="2 2 8 2" Width="16" Height="16">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                                </Rectangle.Fill>
+                                <Rectangle.OpacityMask>
+                                    <ImageBrush  AlignmentX="Center" AlignmentY="Center" ImageSource="{Binding Icon}"  Stretch="Fill" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                
             </ListView>
 
             <GridSplitter 

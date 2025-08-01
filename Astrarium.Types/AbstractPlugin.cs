@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Astrarium.Types
 {
@@ -50,7 +51,14 @@ namespace Astrarium.Types
             }
         }
 
-        protected void ExtendObjectInfo<TViewControl, TViewModel>(string title, Func<SkyContext, CelestialObject, TViewModel> viewModelProvider)
+        /// <summary>
+        /// Extends object info window with custom view
+        /// </summary>
+        /// <typeparam name="TViewControl">View control to be added as dedicated tab to the object info window</typeparam>
+        /// <typeparam name="TViewModel">View Model to be used</typeparam>
+        /// <param name="title">Tab title</param>
+        /// <param name="viewModelProvider">Function to be called to build the view model.</param>
+        protected void ExtendObjectInfo<TViewControl, TViewModel>(string title, Func<SkyContext, CelestialObject, TViewModel> viewModelProvider) where TViewControl : Control where TViewModel : ViewModelBase
         {
             ObjectInfoExtensions.Add(new ObjectInfoExtension(title, typeof(TViewControl), viewModelProvider));
         }

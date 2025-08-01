@@ -603,6 +603,9 @@ namespace System.Windows.Forms
             return new ITileServer[]
             {
                 new LightPollutionWA2015TileServer(userAgent),
+                new LightPollutionVIIRS2024TileServer(userAgent),
+                new LightPollutionVIIRS2023TileServer(userAgent),
+                new LightPollutionVIIRS2022TileServer(userAgent),
                 new LightPollutionVIIRS2021TileServer(userAgent),
                 new LightPollutionVIIRS2020TileServer(userAgent),
                 new LightPollutionVIIRS2019TileServer(userAgent),

@@ -1,0 +1,115 @@
+﻿<Window x:Class="Astrarium.Plugins.Notes.Views.NoteView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:local="clr-namespace:Astrarium.Plugins.Notes.Views"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Title="{t:Text Notes.NoteWindow.Title}" Height="450" Width="800"
+        MinWidth="300" MinHeight="300"
+        Style="{StaticResource {x:Type Window}}">
+
+    <Window.Resources>
+        <c:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
+        <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
+    </Window.Resources>
+    
+    <Grid Margin="8">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="0" Content="{t:Text Notes.NoteWindow.Body}" Margin="0 0 8 0" />
+        <c:CelestialObjectPicker Grid.Column="1" Grid.Row="0" SelectedBody="{Binding Body}" IsEnabled="{Binding IsEditMode}" />
+
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="1" Content="{t:Text Notes.NoteWindow.Date}" Margin="0 0 8 0" />
+
+        <c:DatePicker Grid.Column="1" Grid.Row="1" JulianDay="{Binding Date}" UtcOffset="{Binding UtcOffset}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}">
+            <Hyperlink Command="{Binding Data.SelectDateCommand, Source={StaticResource DataContextProxy}}">                                                 
+                <Run>
+                    <Run.Text>
+                        <MultiBinding Converter="{s:JulianDayToStringConverter}">
+                            <Binding Path="Date" />
+                            <Binding Path="Data.UtcOffset" Source="{StaticResource DataContextProxy}" Mode="OneWay" />
+                        </MultiBinding>
+                    </Run.Text>
+                </Run>
+            </Hyperlink>
+        </TextBlock>
+
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="2" Content="{t:Text Notes.NoteWindow.NoteTitle}" Margin="0 0 8 0"  />
+        <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Title}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Title}" ToolTip="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
+
+        <Label IsEnabled="False" Grid.Column="0" Grid.Row="3" Content="{t:Text Notes.NoteWindow.Description}" />
+
+        <CheckBox VerticalAlignment="Center" Content="{t:Text Notes.NoteWindow.UseMarkdown}" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Markdown}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        <Separator Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
+
+        <TextBox 
+            TextWrapping="Wrap"
+            AcceptsReturn="True"
+            Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" 
+            Height="Auto"
+            VerticalScrollBarVisibility="Visible" 
+            VerticalAlignment="Stretch" 
+            Text="{Binding Description}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+
+        <FlowDocumentScrollViewer 
+            VerticalAlignment="Stretch"
+            Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" 
+            VerticalScrollBarVisibility="Visible"
+            BorderThickness="0"
+            Document="{Binding Description, Converter={StaticResource TextToFlowDocumentConverter}}">
+            <FlowDocumentScrollViewer.Visibility>
+                <MultiBinding Converter="{s:MultiBoolToVisibilityConverter}">
+                    <Binding Path="IsEditMode" Converter="{s:InverseBoolConverter}" />
+                    <Binding Path="Markdown" />
+                </MultiBinding>
+            </FlowDocumentScrollViewer.Visibility>
+        </FlowDocumentScrollViewer>
+
+        <TextBox
+            IsReadOnly="True"
+            Foreground="{StaticResource BrushForeground}"
+            Height="Auto"
+            VerticalAlignment="Stretch"
+            BorderThickness="0"
+            Margin="2"
+            HorizontalAlignment="Stretch"
+            TextWrapping="Wrap"
+            Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" 
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            Text="{Binding Description}">
+            <TextBox.Visibility>
+                <MultiBinding Converter="{s:MultiBoolToVisibilityConverter}">
+                    <Binding Path="IsEditMode" Converter="{s:InverseBoolConverter}" />
+                    <Binding Path="Markdown" Converter="{s:InverseBoolConverter}" />
+                </MultiBinding>
+            </TextBox.Visibility>
+        </TextBox>
+
+        <StackPanel Margin="0 8 0 0" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding EditCommand}" Content="{t:Text Notes.NoteWindow.Edit}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" Visibility="{Binding IsEditMode, Converter={s:InverseBoolToVisibilityConverter}}"  />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" Visibility="{Binding IsEditMode, Converter={s:BoolToVisibilityConverter}}" />
+        </StackPanel>
+
+    </Grid>
+</Window>

@@ -3180,7 +3180,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Viewbox Width="16" Height="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Canvas Width="8" Height="8">
+                            <Canvas Margin="0 -2 0 0" Width="8" Height="8">
                                 <Path Name="Icon" Data="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z" Fill="{TemplateBinding BorderBrush}">
                                     <Path.RenderTransform>
                                         <ScaleTransform ScaleX="0.41" ScaleY="0.41" CenterX="-1.7" CenterY="-1" />
@@ -3188,7 +3188,7 @@
                                 </Path>
                             </Canvas>
                         </Viewbox>
-                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding DateString}" />
+                        <Label Grid.Column="1" Padding="4 0 0 0" VerticalContentAlignment="Center" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding DateString}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -3212,7 +3212,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Viewbox Width="16" Height="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Canvas Width="8" Height="8">
+                            <Canvas Margin="0 -2 0 0" Width="8" Height="8">
                                 <Path Name="Icon" Data="M12,15.39L8.24,17.66L9.23,13.38L5.91,10.5L10.29,10.13L12,6.09L13.71,10.13L18.09,10.5L14.77,13.38L15.76,17.66M22,9.24L14.81,8.63L12,2L9.19,8.63L2,9.24L7.45,13.97L5.82,21L12,17.27L18.18,21L16.54,13.97L22,9.24Z" Fill="{TemplateBinding BorderBrush}">
                                     <Path.RenderTransform>
                                         <ScaleTransform ScaleX="0.41" ScaleY="0.41" CenterX="-1.7" CenterY="-1" />
@@ -3220,7 +3220,7 @@
                                 </Path>
                             </Canvas>
                         </Viewbox>
-                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=SelectedBody, Converter={t:CelestialObjectNameConverter}}" />
+                        <Label Grid.Column="1" Padding="4 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=SelectedBody, Converter={t:CelestialObjectNameConverter}}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -3244,7 +3244,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Viewbox Width="16" Height="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Canvas Width="8" Height="8">
+                            <Canvas Margin="0 -2 0 0" Width="8" Height="8">
                                 <Path Name="Icon" Data="M11,17A1,1 0 0,0 12,18A1,1 0 0,0 13,17A1,1 0 0,0 12,16A1,1 0 0,0 11,17M11,3V7H13V5.08C16.39,5.57 19,8.47 19,12A7,7 0 0,1 12,19A7,7 0 0,1 5,12C5,10.32 5.59,8.78 6.58,7.58L12,13L13.41,11.59L6.61,4.79V4.81C4.42,6.45 3,9.05 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12A9,9 0 0,0 12,3M18,12A1,1 0 0,0 17,11A1,1 0 0,0 16,12A1,1 0 0,0 17,13A1,1 0 0,0 18,12M6,12A1,1 0 0,0 7,13A1,1 0 0,0 8,12A1,1 0 0,0 7,11A1,1 0 0,0 6,12Z" Fill="{TemplateBinding BorderBrush}">
                                     <Path.RenderTransform>
                                         <ScaleTransform ScaleX="0.41" ScaleY="0.41" CenterX="-1.7" CenterY="-1" />
@@ -3252,7 +3252,7 @@
                                 </Path>
                             </Canvas>
                         </Viewbox>
-                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding Caption}" />
+                        <Label Grid.Column="1" Padding="4 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding Caption}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -4037,7 +4037,6 @@
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Button.Foreground" Value="{StaticResource BrushControlLightBackground}" />
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
-        <Setter Property="Margin" Value="2 0" />
         <Setter Property="Padding" Value="1" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Template">

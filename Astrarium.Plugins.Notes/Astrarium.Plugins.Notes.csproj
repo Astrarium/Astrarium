@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<TargetFrameworks>net451</TargetFrameworks>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<UseWpf>true</UseWpf>
+		<Product>Notes</Product>
+		<Description>Allows to add short text notes for celestial objects</Description>
+		<Authors>Alexander Krutov</Authors>
+		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Deploy)' == 'True'">
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>None</DebugType>
+		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+	</PropertyGroup>
+
+	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+	</Target>
+
+	<ItemGroup>
+		<None Remove="Text.ini" />
+		<EmbeddedResource Include="Text.ini" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+		<ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+
+</Project>

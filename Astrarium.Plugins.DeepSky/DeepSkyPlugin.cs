@@ -14,6 +14,7 @@ namespace Astrarium.Plugins.DeepSky
             DefineSetting("DeepSkyImages", false, isPermanent: true);
             DefineSetting("DeepSkyImagesFolder", "", isPermanent: true);
             DefineSetting("DeepSkyHideOutline", false);
+            DefineSetting("DeepSkyHoverOutline", true);
 
             // Colors
             DefineSetting("ColorDeepSkyOutline", Color.DodgerBlue);

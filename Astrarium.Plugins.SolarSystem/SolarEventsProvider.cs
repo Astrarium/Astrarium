@@ -10,9 +10,44 @@ namespace Astrarium.Plugins.SolarSystem
 {
     public class SolarEventsProvider : BaseAstroEventsProvider
     {
+        private readonly SolarCalc calc;
+
+        public SolarEventsProvider(SolarCalc calc)
+        {
+            this.calc = calc;
+        }
+
         public override void ConfigureAstroEvents(AstroEventsConfig phenomena)
         {
             phenomena["SunEvents.Seasons"] = EventsSeasons;
+            phenomena["Daily.Sun.RiseSet"] = RiseSet;
+        }
+
+        public ICollection<AstroEvent> RiseSet(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            for (double jd = context.From; jd < context.To; jd += 1)
+            {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
+                var ctx = new SkyContext(jd, context.GeoLocation);
+                var rts = calc.RiseTransitSet(ctx);
+
+                if (rts.Rise != RTS.None)
+                {
+                    events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Rise, Text.Get("Daily.Sun.Rise"), calc.Sun));
+                }
+
+                if (rts.Set != RTS.None)
+                {
+                    events.Add(new AstroEvent(ctx.JulianDayMidnight + rts.Set, Text.Get("Daily.Sun.Set"), calc.Sun));
+                }
+            }
+
+            return events;
         }
 
         public ICollection<AstroEvent> EventsSeasons(AstroEventsContext context)

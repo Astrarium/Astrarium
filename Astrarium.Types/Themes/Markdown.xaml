@@ -4,11 +4,16 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls">
 
     <Style TargetType="FlowDocument" x:Key="DocumentStyle">
+        <Setter Property="PagePadding" Value="5 5" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontFamily" Value="pack://application:,,,/Astrarium.Types;component/Themes/#Noto Sans" />
         <Setter Property="TextAlignment" Value="Left" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+    </Style>
+
+    <Style x:Key="CodeStyle" TargetType="Run">
+        <Setter Property="FontFamily" Value="Monospace" />
     </Style>
 
     <Style x:Key="H1Style" TargetType="Paragraph">
@@ -60,12 +65,12 @@
     </Style>
 
     <Style x:Key="ListStyle" TargetType="List">
-        <Setter Property="Padding" Value="14 10 0 0" />
+        <Setter Property="Padding" Value="20 4 0 0" />
         <Setter Property="Margin" Value="0" />
     </Style>
 
     <Style x:Key="ListItemStyle" TargetType="ListItem">
-        <Setter Property="Padding" Value="0 0 0 10" />
+        <Setter Property="Padding" Value="0 0 0 0" />
     </Style>
 
     <!-- 
@@ -92,6 +97,7 @@
 
     <c:Markdown x:Key="Markdown"
             DocumentStyle="{StaticResource DocumentStyle}"
+            CodeStyle="{StaticResource CodeStyle}"
             Heading1Style="{StaticResource H1Style}"
             Heading2Style="{StaticResource H2Style}"
             Heading3Style="{StaticResource H3Style}"

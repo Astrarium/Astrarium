@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28729.10
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium", "Astrarium\Astrarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -65,7 +65,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Atmospher
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Satellites", "Astrarium.Plugins.Satellites\Astrarium.Plugins.Satellites.csproj", "{4D45B7D8-9951-4DD1-9F06-CE69DDC75F54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.Supernovae", "Astrarium.Plugins.Supernovae\Astrarium.Plugins.Supernovae.csproj", "{11EFE544-31A8-4A1D-B3E9-7F5CD268849E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Supernovae", "Astrarium.Plugins.Supernovae\Astrarium.Plugins.Supernovae.csproj", "{11EFE544-31A8-4A1D-B3E9-7F5CD268849E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Notes", "Astrarium.Plugins.Notes\Astrarium.Plugins.Notes.csproj", "{CFEBB0F2-2FD3-4271-A846-F1A499E26DCD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.Logger", "Astrarium.Plugins.Logger\Astrarium.Plugins.Logger.csproj", "{5339B1E3-36FA-48DD-A56C-AFBD87244E27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -181,6 +185,14 @@ Global
 		{11EFE544-31A8-4A1D-B3E9-7F5CD268849E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11EFE544-31A8-4A1D-B3E9-7F5CD268849E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11EFE544-31A8-4A1D-B3E9-7F5CD268849E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFEBB0F2-2FD3-4271-A846-F1A499E26DCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFEBB0F2-2FD3-4271-A846-F1A499E26DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFEBB0F2-2FD3-4271-A846-F1A499E26DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFEBB0F2-2FD3-4271-A846-F1A499E26DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5339B1E3-36FA-48DD-A56C-AFBD87244E27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5339B1E3-36FA-48DD-A56C-AFBD87244E27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5339B1E3-36FA-48DD-A56C-AFBD87244E27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5339B1E3-36FA-48DD-A56C-AFBD87244E27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

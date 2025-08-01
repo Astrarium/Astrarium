@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Astrarium.Algorithms;
 
 namespace Astrarium.ViewModels
 {
@@ -48,6 +49,12 @@ namespace Astrarium.ViewModels
 
         public void Ok()
         {
+            if (new Date(JulianDayFrom).Year <= 0)
+            {
+                ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.NoPhenomenaForBCDates", System.Windows.MessageBoxButton.OK);
+                return;
+            }
+
             if (JulianDayFrom > JulianDayTo)
             {
                 ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.WarningText", System.Windows.MessageBoxButton.OK);
@@ -57,6 +64,8 @@ namespace Astrarium.ViewModels
             Close(true);
         }
 
+        public override object Payload => new { From = new Date( JulianDayFrom, UtcOffset).ToString(), To = new Date(JulianDayTo, UtcOffset).ToString(), Categories = string.Join("; ", Categories) };
+
         private void BuildCategoriesTree()
         {
             Nodes.Clear();
@@ -65,7 +74,9 @@ namespace Astrarium.ViewModels
             var groups = categories.GroupBy(cat => cat.Split('.').First());
 
             Node root = new Node(Text.Get("PhenomenaSettingsWindow.Phenomena.All"));
+            root.IsChecked = true;
             root.CheckedChanged += Root_CheckedChanged;
+            Node daily = null;
 
             foreach (var group in groups)
             {
@@ -74,14 +85,32 @@ namespace Astrarium.ViewModels
                 {
                     if (item != group.Key)
                     {
-                        node.Children.Add(new Node(Text.Get(item), item));
+                        var child = new Node(Text.Get(item), item);
+                        child.IsChecked = !item.StartsWith("Daily");
+                        node.Children.Add(child);
                     }
                 }
-                root.Children.Add(node);
+
+                // add regular (not daily) node to the root
+                if (group.Key.StartsWith("Daily")) 
+                {
+                    node.IsChecked = false;
+                    daily = node;
+                }
+                else
+                {
+                    node.IsChecked = true;
+                    root.Children.Add(node);
+                }
+            }
+
+            // add daily events node to the end
+            if (daily != null)
+            {
+                root.Children.Add(daily);
             }
 
             Nodes.Add(root);
-            root.IsChecked = true;
         }
 
         private void Root_CheckedChanged(object sender, bool? e)

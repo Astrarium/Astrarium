@@ -346,19 +346,34 @@ namespace Astrarium.Types
         {
             protected static string[] AbbreviatedMonthNames => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
             protected static string[] MonthNames => CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
+        
+            protected static string FormatYear(int year)
+            {
+                if (year <= 0)
+                    return $"{Math.Abs(year - 1)} B.C.";
+                else
+                    return year.ToString();
+            }
         }
 
         private class DateTimeFormatter : AbstractDateFormatter, IEphemFormatter
         {
+            private bool showSeconds = false;
+
+            public DateTimeFormatter(bool showSeconds = false)
+            {
+                this.showSeconds = showSeconds;
+            }
+
             public string Format(object value)
             {
                 if (value is Date d)
                 {
-                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
+                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {FormatYear(d.Year)} {d.Hour:00}:{d.Minute:00}{(showSeconds ? $":{d.Second:00}" : "")}";
                 }
                 else if (value is DateTime dt)
                 {
-                    return $"{dt.Day:00} {AbbreviatedMonthNames[dt.Month - 1]} {dt.Year} {dt.Hour:00}:{dt.Minute:00}";
+                    return $"{dt.Day:00} {AbbreviatedMonthNames[dt.Month - 1]} {dt.Year} {dt.Hour:00}:{dt.Minute:00}{(showSeconds ? $":{dt.Second:00}" : "")}";
                 }
                 else
                 {
@@ -373,7 +388,7 @@ namespace Astrarium.Types
             {
                 if (value is Date d)
                 {
-                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
+                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {FormatYear(d.Year)}";
                 }
                 else if (value is DateTime dt)
                 {
@@ -391,7 +406,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{MonthNames[d.Month - 1]} {d.Year}";
+                return $"{MonthNames[d.Month - 1]} {FormatYear(d.Year)}";
             }
         }
 
@@ -488,6 +503,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter Angle = new AngleFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
+        public static readonly IEphemFormatter DateTimeWithSeconds = new DateTimeFormatter(showSeconds: true);
         public static readonly IEphemFormatter Date = new DateFormatter();
         public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();

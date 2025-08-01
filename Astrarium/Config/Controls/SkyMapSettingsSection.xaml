@@ -1,0 +1,53 @@
+﻿<c:SettingsSection x:Class="Astrarium.Config.Controls.SkyMapSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.SkyMap}"
+    mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800">
+    <c:SettingsSection.Icon>
+        <DrawingImage>
+            <DrawingImage.Drawing>
+                <GeometryDrawing Brush="White" Geometry="M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M19,17.54L16,18.55V6.86L19,5.7V17.54Z" />
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </c:SettingsSection.Icon>
+
+    <StackPanel Orientation="Vertical" Margin="6">
+        <TextBlock Text="{t:Text Settings.Projection}" Margin="2" />
+        <ComboBox Margin="2 0 2 2" ItemsSource="{Binding Projections}" SelectedValue="{Binding Projection}" DisplayMemberPath="Name" />
+
+        <GroupBox Header="{t:Text Settings.MapMountMode}" Margin="2 8 2 2">
+            <StackPanel Orientation="Vertical">
+                <RadioButton  Margin="4 8 4 4" GroupName="MountMode" Content="{t:Text Settings.MapMountMode.Horizontal}" IsChecked="{Binding IsHorizontalMode}" />
+                <RadioButton Margin="4 0 2 4"  GroupName="MountMode" Content="{t:Text Settings.MapMountMode.Equatorial}" IsChecked="{Binding IsEquatorialMode}" />
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Header="{t:Text Settings.MapTransform}" Margin="2 8 2 2">
+            <StackPanel Orientation="Vertical">
+                <CheckBox Margin="4 8 4 4" Content="{t:Text Settings.FlipHorizontal}" IsChecked="{Binding Settings.FlipHorizontal}" />
+                <CheckBox  Margin="4 0 2 4" Content="{t:Text Settings.FlipVertical}" IsChecked="{Binding Settings.FlipVertical}" />
+            </StackPanel>
+        </GroupBox>
+
+
+        <GroupBox Margin="2 8 2 2">
+            <GroupBox.Header>
+                <CheckBox Margin="2" Content="{t:Text Settings.LimitMagnitude}" IsChecked="{Binding Settings.LimitMagnitude}" />
+            </GroupBox.Header>
+            <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.LimitMagnitude}">
+                <TextBlock Margin="4 0 4 0" VerticalAlignment="Center" Text="{t:Text Settings.LimitingMagnitude}" />
+                <c:NumericUpDown VerticalAlignment="Center" Width="60" DecimalPlaces="1" Value="{Binding Settings.LimitingMagnitude}" Minimum="6" Maximum="20" />
+                <TextBlock Margin="4 0 4 0" VerticalAlignment="Center" Text="m" />
+            </StackPanel>
+        </GroupBox>
+        <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.AutoLock.Description}" IsChecked="{Binding Settings.AutoLock}" />
+
+    </StackPanel>
+    
+</c:SettingsSection>

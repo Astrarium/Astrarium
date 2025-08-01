@@ -160,5 +160,13 @@ namespace Astrarium.Plugins.Meteors
                 .Take(maxCount)
                 .ToArray();
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Meteor")
+                return null;
+            else
+                return Meteors.FirstOrDefault(m => m.CommonName == bodyName);
+        }
     }
 }

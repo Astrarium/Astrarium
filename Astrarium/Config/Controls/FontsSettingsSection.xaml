@@ -9,6 +9,15 @@
     Title="{t:Text Section.Fonts}"
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
+    <c:SettingsSection.Icon>
+        <DrawingImage>
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V128 H128 V0 H0 Z">
+                    <GeometryDrawing Brush="white" Geometry="M2 4V7H7V19H10V7H15V4H2M21 9H12V12H15V19H18V12H21V9Z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </c:SettingsSection.Icon>
     <StackPanel Orientation="Vertical" Margin="4">
         <ItemsControl  
             Grid.IsSharedSizeScope="True"

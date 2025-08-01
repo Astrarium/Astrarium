@@ -423,5 +423,13 @@ namespace Astrarium.Plugins.SolarSystem
             else
                 return new CelestialObject[0];
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Moon")
+                return null;
+            else
+                return Moon;
+        }
     }
 }

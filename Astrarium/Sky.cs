@@ -8,13 +8,11 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Astrarium
 {
     public class Sky : ISky
     {
-        private delegate ICollection<CelestialObject> SearchDelegate(SkyContext context, string searchString, Func<CelestialObject, bool> filter, int maxCount = 50);
         private delegate void GetInfoDelegate<T>(CelestialObjectInfo<T> body) where T : CelestialObject;
         private delegate IEnumerable<T> GetCelestialObjectsDelegate<T>() where T : CelestialObject;
 
@@ -22,7 +20,6 @@ namespace Astrarium
         private Dictionary<Type, Delegate> CelestialObjectsProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
-        private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
         private Dictionary<string, Constellation> Constellations = new Dictionary<string, Constellation>();
 
@@ -133,14 +130,6 @@ namespace Astrarium
                     // Info provider
                     Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
                     InfoProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc);
-
-                    // Search provider
-                    Type[] searchParameters = typeof(SearchDelegate).GetMethod("Invoke").GetParameters().Select(p => p.ParameterType).ToArray();
-                    var searchFunc = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.Search), searchParameters).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
-                    if (!SearchProviders.Contains(searchFunc))
-                    {
-                        SearchProviders.Add(searchFunc);
-                    }
                 }
             }
 
@@ -154,8 +143,6 @@ namespace Astrarium
                     EventConfigs.Add(eventsConfig);
                 }
             }
-
-
         }
 
         /// <summary>
@@ -211,6 +198,12 @@ namespace Astrarium
         {
             TimeSync = false;
             Context.JulianDay = jd;
+            Calculate();
+        }
+
+        public void SetLocation(CrdsGeographical location)
+        {
+            Context.GeoLocation = new CrdsGeographical(location);
             Calculate();
         }
 
@@ -356,11 +349,12 @@ namespace Astrarium
         {
             var filterFunc = filter ?? ((b) => true);
             var results = new List<CelestialObject>();
-            foreach (var searchProvider in SearchProviders)
+            
+            foreach (var calc in Calculators.OfType<ICelestialObjectSearcher>())
             {
                 if (results.Count < maxCount)
                 {
-                    results.AddRange(searchProvider(Context, searchString, filterFunc, maxCount));
+                    results.AddRange(calc.Search(Context, searchString, filterFunc, maxCount));
                 }
                 else
                 {
@@ -378,7 +372,13 @@ namespace Astrarium
         /// <inheritdoc />
         public CelestialObject Search(string objectType, string commonName = null)
         {
-            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName.Equals(commonName, StringComparison.OrdinalIgnoreCase) : true), 1).FirstOrDefault();
+            foreach (var calc in Calculators.OfType<ICelestialObjectSearcher>())
+            {
+                var body = calc.Search(Context, objectType, commonName);
+                if (body != null) return body;
+            }
+
+            return null;
         }
 
         /// <inheritdoc />

@@ -13,6 +13,8 @@ namespace Astrarium.Types
         public SkyContext(double jd, CrdsGeographical location) : this(jd, location, false) { }
 
         public event Action ContextChanged;
+        public event Action LocationChanged;
+        public event Action JulianDayChanged;
 
         public SkyContext(double jd, CrdsGeographical location, bool preferFast)
         {
@@ -45,6 +47,8 @@ namespace Astrarium.Types
             UpdateContextVariables();
             ClearCache();
             ContextChanged?.Invoke();
+            LocationChanged?.Invoke();
+            JulianDayChanged?.Invoke();
         }
 
         private void UpdateContextVariables()
@@ -70,6 +74,7 @@ namespace Astrarium.Types
                 UpdateContextVariables();
                 ClearCache();
                 ContextChanged?.Invoke();
+                JulianDayChanged?.Invoke();
             }
         }
 
@@ -98,6 +103,7 @@ namespace Astrarium.Types
                 _GeoLocation = value;
                 ClearCache();
                 ContextChanged?.Invoke();
+                LocationChanged?.Invoke();
             }
         }
 

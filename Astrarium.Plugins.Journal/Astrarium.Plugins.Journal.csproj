@@ -8,7 +8,6 @@
 		<Description>Handy tool to log your astronomical observations</Description>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
-
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Deploy)' == 'True'">

@@ -250,18 +250,30 @@
         <StatusBar Height="24" Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MouseConstellation, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />
             <Separator />
-            <TextBlock Width="245" TextAlignment="Center" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
+            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
             <Separator />
-            <TextBlock Width="230" TextAlignment="Center" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
+            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
             <Separator />
-            <TextBlock Width="90" TextAlignment="Center" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" ToolTip="{t:Text StatusBar.ViewAngle}" />
+
+            <Menu>
+                <MenuItem 
+                    Width="110"
+                    Command="{Binding SetViewAngleCommand}"
+                    ToolTip="{t:Text StatusBar.ViewAngle}">
+                    <MenuItem.Header>
+                        <TextBlock HorizontalAlignment="Center" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" />
+                    </MenuItem.Header>
+                </MenuItem>
+            </Menu>
+
             <Separator />
 
             <Menu>
                 <MenuItem 
                     ItemsSource="{Binding SelectedObjectsMenuItems}" 
                     Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
-                    ToolTip="{t:Text StatusBar.SelectedObject}">
+                    ToolTip="{t:Text StatusBar.SelectedObject}"
+                    Command="{Binding SelectedObjectsMenuItemsRootMenuCommand}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                             <Setter Property="IsChecked" Value="{Binding IsChecked}" />

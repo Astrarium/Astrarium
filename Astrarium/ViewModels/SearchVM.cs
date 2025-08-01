@@ -99,6 +99,8 @@ namespace Astrarium.ViewModels
 
             SelectedItem = SearchResults.Any() ? SearchResults[0] : null;
         }
+
+        public override object Payload => SelectedItem != null ? new { Body = SelectedItem.Body.ToString() } : null;
     }
 
     public class SearchResultItem

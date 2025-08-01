@@ -48,39 +48,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Controls\MoonSettingsSection.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Controls\PlanetsSettingsSection.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Controls\SunSettingsSection.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-	<ContentWithTargetPath Include="Libs\glfw.dll">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  <TargetPath>glfw.dll</TargetPath>
-	</ContentWithTargetPath>
-	<None Include="Libs\glfw.dll" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Page Update="Controls\MoonSettingsSection.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Controls\PlanetsSettingsSection.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Controls\SunSettingsSection.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-
 </Project>

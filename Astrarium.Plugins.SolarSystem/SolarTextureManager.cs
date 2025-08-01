@@ -117,6 +117,11 @@ namespace Astrarium.Plugins.SolarSystem
         public int GetTexture(double jd, double utcOffset)
         {
             Date date = new Date(jd, utcOffset);
+            if (date.Year <= 0)
+            {
+                return 0;
+            }
+
             DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
 
             string imagePath = GetImagePath(dt);

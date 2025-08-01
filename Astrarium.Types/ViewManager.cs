@@ -142,9 +142,22 @@ namespace Astrarium.Types
         /// <param name="utcOffset">UTC offset, in hours</param>
         /// <param name="displayMode">Dialog options</param>
         /// <returns>Julian day selected, or null</returns>
-        public static double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        public static double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime, bool applyImmediately = false)
         {
-            return viewManager.ShowDateDialog(jd, utcOffset, displayMode);
+            return viewManager.ShowDateDialog(jd, utcOffset, displayMode, applyImmediately);
+        }
+
+        /// <summary>
+        /// Shows FOV dialog.
+        /// </summary>
+        /// <param name="viewAngle">Current view angle, in degrees</param>
+        /// <param name="min">Minimal allowed view angle, in degrees</param>
+        /// <param name="max">Maximal allowed view angle, in degrees</param>
+        /// <param name="applyImmediately">Apply changes immediately</param>
+        /// <returns>Selected FOV, or null</returns>
+        public static double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately = false)
+        {
+            return viewManager.ShowViewAngleDialog(viewAngle, min, max, applyImmediately);
         }
 
         public static CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)

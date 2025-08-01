@@ -1,12 +1,12 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Controls;
 using Astrarium.Types;
+using Astrarium.Types.Themes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,12 +33,14 @@ namespace Astrarium.ViewModels
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
         public Command SetDateCommand { get; private set; }
+        public Command SetViewAngleCommand { get; private set; }
         public Command SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command GetObjectEphemerisCommand { get; private set; }
         public Command CalculatePhenomenaCommand { get; private set; }
+        public Command CalculateTodayEventsCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> LockOnObjectCommand { get; private set; }
         public Command<PointF> MeasureToolCommand { get; private set; }
@@ -52,6 +54,7 @@ namespace Astrarium.ViewModels
         public Command DonateCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
+        public Command SelectedObjectsMenuItemsRootMenuCommand { get; private set; }
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -61,7 +64,7 @@ namespace Astrarium.ViewModels
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
         public CelestialObject SelectedObject { get; private set; }
-        public CrdsGeographical ObserverLocation => settings.Get<CrdsGeographical>("ObserverLocation");
+        public CrdsGeographical ObserverLocation => sky.Context.GeoLocation;
 
         public WindowState WindowState
         {
@@ -164,12 +167,6 @@ namespace Astrarium.ViewModels
             }
         }
 
-        private void SetProjection(Type projectionType)
-        {
-            map.SetProjection(projectionType);
-            settings.SetAndSave("Projection", projectionType.Name);
-        }
-
         public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, IGeoLocationsManager geoLocationsManager, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
@@ -201,13 +198,16 @@ namespace Astrarium.ViewModels
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
             SetDateCommand = new Command(SetDate);
+            SetViewAngleCommand = new Command(SetViewAngle);
             SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
             QuickSearchCommand = new Command<CelestialObject>(GoToObject);
+            SelectedObjectsMenuItemsRootMenuCommand = new Command(SelectedObjectsMenuItemsRootMenuClicked);
             CenterOnPointCommand = new Command(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
+            CalculateTodayEventsCommand = new Command(CalculateTodayEvents);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             GoToHistoryItemCommand = new Command<CelestialObject>(GoToObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
@@ -222,6 +222,7 @@ namespace Astrarium.ViewModels
 
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
+            sky.Context.LocationChanged += Sky_LocationChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.LockedObjectChanged += Map_LockedObjectChanged;
             map.FovChanged += Map_ViewAngleChanged;
@@ -271,6 +272,8 @@ namespace Astrarium.ViewModels
             uiIntegration.ToolbarButtons.Add("View", btnViewModeEquatorial);
             uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "$Settings.FlipHorizontal", new SimpleBinding(settings, "FlipHorizontal", "IsChecked")));
             uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "$Settings.FlipVertical", new SimpleBinding(settings, "FlipVertical", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconLimitMagnitude", "$Settings.LimitMagnitude", new SimpleBinding(settings, "LimitMagnitude", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconAutoLock", "$Settings.AutoLock", new SimpleBinding(settings, "AutoLock", "IsChecked")));
 
             foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
@@ -323,17 +326,17 @@ namespace Astrarium.ViewModels
                 })
             };
 
-            var projectionTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).ToArray();
+            var projections = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).Select(t => t.Name).ToArray();
 
             var projectionMenuItems = new List<MenuItem>();
-            for (int i = 0; i < projectionTypes.Length; i++)
+            for (int i = 0; i < projections.Length; i++)
             {
-                var projectionType = projectionTypes[i];
-                var projectionMenuItem = new MenuItem($"$Projection.{projectionType.Name}");
-                projectionMenuItem.Command = new Command(() => SetProjection(projectionType));
+                var projection = projections[i];
+                var projectionMenuItem = new MenuItem($"$Projection.{projection}");
+                projectionMenuItem.Command = new Command(() => settings.SetAndSave("Projection", projection));
                 var binding = new SimpleBinding(settings, "Projection", nameof(MenuItem.IsChecked));
-                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projectionType.Name;
+                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projection;
                 projectionMenuItem.AddBinding(binding);
                 projectionMenuItems.Add(projectionMenuItem);
             }
@@ -450,6 +453,7 @@ namespace Astrarium.ViewModels
                 {
                     new MenuItem("$Menu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
                     new MenuItem("$Menu.Phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
+                    new MenuItem("$Menu.TodayEvents", CalculateTodayEventsCommand) { HotKey = new KeyGesture(Key.N, ModifierKeys.Control, "Ctrl+N") },
                     new MenuItem("$Menu.Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }                
                 }
             };
@@ -479,7 +483,7 @@ namespace Astrarium.ViewModels
                     new MenuItem("$Menu.Language")
                     {
                         SubItems = new ObservableCollection<MenuItem>(Text.GetLocales().Select(loc => {
-                            var menuItem = new MenuItem(loc.NativeName);
+                            var menuItem = new MenuItem(loc.NativeName.ToUpperFirstLetter());
                             menuItem.Command = new Command(() => {
                                 menuItem.IsChecked = true;
                                 settings.SetAndSave("Language", loc.Name);
@@ -558,6 +562,13 @@ namespace Astrarium.ViewModels
             TimeSync = timeSync;
         }
 
+        private void Sky_LocationChanged()
+        {
+            NotifyPropertyChanged(nameof(ObserverLocation));
+            settings.SetAndSave("ObserverLocation", sky.Context.GeoLocation);
+            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", sky.Context.GeoLocation.Name)));
+        }
+
         private void OnAppUpdateFound(LastRelease lastRelease)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -613,9 +624,7 @@ namespace Astrarium.ViewModels
         {
             double jd = map.Projection.Context.JulianDay;
             double utcOffset = map.Projection.Context.GeoLocation.UtcOffset;
-            var months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
-            var d = new Date(jd, utcOffset);
-            DateString = $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year} {d.Hour:00}:{d.Minute:00}:{d.Second:00}";
+            DateString = Formatters.DateTimeWithSeconds.Format(new Date(jd, utcOffset));
             NotifyPropertyChanged(nameof(DateString));
         }
 
@@ -650,6 +659,13 @@ namespace Astrarium.ViewModels
                 NotifyPropertyChanged(nameof(ObserverLocation));
                 FillLocationsList();
             }
+            if (settingName == "Projection")
+            {
+                var projectionType =
+                    System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+                    .FirstOrDefault(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract && t.Name == settingValue.ToString());
+                map.SetProjection(projectionType);
+            }
         }
 
         private void Map_SelectedObjectChanged(CelestialObject body)
@@ -662,6 +678,10 @@ namespace Astrarium.ViewModels
                 {
                     SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));                
                     SelectedObjectsMenuItems.Add(null);
+
+
+                    SelectedObjectsMenuItems.Add(null);
+                    SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.SearchObject", SearchObjectCommand));
                 }
 
                 var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => body.Equals(i?.CommandParameter));
@@ -672,10 +692,10 @@ namespace Astrarium.ViewModels
 
                 SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
 
-                // 10 items of history + "clear all" + separator
-                if (SelectedObjectsMenuItems.Count > 13)
+                // 10 items of history + "clear all" + "search" + 2 separators
+                if (SelectedObjectsMenuItems.Count > 14)
                 {
-                    SelectedObjectsMenuItems.RemoveAt(0);
+                    SelectedObjectsMenuItems.RemoveAt(12);
                 }
             }
 
@@ -819,6 +839,13 @@ namespace Astrarium.ViewModels
             }
         }
 
+        private void CalculateTodayEvents()
+        {
+            var vm = ViewManager.CreateViewModel<TodayEventsVM>();
+            vm.OnEventSelected += OnPhenomenaSelected;
+            ViewManager.ShowWindow(vm);  
+        }
+
         private void OnPhenomenaSelected(AstroEvent ev)
         {
             sky.SetDate(ev.JulianDay);
@@ -887,6 +914,11 @@ namespace Astrarium.ViewModels
             {
                 ViewManager.ShowMessageBox("$Warning", "$ObjectNotFound");
             }
+        }
+
+        private void SelectedObjectsMenuItemsRootMenuClicked()
+        {
+            if (!SelectedObjectsMenuItems.Any()) SearchObject();
         }
 
         public bool CenterOnObject(CelestialObject celestialObject)
@@ -1000,15 +1032,14 @@ namespace Astrarium.ViewModels
 
         private void ClearObjectsHistory()
         {
+            map.SelectedObject = null;
+            map.Invalidate();
             SelectedObjectsMenuItems.Clear();
         }
 
         private void SetLocation(CrdsGeographical location)
         {
-            sky.Context.GeoLocation = new CrdsGeographical(location);
-            settings.SetAndSave("ObserverLocation", location);
-            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", location.Name)));
-            sky.Calculate();
+            sky.SetLocation(location);
         }
 
         private void EditFavoriteLocations()
@@ -1046,11 +1077,12 @@ namespace Astrarium.ViewModels
 
         private void SetDate()
         {
-            double? jd = ViewManager.ShowDateDialog(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            if (jd != null)
-            {
-                sky.SetDate(jd.Value);
-            }
+            ViewManager.ShowDateDialog(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset, applyImmediately: true);
+        }
+
+        private void SetViewAngle()
+        {
+            ViewManager.ShowViewAngleDialog(map.Projection.Fov, map.Projection.MinFov, map.Projection.MaxFov, applyImmediately: true);
         }
 
         private void SelectLocation()

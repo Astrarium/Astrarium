@@ -211,6 +211,14 @@ namespace Astrarium.Plugins.DeepSky
                 .ToArray();
         }
 
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (!bodyType.StartsWith("DeepSky."))
+                return null;
+            else
+                return deepSkies.FirstOrDefault(ds => ds.Type == bodyType && ds.CommonName == bodyName);
+        }
+
         public override void Initialize()
         {
             // Load NGC/IC catalogs data

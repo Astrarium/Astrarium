@@ -22,15 +22,17 @@
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    
-    <Grid Name="tblInfo">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition MinWidth="100" Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">Property</Label>
-        <Label Grid.Row="0" Grid.Column="1">
-            <Hyperlink>Value</Hyperlink>
-        </Label>
-    </Grid>
+
+    <ScrollViewer VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Name="tblInfo">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition MinWidth="100" Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">Property</Label>
+            <Label Grid.Row="0" Grid.Column="1">
+                <Hyperlink>Value</Hyperlink>
+            </Label>
+        </Grid>
+    </ScrollViewer>
 </c:DisposableUserControl>

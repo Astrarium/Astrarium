@@ -15,6 +15,11 @@ namespace Astrarium.Types
         public abstract double MaxFov { get; }
 
         /// <summary>
+        /// Gets minimal allowed field of view, in degrees
+        /// </summary>
+        public double MinFov => new DMS(0, 0, 1).ToDecimalAngle();
+
+        /// <summary>
         /// Screen scaling factor
         /// </summary>
         protected double ScreenScalingFactor { get; private set; }
@@ -151,9 +156,19 @@ namespace Astrarium.Types
             return (float)Math.Max(minSize, (float)(Math.Min(ScreenWidth, ScreenHeight) / Fov * (2 * semidiameter / 3600)));
         }
 
-        // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
-        // TODO: check this http://www.hnsky.org/star_count.htm
-        public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
+        /// <summary>
+        /// User-defined magnitude limit. Default value is float.MaxValue (no limit).
+        /// </summary>
+        public float UserMagLimit { get; set; } = float.MaxValue;
+
+        /// <summary>
+        /// Current magnitude limit, depending of current FOV.
+        /// </summary>
+        /// <remarks>
+        /// Constructed as log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
+        /// TODO: check this http://www.hnsky.org/star_count.htm
+        /// </remarks>
+        public float MagLimit => Math.Min(UserMagLimit, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
 
         /// <summary>
         /// Gets magnitude extinction for a given altitude
@@ -330,10 +345,8 @@ namespace Astrarium.Types
             get => fov;
             set
             {
-                const double minFov = 0.001;
-
                 if (value > MaxFov) value = MaxFov;
-                if (value < minFov) value = minFov;
+                if (value < MinFov) value = MinFov;
                 fov = value;
 
                 UpdateScreenScalingFactor();

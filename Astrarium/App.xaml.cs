@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using NLog;
 using System.Threading;
 
 namespace Astrarium
@@ -28,9 +27,7 @@ namespace Astrarium
             base.OnStartup(e);
 
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
-            Log.SetImplementation((DefaultLogger)LogManager.GetLogger("", typeof(DefaultLogger)));
-            Log.Info($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
-
+            
             var splashVM = new SplashScreenVM();
             ViewManager.ShowWindow(splashVM);
 
@@ -49,7 +46,7 @@ namespace Astrarium
             Dispatcher.UnhandledException += (s, ea) =>
             {
                 string message = $"An unhandled exception occurred:\n\n{ea.Exception.Message}\nStack trace:\n\n{ea.Exception.StackTrace}";
-                Log.Error(message);
+                Log.Fatal(message);
                 ViewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
                 ea.Handled = true;
             };
@@ -110,6 +107,8 @@ namespace Astrarium
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
@@ -283,9 +282,15 @@ namespace Astrarium
 
             foreach (var plugin in plugins)
             {
-                progress.Report($"Initializing plugin {AbstractPlugin.GetName(plugin.GetType())}");
+                string name = AbstractPlugin.GetName(plugin.GetType());
+                progress.Report($"Initializing plugin {name}");
                 plugin.Initialize();
             }
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.Fatal($"Unhandled exception: {e.ExceptionObject}");
         }
     }
 }

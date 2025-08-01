@@ -12,6 +12,7 @@ namespace Astrarium.Types
         event Action<bool> TimeSyncChanged;
 
         void SetDate(double jd);
+        void SetLocation(CrdsGeographical location);
         void Calculate();
         bool TimeSync { get; set; }
 

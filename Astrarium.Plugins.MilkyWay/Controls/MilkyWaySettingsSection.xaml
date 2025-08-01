@@ -8,6 +8,7 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     Title="{t:Text Section.MilkyWay}"
+    Icon="{StaticResource IconMilkyWay}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">

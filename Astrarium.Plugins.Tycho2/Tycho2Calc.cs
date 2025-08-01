@@ -615,5 +615,27 @@ namespace Astrarium.Plugins.Tycho2
             }
             return new CelestialObject[0];
         }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Star")
+                return null;
+
+            var match = searchRegex.Match(bodyName.ToLowerInvariant());
+
+            if (match.Success)
+            {
+                int tyc1 = int.Parse(match.Groups["tyc1"].Value);
+                short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
+                string tyc3 = match.Groups["tyc3"].Value;
+                if (tyc1 > 0 && tyc1 <= 9537)
+                {
+                    Tycho2Region region = indexRegions.ElementAt(tyc1 - 1);
+                    return GetStarsInRegion(context, region, tyc2, tyc3).FirstOrDefault();
+                }
+            }
+
+            return null;
+        }
     }
 }

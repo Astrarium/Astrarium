@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.SolarSystem
                 Log.Debug("No cached orbital elements found.");
             }
 
-            if (orbits == null)
+            if (orbits == null || !orbits.Any())
             {
                 Log.Debug("Read default orbital elements...");
                 try
@@ -120,7 +120,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// </summary>
         public async void Update(IEnumerable<GenericMoonData> orbits, Action onBefore, Action onAfter)
         {
-            onAfter?.Invoke();
+            onBefore?.Invoke();
 
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();

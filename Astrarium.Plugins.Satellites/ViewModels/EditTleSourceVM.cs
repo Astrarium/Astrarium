@@ -94,6 +94,8 @@ namespace Astrarium.Plugins.Satellites.ViewModels
             }
         }
 
+        public override object Payload => new { File = FileName, Url = Url };
+
         private bool RemoteFileExists(string url)
         {
             try

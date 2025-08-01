@@ -52,7 +52,6 @@ namespace Astrarium.ViewModels
 
         public bool NoEvents => !Events.Any();
 
-
         private Type GetExportFormat(int index)
         {
             return exportFormats.ElementAt(index - 1).Value;
@@ -78,29 +77,6 @@ namespace Astrarium.ViewModels
         private void SelectAstroEvent(AstroEventVM ev)
         {
             OnEventSelected?.Invoke(new AstroEvent(ev.JulianDay, ev.Text, ev.PrimaryBody, ev.SecondaryBody));
-        }
-    }
-
-    public class AstroEventVM
-    {
-        public string Date { get; set; }
-        public string Time { get; set; }
-        public double JulianDay { get; set; }
-        public string Text { get; set; }
-        public bool NoExactTime { get; set; }
-        public CelestialObject PrimaryBody { get; set; }
-        public CelestialObject SecondaryBody { get; set; }
-
-        public AstroEventVM(AstroEvent e, double utcOffset)
-        {
-            var date = new Date(e.JulianDay, utcOffset);
-            JulianDay = e.JulianDay;
-            Text = e.Text;
-            NoExactTime = e.NoExactTime;
-            PrimaryBody = e.PrimaryBody;
-            SecondaryBody = e.SecondaryBody;
-            Date = Formatters.Date.Format(date);
-            Time = Formatters.Time.Format(date);
         }
     }
 

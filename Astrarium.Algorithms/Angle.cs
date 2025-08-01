@@ -346,13 +346,12 @@ namespace Astrarium.Algorithms
             Seconds = 0;
             Sign = Math.Sign(decimalAngle);
 
-            decimalAngle = Math.Abs(decimalAngle);
-
-            const decimal _60 = 60;
+            decimalAngle = Math.Round(Math.Abs(decimalAngle), 10);
 
             Degrees = (uint)decimalAngle;
-            Minutes = (uint)(((decimal)decimalAngle - Degrees) * _60);
-            Seconds = (double)(((decimal)decimalAngle - Degrees - Minutes / _60) * 3600);
+            double remaining = Math.Round((decimalAngle - Degrees) * 60, 10);
+            Minutes = (uint)remaining;
+            Seconds = Math.Round((remaining - Minutes) * 60, 6);
         }
 
         /// <summary>

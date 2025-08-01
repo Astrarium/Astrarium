@@ -12,6 +12,17 @@
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+	<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(Deploy)' != 'True'">
+	  <_Parameter1>Guid</_Parameter1>
+	  <_Parameter2>d9e96be2-5dcd-4638-bc80-512913c2e99c</_Parameter2>
+	</AssemblyAttribute>
+	<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(Deploy)' == 'True'">
+      <_Parameter1>Guid</_Parameter1>
+	  <_Parameter2>414038f4-d239-44ce-93a5-c41a10f5b8f0</_Parameter2>
+	</AssemblyAttribute>
+  </ItemGroup>
+
   <PropertyGroup> 
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages>
   </PropertyGroup>
@@ -80,10 +91,14 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ninject" Version="3.3.6" />
-    <PackageReference Include="NLog" Version="5.3.2" />
   </ItemGroup>
       
   <ItemGroup>
+	<ProjectReference Include="..\Astrarium.Plugins.Logger\Astrarium.Plugins.Logger.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.ASCOM\Astrarium.Plugins.ASCOM.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -139,6 +154,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Notes\Astrarium.Plugins.Notes.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.SolarSystem\Astrarium.Plugins.SolarSystem.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -194,11 +214,14 @@
 		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		<Private>false</Private>
 	</ProjectReference>
+	  
+	<!--
 	<ProjectReference Include="..\Astrarium.Plugins.Journal\Astrarium.Plugins.Journal.csproj">
 		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		<Private>false</Private>
 	</ProjectReference>
+	-->
     
     <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
@@ -212,16 +235,6 @@
     <None Update="Data\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Config\Controls\ColorsSettingsSection - Copy.xaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>ColorsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Config\Controls\FontsSettingsSection - Copy.xaml.cs">
-      <DependentUpon>FontsSettingsSection.xaml.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>

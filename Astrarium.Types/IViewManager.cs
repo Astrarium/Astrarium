@@ -133,7 +133,16 @@ namespace Astrarium.Types
         /// <param name="utcOffset">UTC offset, in hours</param>
         /// <param name="displayMode">Dialog options</param>
         /// <returns>Julian day selected, or null</returns>
-        double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime);
+        double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime, bool applyImmediately = false);
+
+        /// <summary>
+        /// Show view angle dialog
+        /// </summary>
+        /// <param name="viewAngle">Current view angle, in degrees</param>
+        /// <param name="min">Minimal view angle value, in degrees</param>
+        /// <param name="max">Maximal view angle value, in degrees</param>
+        /// <returns></returns>
+        double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately);
 
         /// <summary>
         /// Shows search celestial object window

@@ -201,6 +201,14 @@ namespace Astrarium.Plugins.MinorBodies
                 .ToArray();
         }
 
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Asteroid")
+                return null;
+            else
+                return Asteroids.FirstOrDefault(a => a.CommonName == bodyName);
+        }
+
         private bool IsAsteroidNameMatch(Asteroid a, string searchString)
         {
             if (searchString.Equals(a.Name, StringComparison.OrdinalIgnoreCase))

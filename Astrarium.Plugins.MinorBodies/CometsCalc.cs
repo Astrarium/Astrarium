@@ -249,6 +249,14 @@ namespace Astrarium.Plugins.MinorBodies
                 .ToArray();
         }
 
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Comet")
+                return null;
+            else
+                return Comets.FirstOrDefault(c => c.CommonName == bodyName);
+        }
+
         private string[] GetNames(string name)
         {
             var match = Regex.Match(name, "^(.+)\\((.+)\\)$");

@@ -29,7 +29,7 @@
     <Color x:Key="ColorControlDarkBackground">#2A4726</Color>
 
     <!-- Selected list items background, hovered menu items -->
-    <Color x:Key="ColorSelection">#568251</Color>
+    <Color x:Key="ColorSelection">#476841</Color>
 
     <!-- Color of text over selected background -->
     <Color x:Key="ColorSelectionForeground">#CAF5A4</Color>

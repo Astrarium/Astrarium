@@ -407,10 +407,12 @@ namespace Astrarium.Plugins.UCAC4
         private UCAC4Star ReadStar(SkyContext context, byte[] starsData, int offset, int zn, int starIndex, Func<float, bool> magFilter)
         {
             float mag = BitConverter.ToInt16(starsData, 8 + offset) / 1000.0f;
+            
             if (magFilter(mag))
             {
                 float bmag = BitConverter.ToInt16(starsData, 46 + offset) / 1000.0f;
                 float vmag = BitConverter.ToInt16(starsData, 48 + offset) / 1000.0f;
+
                 var posData = ParsePositionData(starsData, offset, zn, starIndex);
 
                 string catName = $"UCAC4 {zn:000}-{starIndex + 1:000000}";
@@ -706,6 +708,34 @@ namespace Astrarium.Plugins.UCAC4
             }
 
             return stars.Where(filterFunc).ToList();
+        }
+
+        public CelestialObject Search(SkyContext context, string bodyType, string bodyName)
+        {
+            if (bodyType != "Star")
+                return null;
+
+            var match = searchRegex.Match(bodyName.ToLowerInvariant());
+
+            if (match.Success)
+            {
+                ushort zone = ushort.Parse(match.Groups["zone"].Value);
+
+                uint? number = match.Groups["number"].Success ? (uint?)uint.Parse(match.Groups["number"].Value) : null;
+
+                if (number != null && zone >= 1 && zone <= ZONES_COUNT && zoneAvailable[zone - 1])
+                {
+                    var bin = GetBin(zone, BINS_IN_ZONE);
+                    int starsInBin = (int)(bin.N0 + bin.NN);
+
+                    if (number > 0 && number <= starsInBin)
+                    {
+                        return ReadStarAtPosition(context, zone, (int)number.Value);
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <inheritdoc />

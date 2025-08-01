@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types.Controls;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,6 +33,43 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public static class FirstCapitalLetterExtension
+    {
+        public static string ToUpperFirstLetter(this string text)
+        {
+            if (text != null)
+                return text.Length > 0 ? char.ToUpper(text[0]) + text.Substring(1) : text;
+            else
+                return null;
+        } 
+    }
+
+    public class LocaleNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string language)
+                return language.ToUpperFirstLetter();
+            else
+                return null;
+        }
+    }
+
+    public class MarkdownToPlainTextConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Markdown.ToPlainText(value as string);
+        }
+    }
+
+    public class SingleLineTextConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value as string)?.Replace("\r\n", " ");
+        }
+    }
 
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]
@@ -187,6 +225,24 @@ namespace Astrarium.Types.Themes
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
+        }
+    }
+
+    [ValueConversion(typeof(ICollection), typeof(Visibility))]
+    public class EmptyCollectionToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null || (value is ICollection collection && collection.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    [ValueConversion(typeof(ICollection), typeof(Visibility))]
+    public class NotEmptyCollectionToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is ICollection collection && collection.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
@@ -513,6 +569,21 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class JulianDayToStringConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length == 2 && values[0] is double jd && values[1] is double utcOffset)
+            {
+                return Formatters.DateTime.Format(new Algorithms.Date(jd, utcOffset));
+            }
+            else
+            {
+                return "?";
+            }
+        }
+    }
+
     public class DateTimeToStringConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -539,6 +610,38 @@ namespace Astrarium.Types.Themes
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class FormatterConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            Type type = parameter as Type;
+            if (typeof(IEphemFormatter).IsAssignableFrom(type))
+            {
+                var formatter = Activator.CreateInstance(type) as IEphemFormatter;
+                return formatter.Format(value);
+            }
+            else
+            {
+                throw new ArgumentException($"Parameter must implement {nameof(IEphemFormatter)} interface.");
+            }
+        }
+    }
+
+    public class LogScaleConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double x = (double)value;
+            return Math.Log(x);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double x = (double)value;
+            return Math.Exp(x);
         }
     }
 

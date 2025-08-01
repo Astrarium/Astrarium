@@ -31,5 +31,7 @@ namespace Astrarium.ViewModels
         {
             Close(true);
         }
+
+        public override bool Loggable => false;
     }
 }

@@ -15,6 +15,7 @@ using System.Drawing.Printing;
 using System.Drawing;
 using System.IO;
 using Astrarium.Algorithms;
+using Newtonsoft.Json;
 
 namespace Astrarium
 {
@@ -105,14 +106,18 @@ namespace Astrarium
                 {
                     if (isDialog || flags.HasFlag(ViewFlags.TopMost))
                     {
-                        var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
-                        window.Owner = owner ?? Application.Current.MainWindow;
                         window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     }
                 }
                 else
                 {
                     Application.Current.MainWindow = window;
+                }
+
+                if (window.WindowStartupLocation == WindowStartupLocation.CenterOwner)
+                {
+                    var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+                    window.Owner = owner ?? Application.Current.MainWindow;
                 }
 
                 EventHandler activatedEventHandler = (s, e) => viewModel.OnActivated();
@@ -143,10 +148,18 @@ namespace Astrarium
 
                 if (isDialog)
                 {
-                    return window.ShowDialog();
+                    try
+                    {
+                        return window.ShowDialog();
+                    }
+                    finally
+                    {
+                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    }
                 }
                 else
                 {
+                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
                     window.Show();
                     return null;
                 }
@@ -356,10 +369,32 @@ namespace Astrarium
             return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
         }
 
-        public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime, bool applyImmediately = false)
         {
-            var vm = new DateVM(jd, utcOffset, displayMode);
-            return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
+            var vm = CreateViewModel<DateVM>().WithDefaults(jd, utcOffset, displayMode, applyImmediately);
+            if (applyImmediately)
+            {
+                ShowWindow(vm, flags: ViewFlags.TopMost);
+                return null;
+            }
+            else
+            {
+                return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
+            }
+        }
+
+        public double? ShowViewAngleDialog(double viewAngle, double min, double max, bool applyImmediately)
+        {
+            var vm = CreateViewModel<ViewAngleVM>().WithDefaults(viewAngle, min, max, applyImmediately);
+            if (applyImmediately)
+            {
+                ShowWindow(vm, flags: ViewFlags.TopMost);
+                return null;
+            }
+            else
+            {
+                return (ShowDialog(vm) ?? false) ? (double?)vm.ViewAngle : null;
+            }
         }
 
         public Color? ShowColorDialog(string caption, Color color)
@@ -413,7 +448,7 @@ namespace Astrarium
         {
             if (Application.Current?.MainWindow is MainWindow window)
             {
-                window.skyToolTip.Content = message;
+                window.skyToolTip.Content = message.StartsWith("$") ? Text.Get(message.Substring(1)) : message;
                 window.skyToolTip.PlacementRectangle = new Rect(mouse.X, mouse.Y, 0, 0);
                 window.skyToolTip.IsOpen = true;
                 window.skyToolTip.Tag = (window.skyToolTip.Tag as long? ?? 0) + 1;

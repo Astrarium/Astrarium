@@ -11,7 +11,15 @@
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
-
+    <c:SettingsSection.Icon>
+        <DrawingImage>
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="white" Geometry="F1 M100,125z M0,0z M73.561,39.288C79.478,39.288 84.275,34.491 84.275,28.574 84.275,22.657 79.478,17.86 73.561,17.86 67.644,17.86 62.847,22.657 62.847,28.574 62.847,34.491 67.643,39.288 73.561,39.288z M71.429,62.857C49.656,62.857 46.156,39.286 22.143,39.286 13.294,39.286 5,43.571 5,43.571L5,84.285C5,90.203,9.797,95,15.714,95L84.285,95C90.203,95,95,90.203,95,84.286L95,56.429C95,56.429,87.877,62.857,71.429,62.857z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </c:SettingsSection.Icon>
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Ground}" IsChecked="{Binding Settings.Ground}" Margin="2" />
 

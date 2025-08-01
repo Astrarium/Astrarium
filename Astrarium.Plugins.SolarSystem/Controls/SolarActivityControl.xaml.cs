@@ -25,5 +25,13 @@ namespace Astrarium.Plugins.SolarSystem.Controls
         {
             InitializeComponent();
         }
+
+        private void BindableListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // solution from: https://stackoverflow.com/questions/61870147/wpf-datagrid-inside-a-scrollviewer
+            var args = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
+            args.RoutedEvent = ScrollViewer.MouseWheelEvent;
+            scroll_viewer.RaiseEvent(args);
+        }
     }
 }

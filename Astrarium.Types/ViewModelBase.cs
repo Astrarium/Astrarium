@@ -39,5 +39,15 @@ namespace Astrarium.Types
         /// Called when associated dialog or window is activated
         /// </summary>
         public virtual void OnActivated() { }
+
+        /// <summary>
+        /// Gets ViewModel payload for debug purposes
+        /// </summary>
+        public virtual object Payload => null;
+
+        /// <summary>
+        /// Determines the view model is loggable or not
+        /// </summary>
+        public virtual bool Loggable => true;
     }
 }
