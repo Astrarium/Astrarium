@@ -79,6 +79,8 @@ namespace Astrarium.Plugins.FOV
 
                 settings.SetAndSave("FovFrames", fovFrames);
                 NotifyPropertyChanged(nameof(FovFrames), nameof(IsEmptyList));
+
+                map.Invalidate();
             }
         }
 

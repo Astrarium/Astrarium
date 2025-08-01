@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,6 +13,9 @@ namespace Astrarium.Plugins.FOV
         private readonly ISkyMap map;
         private readonly ISettings settings;
 
+        private readonly int[] xSigns = new int[] { -1, 1, 1, -1 };
+        private readonly int[] ySigns = new int[] { 1, 1, -1, -1 };
+
         // TODO: move to settings
         private Font font = new Font("Arial", 8);
         public override RendererOrder Order => RendererOrder.Foreground;
@@ -20,6 +24,126 @@ namespace Astrarium.Plugins.FOV
         {
             this.map = map;
             this.settings = settings;
+        }
+
+        private CameraFovFrame selectedFrame = null;
+        private float? selectedFrameRotation = null;
+        private int selectedFrameCorner = 0;
+        private Vec2 selectedFramePoint = null;
+
+        public override void OnMouseDown(ISkyMap map, MouseButton mouseButton)
+        {
+            var prj = map.Projection;
+
+            // detect whether mouse button has been pressed near one of Camera FOV frames
+        
+            if (mouseButton == MouseButton.Left)
+            {
+                bool isSelected = false;
+
+                var frames = settings.Get("FovFrames", new List<FovFrame>())
+                    .OfType<CameraFovFrame>().Where(x => x.Enabled && x is CameraFovFrame && NeedDrawCameraFrame(x))
+                    .ToList();
+
+                // mouse coordinates
+                Vec2 m = (Vec2)map.MouseScreenCoordinates;
+
+                // center of the map
+                Vec2 c = new Vec2(map.Projection.ScreenWidth / 2, map.Projection.ScreenHeight / 2);
+
+                foreach (var frame in frames)
+                {
+                    double rotAngle = GetCameraFrameRotation(frame);
+                    float w2 = prj.GetDiskSize(frame.Width * 3600 / 2) /2 ;
+                    float h2 = prj.GetDiskSize(frame.Height * 3600 / 2) / 2;
+
+                    var mat = Mat4.ZRotation(Angle.ToRadians(rotAngle));
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vec2 fp = c + mat * new Vec2(xSigns[i] * w2, ySigns[i] * h2);
+                        if (m.Distance(fp) < 5)
+                        {
+                            selectedFrame = frame;
+                            selectedFrameRotation = frame.Rotation;
+                            selectedFramePoint = fp;
+                            selectedFrameCorner = i;
+                            isSelected = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isSelected)
+                {
+                    if (selectedFrame != null)
+                    {
+                        var allFrames = settings.Get("FovFrames", new List<FovFrame>());
+                        settings.SetAndSave("FovFrames", allFrames);
+                        ViewManager.ShowPopupMessage("$FovPlugin.OnScreenRotation.CompletedTooltip");
+                        selectedFrame = null;
+                    }
+                }
+                map.Invalidate();
+            }
+        }
+
+        public override void OnMouseMove(ISkyMap map, MouseButton mouseButton)
+        {
+            var prj = map.Projection;
+
+            // mouse coordinates
+            var m = (Vec2)map.MouseScreenCoordinates;
+
+            // map center
+            Vec2 c = new Vec2(map.Projection.ScreenWidth / 2, map.Projection.ScreenHeight / 2);
+
+            if (selectedFrame != null)
+            {
+                Vec2 b = m - c;
+                Vec2 a = selectedFramePoint - c;
+
+                double sign = (map.Projection.FlipHorizontal ^ map.Projection.FlipVertical ? 1 : -1);
+
+                double theta = sign * Angle.ToDegrees(Math.Atan2(a.X * b.Y - a.Y * b.X, a.X * b.X + a.Y * b.Y));
+
+                selectedFrame.Rotation = (float)Angle.To360(selectedFrameRotation.Value + theta);
+                map.Invalidate();
+
+                ViewManager.ShowPopupMessage("$FovPlugin.OnScreenRotation.RotatingTooltip");
+            }
+            else
+            {
+                var frames = settings.Get("FovFrames", new List<FovFrame>())
+                                    .OfType<CameraFovFrame>().Where(x => x.Enabled && x is CameraFovFrame && NeedDrawCameraFrame(x))
+                                    .ToList();
+
+                bool showTooltip = false;
+
+                foreach (var frame in frames)
+                {
+                    double rotAngle = GetCameraFrameRotation(frame);
+                    float w2 = prj.GetDiskSize(frame.Width * 3600 / 2) / 2;
+                    float h2 = prj.GetDiskSize(frame.Height * 3600 / 2) / 2;
+
+                    var mat = Mat4.ZRotation(Angle.ToRadians(rotAngle));
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vec2 fp = c + mat * new Vec2(xSigns[i] * w2, ySigns[i] * h2);
+                        if (m.Distance(fp) < 5)
+                        {
+                            showTooltip = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (showTooltip)
+                {
+                    ViewManager.ShowTooltipMessage(m, "$FovPlugin.OnScreenRotation.CornerTooltip");
+                }
+            }
         }
 
         public override void Render(ISkyMap map)
@@ -67,39 +191,16 @@ namespace Astrarium.Plugins.FOV
                 }
                 else if (frame is CameraFovFrame cameraFrame)
                 {
-                    float width = prj.GetDiskSize(cameraFrame.Width * 3600 / 2);
-                    float height = prj.GetDiskSize(cameraFrame.Height * 3600 / 2);
+                    float w2 = prj.GetDiskSize(cameraFrame.Width * 3600 / 2) / 2;
+                    float h2 = prj.GetDiskSize(cameraFrame.Height * 3600 / 2) / 2;
 
-                    // do not draw frame if its size exceeds screen bounds
-                    if (width > 5 && height > 5 && Math.Min(width, height) < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
+                    if (NeedDrawCameraFrame(cameraFrame))
                     {
                         var color = frame.Color.Tint(nightMode);
 
                         var p = new PointF(prj.ScreenWidth / 2, prj.ScreenHeight / 2);
-                        double rotAngle = 0;
-                        if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Equatorial)
-                        {
-                            if (prj.ViewMode == ProjectionViewType.Horizontal)
-                            {
-                                rotAngle = prj.GetAxisRotation(prj.CenterEquatorial, -cameraFrame.Rotation);
-                            }
-                            else if (prj.ViewMode == ProjectionViewType.Equatorial)
-                            {
-                                rotAngle = -cameraFrame.Rotation;
-                            }
-                        }
-                        else if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Horizontal)
-                        {
-                            if (prj.ViewMode == ProjectionViewType.Horizontal)
-                            {
-                                rotAngle = -cameraFrame.Rotation;
-                            }
-                            else if (prj.ViewMode == ProjectionViewType.Equatorial)
-                            {
-                                rotAngle = prj.GetAxisRotation(prj.CenterHorizontal, -cameraFrame.Rotation);
-                            }
-                        }
-
+                        double rotAngle = GetCameraFrameRotation(cameraFrame);
+                        
                         GL.PushMatrix();
                         GL.Translate(p.X, p.Y, 0);
                         GL.Rotate(rotAngle, 0, 0, 1);
@@ -111,18 +212,79 @@ namespace Astrarium.Plugins.FOV
 
                         GL.Begin(GL.LINE_LOOP);
                         GL.Color3(color);
-                        GL.Vertex2(-width / 2, height / 2);
-                        GL.Vertex2(width / 2, height / 2);
-                        GL.Vertex2(width / 2, -height / 2);
-                        GL.Vertex2(-width / 2, -height / 2);
+                        for (int i = 0; i < 4; i++)
+                        {
+                            GL.Vertex2(xSigns[i] * w2, ySigns[i] *  h2);
+                        }
                         GL.End();
 
-                        DrawFrameLabel(frame, color, width, height);
+                        // highlight selected corner
+                        if (selectedFrame == frame)
+                        {
+                            GL.PointSize(10);
+                            GL.Begin(GL.POINTS);
+                            GL.Vertex2(xSigns[selectedFrameCorner] * w2, ySigns[selectedFrameCorner] * h2); 
+                            GL.End();
+                        }
+
+                        DrawFrameLabel(frame, color, 2 * w2, 2 * h2);
 
                         GL.PopMatrix();
+
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Detects whether Camera frame should be / can be drawn or not
+        /// </summary>
+        /// <param name="frame">Camera frame</param>
+        /// <returns>
+        /// True, if camera frame should be / can be drawn.
+        /// </returns>
+        private bool NeedDrawCameraFrame(CameraFovFrame frame)
+        {
+            var prj = map.Projection;
+            float width = prj.GetDiskSize(frame.Width * 3600 / 2);
+            float height = prj.GetDiskSize(frame.Height * 3600 / 2);
+            return width > 5 && height > 5 && Math.Min(width, height) < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight);
+        }
+
+        /// <summary>
+        /// Gets camera frame rotation relative to screen
+        /// </summary>
+        /// <param name="frame">Camera frame</param>
+        /// <returns>Rotation angle, in degrees</returns>
+        private double GetCameraFrameRotation(CameraFovFrame frame)
+        {
+            var prj = map.Projection;
+            double rotAngle = 0;
+
+            if (frame.RotateOrigin == FovFrameRotateOrigin.Equatorial)
+            {
+                if (prj.ViewMode == ProjectionViewType.Horizontal)
+                {
+                    rotAngle = prj.GetAxisRotation(prj.CenterEquatorial, -frame.Rotation);
+                }
+                else if (prj.ViewMode == ProjectionViewType.Equatorial)
+                {
+                    rotAngle = -frame.Rotation;
+                }
+            }
+            else if (frame.RotateOrigin == FovFrameRotateOrigin.Horizontal)
+            {
+                if (prj.ViewMode == ProjectionViewType.Horizontal)
+                {
+                    rotAngle = -frame.Rotation;
+                }
+                else if (prj.ViewMode == ProjectionViewType.Equatorial)
+                {
+                    rotAngle = prj.GetAxisRotation(prj.CenterHorizontal, -frame.Rotation);
+                }
+            }
+
+            return rotAngle;
         }
 
         private void DrawFrameLabel(FovFrame frame, Color color, float width, float height)

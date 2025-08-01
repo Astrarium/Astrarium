@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
+using Astrarium.Algorithms;
 using Astrarium.Types;
 
 namespace Astrarium.Plugins.FOV
@@ -56,15 +55,70 @@ namespace Astrarium.Plugins.FOV
                 })):
             new ObservableCollection<MenuItem>();
 
+
+        private double FindTargetFov(CrdsEquatorial eq, CameraFovFrame cameraFrame)
+        {
+            var prj = map.Projection;
+
+            double sw = prj.ScreenWidth;
+            double sh = prj.ScreenHeight;
+            double w = cameraFrame.Width;
+            double h = cameraFrame.Height;
+
+
+
+            double rotAngle = 0;
+            if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Equatorial)
+            {
+                if (prj.ViewMode == ProjectionViewType.Horizontal)
+                {
+                    rotAngle = prj.GetAxisRotation(eq, -cameraFrame.Rotation);
+                }
+                else if (prj.ViewMode == ProjectionViewType.Equatorial)
+                {
+                    rotAngle = -cameraFrame.Rotation;
+                }
+            }
+            else if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Horizontal)
+            {
+                if (prj.ViewMode == ProjectionViewType.Horizontal)
+                {
+                    rotAngle = -cameraFrame.Rotation;
+                }
+                else if (prj.ViewMode == ProjectionViewType.Equatorial)
+                {
+                    rotAngle = prj.GetAxisRotation(prj.ToHorizontal(eq), -cameraFrame.Rotation);
+                }
+            }
+
+            double theta = Angle.ToRadians(rotAngle);
+            double aspectRatio = sw / sh;
+
+            double newWidth = Math.Abs(w * Math.Cos(theta)) + Math.Abs(h * Math.Sin(theta));
+            double newHeight = Math.Abs(w * Math.Sin(theta)) + Math.Abs(h * Math.Cos(theta));
+
+            double fov;
+            if (aspectRatio >= 1)
+            {
+                fov = Math.Max(newWidth / aspectRatio, newHeight);
+            }
+            else
+            {
+                fov = Math.Max(newWidth, newHeight * aspectRatio);
+            }
+
+
+            return fov;
+        }
+
         private void ContextMenuItemSelected(MenuItemCommandParameter param)
         {
             double fov = 1;
-
+            CrdsEquatorial targetEq = map.SelectedObject != null ? map.SelectedObject.Equatorial : map.MouseEquatorialCoordinates;
+            
             if (param.Frame is CameraFovFrame cameraFovFrame)
             {
-                double w = cameraFovFrame.Width;
-                double h = cameraFovFrame.Height;
-                fov = Math.Sqrt(w * w + h * h) / 2;
+                fov = FindTargetFov(targetEq, cameraFovFrame);
             }
             else
             {

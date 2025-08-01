@@ -12,7 +12,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Does the rendering logic
         /// </summary>
-        /// <param name="map"></param>
+        /// <param name="map">Map instance.</param>
         public abstract void Render(ISkyMap map);
 
         /// <summary>
@@ -25,8 +25,25 @@ namespace Astrarium.Types
         /// </summary>
         public abstract RendererOrder Order { get; }
 
+        /// <summary>
+        /// Called when mouse is moving above the map.
+        /// </summary>
+        /// <param name="map">Map instance.</param>
+        /// <param name="mouseButton">Flags denoting which mouse buttons are holding</param>
         public virtual void OnMouseMove(ISkyMap map, MouseButton mouseButton) { }
+
+        /// <summary>
+        /// Called when mouse button is down over the map.
+        /// </summary>
+        /// <param name="map">Map instance.</param>
+        /// <param name="mouseButton">Flags denoting which mouse buttons are pressed</param>
         public virtual void OnMouseDown(ISkyMap map, MouseButton mouseButton) { }
+
+        /// <summary>
+        /// Called when mouse button is up (released) over the map.
+        /// </summary>
+        /// <param name="map">Map instance.</param>
+        /// <param name="mouseButton">Flags denoting which mouse buttons are released after press</param>
         public virtual void OnMouseUp(ISkyMap map, MouseButton mouseButton) { }
     }
 

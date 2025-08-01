@@ -14,15 +14,42 @@ namespace Astrarium.Controls
 {
     public class AutoClosePopup : Popup
     {
-        private int ms = 1000;
+        private const int DELAY = 1000;
+        
+        private volatile int LastShowTime; 
+        private bool IsClosingScheduled; 
 
-        public async void Show()
+        public void Show()
         {
+            LastShowTime = Environment.TickCount;
+
             if (!IsOpen)
             {
                 IsOpen = true;
-                await Task.Delay(ms);
-                Application.Current.Dispatcher.Invoke(() => IsOpen = false);
+                if (!IsClosingScheduled)
+                {
+                    IsClosingScheduled = true;
+                    _ = RunAutoCloseCheckAsync();
+                }
+            }
+        }
+
+        private async Task RunAutoCloseCheckAsync()
+        {
+            while (true)
+            {
+                int timeSinceLastCall = Environment.TickCount - LastShowTime;
+                if (timeSinceLastCall >= DELAY)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        IsOpen = false;
+                        IsClosingScheduled = false;
+                    });
+                    break;
+                }
+                
+                await Task.Delay(Math.Min(50, DELAY - timeSinceLastCall));
             }
         }
 
