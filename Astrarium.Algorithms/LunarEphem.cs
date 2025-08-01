@@ -1173,8 +1173,8 @@ namespace Astrarium.Algorithms
             double ARCL = Angle.ToRadians(Angle.Separation(eclSun, eclMoon));
 
             // Arc of Vision, in degrees
-            // ARCV is the geocentric dierence in altitude between the centre of the Sun 
-            // and the centre of the Moon for a given latitude and longitude ignoring the eects of refraction
+            // ARCV is the geocentric difference in altitude between the centre of the Sun 
+            // and the centre of the Moon for a given latitude and longitude ignoring the effects of refraction
             double ARCV = Angle.ToDegrees(Math.Acos(Math.Cos(ARCL) / Math.Cos(Angle.ToRadians(DAZ))));
             
             // Width of lunar crescent, in minutes of arc
