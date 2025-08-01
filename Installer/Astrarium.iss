@@ -121,7 +121,7 @@ sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astra
 ru.Astrarium_Plugins_Meteors                = Метеорные потоки
 en.Astrarium_Plugins_Meteors                = Meteor showers
 #define sz_Astrarium_Plugins_Meteors        = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
-sz_Astrarium_Plugins_Meteor                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
+sz_Astrarium_Plugins_Meteors                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
 
 ru.Astrarium_Plugins_Novae                  = Новые звёзды
 en.Astrarium_Plugins_Novae             		= Novae stars
