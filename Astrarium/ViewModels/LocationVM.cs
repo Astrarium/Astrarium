@@ -931,7 +931,7 @@ namespace Astrarium.ViewModels
         }
 
         /// <inheritdoc />
-        public override object Payload => new { Name = LocationName, Latitude = ObserverLocation.Latitude, Longitude = ObserverLocation.Longitude, Elevation = Elevation, UtcOffset = UtcOffset.ToString() };
+        public override object Payload => new { Name = LocationName, Location = ObserverLocation.ToShortString(), Elevation = Elevation, UtcOffset = UtcOffset.ToString() };
 
         /// <summary>
         /// Raised when user presses "Apply" / "Select" button

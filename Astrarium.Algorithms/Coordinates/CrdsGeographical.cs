@@ -100,6 +100,11 @@ namespace Astrarium.Algorithms
             return $"Latitude: {new DMS(Latitude)}; Longitude:{new DMS(Longitude)}";
         }
 
+        public string ToShortString()
+        {
+            return $"{Math.Abs(Latitude).ToString("F6")}{(Latitude > 0 ? "N" : "S")} {Math.Abs(Longitude).ToString("F6")}{(Longitude > 0 ? "W" : "E")}";
+        }
+
         public override bool Equals(object obj)
         {
             if (GetHashCode() != obj.GetHashCode())
