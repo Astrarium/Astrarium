@@ -71,7 +71,7 @@ namespace Astrarium.Plugins.Notes
 
             var note = new Note
             {
-                Body = body,
+                Body = body ?? new DummyCelestialObject(type, name),
                 Location = location,
                 Date = (double)jsonObject["Date"],
                 Title = (string)jsonObject["Title"],

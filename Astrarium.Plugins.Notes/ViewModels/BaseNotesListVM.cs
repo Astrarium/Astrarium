@@ -118,7 +118,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
         {
             if (SelectedNote == null) return;
             var note = SelectedNote;
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the note?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
+            if (ViewManager.ShowMessageBox("$Warning", "$Notes.NoteWindow.Warning.DeleteNote", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
             {
                 notesManager.RemoveNote(note);
                 ReloadNotes();
