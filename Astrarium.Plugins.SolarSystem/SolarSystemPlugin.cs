@@ -79,9 +79,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             #region Extending formatters
 
-            Formatters.Default["Appearance.CM"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.P"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.D"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.CM"] = new UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.P"] = new UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.D"] = new UnsignedDoubleFormatter(2, "\u00B0");
 
             #endregion Extending formatters
         }

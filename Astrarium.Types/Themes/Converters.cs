@@ -599,7 +599,7 @@ namespace Astrarium.Types.Themes
 
     public class LongitudeConverter : ValueConverterBase
     {
-        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+        private static IEphemFormatter formatter = Formatters.Longitude;
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -647,7 +647,7 @@ namespace Astrarium.Types.Themes
 
     public class LatitudeConverter : ValueConverterBase
     {
-        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+        private static IEphemFormatter formatter = Formatters.Latitude;
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
