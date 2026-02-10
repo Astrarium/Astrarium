@@ -121,6 +121,14 @@ namespace Astrarium.Types
         bool ShowPrintDialog(PrintDocument document);
 
         /// <summary>
+        /// Shows print dialog for printing visual
+        /// </summary>
+        /// <param name="visual"></param>
+        /// <param name="title"></param>
+        /// <returns></returns>
+        bool ShowPrintDialog(System.Windows.Media.Visual visual, string title);
+
+        /// <summary>
         /// Shows print preview dialog
         /// </summary>
         /// <returns>Dialog result (true or false)</returns>

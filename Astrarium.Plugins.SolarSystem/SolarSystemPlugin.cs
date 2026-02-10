@@ -6,7 +6,6 @@ using Astrarium.Types;
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Windows.Controls;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -75,6 +74,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 
+            var menuLunarCalendar = new MenuItem("Lunar calendar", new Command(ShowLunarCalendar));
+            MenuItems.Add(MenuItemPosition.MainMenuTools, menuLunarCalendar);
+
             #endregion UI integration
 
             #region Extending formatters
@@ -84,6 +86,12 @@ namespace Astrarium.Plugins.SolarSystem
             Formatters.Default["Appearance.D"] = new UnsignedDoubleFormatter(2, "\u00B0");
 
             #endregion Extending formatters
+        }
+
+        private void ShowLunarCalendar()
+        {
+            var vm = ViewManager.CreateViewModel<LunarCalendarViewModel>();
+            ViewManager.ShowWindow(vm);
         }
 
         private SolarActivityViewModel GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)

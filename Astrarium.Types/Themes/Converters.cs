@@ -191,6 +191,15 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(object), typeof(bool))]
+    public class NotNanToBoolConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is double val && !double.IsNaN(val);
+        }
+    }
+
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class NotNullToVisibilityConverter : ValueConverterBase
     {

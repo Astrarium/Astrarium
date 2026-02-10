@@ -39,6 +39,11 @@
         public double TransitAltitude { get; set; } = None;
 
         /// <summary>
+        /// Azimuth of the body at the instant of transit.
+        /// </summary>
+        public double TransitAzimuth { get; set; } = None;
+
+        /// <summary>
         /// Gets duration of visibility (time when the body is above the horizon), in fractions of a day.
         /// </summary>
         public double Duration

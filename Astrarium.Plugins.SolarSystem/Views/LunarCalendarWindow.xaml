@@ -1,0 +1,201 @@
+﻿<Window x:Class="Astrarium.Plugins.SolarSystem.Views.LunarCalendarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:c="clr-namespace:Astrarium.Plugins.SolarSystem.Controls"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Astrarium.Plugins.SolarSystem.Views"
+        xmlns:a="Astrarium"
+        mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}"
+        Title="LunarCalendarWindow" Height="450" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="BrushIcon" Color="{Binding ColorIcon}" />
+            <SolidColorBrush x:Key="BrushTextForeground" Color="{Binding ColorTextForeground}" />
+            <SolidColorBrush x:Key="BrushCalendarBackground" Color="{Binding ColorCalendarBackground}" />
+            <SolidColorBrush x:Key="BrushCalendarForeground" Color="{Binding ColorCalendarForeground}" />
+            <SolidColorBrush x:Key="BrushCalendarBorder" Color="{Binding ColorCalendarBorder}" />
+            <SolidColorBrush x:Key="BrushLinkForeground" Color="{Binding ColorLinkForeground}" />
+
+            <Style x:Key="HeaderButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Height" Value="48" />
+                <Setter Property="Width" Value="48" />
+                <Setter Property="Margin" Value="4" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style  x:Key="HeaderStrip" TargetType="StackPanel">
+                <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+                <Setter Property="Orientation" Value="Vertical" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+            </Style>
+
+            <Style x:Key="SmallIcon" TargetType="{x:Type a:PathIcon}" BasedOn="{StaticResource {x:Type a:PathIcon}}">
+                <Setter Property="Margin" Value="4 0" />
+                <Setter Property="Width" Value="12" />
+                <Setter Property="Height" Value="12" />
+                <Setter Property="Fill" Value="{DynamicResource BrushIcon}" />
+            </Style>
+           
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="100" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Style="{StaticResource HeaderStrip}">
+            <StackPanel Margin="0" Orientation="Horizontal" HorizontalAlignment="Center" IsEnabled="{Binding IsCalculating, Converter={a:InverseBoolConverter}}">
+                <Button Style="{StaticResource HeaderButton}" Command="{Binding PrevMonthCommand}">
+                    <a:PathIcon Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+                </Button>
+                <Button Style="{StaticResource HeaderButton}" Command="{Binding SelectDateCommand}" Width="220">
+                    <TextBlock VerticalAlignment="Center" FontSize="28" Text="{Binding SelectedMonth}" />
+                </Button>
+                <Button Style="{StaticResource HeaderButton}" Command="{Binding NextMonthCommand}">
+                    <a:PathIcon Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+                </Button>
+            </StackPanel>
+            <Separator Margin="0" Padding="0" />
+        </StackPanel>
+        
+        <ScrollViewer Grid.Column="0" Grid.Row="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <v:LunarCalendarView 
+                MinWidth="900" Margin="8" x:Name="calendarView" 
+                BorderBrush="{StaticResource BrushCalendarBorder}" 
+                Background="{StaticResource BrushCalendarBackground}"
+                ItemsSource="{Binding Days}" 
+                SelectedDate="{Binding SelectedDate}"
+                Grid.Row="0">
+
+                <v:LunarCalendarView.HeaderCellTemplate>
+                    <DataTemplate>
+                        <TextBlock Margin="4" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Stretch" Foreground="{DynamicResource BrushCalendarForeground}" Text="{Binding Path='.', Converter={a:FormatterConverter}, ConverterParameter={x:Type a:DayOfWeekFormatter}}" />
+                    </DataTemplate>
+                </v:LunarCalendarView.HeaderCellTemplate>
+                <v:LunarCalendarView.DayCellTemplate>
+                    <DataTemplate>
+                        <Grid Margin="8 2" MinWidth="110">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Foreground="{DynamicResource BrushCalendarForeground}" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontSize="48" Text="{Binding DayOfMonth}" />
+
+                            <c:MoonDiskImageControl 
+                                Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" Width="48" Height="48"
+                                Phase="{Binding Illumination}" 
+                                AxisRotation="{Binding PositionAngle}"
+                                NorthTop="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.NorthTop}"
+                                RotateAxis="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.RotateAxis}"
+                                NightMode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.NightMode}"/>
+
+                            <a:PathIcon  Grid.Row="1" Grid.Column="0" Data="{StaticResource PathSunRise}" Style="{StaticResource SmallIcon}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                                <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" IsEnabled="{Binding Sun.Rise, Converter={a:NotNanToBoolConverter}}" Command="{Binding DataContext.ShowSunRiseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding DayOfMonth}">
+                                    <Run Text="{Binding Sun.Rise, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <a:PathIcon Grid.Row="2" Grid.Column="0" Data="{StaticResource PathDuration}" Style="{StaticResource SmallIcon}" />
+
+                            <TextBlock Foreground="{DynamicResource BrushTextForeground}" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Sun.Duration, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+
+                            <a:PathIcon Grid.Row="3" Grid.Column="0" Data="{StaticResource PathSunSet}"  Style="{StaticResource SmallIcon}" />
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left">
+                                <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" IsEnabled="{Binding Sun.Set, Converter={a:NotNanToBoolConverter}}" Command="{Binding DataContext.ShowSunSetCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding DayOfMonth}">
+                                    <Run Text="{Binding Sun.Set, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+                                </Hyperlink> 
+                            </TextBlock>
+
+                            <a:PathIcon HorizontalAlignment="Right"  Grid.Row="1" Grid.Column="2" Data="{StaticResource PathMoonRise}" Style="{StaticResource SmallIcon}" />
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right">
+                                <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" IsEnabled="{Binding Moon.Rise, Converter={a:NotNanToBoolConverter}}" Command="{Binding DataContext.ShowMoonRiseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding DayOfMonth}">
+                                    <Run Text="{Binding Moon.Rise, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <a:PathIcon ToolTip="Lunar transit (culmination)" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="2" Data="{StaticResource PathTransit}" Style="{StaticResource SmallIcon}" />
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="3" HorizontalAlignment="Right">
+                                <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" IsEnabled="{Binding Moon.Transit, Converter={a:NotNanToBoolConverter}}" Command="{Binding DataContext.ShowMoonTransitCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding DayOfMonth}">
+                                    <Run Text="{Binding Moon.Transit, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <a:PathIcon HorizontalAlignment="Right" Grid.Row="3" Grid.Column="2" Data="{StaticResource PathMoonSet}" Style="{StaticResource SmallIcon}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="3" HorizontalAlignment="Right">
+                                <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" IsEnabled="{Binding Moon.Set, Converter={a:NotNanToBoolConverter}}" Command="{Binding DataContext.ShowMoonSetCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding DayOfMonth}">
+                                    <Run Text="{Binding Moon.Set, Converter={a:FormatterConverter}, ConverterParameter={x:Type a:TimeFormatter}}" />
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <StackPanel HorizontalAlignment="Center" Margin="0 4" Visibility="{Binding Phase, Converter={a:NotNullToVisibilityConverter}}" Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="4">
+                                <TextBlock Foreground="{DynamicResource BrushTextForeground}" Text="{Binding PhaseText}" HorizontalAlignment="Center" />
+                                <TextBlock Text=": " />
+                                <TextBlock>
+                                    <Hyperlink Foreground="{DynamicResource BrushLinkForeground}" Command="{Binding DataContext.ShowMoonCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding PhaseInstant}">
+                                        <Run Text="{Binding PhaseInstantString}" />
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+
+                        </Grid>
+                    </DataTemplate>
+                </v:LunarCalendarView.DayCellTemplate>
+            </v:LunarCalendarView>
+        </ScrollViewer>
+        
+        <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" ResizeDirection="Columns" Width="5"  ResizeBehavior="PreviousAndNext" />
+
+        <StackPanel Width="100" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Orientation="Vertical" HorizontalAlignment="Right">
+
+            <CheckBox IsChecked="{Binding PrintMode}" Content="Print mode" />
+            <CheckBox IsChecked="{Binding RotateAxis}" Content="Rotate axis" />
+            <StackPanel Orientation="Vertical" Margin="10 4 0 0" IsEnabled="{Binding RotateAxis, Converter={a:InverseBoolConverter}}">
+                <RadioButton Content="North top" IsChecked="{Binding NorthTop}" />
+                <RadioButton Content="South top" IsChecked="{Binding NorthTop, Converter={a:InverseBoolConverter}}" />
+            </StackPanel>
+            
+            
+            <Button Margin="8" Content="Export..." Command="{Binding ExportCommand}" CommandParameter="{Binding ElementName=calendarView}" />
+            <Button Margin="8" Content="Print..." Command="{Binding PrintCommand}" CommandParameter="{Binding ElementName=calendarView}" />
+
+
+        </StackPanel>
+        
+
+    </Grid>
+</Window>

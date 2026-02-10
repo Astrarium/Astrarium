@@ -125,6 +125,11 @@ namespace Astrarium.Types
             return viewManager.ShowPrintDialog(document);
         }
 
+        public static bool ShowPrintDialog(System.Windows.Media.Visual visual, string title)
+        {
+            return viewManager.ShowPrintDialog(visual, title);
+        }
+
         public static bool ShowPrintPreviewDialog(PrintDocument document)
         {
             return viewManager.ShowPrintPreviewDialog(document);
