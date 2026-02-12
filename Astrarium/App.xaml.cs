@@ -1,17 +1,19 @@
 ﻿using Astrarium.Algorithms;
-using Ninject;
 using Astrarium.Config;
 using Astrarium.Types;
 using Astrarium.ViewModels;
+using Astrarium.Workers;
+using Ninject;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Threading;
+using System.Windows.Forms.VisualStyles;
 
 namespace Astrarium
 {
@@ -98,13 +100,12 @@ namespace Astrarium
         private void ConfigureContainer(IProgress<string> progress)
         {
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
-            kernel.Bind<IAppUpdater>().To<AppUpdater>().InSingletonScope();
-            kernel.Bind<IDonationsHelper>().To<DonationsHelper>().InSingletonScope();
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
             kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
+            kernel.Bind<IWorkersCollection>().To<WorkersCollection>().InSingletonScope();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
 
@@ -285,6 +286,20 @@ namespace Astrarium
                 string name = AbstractPlugin.GetName(plugin.GetType());
                 progress.Report($"Initializing plugin {name}");
                 plugin.Initialize();
+            }
+
+            // collect all worker types
+            Type[] workerTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => typeof(IWorker).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                .ToArray();
+
+            var workers = kernel.Get<IWorkersCollection>();
+            foreach (Type workerType in workerTypes)
+            {
+                var worker = kernel.Get(workerType);
+                kernel.Bind(workerType).ToConstant(worker).InSingletonScope();
+                workers.AddWorker((IWorker)worker);
             }
         }
 

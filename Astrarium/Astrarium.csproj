@@ -10,6 +10,7 @@
     <Description>Open-source .Net planetarium</Description>
     <RootNamespace>Astrarium</RootNamespace>
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +25,7 @@
   </ItemGroup>
 
   <PropertyGroup> 
-    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages> 
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -229,6 +230,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Astrarium.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Device" />
   </ItemGroup>
 
   <ItemGroup>

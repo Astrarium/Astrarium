@@ -938,6 +938,12 @@ namespace Astrarium.ViewModels
         /// </summary>
         private void Ok()
         {
+            if (string.IsNullOrWhiteSpace(LocationName))
+            {
+                ViewManager.ShowMessageBox("$Warning", "Please specify location name");
+                return;
+            }
+
             Close(true);
         }
 
