@@ -40,6 +40,8 @@ namespace Astrarium.ViewModels
             }
         }
 
+        public bool IsLocationCheckEnabled => Environment.OSVersion.Version.Major >= 10;
+
         public GeneralSettingsVM(ISettings settings)
         {
             Settings = settings;

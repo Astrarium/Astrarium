@@ -37,6 +37,7 @@
         <ComboBox Margin="2 0 2 2" ItemsSource="{Binding Themes}" SelectedValue="{Binding SelectedTheme}" />
 
         <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.CheckUpdatesOnStart}" IsChecked="{Binding Settings.CheckUpdatesOnStart}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.CheckLocationOnStart}" IsChecked="{Binding Settings.CheckLocationOnStart}" Visibility="{Binding IsLocationCheckEnabled, Converter={s:BoolToVisibilityConverter}}" />
         <CheckBox Margin="2" Content="{t:Text Settings.TimeSyncOnStart}" IsChecked="{Binding Settings.TimeSyncOnStart}" />
         <CheckBox Margin="2" Content="{t:Text Settings.StartMaximized}" IsChecked="{Binding Settings.StartMaximized}" />
         <CheckBox Margin="2" Content="{t:Text Settings.RememberWindowSize}" IsChecked="{Binding Settings.RememberWindowSize}" IsEnabled="{Binding Settings.StartMaximized, Converter={s:InverseBoolConverter}}" />

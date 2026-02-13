@@ -3,7 +3,6 @@ using Astrarium.Types;
 using System;
 using System.Device.Location;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -11,77 +10,85 @@ namespace Astrarium.Workers
 {
     public class LocationChecker : IWorker
     {
-        private readonly GeoCoordinateWatcher watcher = null;
         private readonly ISettings settings = null;
+        private GeoCoordinateWatcher watcher = null;
+        private bool permissionRequested = false;
 
         public LocationChecker(ISettings settings)
         {
             this.settings = settings;
-            watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.Default);
-            watcher.StatusChanged += StatusChanged;
         }
 
         public void Run()
         {
-            Task.Run(async () =>
+            if (settings.Get("CheckLocationOnStart") && Environment.OSVersion.Version.Major >= 10)
             {
-                await Task.Delay(TimeSpan.FromSeconds(3));
-                bool result = watcher.TryStart(true, TimeSpan.FromSeconds(10));
-                if (result)
+                Task.Run(async () =>
                 {
-                    if (watcher.Permission == GeoPositionPermission.Denied)
-                    {
-                        RequestPermission();
-                    }
-                }
-            });
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    RestartWatcher();
+                });
+            }
         }
 
-        private void StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
+        private void RestartWatcher()
         {
-            if (e.Status == GeoPositionStatus.Ready)
+            if (watcher != null)
             {
-                if (watcher.Position.Location.IsUnknown)
+                CloseWatcher();
+            }
+            watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.Default);
+            watcher.StatusChanged += StatusChanged;
+            watcher.Start();
+        }
+
+        private void CloseWatcher()
+        {
+            watcher.StatusChanged -= StatusChanged;
+            watcher.Stop();
+            watcher.Dispose();
+        }
+
+        private async void StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
+        {
+            if (e.Status == GeoPositionStatus.Ready && !watcher.Position.Location.IsUnknown)
+            {
+                TryGetPosition();
+            }
+            else if (e.Status == GeoPositionStatus.NoData && watcher.Permission == GeoPositionPermission.Denied && watcher.Position.Location.IsUnknown) 
+            {
+                if (!permissionRequested)
                 {
                     RequestPermission();
                 }
                 else
                 {
-                    TryGetPosition();
+                    await Task.Delay(5000);
+                    RestartWatcher();
                 }
             }
-            else if (e.Status == GeoPositionStatus.Disabled ||
-                    (e.Status == GeoPositionStatus.NoData &&
-                    watcher.Permission == GeoPositionPermission.Denied))
-            {
-                RequestPermission();
-            }
-
-            //watcher.StatusChanged -= StatusChanged;
-            //watcher.Stop();
         }
 
         private void TryGetPosition()
         {
-            var currentLocation = watcher.Position.Location;
-            if (!currentLocation.IsUnknown)
-            {
-                double utcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).TotalHours;
-                var location = new CrdsGeographical(
-                    -currentLocation.Longitude,
-                    currentLocation.Latitude,
-                    utcOffset, 0, Text.Get("MyCurrentLocation"));
+            var position = watcher.Position.Location;
+            double utcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).TotalHours;
+            var actualLocation = new CrdsGeographical(
+                -position.Longitude,
+                position.Latitude,
+                utcOffset, 0, Text.Get("MyCurrentLocation"));
 
-                CheckLocation(location);
-            }        
+            CloseWatcher();
+            CheckLocation(actualLocation);
         }
 
         private void RequestPermission()
         {
+            permissionRequested = true;
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // ask user to enable location detection in settings
-                if (ViewManager.ShowMessageBox("Attention", "To calculate more accurately positions of celestial bodies on the star map and make your observations more productive, the app requires access to your location. Would you like to open system settings and enable location services?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$Warning", "$EnableLocationServicesRequest", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     OpenSystemLocationSettings();
                 }
@@ -102,7 +109,7 @@ namespace Astrarium.Workers
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     // ask user to change location
-                    if (ViewManager.ShowMessageBox("Attention", $"It seems that your actual location is too far ({(int)distance} km away) from observer location specified in application settings. Would you like to change settings?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (ViewManager.ShowMessageBox("$Warning", Text.Get("DetectedLocationIsFarAwayMessage", ("distance", ((int)distance).ToString())), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         ViewManager.RaiseCommand("SelectLocation", actualLocation);
                     }
@@ -110,27 +117,13 @@ namespace Astrarium.Workers
             }
         }
 
-        private async void OpenSystemLocationSettings()
+        private void OpenSystemLocationSettings()
         {
             try
             {
-                // Windows 10/11
-                if (Environment.OSVersion.Version.Major >= 10)
-                {
-                    Process.Start("ms-settings:privacy-location");
-                }
-                // Previous Windows versions
-                else
-                {
-                    Process.Start("control.exe", "input.dll,,{LOCATION}");
-                }
-
-                await Task.Delay(TimeSpan.FromMinutes(1));
-                if (watcher.TryStart(true, TimeSpan.FromSeconds(10)))
-                {
-                    //TryGetPosition();
-                }
-
+                // Works on Windows 10 and above
+                Process.Start("ms-settings:privacy-location");
+                RestartWatcher();
             }
             catch (Exception ex)
             {
