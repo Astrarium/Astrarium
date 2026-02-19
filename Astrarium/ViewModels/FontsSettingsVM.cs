@@ -1,29 +1,20 @@
 ﻿using Astrarium.Types;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.ViewModels
 {
-    public class FontsSettingsVM : ViewModelBase
+    public class FontsSettingsVM : SettingsViewModel
     {
-        /// <summary>
-        /// Settings instance
-        /// </summary>
-        public ISettings Settings { get; private set; }
-
         /// <summary>
         /// Collection of settings of type <see cref="Font"/>,
         /// needed for building dynamic list of font pickers in UI.
         /// </summary>
         public ICollection<FontSetting> FontSettings { get; private set; }
 
-        public FontsSettingsVM(ISettings settings)
+        public FontsSettingsVM(ISettings settings) : base(settings)
         {
-            Settings = settings;
             FontSettings = settings.OfType<Font>().Select(name => new FontSetting(settings, name)).ToArray();
         }
 

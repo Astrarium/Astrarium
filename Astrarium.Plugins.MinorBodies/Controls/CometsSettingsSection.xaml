@@ -8,18 +8,11 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     Title="{t:Text Section.Comets}"
+    Icon="M43.75 62.5c0 3.45-2.8 6.25-6.25 6.25s-6.25-2.8-6.25-6.25 2.8-6.25 6.25-6.25 6.25 2.8 6.25 6.25Zm5.47-7.46c.31-.21.72-.55.93-.77L76.29 28.12l-4.41-4.41L45.73 49.85c-.22.21-.56.62-.77.93.19-.31.42-.8.52-1.09L54 26.26l-5.87-2.14L38.7 50.06c-6.87-.66-12.98 4.37-13.64 11.24-.66 6.87 4.37 12.98 11.24 13.64S49.28 70.57 49.94 63.7c.08-.62.08-1.78 0-2.4l25.94-9.43L73.74 46 50.31 54.519c-.29.101-.78.331-1.09.521Z"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
-    <c:SettingsSection.Icon>
-        <DrawingImage>
-            <DrawingImage.Drawing>
-                <DrawingGroup ClipGeometry="M0,0 V128 H128 V0 H0 Z">
-                    <GeometryDrawing Brush="White" Geometry="M56.42 57.43a18.9 18.9 0 0 0-3.05-6.56L74.24 30 70 25.76 49.13 46.63a18.9 18.9 0 0 0-6.56-3.05L54 20.66 48.66 18 36.1 43.1A19 19 0 1 0 56.9 63.9L82 51.34 79.34 46ZM38 75A13 13 0 1 1 51 62 13 13 0 0 1 38 75Z" />
-                </DrawingGroup>
-            </DrawingImage.Drawing>
-        </DrawingImage>
-    </c:SettingsSection.Icon>
+    
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.Comets}" IsChecked="{Binding Settings.Comets}" Margin="2" />
         <CheckBox Content="{t:Text Settings.CometsLabels}" IsChecked="{Binding Settings.CometsLabels}" IsEnabled="{Binding Settings.Comets}" Margin="2" />

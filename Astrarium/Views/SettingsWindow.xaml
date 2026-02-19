@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:a="Astrarium"
         mc:Ignorable="d"
         Title="{t:Text SettingsWindow.Title}" 
         Width="1000" Height="600"
@@ -26,35 +27,23 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ListView 
-                Padding="4"
+            <ListBox
+                Padding="2"
+				BorderThickness="0"
                 Grid.Column="0"
-                ItemsSource="{Binding Path=SettingsSections, Mode=OneWay}"                               
-                SelectionMode="Single" 
-                SelectedItem="{Binding SelectedSection}"
-                VerticalContentAlignment="Top"
-                IsSynchronizedWithCurrentItem="True"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                ScrollViewer.CanContentScroll="False">
+                ItemsSource="{Binding Sections, Mode=OneWay}"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedSection}">
 
-                <ListView.ItemTemplate>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Height="20">
-                            <Rectangle Margin="2 2 8 2" Width="16" Height="16">
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                                </Rectangle.Fill>
-                                <Rectangle.OpacityMask>
-                                    <ImageBrush  AlignmentX="Center" AlignmentY="Center" ImageSource="{Binding Icon}"  Stretch="Fill" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                            <a:PathIcon Data="{Binding Icon}" IsEnabled="False" Width="14" Height="14" VerticalAlignment="Center" />
+                            <TextBlock Margin="8 0 0 0" Text="{Binding Title}" VerticalAlignment="Center" />
                         </StackPanel>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-                
-            </ListView>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <GridSplitter 
                 Grid.Column="1" 

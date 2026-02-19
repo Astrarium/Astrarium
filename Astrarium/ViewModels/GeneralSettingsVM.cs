@@ -1,21 +1,11 @@
 ﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.ViewModels
 {
-    public class GeneralSettingsVM : ViewModelBase
+    public class GeneralSettingsVM : SettingsViewModel
     {
-        /// <summary>
-        /// Settings instance
-        /// </summary>
-        public ISettings Settings { get; private set; }
-
         public CultureInfo[] Languages { get; private set; }
 
         public CultureInfo SelectedLanguage
@@ -42,9 +32,8 @@ namespace Astrarium.ViewModels
 
         public bool IsLocationCheckEnabled => Environment.OSVersion.Version.Major >= 10;
 
-        public GeneralSettingsVM(ISettings settings)
+        public GeneralSettingsVM(ISettings settings) : base(settings)
         {
-            Settings = settings;
             Languages = Text.GetLocales();
             Themes = new string[] { "DeepBlue", "Graphite", "Marsh" };
             NotifyPropertyChanged(nameof(SelectedLanguage));

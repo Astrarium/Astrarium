@@ -4142,10 +4142,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:PathIcon}">
-                    <!--<Viewbox Stretch="{TemplateBinding Stretch}" 
-                             Width="{TemplateBinding Width}"
-                             Height="{TemplateBinding Height}">-->
-                        <Path x:Name="PART_Path"
+                    <Path x:Name="PART_Path"
                               Width="{TemplateBinding Width}"
                               Height="{TemplateBinding Height}"
                               Data="{TemplateBinding Data}"
@@ -4153,7 +4150,6 @@
                               Stroke="{TemplateBinding Stroke}"
                               StrokeThickness="{TemplateBinding StrokeThickness}"
                               Stretch="{TemplateBinding Stretch}"/>
-                    <!--</Viewbox>-->
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
