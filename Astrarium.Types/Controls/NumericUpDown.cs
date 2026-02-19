@@ -153,10 +153,19 @@ namespace Astrarium.Types.Controls
             _DownButton = Template.FindName("PART_DownButton", this) as RepeatButton;
             _UpButton.Click += Increment;
             _DownButton.Click += Decrement;
+            _TextBox.MouseWheel += TextBox_MouseWheel;
             _TextBox.LostFocus += TextBox_LostFocus;
             _TextBox.PreviewTextInput += TextBox_PreviewTextInput;
             _TextBox.PreviewKeyDown += TextBox_PreviewKeyDown;
             DataObject.AddPastingHandler(_TextBox, new DataObjectPastingEventHandler(TextBox_PreviewPaste));
+        }
+
+        private void TextBox_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta < 0)
+                Increment(sender, new RoutedEventArgs());
+            else
+                Decrement(sender, new RoutedEventArgs());
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)

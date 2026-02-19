@@ -38,6 +38,28 @@ namespace Astrarium.Types.Controls
             set { SetValue(LoopDecrementCommandProperty, value); }
         }
 
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            if (Loop)
+            {
+                if (SelectedIndex == 0 && e.Delta > 0)
+                {
+                    LoopDecrementCommand?.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+
+                if (SelectedIndex == Items.Count - 1 && e.Delta < 0)
+                {
+                    LoopIncrementCommand?.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            base.OnPreviewMouseWheel(e);
+        }
+
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             if (Loop)
