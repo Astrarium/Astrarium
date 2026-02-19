@@ -29,25 +29,6 @@
     s:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={s:BoolToVisibilityConverter}}"
     Title="Astrarium" Height="768" Width="1024">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <DrawingImage x:Key="ImageLock">
-                <DrawingImage.Drawing>
-                    <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
-                        <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M50.00049,14.06006C38.51611,14.06006,29.17237,23.40283,29.17237,34.88721L29.17237,41.73682 24.41163,41.73682C22.20265,41.73682,20.41163,43.52784,20.41163,45.73682L20.41163,81.93994C20.41163,84.14892,22.20265,85.93994,24.41163,85.93994L75.58839,85.93994C77.79737,85.93994,79.58839,84.14892,79.58839,81.93994L79.58839,45.73682C79.58839,43.52784,77.79737,41.73682,75.58839,41.73682L70.82765,41.73682 70.82765,34.88721C70.82764,23.40283,61.48486,14.06006,50.00049,14.06006z M37.17236,34.88721C37.17236,27.81397 42.92724,22.06006 50.00048,22.06006 57.07372,22.06006 62.82763,27.81397 62.82763,34.88721L62.82763,41.73682 37.17236,41.73682 37.17236,34.88721z M71.58838,49.73682L71.58838,77.93994 28.41162,77.93994 28.41162,49.73682 71.58838,49.73682z" />
-                    </DrawingGroup>
-                </DrawingImage.Drawing>
-            </DrawingImage>
-            <DrawingImage x:Key="ImageUnlock">
-                <DrawingImage.Drawing>
-                    <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
-                        <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M66.82764,40.61035C69.03662,40.61035,70.82764,38.81933,70.82764,36.61035L70.82764,25.76172C70.82764,14.27734 61.48487,4.9336 50.00049,4.9336 38.51611,4.9336 29.17237,14.27735 29.17237,25.76172L29.17237,50.8623 24.41163,50.8623C22.20265,50.8623,20.41163,52.65332,20.41163,54.8623L20.41163,91.0664C20.41163,93.27538,22.20265,95.0664,24.41163,95.0664L75.58839,95.0664C77.79737,95.0664,79.58839,93.27538,79.58839,91.0664L79.58839,54.8623C79.58839,52.65332,77.79737,50.8623,75.58839,50.8623L37.17236,50.8623 37.17236,25.76172C37.17236,18.68848 42.92724,12.9336 50.00048,12.9336 57.07372,12.9336 62.82763,18.68848 62.82763,25.76172L62.82763,36.61035C62.82764,38.81934,64.61865,40.61035,66.82764,40.61035z M71.58838,58.8623L71.58838,87.0664 28.41162,87.0664 28.41162,58.8623 71.58838,58.8623z" />
-                    </DrawingGroup>
-                </DrawingImage.Drawing>
-            </DrawingImage>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -326,15 +307,15 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type ToggleButton}">
                                             <Border x:Name="Border">
-                                                <Image x:Name="LockedIcon" Stretch="UniformToFill" Height="14" Width="14" VerticalAlignment="Center" Source="{StaticResource ResourceKey=ImageUnlock}" />
+                                                <cc:PathIcon Name="LockedIcon" Margin="0 2 0 0" Width="16" Height="16" VerticalAlignment="Center" />
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="LockedIcon" Property="Source" Value="{StaticResource ResourceKey=ImageLock}" />
+                                                    <Setter TargetName="LockedIcon" Property="Data" Value="F1 M100,125z M0,0z M50.00049,14.06006C38.51611,14.06006,29.17237,23.40283,29.17237,34.88721L29.17237,41.73682 24.41163,41.73682C22.20265,41.73682,20.41163,43.52784,20.41163,45.73682L20.41163,81.93994C20.41163,84.14892,22.20265,85.93994,24.41163,85.93994L75.58839,85.93994C77.79737,85.93994,79.58839,84.14892,79.58839,81.93994L79.58839,45.73682C79.58839,43.52784,77.79737,41.73682,75.58839,41.73682L70.82765,41.73682 70.82765,34.88721C70.82764,23.40283,61.48486,14.06006,50.00049,14.06006z M37.17236,34.88721C37.17236,27.81397 42.92724,22.06006 50.00048,22.06006 57.07372,22.06006 62.82763,27.81397 62.82763,34.88721L62.82763,41.73682 37.17236,41.73682 37.17236,34.88721z M71.58838,49.73682L71.58838,77.93994 28.41162,77.93994 28.41162,49.73682 71.58838,49.73682z" />
                                                     <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushControlBackground}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsChecked" Value="False">
-                                                    <Setter TargetName="LockedIcon" Property="Source" Value="{StaticResource ResourceKey=ImageUnlock}" />
+                                                    <Setter TargetName="LockedIcon" Property="Data" Value="F1 M100,125z M0,0z M66.82764,40.61035C69.03662,40.61035,70.82764,38.81933,70.82764,36.61035L70.82764,25.76172C70.82764,14.27734 61.48487,4.9336 50.00049,4.9336 38.51611,4.9336 29.17237,14.27735 29.17237,25.76172L29.17237,50.8623 24.41163,50.8623C22.20265,50.8623,20.41163,52.65332,20.41163,54.8623L20.41163,91.0664C20.41163,93.27538,22.20265,95.0664,24.41163,95.0664L75.58839,95.0664C77.79737,95.0664,79.58839,93.27538,79.58839,91.0664L79.58839,54.8623C79.58839,52.65332,77.79737,50.8623,75.58839,50.8623L37.17236,50.8623 37.17236,25.76172C37.17236,18.68848 42.92724,12.9336 50.00048,12.9336 57.07372,12.9336 62.82763,18.68848 62.82763,25.76172L62.82763,36.61035C62.82764,38.81934,64.61865,40.61035,66.82764,40.61035z M71.58838,58.8623L71.58838,87.0664 28.41162,87.0664 28.41162,58.8623 71.58838,58.8623z" />
                                                     <Setter TargetName="Border" Property="Background" Value="Transparent"/>
                                                 </Trigger>
                                                 <Trigger Property="IsMouseOver" Value="True">

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -38,6 +39,11 @@ namespace Astrarium.ViewModels
         private readonly ISettings settings;
 
         /// <summary>
+        /// Location detector instance
+        /// </summary>
+        private readonly ILocationDetector locationDetector;
+
+        /// <summary>
         /// Geo locations manager instance.
         /// </summary>
         private readonly IGeoLocationsManager locationsManager;
@@ -50,11 +56,13 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Creates new instance of the ViewModel
         /// </summary>
-        public LocationVM(IGeoLocationsManager locationsManager, ISettings settings)
+        public LocationVM(IGeoLocationsManager locationsManager, ILocationDetector locationDetector, ISettings settings)
         {
             this.settings = settings;
             this.settings.SettingValueChanged += OnSettingValueChanged;
 
+            this.locationDetector = locationDetector;
+            this.locationDetector.OnLocationDetected += OnLocationDetected;
             this.locationsManager = locationsManager;
 
             IsDarkMode = settings.Get("NightMode");
@@ -77,6 +85,11 @@ namespace Astrarium.ViewModels
             SetValue(nameof(TileServer), tileServer ?? TileServers.First());
             SetValue(nameof(OverlayTileServer), overlayServer);
             SetValue(nameof(OverlayOpacity), settings.Get(OVERLAY_OPACITY_SETTING_NAME, 0.5f));
+        }
+
+        private void OnLocationDetected(CrdsGeographical location)
+        {
+            ObserverLocation = location;
         }
 
         public override void OnActivated()
@@ -145,6 +158,11 @@ namespace Astrarium.ViewModels
         /// Executed when user selects "nearest location" position from context menu
         /// </summary>
         public ICommand SelectNearestLocationCommand => new Command(SelectNearestLocation);
+
+        /// <summary>
+        /// Executed when user clicks on "detect location" button
+        /// </summary>
+        public ICommand DetectLocationCommand => new Command(DetectLocation);
 
         #endregion Commands
 
@@ -329,6 +347,11 @@ namespace Astrarium.ViewModels
             get => GetValue<bool>(nameof(IsDarkMode));
             protected set => SetValue(nameof(IsDarkMode), value);
         }
+
+        /// <summary>
+        /// Flag indicating location detection is enabled (Win 10 and above)
+        /// </summary>
+        public bool IsLocationDetectionEnabled => !SearchMode && Environment.OSVersion.Version.Major >= 10;
 
         /// <summary>
         /// Brush to draw location name on the map
@@ -624,7 +647,7 @@ namespace Astrarium.ViewModels
             {
                 SetValue(nameof(SearchString), value);
                 bool searchMode = SearchMode;
-                NotifyPropertyChanged(nameof(SearchString), nameof(SearchMode));
+                NotifyPropertyChanged(nameof(SearchString), nameof(SearchMode), nameof(IsLocationDetectionEnabled));
                 if (SearchMode)
                 {
                     if (!searchMode)
@@ -748,6 +771,17 @@ namespace Astrarium.ViewModels
         private void SelectNearestLocation()
         {
             ObserverLocation = NearestLocation;
+        }
+
+        /// <summary>
+        /// Handler for <see cref="DetectLocationCommand"/>
+        /// </summary>
+        private void DetectLocation()
+        {
+            if (IsLocationDetectionEnabled)
+            {
+                locationDetector.Detect();
+            }
         }
 
         /// <summary>

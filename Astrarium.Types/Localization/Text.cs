@@ -190,7 +190,7 @@ namespace Astrarium.Types
 
                                                     if (!LocalizationStrings.ContainsKey(key))
                                                     {
-                                                        // special character to mark untrnslated strings
+                                                        // special character to mark untranslated strings
                                                         if (value.StartsWith("???"))
                                                         {
                                                             value = value.Substring(3);

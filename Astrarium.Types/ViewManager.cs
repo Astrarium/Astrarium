@@ -189,12 +189,12 @@ namespace Astrarium.Types
             viewManager.ShowTooltipMessage(mouse, message);
         }
 
-        public static void RegisterCommand(string name, ICommand command)
+        public static void RegisterMessageHandler(string name, ICommand command)
         {
             commands[name] = command;
         }
 
-        public static void RaiseCommand(string name, object parameters = null)
+        public static void RaiseMessage(string name, object parameters = null)
         {
             if (commands.ContainsKey(name))
             {

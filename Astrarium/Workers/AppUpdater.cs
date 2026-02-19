@@ -20,7 +20,7 @@ namespace Astrarium.Workers
         public AppUpdater(ISettings settings)
         {
             this.settings = settings;
-            ViewManager.RegisterCommand("CheckForUpdates", new Command(CheckForUpdates));
+            ViewManager.RegisterMessageHandler("CheckForUpdates", new Command(CheckForUpdates));
         }
 
         public void Run()

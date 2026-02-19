@@ -204,7 +204,7 @@ namespace Astrarium.ViewModels
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
 
-            ViewManager.RegisterCommand("SelectLocation", SelectLocationCommand);
+            ViewManager.RegisterMessageHandler("SelectLocation", SelectLocationCommand);
 
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
@@ -831,12 +831,12 @@ namespace Astrarium.ViewModels
 
         private void CheckForUpdates()
         {
-            ViewManager.RaiseCommand("CheckForUpdates");
+            ViewManager.RaiseMessage("CheckForUpdates");
         }
 
         private void OpenDonationDialog()
         {
-            ViewManager.RaiseCommand("OpenDonationDialog");
+            ViewManager.RaiseMessage("OpenDonationDialog");
         }
 
         private void GoToObject(CelestialObject body)

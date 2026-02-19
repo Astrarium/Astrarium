@@ -57,6 +57,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBox x:Name="txtSearchString" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
@@ -83,24 +84,16 @@
 
                 <Button Grid.Column="1" Margin="3 3 1 3" Width="24" Height="24" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={s:BoolToVisibilityConverter}}">
                     <Button.Content>
-                        <Rectangle Margin="2" Width="8" Height="8">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{DynamicResource ColorForeground}" />
-                            </Rectangle.Fill>
-                            <Rectangle.OpacityMask>
-                                <ImageBrush AlignmentX="Left" AlignmentY="Top" Stretch="UniformToFill">
-                                    <ImageBrush.ImageSource>
-                                        <DrawingImage>
-                                            <DrawingImage.Drawing>
-                                                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
-                                                    <GeometryDrawing Brush="White" Geometry="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z " />
-                                                </DrawingGroup>
-                                            </DrawingImage.Drawing>
-                                        </DrawingImage>
-                                    </ImageBrush.ImageSource>
-                                </ImageBrush>
-                            </Rectangle.OpacityMask>
-                        </Rectangle>
+                        <c:PathIcon Width="8" Height="8" Margin="2" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+                    </Button.Content>
+                </Button>
+
+                <Button Grid.Column="2" Margin="3 3 1 3" Padding="8 0" Width="Auto" Height="24" VerticalContentAlignment="Center" Command="{Binding DetectLocationCommand}" Visibility="{Binding IsLocationDetectionEnabled, Converter={s:BoolToVisibilityConverter}}">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <c:PathIcon  Margin="0 0 4 0" Data="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M3.05,13H1V11H3.05C3.5,6.83 6.83,3.5 11,3.05V1H13V3.05C17.17,3.5 20.5,6.83 20.95,11H23V13H20.95C20.5,17.17 17.17,20.5 13,20.95V23H11V20.95C6.83,20.5 3.5,17.17 3.05,13M12,5A7,7 0 0,0 5,12A7,7 0 0,0 12,19A7,7 0 0,0 19,12A7,7 0 0,0 12,5Z" />
+                            <TextBlock Text="{t:Text DetectLocation}" />
+                        </StackPanel>
                     </Button.Content>
                 </Button>
             </Grid>

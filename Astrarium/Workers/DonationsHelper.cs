@@ -26,7 +26,7 @@ namespace Astrarium.Workers
             settingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium");
             statsFile = Path.Combine(settingsDir, "Stats.json");
 
-            ViewManager.RegisterCommand("OpenDonationDialog", new Command(OpenDonationDialog));
+            ViewManager.RegisterMessageHandler("OpenDonationDialog", new Command(OpenDonationDialog));
         }
 
         public void Run()
