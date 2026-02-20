@@ -22,11 +22,11 @@ namespace Astrarium.Plugins.Meteors
                 new MenuItem("$Astrarium.Plugins.Meteors.ToolsMenu",
                 new Command(() => ViewManager.ShowWindow<MeteorShowersVM>(ViewFlags.SingleInstance))));
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMeteor", "$Settings.Meteors", new SimpleBinding(settings, "Meteors", "IsChecked")));
 
             DefineSettingsSection<MeteorsSettingsSection, SettingsViewModel>();
-
-            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

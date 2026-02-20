@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     mc:Ignorable="d"
     Title="{t:Text SearchWindow.Title}" 
     Width="600" Height="600"
@@ -56,14 +57,9 @@
                                     Padding="{TemplateBinding Padding}"
                                     SnapsToDevicePixels="true">
                                     <StackPanel Orientation="Horizontal">
-                                        <Rectangle x:Name="Icon" Margin="2" Width="16" Height="16" ToolTip="{Binding Body, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                                            <Rectangle.Fill>
-                                                <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                                            </Rectangle.Fill>
-                                            <Rectangle.OpacityMask>
-                                                <ImageBrush ImageSource="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
-                                            </Rectangle.OpacityMask>
-                                        </Rectangle>
+                                        <Border Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                                            <c:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" />
+                                        </Border>
                                         <TextBlock Padding="4 0 0 0" Text="{Binding Name}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>

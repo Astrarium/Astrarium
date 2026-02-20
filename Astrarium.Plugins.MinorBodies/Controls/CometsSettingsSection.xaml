@@ -8,7 +8,7 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     Title="{t:Text Section.Comets}"
-    Icon="M43.75 62.5c0 3.45-2.8 6.25-6.25 6.25s-6.25-2.8-6.25-6.25 2.8-6.25 6.25-6.25 6.25 2.8 6.25 6.25Zm5.47-7.46c.31-.21.72-.55.93-.77L76.29 28.12l-4.41-4.41L45.73 49.85c-.22.21-.56.62-.77.93.19-.31.42-.8.52-1.09L54 26.26l-5.87-2.14L38.7 50.06c-6.87-.66-12.98 4.37-13.64 11.24-.66 6.87 4.37 12.98 11.24 13.64S49.28 70.57 49.94 63.7c.08-.62.08-1.78 0-2.4l25.94-9.43L73.74 46 50.31 54.519c-.29.101-.78.331-1.09.521Z"
+    Icon="{StaticResource IconComet}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">

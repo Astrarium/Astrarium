@@ -36,11 +36,11 @@ namespace Astrarium.Plugins.Horizon
             // Fonts
             DefineSetting("CardinalDirectionsFont", new Font("Arial", 14, FontStyle.Bold));
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
 
             DefineSettingsSection<HorizonSettingsSection, HorizonSettingsViewModel>();
-
-            ExportResourceDictionaries("Images.xaml");
 
             settings.SettingValueChanged += (settingName, value) =>
             {

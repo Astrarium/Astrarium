@@ -222,7 +222,7 @@ namespace Astrarium.Plugins.Tycho2
                     properNames = sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
 
                     // Open Tycho2 catalog file
-                    catalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+                    catalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                     IsLoaded = true;
                 }

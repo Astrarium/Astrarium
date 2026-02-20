@@ -47,10 +47,10 @@ namespace Astrarium.Plugins.MinorBodies
             DefineSettingsSection<CometsSettingsSection, CometsSettingsVM>();
             DefineSettingsSection<AsteroidsSettingsSection, AsteroidsSettingsVM>();
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconAsteroid", "$Settings.Asteroids", new SimpleBinding(settings, "Asteroids", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconComet", "$Settings.Comets", new SimpleBinding(settings, "Comets", "IsChecked")));
-
-            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

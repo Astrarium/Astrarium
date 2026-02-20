@@ -235,14 +235,9 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Background="Transparent">
-                                <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding CelestialObject, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                                    <Rectangle.Fill>
-                                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                                    </Rectangle.Fill>
-                                    <Rectangle.OpacityMask>
-                                        <ImageBrush ImageSource="{Binding CelestialObject, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
-                                    </Rectangle.OpacityMask>
-                                </Rectangle>
+                                <Border Background="Transparent" ToolTip="{Binding CelestialObject, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                                    <c:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding CelestialObject, Converter={s:CelestialObjectToIconConverter}}" />
+                                </Border>
                                 <TextBlock Padding="4 0 0 0" Text="{Binding CelestialObject, Converter={s:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>

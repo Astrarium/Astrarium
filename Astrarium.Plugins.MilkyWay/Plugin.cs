@@ -12,8 +12,9 @@ namespace Astrarium.Plugins.MilkyWay
             DefineSetting("MilkyWayDimOnZoom", true);
             DefineSettingsSection<MilkyWaySettingsSection, SettingsViewModel>();
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMilkyWay", "$Settings.MilkyWay", new SimpleBinding(settings, "MilkyWay", "IsChecked")));
             ExportResourceDictionaries("Images.xaml");
+
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMilkyWay", "$Settings.MilkyWay", new SimpleBinding(settings, "MilkyWay", "IsChecked")));
         }
     }
 }

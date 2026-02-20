@@ -66,11 +66,11 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSettingsSection<MoonSettingsSection, MoonSettingsVM>();
             DefineSettingsSection<PlanetsSettingsSection, PlanetsSettingsVM>();
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSun", "$Settings.Sun", new SimpleBinding(settings, "Sun", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
-
-            ExportResourceDictionaries("Images.xaml");
 
             ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 

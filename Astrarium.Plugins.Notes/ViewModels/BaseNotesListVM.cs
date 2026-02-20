@@ -35,12 +35,11 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public string FilterString
         {
-            get => GetValue<string>(nameof(FilterString), "");
+            get => GetValue(nameof(FilterString), "");
             set 
             { 
                 SetValue(nameof(FilterString), value);
                 Notes.Refresh();
-                
             }
         }
 
