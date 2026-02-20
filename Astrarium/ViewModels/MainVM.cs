@@ -36,7 +36,7 @@ namespace Astrarium.ViewModels
         public Command<CrdsGeographical> SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command CenterOnPointCommand { get; private set; }
-        public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
+        public Command GetObjectInfoCommand { get; private set; }
         public Command GetObjectEphemerisCommand { get; private set; }
         public Command CalculatePhenomenaCommand { get; private set; }
         public Command CalculateTodayEventsCommand { get; private set; }
@@ -188,7 +188,7 @@ namespace Astrarium.ViewModels
             QuickSearchCommand = new Command<CelestialObject>(GoToObject);
             SelectedObjectsMenuItemsRootMenuCommand = new Command(SelectedObjectsMenuItemsRootMenuClicked);
             CenterOnPointCommand = new Command(CenterOnPoint);
-            GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
+            GetObjectInfoCommand = new Command(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
             CalculateTodayEventsCommand = new Command(CalculateTodayEvents);
@@ -706,7 +706,7 @@ namespace Astrarium.ViewModels
         {
             map.SelectedObject = map.FindObject(point);
             map.Invalidate();
-            GetObjectInfo(map.SelectedObject);
+            GetObjectInfo();
         }
 
         private void MapRightClick(PointF point)
@@ -978,24 +978,17 @@ namespace Astrarium.ViewModels
             ViewManager.ShowDialog<FavoriteLocationsVM>();
         }
 
-        private void GetObjectInfo(CelestialObject body)
+        private void GetObjectInfo()
         {
+            var body = map.SelectedObject;
             if (body != null)
             {
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    var vm = new ObjectInfoVM(info);
-                    foreach (var ext in uiIntegration.ObjectInfoExtensions)
-                    {
-                        var model = ext.ViewModelProvider.DynamicInvoke(sky.Context, body);
-                        if (model != null)
-                        {
-                            var control = Activator.CreateInstance(ext.ViewType) as FrameworkElement;
-                            control.SetValue(FrameworkElement.DataContextProperty, model);
-                            vm.AddExtension(ext.Title, control);
-                        }
-                    }
+                    var vm = ViewManager
+                         .CreateViewModel<ObjectInfoVM>()
+                         .WithObjectInfo(info, uiIntegration.ObjectInfoExtensions);
 
                     if (ViewManager.ShowDialog(vm))
                     {
