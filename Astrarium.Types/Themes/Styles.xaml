@@ -3470,6 +3470,9 @@
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter TargetName="Ellipse" Property="Fill" Value="{StaticResource BrushHighlight}"></Setter>
                         </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="Ellipse" Property="Fill" Value="{StaticResource BrushControlBackground}" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -3486,6 +3489,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
                     <c:BorderFix BorderThickness="1" BorderBrush="{TemplateBinding Background}" Opacity="0.75" Background="{TemplateBinding Background}" Height="3"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -3499,6 +3507,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
                     <c:BorderFix SnapsToDevicePixels="True" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{TemplateBinding Background}" Height="3"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
