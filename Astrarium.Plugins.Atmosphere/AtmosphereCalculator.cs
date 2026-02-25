@@ -94,9 +94,10 @@ namespace Astrarium.Plugins.Atmosphere
             sun = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
             moon = context.Get(sky.MoonEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
 
+            // semidiameters of Sun and Moon, in arcseconds
             // TODO: get from sky
-            sdSun = 0.5 * 3600;
-            sdMoon = 0.5 * 3600;
+            sdSun = 960;
+            sdMoon = 950;
 
             // solar zenith distance, in radians
             thetaSun = Angle.ToRadians(90 - sun.Altitude);
@@ -117,6 +118,7 @@ namespace Astrarium.Plugins.Atmosphere
                 (-0.04214 * thetaSun3 + 0.08970 * thetaSun2 - 0.04153 * thetaSun + 0.00516) * T +
                 (0.15346 * thetaSun3 - 0.26756 * thetaSun2 + 0.06670 * thetaSun + 0.26688);
 
+            // -18 degrees is an astronomical twilight
             if (sun.Altitude > -18)
             {
                 double a = sun.Altitude;
@@ -142,6 +144,11 @@ namespace Astrarium.Plugins.Atmosphere
             map.DaylightFactor = CalcDaylightFactor();
         }
 
+        /// <summary>
+        /// Calculates daylight factor. 
+        /// 1 means day (blue sky), 0 means night (translucent athmosphere).
+        /// </summary>
+        /// <returns>Value from 0 to 1.</returns>
         private float CalcDaylightFactor()
         {
             if (!settings.Get("Atmosphere", true)) return 0;
@@ -154,37 +161,27 @@ namespace Astrarium.Plugins.Atmosphere
                 // Angular separation between Sun and Moon disks, in arcseconds
                 double delta = Angle.Separation(sun, moon) * 3600.0;
 
-                if (delta < Abs(sdSun - sdMoon))
+                // area of overlapping
+                double s =  FindIntersectionArea(sdSun, sdMoon, delta);
+
+                // area of Sun disk
+                double ss = PI * sdSun * sdSun;
+
+                // Sun coverage, from 0 to 1
+                double coverage = Abs(s / ss);
+
+                // eclipse threshold, percentage of overlapped area of solar disk.
+                // Values below this threshold do not affect daylight factor.
+                const double threshold = 0.8;
+                if (coverage <= threshold)
                 {
-                    return 0;
+                    return 1.0f;
                 }
-
-                // Solar eclipse (disks are overlapping)
-                if (delta <= sdSun + sdMoon)
+                // solar eclipse takes place
+                else
                 {
-                    // find overlapping area of two circles
-                    // (https://abakbot.ru/online-2/73-ploshhad-peresecheniya-okruzhnostej)
-
-                    double r1 = sdSun;
-                    double r2 = sdMoon;
-                    double f1 = 2 * Acos((r1 * r1 - r2 * r2 + delta * delta) / (2 * r1 * delta));
-                    double f2 = 2 * Acos((r2 * r2 - r1 * r1 + delta * delta) / (2 * r2 * delta));
-
-                    double s1 = r1 * r1 * Sin(f1 - Sin(f1)) / 2;
-                    double s2 = r2 * r2 * Sin(f2 - Sin(f2)) / 2;
-
-                    // area of overlapping
-                    double s = s1 + s2;
-
-                    // area of Sun disk
-                    double ss = PI * r1 * r1;
-
-                    double percentage = Abs(s / ss);
-
-                    if (percentage <= 0.1)
-                    {
-                        return (float)(percentage / 0.1);
-                    }
+                    double t = (coverage - threshold) / (1.0 - threshold);
+                    return (float)(1.0 - Pow(t, 0.5));
                 }
             }
 
@@ -200,6 +197,37 @@ namespace Astrarium.Plugins.Atmosphere
                 return 0;
         }
 
+        /// <summary>
+        /// Finds intersection area of two circles
+        /// </summary>
+        /// <param name="r1">Radius of first circle, arbitrary units</param>
+        /// <param name="r2">Radius of second circle, same units</param>
+        /// <param name="d">Distance between circles centers, same units</param>
+        /// <returns>Area of intersection, in square units</returns>
+        public double FindIntersectionArea(double r1, double r2, double d)
+        {
+            // no intersection
+            if (d >= r1 + r2)
+                return 0;
+
+            // one circle inside another
+            if (d <= Abs(r1 - r2))
+            {
+                double minRadius = Min(r1, r2);
+                return PI * minRadius * minRadius;
+            }
+
+            double a1 = Acos((d * d + r1 * r1 - r2 * r2) / (2 * d * r1));
+            double a2 = Acos((d * d + r2 * r2 - r1 * r1) / (2 * d * r2));
+
+            double s1 = r1 * r1 * a1;
+            double s2 = r2 * r2 * a2;
+
+            double triangleArea = 0.5 * Sqrt((-d + r1 + r2) *(d + r1 - r2) *(d - r1 + r2) *(d + r1 + r2));
+
+            return s1 + s2 - triangleArea;
+        }
+
         // Perez function
         private double F(int i, double theta, double gamma)
         {
@@ -210,8 +238,6 @@ namespace Astrarium.Plugins.Atmosphere
             double c = alt <= -5 ? 0.001 : (alt > 0 ? 1.028 : 0.2054 * alt + 1.028);
             double d = alt <= -5 ? 10 : (alt >= 0 ? 2.504 : (2.504 - 1.4992 * alt));
             double e = 1;
-
-            //c = 1;
 
             return (1 + a * A[i] * Exp(b * B[i] / Cos(theta))) * (1 + c * C[i] * Exp(d * D[i] * gamma) + e * E[i] * Cos(gamma) * Cos(gamma));
         }
