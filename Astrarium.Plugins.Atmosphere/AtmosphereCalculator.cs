@@ -1,11 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static System.Math;
 
 namespace Astrarium.Plugins.Atmosphere
@@ -88,6 +83,8 @@ namespace Astrarium.Plugins.Atmosphere
                 map.DaylightFactor = CalcDaylightFactor();
             }
         }
+
+        public CrdsHorizontal SolarCoordinates => sun;
 
         public override void Calculate(SkyContext context)
         {
