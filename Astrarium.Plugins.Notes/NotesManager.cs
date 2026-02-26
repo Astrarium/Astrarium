@@ -83,9 +83,8 @@ namespace Astrarium.Plugins.Notes
         }
     }
 
-
     [Singleton]
-    public class NotesManager
+    public class NotesManager 
     {
         private static readonly string NotesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Notes");
 
@@ -164,5 +163,7 @@ namespace Astrarium.Plugins.Notes
             notes.Value.Add(@new);
             Task.Run(() => SaveNotes(notes.Value));
         }
+
+        public bool HasNotesForObject(CelestialObject body) => notes.Value.Any(n => n.Body.Equals(body));
     }
 }

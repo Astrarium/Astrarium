@@ -1,19 +1,20 @@
 ﻿using Astrarium.Types;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Windows.Data;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
     internal class ObjectNotesVM : BaseNotesListVM
     {
+        public override bool AllNotes => false;
+
         private CelestialObject body;
 
-        public ObjectNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map, notesManager) { }
+        public Command CloseCommand { get; private set; }
 
-        public override bool AllNotes => false;
+        public ObjectNotesVM(ISky sky, ISkyMap map, NotesManager notesManager) : base(sky, map, notesManager) 
+        {
+            CloseCommand = new Command(Close);
+        }
 
         protected override List<Note> GetNotes()
         {
@@ -31,7 +32,5 @@ namespace Astrarium.Plugins.Notes.ViewModels
             ReloadNotes();
             return this;
         }
-
-        
     }
 }
