@@ -51,20 +51,10 @@ namespace Astrarium.Plugins.Atmosphere
                     for (int k = 0; k < 2; k++)
                     {
                         var hor = SolicentricToHorizontal(new CrdsHorizontal(L, B - k * stepAlt));
-                        
                         var p = prj.Project(hor);
-
                         if (p != null)
                         {
-                            if (hor.Altitude < 0)
-                            {
-                                GL.Color3(calc.GetColor(new CrdsHorizontal(hor.Azimuth, -hor.Altitude)));
-                            }
-                            else
-                            {
-                                GL.Color3(calc.GetColor(hor));
-                            }
-
+                            GL.Color3(calc.GetColor(hor));
                             GL.Vertex2(p.X, p.Y);
                         }
                         else
@@ -73,7 +63,6 @@ namespace Astrarium.Plugins.Atmosphere
                             GL.Begin(GL.QUAD_STRIP);
                             break;
                         }
-                        
                     }
                 }
 

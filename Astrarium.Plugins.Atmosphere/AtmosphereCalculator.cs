@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System;
 using System.Drawing;
 using static System.Math;
 
@@ -241,8 +242,7 @@ namespace Astrarium.Plugins.Atmosphere
 
         public Color GetColor(CrdsHorizontal p)
         {
-            double thetaP = Angle.ToRadians(90 - p.Altitude);
-
+            double thetaP = Angle.ToRadians(90 - Max(p.Altitude, 0));
             double gammaP = Angle.ToRadians(Angle.Separation(p, sun));
 
             double[] L = new double[3];
