@@ -654,6 +654,22 @@ namespace Astrarium.ViewModels
             map.Projection.Fov *= Math.Pow(1.1, -delta / 120);
             map.Invalidate();
         }
+
+        private bool isTimeShifting = false;
+        private void TimeShift(double delta)
+        {
+            if (sky.TimeSync) return;
+            Task.Run(() =>
+            {
+                if (!isTimeShifting)
+                {
+                    isTimeShifting = true;
+                    sky.Context.JulianDay += delta;
+                    sky.Calculate();
+                    isTimeShifting = false;
+                }
+            });
+        }
        
         private IEnumerable<MenuItem> GetMenuItems(IEnumerable<MenuItem> items)
         {
@@ -690,14 +706,12 @@ namespace Astrarium.ViewModels
                 // "A" = [A]dd
                 else if (key == Key.A)
                 {
-                    sky.Context.JulianDay += 5.0 / 24 / 60;
-                    sky.Calculate();
+                    TimeShift(5.0 / 24 / 60);
                 }
                 // "S" = [S]ubtract
                 else if (key == Key.S)
                 {
-                    sky.Context.JulianDay -= 5.0 / 24 / 60;
-                    sky.Calculate();
+                    TimeShift(-5.0 / 24 / 60);
                 }
             }
         }
