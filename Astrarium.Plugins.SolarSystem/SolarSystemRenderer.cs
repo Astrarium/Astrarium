@@ -317,7 +317,6 @@ namespace Astrarium.Plugins.SolarSystem
                     };
 
                     RenderSolarSystemObject(moon, data);
-                    RenderPlanetaryGrid(moon, data);
                 }
             }
         }
