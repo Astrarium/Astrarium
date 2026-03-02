@@ -24,6 +24,11 @@ namespace Astrarium.Types.Themes
             else if (value is string)
             {
                 string text = (string)value;
+                if (parameter != null && parameter is string prefix)
+                {
+                    text = prefix + text;
+                }
+                
                 return text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             }
             else
@@ -298,6 +303,14 @@ namespace Astrarium.Types.Themes
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return parameter;
+        }
+    }
+
+    public class MultiEqualityConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+           return object.Equals(values[0], values[1]);
         }
     }
 
@@ -630,6 +643,31 @@ namespace Astrarium.Types.Themes
             if (typeof(IEphemFormatter).IsAssignableFrom(type))
             {
                 var formatter = Activator.CreateInstance(type) as IEphemFormatter;
+                return formatter.Format(value);
+            }
+            else
+            {
+                throw new ArgumentException($"Parameter must implement {nameof(IEphemFormatter)} interface.");
+            }
+        }
+    }
+
+    public class MultiValueFormatterConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            
+
+            var formatter = values.FirstOrDefault(x => x is IEphemFormatter) as IEphemFormatter;
+            var value = values.FirstOrDefault(x => !(x is IEphemFormatter));
+
+            if (formatter == DependencyProperty.UnsetValue &&
+                value == DependencyProperty.UnsetValue)
+            {
+                return null;
+            }
+            else if (formatter != null)
+            {
                 return formatter.Format(value);
             }
             else

@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using System;
@@ -13,7 +14,7 @@ using System.Windows.Media.Imaging;
 
 namespace Astrarium.Plugins.SolarSystem.ViewModels
 {
-    public class LunarCalendarViewModel : ViewModelBase
+    public class LunarCalendarVM : ViewModelBase
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
@@ -35,8 +36,13 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         public ICommand NextMonthCommand { get; private set; }
         public ICommand SelectDateCommand { get; private set; }
 
+        public ICommand PrevDayCommand { get; private set; }
+        public ICommand NextDayCommand { get; private set; }
+
         public ICommand ExportCommand { get; private set; }
         public ICommand PrintCommand { get; private set; }
+
+        public DisplayOptions DisplayOptions { get; private set; }
 
         public Date SelectedDate
         {
@@ -45,6 +51,43 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             {
                 SetValue(nameof(SelectedDate), value);
                 NotifyPropertyChanged(nameof(SelectedMonth));
+            }
+        }
+
+        public LunarDay SelectedDay
+        {
+            get => GetValue<LunarDay>(nameof(SelectedDay));
+            set
+            {
+                if (value != SelectedDay)
+                {
+                    SetValue(nameof(SelectedDay), value);
+                }
+                else
+                {
+                    SetValue(nameof(SelectedDay), null);
+                }
+                
+                CalculateForDay();
+            }
+        }
+
+        public LunarDay SelectedInstant
+        {
+            get => GetValue<LunarDay>(nameof(SelectedInstant));
+            set
+            {
+                SetValue(nameof(SelectedInstant), value);
+            }
+        }
+
+        public double SelectedTimeOfTheDay 
+        {
+            get => GetValue<double>(nameof(SelectedTimeOfTheDay));
+            set
+            {
+                SetValue(nameof(SelectedTimeOfTheDay), value);
+                CalculateForDay();
             }
         }
 
@@ -75,26 +118,10 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             }
         }
 
-        public bool PrintMode
+        public MoonDiskImageRotationMode RotationMode
         {
-            get => GetValue<bool>(nameof(PrintMode));
-            set 
-            {
-                SetValue(nameof(PrintMode), value);
-                LoadColors();
-            } 
-        }
-
-        public bool RotateAxis
-        {
-            get => GetValue(nameof(RotateAxis), true);
-            set => SetValue(nameof(RotateAxis), value);
-        }
-
-        public bool NorthTop
-        {
-            get => GetValue(nameof(NorthTop), true);
-            set => SetValue(nameof(NorthTop), value);
+            get => GetValue(nameof(RotationMode), MoonDiskImageRotationMode.PA);
+            set => SetValue(nameof(RotationMode), value);
         }
 
         public Color ColorTextForeground
@@ -115,6 +142,12 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => SetValue(nameof(ColorCalendarBackground), value);
         }
 
+        public Color ColorCalendarSelection
+        {
+            get => GetValue<Color>(nameof(ColorCalendarSelection));
+            set => SetValue(nameof(ColorCalendarSelection), value);
+        }
+
         public Color ColorIcon
         {
             get => GetValue<Color>(nameof(ColorIcon));
@@ -133,7 +166,9 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             set => SetValue(nameof(ColorCalendarBorder), value);
         }
 
-        public LunarCalendarViewModel(ISky sky, ISkyMap map, ISettings settings, LunarCalc moonCalc, SolarCalc sunCalc, LunarCalendar calendar)
+        public CrdsGeographical GeoLocation => sky.Context.GeoLocation;
+
+        public LunarCalendarVM(ISky sky, ISkyMap map, ISettings settings, LunarCalc moonCalc, SolarCalc sunCalc, LunarCalendar calendar)
         {
             this.sky = sky;
             this.map = map;
@@ -144,9 +179,11 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
             ColorCalendarBackground = (Color)Application.Current.FindResource("ColorWindowBackground");
 
+            DisplayOptions = new DisplayOptions();
+            DisplayOptions.PropertyChanged += DisplayOptions_PropertyChanged;
             NightMode = settings.Get("NightMode");
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
-            Text.LocaleChanged += Calculate;
+            Text.LocaleChanged += CalculateForMonth;
 
             selectedDate = Date.Now;
             
@@ -155,23 +192,34 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             ShowMoonSetCommand = new Command<int>(ShowMoonSet);
             ShowSunRiseCommand = new Command<int>(ShowSunRise);
             ShowSunSetCommand = new Command<int>(ShowSunSet);
-            ShowMoonCommand = new Command<double>(ShowMoon);
+            ShowMoonCommand = new Command<Date>(ShowMoon);
             PrevMonthCommand = new Command(PrevMonth);
             NextMonthCommand = new Command(NextMonth);
+            PrevDayCommand = new Command(PrevDay);
+            NextDayCommand = new Command(NextDay);
             SelectDateCommand = new Command(SelectDate);
             ExportCommand = new Command<FrameworkElement>(Export);
             PrintCommand = new Command<FrameworkElement>(Print);
 
-            Calculate();
+            CalculateForMonth();
+        }
+
+        private void DisplayOptions_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DisplayOptions.PrintMode))
+            {
+                LoadColors();
+            }
         }
 
         private void LoadColors()
         {
-            if (PrintMode)
+            if (DisplayOptions.PrintMode)
             {
                 ColorTextForeground = Colors.Black;
                 ColorCalendarForeground = Colors.Gray;
                 ColorCalendarBackground = Colors.White;
+                ColorCalendarSelection = Colors.LightGray;
                 ColorIcon = Colors.Gray;
                 ColorCalendarBorder = Colors.LightGray;
                 ColorLinkForeground = Colors.Black;
@@ -181,6 +229,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 ColorTextForeground = (Color)Application.Current.FindResource("ColorForeground");
                 ColorCalendarForeground = (Color)Application.Current.FindResource("ColorControlLightBackground");
                 ColorCalendarBackground = (Color)Application.Current.FindResource("ColorWindowBackground");
+                ColorCalendarSelection = (Color)Application.Current.FindResource("ColorControlBackground");
                 ColorIcon = (Color)Application.Current.FindResource("ColorControlLightBackground");
                 ColorCalendarBorder = (Color)Application.Current.FindResource("ColorControlBackground");
                 ColorLinkForeground = (Color)Application.Current.FindResource("ColorHighlight");
@@ -204,8 +253,8 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 month = 12;
                 year--;
             }
-            selectedDate = new Date(year, month, 1, sky.Context.GeoLocation.UtcOffset);
-            Calculate();
+            selectedDate = new Date(year, month, 1, GeoLocation.UtcOffset);
+            CalculateForMonth();
         }
 
         private void NextMonth()
@@ -217,27 +266,89 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 month = 1;
                 year++;
             }
-            selectedDate = new Date(year, month, 1, sky.Context.GeoLocation.UtcOffset);
-            Calculate();
+            selectedDate = new Date(year, month, 1, GeoLocation.UtcOffset);
+            CalculateForMonth();
+        }
+        
+        private void PrevDay()
+        {
+            var days = Days.ToList();
+            int index = days.IndexOf(SelectedDay);
+            if (index > 0)
+            {
+                SelectedDay = days.ElementAt(index - 1);
+            }
+            else
+            {
+                PrevMonth();
+            }  
+        }
+
+        private void NextDay()
+        {
+            var days = Days.ToList();
+            int index = days.IndexOf(SelectedDay);
+            if (index < Days.Count - 1)
+            {
+                SelectedDay = days.ElementAt(index + 1);
+            }
+            else
+            {
+                NextMonth();
+            }
         }
 
         private void SelectDate()
         {
-            double? jd = ViewManager.ShowDateDialog(selectedDate.ToJulianEphemerisDay(), sky.Context.GeoLocation.UtcOffset, DateOptions.MonthYear);
+            double? jd = ViewManager.ShowDateDialog(selectedDate.ToJulianEphemerisDay(), GeoLocation.UtcOffset, DateOptions.MonthYear);
             if (jd != null)
             {
-                selectedDate = new Date(jd.Value, sky.Context.GeoLocation.UtcOffset);
-                Calculate();
+                selectedDate = new Date(jd.Value, GeoLocation.UtcOffset);
+                CalculateForMonth();
             }
         }
 
-        private async void Calculate()
+        private async void CalculateForMonth()
         {
-            SelectedDate = selectedDate;
+            int needSelectDay = 0;
+            if (SelectedDay != null)
+            {
+                if (SelectedDay.DayOfMonth == 1) needSelectDay = -1;
+                if (SelectedDay.DayOfMonth == Date.DaysInMonth(SelectedDate.Year, SelectedDate.Month)) needSelectDay = 1;
+            }
+
+            SelectedDay = null;
+            SetValue(nameof(SelectedDate), selectedDate);
+            NotifyPropertyChanged(nameof(SelectedMonth));
 
             IsCalculating = true;
-            Days = await lunarCalendar.Calculate(new Date(selectedDate.Year, selectedDate.Month, 1, sky.Context.GeoLocation.UtcOffset), sky.Context.GeoLocation);
+            Days = await lunarCalendar.Calculate(new Date(selectedDate.Year, selectedDate.Month, 1, GeoLocation.UtcOffset), GeoLocation);
+            
+            if (needSelectDay == 1)
+            {
+                SelectedDay = Days.First();
+            } 
+            else if (needSelectDay == -1) 
+            {
+                SelectedDay = Days.Last();
+            }
+            
             IsCalculating = false;
+        }
+
+        private async void CalculateForDay()
+        {
+            if (SelectedDay != null)
+            {
+                var jdMidnight = SelectedDay.JdMidnight;
+                var timeOfDay = SelectedTimeOfTheDay;
+
+                SelectedInstant = await lunarCalendar.Calculate(jdMidnight, timeOfDay, GeoLocation);
+            }
+            else
+            {
+                SelectedInstant = null;
+            }
         }
 
         private void ShowMoonRise(int d)
@@ -270,6 +381,11 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             ShowSun(day.JdMidnight + day.Sun.Set);
         }
 
+        private void ShowMoon(Date date)
+        {
+            ShowMoon(date.ToJulianEphemerisDay());
+        }
+
         private async void ShowMoon(double jd)
         {
             await Task.Run(() =>
@@ -291,14 +407,12 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private void Export(FrameworkElement calendarControl)
         {
             string path = ViewManager.ShowSaveFileDialog("Save as image...", SelectedMonth, ".png", "PNG image|*.png", out int _);
-        
+
             if (!string.IsNullOrEmpty(path))
             {
-                
-
                 var bitmap = new RenderTargetBitmap(
-                    (int)calendarControl.ActualWidth * 2, 
-                    (int)calendarControl.ActualHeight * 2, 
+                    (int)(calendarControl.ActualWidth + calendarControl.Margin.Left + calendarControl.Margin.Right) * 2, 
+                    (int)(calendarControl.ActualHeight + calendarControl.Margin.Top + calendarControl.Margin.Bottom) * 2, 
                     96 * 2, 
                     96 * 2, PixelFormats.Default);
 
@@ -319,6 +433,81 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private void Print(FrameworkElement calendarControl)
         {
             ViewManager.ShowPrintDialog(calendarControl, SelectedMonth);
+        }
+    }
+
+    public class DisplayOptions : PropertyChangedBase
+    {
+        public bool PrintMode
+        {
+            get => GetValue<bool>(nameof(PrintMode));
+            set => SetValue(nameof(PrintMode), value);
+        }
+
+        public bool MonthHeader
+        {
+            get => GetValue(nameof(MonthHeader), false);
+            set => SetValue(nameof(MonthHeader), value);
+        }
+
+        public bool SunInfo
+        {
+            get => GetValue(nameof(SunInfo), true);
+            set => SetValue(nameof(SunInfo), value);
+        }
+
+        public bool SunRise
+        {
+            get => GetValue(nameof(SunRise), true);
+            set => SetValue(nameof(SunRise), value);
+        }
+
+        public bool DayLength
+        {
+            get => GetValue(nameof(DayLength), true);
+            set => SetValue(nameof(DayLength), value);
+        }
+
+        public bool SunSet
+        {
+            get => GetValue(nameof(SunSet), true);
+            set => SetValue(nameof(SunSet), value);
+        }
+
+        public bool Icons
+        {
+            get => GetValue(nameof(Icons), true);
+            set => SetValue(nameof(Icons), value);
+        }
+
+        public bool MoonInfo
+        {
+            get => GetValue(nameof(MoonInfo), true);
+            set => SetValue(nameof(MoonInfo), value);
+        }
+
+        public bool MoonRise
+        {
+            get => GetValue(nameof(MoonRise), true);
+            set => SetValue(nameof(MoonRise), value);
+        }
+
+        public bool MoonTransit
+        {
+            get => GetValue(nameof(MoonTransit), true);
+            set => SetValue(nameof(MoonTransit), value);
+        }
+
+        public bool MoonSet
+        {
+            get => GetValue(nameof(MoonSet), true);
+            set => SetValue(nameof(MoonSet), value);
+        }
+
+        public bool MoonImages
+        {
+            get => GetValue(nameof(MoonImages), true);
+            set => SetValue(nameof(MoonImages), value);
         }
     }
 }

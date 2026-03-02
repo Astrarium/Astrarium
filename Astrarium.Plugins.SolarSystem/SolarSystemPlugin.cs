@@ -72,7 +72,7 @@ namespace Astrarium.Plugins.SolarSystem
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
-            ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
+            ExtendObjectInfo<SolarActivityControl, SolarActivityVM>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 
             var menuLunarCalendar = new MenuItem("Lunar calendar", new Command(ShowLunarCalendar));
             MenuItems.Add(MenuItemPosition.MainMenuTools, menuLunarCalendar);
@@ -90,15 +90,15 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void ShowLunarCalendar()
         {
-            var vm = ViewManager.CreateViewModel<LunarCalendarViewModel>();
+            var vm = ViewManager.CreateViewModel<LunarCalendarVM>();
             ViewManager.ShowWindow(vm);
         }
 
-        private SolarActivityViewModel GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)
+        private SolarActivityVM GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)
         {
             if (obj is Sun)
             {
-                var vm = ViewManager.CreateViewModel<SolarActivityViewModel>();
+                var vm = ViewManager.CreateViewModel<SolarActivityVM>();
                 vm.SetDate(ctx.JulianDay, ctx.GeoLocation.UtcOffset);
                 return vm;
             }

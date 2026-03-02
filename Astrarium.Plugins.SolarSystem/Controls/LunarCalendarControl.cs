@@ -6,23 +6,31 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Media;
 
-namespace Astrarium.Plugins.SolarSystem.Views
+namespace Astrarium.Plugins.SolarSystem.Controls
 {
-    public class LunarCalendarView : Grid
+    public class LunarCalendarControl : Grid
     {
-        public static readonly DependencyProperty SelectedDateProperty = DependencyProperty.Register(nameof(SelectedDate), typeof(Date), typeof(LunarCalendarView), new PropertyMetadata(Date.Now, OnPropertyChanged));
-        public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(LunarCalendarView), new PropertyMetadata(null, OnPropertyChanged));
-        public static readonly DependencyProperty DayCellTemplateProperty = DependencyProperty.Register(nameof(DayCellTemplate), typeof(DataTemplate), typeof(LunarCalendarView), new PropertyMetadata(null, OnPropertyChanged));
-        public static readonly DependencyProperty HeaderCellTemplateProperty = DependencyProperty.Register(nameof(HeaderCellTemplate), typeof(DataTemplate), typeof(LunarCalendarView), new PropertyMetadata(null, OnPropertyChanged));
-        public static readonly DependencyProperty BorderBrushProperty = DependencyProperty.Register(nameof(BorderBrush), typeof(Brush), typeof(LunarCalendarView), new PropertyMetadata(Brushes.Transparent, OnPropertyChanged));
+        public static readonly DependencyProperty SelectedDateProperty = DependencyProperty.Register(nameof(SelectedDate), typeof(Date), typeof(LunarCalendarControl), new PropertyMetadata(Date.Now, OnPropertyChanged));
+        public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(LunarCalendarControl), new PropertyMetadata(null, OnSelectedItemChanged));
+        public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(LunarCalendarControl), new PropertyMetadata(null, OnPropertyChanged));
+        public static readonly DependencyProperty DayCellTemplateProperty = DependencyProperty.Register(nameof(DayCellTemplate), typeof(DataTemplate), typeof(LunarCalendarControl), new PropertyMetadata(null, OnSelectedItemChanged));
+        public static readonly DependencyProperty HeaderTemplateProperty = DependencyProperty.Register(nameof(HeaderTemplate), typeof(DataTemplate), typeof(LunarCalendarControl), new PropertyMetadata(null, OnSelectedItemChanged));
+        public static readonly DependencyProperty HeaderCellTemplateProperty = DependencyProperty.Register(nameof(HeaderCellTemplate), typeof(DataTemplate), typeof(LunarCalendarControl), new PropertyMetadata(null, OnPropertyChanged));
+        public static readonly DependencyProperty FooterTemplateProperty = DependencyProperty.Register(nameof(FooterTemplate), typeof(DataTemplate), typeof(LunarCalendarControl), new PropertyMetadata(null, OnSelectedItemChanged));
+        public static readonly DependencyProperty BorderBrushProperty = DependencyProperty.Register(nameof(BorderBrush), typeof(Brush), typeof(LunarCalendarControl), new PropertyMetadata(Brushes.Transparent, OnSelectedItemChanged));
        
         public Date SelectedDate
         {
             get => (Date)GetValue(SelectedDateProperty);
             set => SetValue(SelectedDateProperty, value);
+        }
+
+        public object SelectedItem
+        {
+            get => GetValue(SelectedItemProperty);
+            set => SetValue(SelectedItemProperty, value);
         }
 
         public IEnumerable ItemsSource
@@ -37,9 +45,15 @@ namespace Astrarium.Plugins.SolarSystem.Views
             set => SetValue(BorderBrushProperty, value);
         }
 
+        private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (LunarCalendarControl)d;
+            control.InvalidateVisual();
+        }
+
         private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var control = (LunarCalendarView)d;
+            var control = (LunarCalendarControl)d;
             control.UpdateDate();
             control.UpdateGridLayout();
             control.InvalidateVisual();
@@ -50,6 +64,19 @@ namespace Astrarium.Plugins.SolarSystem.Views
             get => (DataTemplate)GetValue(DayCellTemplateProperty);
             set => SetValue(DayCellTemplateProperty, value);
         }
+
+        public DataTemplate HeaderTemplate
+        {
+            get => (DataTemplate)GetValue(HeaderTemplateProperty);
+            set => SetValue(HeaderTemplateProperty, value);
+        }
+
+        public DataTemplate FooterTemplate
+        {
+            get => (DataTemplate)GetValue(FooterTemplateProperty);
+            set => SetValue(FooterTemplateProperty, value);
+        }
+
 
         public DataTemplate HeaderCellTemplate
         {
@@ -62,6 +89,9 @@ namespace Astrarium.Plugins.SolarSystem.Views
             RowDefinitions.Clear();
             ColumnDefinitions.Clear();
 
+            // month name header
+            RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Auto) });
+
             // day of week header
             RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Auto) });
 
@@ -72,24 +102,40 @@ namespace Astrarium.Plugins.SolarSystem.Views
             }
             for (int col = 0; col < 7; col++)
             {
-                ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+                ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star), SharedSizeGroup = "DayOfWeek" });
             }
 
-            Children.Clear();
+            // footer
+            RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Auto) });
 
+            Children.Clear();
+            int currentRow = 0;
+
+            // calendar header (month and year)
+            if (HeaderTemplate != null)
+            {
+                FrameworkElement header = HeaderTemplate.LoadContent() as FrameworkElement;
+                header.DataContext = DataContext;
+                SetColumnSpan(header, 7);
+                AddChildToCell(header, 0, currentRow);
+                currentRow++;
+            }
+
+            // days of week header
             for (int col = 0; col < 7; col++)
             {
                 if (HeaderCellTemplate != null)
                 {
                     FrameworkElement cell = HeaderCellTemplate.LoadContent() as FrameworkElement;
                     cell.DataContext = (DayOfWeek)((col + (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek) % 7);
-                    AddChildToCell(cell, col, 0);
+                    AddChildToCell(cell, col, currentRow);
                 }
             }
+            currentRow++;
 
+            // main content
             int currentDay = 0;
             var enumerator = ItemsSource?.GetEnumerator();
-
             if (enumerator != null)
             {
                 for (int row = 0; row < WeeksCount; row++)
@@ -106,11 +152,35 @@ namespace Astrarium.Plugins.SolarSystem.Views
                             {
                                 FrameworkElement cell = DayCellTemplate.LoadContent() as FrameworkElement;
                                 cell.DataContext = item;
-                                AddChildToCell(cell, col, row + 1);
+                                cell.MouseDown += Cell_MouseDown;
+                                AddChildToCell(cell, col, row + currentRow);
                             }
                         }
                     }
                 }
+            }
+            currentRow++;
+
+            // calendar footer
+            if (FooterTemplate != null)
+            {
+                FrameworkElement footer = FooterTemplate.LoadContent() as FrameworkElement;
+                footer.DataContext = DataContext;
+                SetColumnSpan(footer, 7);
+                AddChildToCell(footer, 0, WeeksCount + currentRow);
+            }
+        }
+
+        private void Cell_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            FrameworkElement cell = sender as FrameworkElement;
+            if (SelectedItem == cell.DataContext)
+            {
+                SelectedItem = null;
+            }
+            else
+            {
+                SelectedItem = cell.DataContext;
             }
         }
 

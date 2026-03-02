@@ -1,16 +1,13 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Plugins.SolarSystem;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem.ViewModels
 {
-    public class SolarActivityViewModel : ViewModelBase
+    public class SolarActivityVM : ViewModelBase
     {
         private readonly SolarRegionSummaryManager srsManager;
         private readonly SolarSystemRenderer renderer;
@@ -22,7 +19,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         public Command<string> MagTypeInfoCommand { get; private set; }
         public Command<string> ZurichClassificationCommand { get; private set; }
 
-        public SolarActivityViewModel(SolarSystemRenderer renderer, SolarRegionSummaryManager srsManager)
+        public SolarActivityVM(SolarSystemRenderer renderer, SolarRegionSummaryManager srsManager)
         {
             this.srsManager = srsManager;
             this.renderer = renderer;

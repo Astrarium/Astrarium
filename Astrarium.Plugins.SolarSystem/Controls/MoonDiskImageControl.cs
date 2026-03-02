@@ -7,13 +7,20 @@ using System.Windows.Media.Imaging;
 
 namespace Astrarium.Plugins.SolarSystem.Controls
 {
+    public enum MoonDiskImageRotationMode
+    {
+        PA = 0,
+        NorthTop = 1,
+        SouthTop = 2
+    }
+
     public class MoonDiskImageControl : FrameworkElement
     {
         public static readonly DependencyProperty PhaseProperty = DependencyProperty.Register(nameof(Phase), typeof(double), typeof(MoonDiskImageControl), new PropertyMetadata(0.0, OnPropertyChanged));
-        public static readonly DependencyProperty RotateAxisProperty = DependencyProperty.Register(nameof(RotateAxis), typeof(bool), typeof(MoonDiskImageControl), new PropertyMetadata(true, OnPropertyChanged));
-        public static readonly DependencyProperty NorthTopProperty = DependencyProperty.Register(nameof(NorthTop), typeof(bool), typeof(MoonDiskImageControl), new PropertyMetadata(true, OnPropertyChanged));
+        public static readonly DependencyProperty RotationModeProperty = DependencyProperty.Register(nameof(RotationMode), typeof(MoonDiskImageRotationMode), typeof(MoonDiskImageControl), new PropertyMetadata(MoonDiskImageRotationMode.PA, OnPropertyChanged));
         public static readonly DependencyProperty AxisRotationProperty = DependencyProperty.Register(nameof(AxisRotation), typeof(double), typeof(MoonDiskImageControl), new PropertyMetadata(0.0, OnPropertyChanged));
         public static readonly DependencyProperty NightModeProperty = DependencyProperty.Register(nameof(NightMode), typeof(bool), typeof(MoonDiskImageControl), new PropertyMetadata(false, OnPropertyChanged));
+        public static readonly DependencyProperty UseImageProperty = DependencyProperty.Register(nameof(UseImage), typeof(bool), typeof(MoonDiskImageControl), new PropertyMetadata(false, OnPropertyChanged));
 
         public double Phase
         {
@@ -21,16 +28,10 @@ namespace Astrarium.Plugins.SolarSystem.Controls
             set => SetValue(PhaseProperty, value);
         }
 
-        public bool RotateAxis
+        public MoonDiskImageRotationMode RotationMode
         {
-            get => (bool)GetValue(RotateAxisProperty);
-            set => SetValue(RotateAxisProperty, value);
-        }
-
-        public bool NorthTop
-        {
-            get => (bool)GetValue(NorthTopProperty);
-            set => SetValue(NorthTopProperty, value);
+            get => (MoonDiskImageRotationMode)GetValue(RotationModeProperty);
+            set => SetValue(RotationModeProperty, value);
         }
 
         public double AxisRotation
@@ -43,6 +44,12 @@ namespace Astrarium.Plugins.SolarSystem.Controls
         {
             get => (bool)GetValue(NightModeProperty);
             set => SetValue(NightModeProperty, value);
+        }
+
+        public bool UseImage
+        {
+            get => (bool)GetValue(UseImageProperty);
+            set => SetValue(UseImageProperty, value);
         }
 
         private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -69,12 +76,12 @@ namespace Astrarium.Plugins.SolarSystem.Controls
 
                 ImageSource image;
 
-                if (NightMode)
+                if (NightMode || !UseImage)
                 {
                     var dg = new DrawingGroup();
                     dg.Children.Add(new ImageDrawing(originalImage, new Rect(0, 0, originalImage.PixelWidth, originalImage.PixelHeight)));
                     dg.Children.Add(new GeometryDrawing(
-                        new SolidColorBrush(Color.FromRgb(100, 0, 0)),
+                        new SolidColorBrush(NightMode ? Color.FromRgb(100, 0, 0) : Colors.Gray),
                         null,
                         new EllipseGeometry(new Rect(0, 0, originalImage.PixelWidth, originalImage.PixelHeight))
                     ));
@@ -86,7 +93,22 @@ namespace Astrarium.Plugins.SolarSystem.Controls
                     image = originalImage;
                 }
 
-                var rotateTransform = new RotateTransform(RotateAxis ? -AxisRotation : (NorthTop ? 0 : 180), centerX, centerY);
+                double angle = 0;
+                switch (RotationMode)
+                {
+                    case MoonDiskImageRotationMode.PA:
+                        angle = -AxisRotation;
+                        break;
+                    default:
+                    case MoonDiskImageRotationMode.NorthTop:
+                        angle = 0;
+                        break;
+                    case MoonDiskImageRotationMode.SouthTop:
+                        angle = 180;
+                        break;
+                }
+
+                var rotateTransform = new RotateTransform(angle, centerX, centerY);
                 dc.PushTransform(rotateTransform);
 
                 dc.PushTransform(new ScaleTransform(0.999, 0.999, Width / 2, Height / 2));
@@ -170,9 +192,6 @@ namespace Astrarium.Plugins.SolarSystem.Controls
                 originalImage.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
                 originalImage.EndInit();
                 originalImage.Freeze();
-
-
-                
             }
             catch
             {
@@ -182,6 +201,4 @@ namespace Astrarium.Plugins.SolarSystem.Controls
 
         private static BitmapImage originalImage;
     }
-
-
 }

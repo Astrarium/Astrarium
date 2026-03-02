@@ -10,13 +10,39 @@ namespace Astrarium.Plugins.SolarSystem
     [Singleton]
     public class LunarCalendar
     {
+        private readonly ISky sky;
         private readonly LunarCalc lunarCalc;
         private readonly SolarCalc solarCalc;
 
-        public LunarCalendar(LunarCalc lunarCalc, SolarCalc solarCalc) 
+        private readonly string[] ephemerides = new string[] { "Constellation", "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.Duration", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth", "Equatorial.Alpha", "Equatorial.Delta", "Horizontal.Altitude", "Horizontal.Azimuth", "Ecliptical.Lambda", "Ecliptical.Beta", "Phase", "PhaseAngle", "Age", "Lunation", "Magnitude", "Distance", "HorizontalParallax", "AngularDiameter", "Libration.Latitude", "Libration.Longitude" };
+
+        public LunarCalendar(ISky sky, LunarCalc lunarCalc, SolarCalc solarCalc) 
         {
+            this.sky = sky;
             this.lunarCalc = lunarCalc;
             this.solarCalc = solarCalc;
+        }
+
+        public Task<LunarDay> Calculate(double jdMidnight, double timeOfDay, CrdsGeographical geoLocation)
+        {
+            return Task.Run(() =>
+            {
+                var ctx = new SkyContext(jdMidnight + timeOfDay, geoLocation, preferFast: false);
+
+                var dayInfo = new LunarDay();
+                dayInfo.JdMidnight = jdMidnight;
+                dayInfo.Sun = ctx.Get(solarCalc.RiseTransitSet);
+                dayInfo.Moon = ctx.Get(lunarCalc.RiseTransitSet);
+                dayInfo.Illumination = Math.Sign(ctx.Get(lunarCalc.Elongation)) * ctx.Get(lunarCalc.Phase);
+                dayInfo.PositionAngle = ctx.Get(lunarCalc.PAaxis);
+                dayInfo.Ephemerides = sky.GetEphemerides(lunarCalc.Moon, ctx, ephemerides);
+
+                ctx = new SkyContext(jdMidnight + 0.5, geoLocation, preferFast: false);
+                dayInfo.SiderealTime = ctx.SiderealTime;
+                dayInfo.SunCoordinates = ctx.Get(sky.SunEquatorial);
+
+                return dayInfo;
+            });
         }
 
         public Task<IReadOnlyCollection<LunarDay>> Calculate(Date date, CrdsGeographical geoLocation)
@@ -63,10 +89,8 @@ namespace Astrarium.Plugins.SolarSystem
                         if ((int)instant.Day == dayInfo.DayOfMonth &&
                             instant.Month == date.Month)
                         {
-                            dayInfo.PhaseText = Text.Get($"Moon.Phases.{phase}");
                             dayInfo.Phase = phase;
-                            dayInfo.PhaseInstant = instant.ToJulianEphemerisDay();
-                            dayInfo.PhaseInstantString = instant.ToDateTime().ToString("HH:mm");
+                            dayInfo.PhaseInstant = instant;
                             dayInfo.Illumination = Math.Round(dayInfo.Illumination * 2) / 2;
                         }
                     }

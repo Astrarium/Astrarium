@@ -1,9 +1,5 @@
 ﻿using Astrarium.Algorithms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -11,6 +7,7 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public int DayOfMonth { get; set; }
 
+        public Date Date { get; set; }
         /// <summary>
         /// JD of the midnight of current day
         /// </summary>
@@ -32,16 +29,9 @@ namespace Astrarium.Plugins.SolarSystem
         public MoonPhase? Phase { get; set; }
 
         /// <summary>
-        /// Localized phase text, like New Moon ot Full Moon
-        /// </summary>
-        public string PhaseText { get; set; }
-
-        /// <summary>
         /// Phase instant, if occurs
         /// </summary>
-        public double PhaseInstant { get; set; }
-
-        public string PhaseInstantString { get; set; }
+        public Date PhaseInstant { get; set; }
 
         /// <summary>
         /// Lunar phase, i.e. illumination
@@ -52,6 +42,15 @@ namespace Astrarium.Plugins.SolarSystem
         /// Position angle of the Moon at culmination
         /// </summary>
         public double PositionAngle { get; set; }
+
+        /// <summary>
+        /// Lunar ephemerides
+        /// </summary>
+        public Ephemerides Ephemerides { get; set; }
+
+        public double SiderealTime { get; set; }
+
+        public CrdsEquatorial SunCoordinates { get; set; }
 
         public override string ToString()
         {
