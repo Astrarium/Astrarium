@@ -74,7 +74,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             ExtendObjectInfo<SolarActivityControl, SolarActivityVM>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 
-            var menuLunarCalendar = new MenuItem("Lunar calendar", new Command(ShowLunarCalendar));
+            var menuLunarCalendar = new MenuItem("$LunarCalendar.MenuTitle", new Command(ShowLunarCalendar));
             MenuItems.Add(MenuItemPosition.MainMenuTools, menuLunarCalendar);
 
             #endregion UI integration
@@ -90,8 +90,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void ShowLunarCalendar()
         {
-            var vm = ViewManager.CreateViewModel<LunarCalendarVM>();
-            ViewManager.ShowWindow(vm);
+            ViewManager.ShowWindow<LunarCalendarVM>();
         }
 
         private SolarActivityVM GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)

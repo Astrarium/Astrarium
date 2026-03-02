@@ -406,7 +406,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
 
         private void Export(FrameworkElement calendarControl)
         {
-            string path = ViewManager.ShowSaveFileDialog("Save as image...", SelectedMonth, ".png", "PNG image|*.png", out int _);
+            string path = ViewManager.ShowSaveFileDialog("$LunarCalendarWindow.SaveAsImage", SelectedMonth, ".png", "PNG image|*.png", out int _);
 
             if (!string.IsNullOrEmpty(path))
             {
