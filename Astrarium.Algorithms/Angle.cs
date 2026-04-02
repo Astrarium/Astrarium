@@ -309,7 +309,7 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Regex to parse angle value from string.
         /// </summary>
-        private static readonly Regex REGEX = new Regex(@"^\s*([-+]?)\s*(\d+)[\*°d\s]\s*(\d+)[\s'm]\s*(\d+\.?\d*)(''|\""|s|\\s*){1}\s*$");
+        private static readonly Regex REGEX = new Regex(@"^\s*([-+]?)\s*(\d+)[\*°d\s]\s*(\d+)[\s'm]\s*(\d+\.?\d*)(''|\""|s|\s*){1}\s*$");
 
         /// <summary>
         /// Degrees part of angle value.
@@ -333,7 +333,7 @@ namespace Astrarium.Algorithms
         /// Sign of the angle. 
         /// -1 for negative, 1 for positive, 0 for zero value.
         /// </summary>
-        private int Sign { get; set; }
+        public int Sign { get; private set; }
 
         /// <summary>
         /// Creates new angle from its decimal value.
