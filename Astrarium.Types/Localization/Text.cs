@@ -146,8 +146,8 @@ namespace Astrarium.Types
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct())
             {
-                string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith($".{localizationFile}"));
-                if (resourceName != null)
+                var resourceNames = assembly.GetManifestResourceNames().Where(rn => rn.EndsWith($".{localizationFile}"));
+                foreach (var resourceName in resourceNames)
                 {
                     using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                     {
