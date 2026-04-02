@@ -1,5 +1,5 @@
 ﻿; Astrarium Inno Setup project file
-; Copyright Alexander Krutov, 2018-2024
+; Copyright Alexander Krutov, 2018-2026
 ; https://astrarium.space/
 
 #include "idp.iss"
@@ -17,6 +17,7 @@
 #endif
 
 #define DOWNLOAD_BASE_URL "https://github.com/Astrarium/Astrarium/releases/download/v"
+#define CurrentYear GetDateTimeString('yyyy', '', '')
 
 [Setup] 
 AppName               = "Astrarium"
@@ -28,7 +29,7 @@ UninstallDisplayIcon  = {app}\Astrarium\Astrarium.exe
 Compression           = lzma2
 SolidCompression      = yes
 OutputBaseFilename    = Astrarium-setup
-AppCopyright          = "© Alexander Krutov, 2018-2025"
+AppCopyright          = "© Alexander Krutov, 2018-{#CurrentYear}"
 AppPublisher          = Alexander Krutov
 AppPublisherURL       = https://astrarium.space/
 AppUpdatesURL         = https://astrarium.space/
@@ -45,7 +46,7 @@ OutputDir             = "..\Deploy"
 WizardImageFile       = "Images\installer.bmp"
 WizardImageStretch    = yes
 
-; Small logo image: 55x55
+; Small logo image: 64x71
 WizardSmallImageFile  = "Images\logo.bmp"
 
 [Languages]
@@ -203,9 +204,14 @@ en.Astrarium_Plugins_Notes                  = Notes
 #define sz_Astrarium_Plugins_Notes          = CalcDirSize('..\Deploy\Astrarium.Plugins.Notes')
 sz_Astrarium_Plugins_Notes                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Notes')}
 
+ru.Astrarium_Plugins_Simbad                 = Simbad
+en.Astrarium_Plugins_Simbad                 = Simbad
+#define sz_Astrarium_Plugins_Simbad         = CalcDirSize('..\Deploy\Astrarium.Plugins.Simbad')
+sz_Astrarium_Plugins_Simbad                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Simbad')}
+
 [Components]
 Name: Astrarium;                        Description: {cm:Astrarium};                        Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium};
-Name: Astrarium_Plugins_Logger;         Description: {cm:Astrarium_Plugins_Logger};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Logger};  
+Name: Astrarium_Plugins_Logger;         Description: {cm:Astrarium_Plugins_Logger};         Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Logger};  
 Name: Astrarium_Plugins_SolarSystem;    Description: {cm:Astrarium_Plugins_SolarSystem};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_SolarSystem};  
 Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_BrightStars};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_BrightStars};  
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
@@ -215,7 +221,7 @@ Name: Astrarium_Plugins_Atmosphere;     Description: {cm:Astrarium_Plugins_Atmos
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
 Name: Astrarium_Plugins_Meteors;    	Description: {cm:Astrarium_Plugins_Meteors};    	Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Meteors};
-Name: Astrarium_Plugins_Novae;    		Description: {cm:Astrarium_Plugins_Novae};    		Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Novae};
+Name: Astrarium_Plugins_Novae;    		Description: {cm:Astrarium_Plugins_Novae};    	    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Novae};
 Name: Astrarium_Plugins_Supernovae;    	Description: {cm:Astrarium_Plugins_Supernovae};    	Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Supernovae};
 Name: Astrarium_Plugins_Satellites;    	Description: {cm:Astrarium_Plugins_Satellites};    	Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Satellites};
 Name: Astrarium_Plugins_JupiterMoons;   Description: {cm:Astrarium_Plugins_JupiterMoons};   Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_JupiterMoons};
@@ -228,7 +234,8 @@ Name: Astrarium_Plugins_Tycho2;         Description: {cm:Astrarium_Plugins_Tycho
 Name: Astrarium_Plugins_UCAC4;          Description: {cm:Astrarium_Plugins_UCAC4};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_UCAC4};
 Name: Astrarium_Plugins_ASCOM;          Description: {cm:Astrarium_Plugins_ASCOM};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_ASCOM};
 Name: Astrarium_Plugins_Planner;        Description: {cm:Astrarium_Plugins_Planner};        Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Planner};
-Name: Astrarium_Plugins_Notes;        Description: {cm:Astrarium_Plugins_Notes};            Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Notes};
+Name: Astrarium_Plugins_Notes;          Description: {cm:Astrarium_Plugins_Notes};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Notes};
+Name: Astrarium_Plugins_Simbad;         Description: {cm:Astrarium_Plugins_Simbad};         Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Simbad};
 
 [Files]
 Source: "7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; AfterInstall: AfterInstallProc

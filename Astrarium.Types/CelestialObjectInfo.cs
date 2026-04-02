@@ -166,6 +166,7 @@ namespace Astrarium.Types
     }
 
     public class InfoElementProperty : InfoElementPropertyBase { }
+    public class InfoElementMultilineProperty : InfoElementPropertyBase { }
     public class InfoElementDateProperty : InfoElementPropertyBase { }
 
     public class InfoElementLink : InfoElement
