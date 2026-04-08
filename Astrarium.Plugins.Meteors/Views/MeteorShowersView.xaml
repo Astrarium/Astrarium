@@ -3,12 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:c="clr-namespace:Astrarium.Plugins.Meteors.Controls"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.Meteors"
-        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        mc:Ignorable="d"
-        Title="{t:Text MeteorShowersView.Title}" 
+        xmlns:a="Astrarium"
+        Title="{a:Text MeteorShowersView.Title}" 
         Style="{StaticResource {x:Type Window}}" 
         MinHeight="600" MinWidth="800"
         WindowStartupLocation="CenterScreen"
@@ -91,17 +88,17 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="{StaticResource ImagePrevYear}" Style="{StaticResource ImageButton}" Command="{Binding PrevYearCommand}" ToolTip="{t:Text MeteorShowersView.PrevYear}" />
-            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeYearCommand}" Style="{StaticResource DateButton}" ToolTip="{t:Text MeteorShowersView.ChangeYear}">
+            <Button Content="{StaticResource ImagePrevYear}" Style="{StaticResource ImageButton}" Command="{Binding PrevYearCommand}" ToolTip="{a:Text MeteorShowersView.PrevYear}" />
+            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeYearCommand}" Style="{StaticResource DateButton}" ToolTip="{a:Text MeteorShowersView.ChangeYear}">
                 <Button.Content>
                     <TextBlock FontSize="32" VerticalAlignment="Center" Text="{Binding Year, FallbackValue='Jan 2000'}" />
                 </Button.Content>
             </Button>
-            <Button Content="{StaticResource ImageNextYear}" Style="{StaticResource ImageButton}" Command="{Binding NextYearCommand}" ToolTip="{t:Text MeteorShowersView.NextYear}" />
+            <Button Content="{StaticResource ImageNextYear}" Style="{StaticResource ImageButton}" Command="{Binding NextYearCommand}" ToolTip="{a:Text MeteorShowersView.NextYear}" />
         </StackPanel>
 
         <Grid Height="6" Grid.Row="1">
-            <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+            <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={a:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
         </Grid>
 
         <c:MeteorShowersTable 
@@ -138,8 +135,8 @@
             
             <DataGrid.Columns>
 
-                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.Name}" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.Max}" SortMemberPath="Max">
+                <DataGridTextColumn Header="{a:Text MeteorShowersView.TableColumn.Name}" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="{a:Text MeteorShowersView.TableColumn.Max}" SortMemberPath="Max">
                     <DataGridTextColumn.Binding>
                         <MultiBinding Converter="{StaticResource DayOfYearToDateConverter}"  UpdateSourceTrigger="PropertyChanged" >
                             <Binding Path="Max" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" />
@@ -147,8 +144,8 @@
                         </MultiBinding>
                     </DataGridTextColumn.Binding>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.ZHR}" Binding="{Binding ZHR}" SortMemberPath="ZHRNumeric" />
-                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.ActivityClass}" Binding="{Binding ActivityClass}" />
+                <DataGridTextColumn Header="{a:Text MeteorShowersView.TableColumn.ZHR}" Binding="{Binding ZHR}" SortMemberPath="ZHRNumeric" />
+                <DataGridTextColumn Header="{a:Text MeteorShowersView.TableColumn.ActivityClass}" Binding="{Binding ActivityClass}" />
 
                 <DataGridTemplateColumn Width="3650" IsReadOnly="True">
                     <DataGridTemplateColumn.CellStyle>
@@ -187,7 +184,7 @@
             </DataGrid.Columns>
         </c:MeteorShowersTable>
 
-        <StatusBar Grid.Row="3" Visibility="{Binding IsMouseOver, Converter={s:BoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Hidden}}">
+        <StatusBar Grid.Row="3" Visibility="{Binding IsMouseOver, Converter={a:BoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Hidden}}">
             <StatusBarItem>
                 <TextBlock Text="{Binding DateString, Mode=OneWay}" />
             </StatusBarItem>

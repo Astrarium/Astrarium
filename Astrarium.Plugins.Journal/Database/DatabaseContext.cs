@@ -1,9 +1,7 @@
 ﻿using Astrarium.Plugins.Journal.Database.Entities;
-using Astrarium.Types;
 using SQLite.CodeFirst;
 using System.Data.Common;
 using System.Data.Entity;
-using System.Data.SqlClient;
 
 namespace Astrarium.Plugins.Journal.Database
 {

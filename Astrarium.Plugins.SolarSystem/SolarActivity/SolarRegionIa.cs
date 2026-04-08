@@ -1,6 +1,4 @@
-﻿using Astrarium.Algorithms;
-
-namespace Astrarium.Plugins.SolarSystem
+﻿namespace Astrarium.Plugins.SolarSystem
 {
     /// <summary>
     /// Describes previously numbered active regions which still 

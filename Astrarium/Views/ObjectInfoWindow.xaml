@@ -3,12 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:a="Astrarium"
         xmlns:vm="clr-namespace:Astrarium.ViewModels"
         mc:Ignorable="d"
-        Title="{t:Text ObjectInfoWindow.Title}" 
+        Title="{a:Text ObjectInfoWindow.Title}" 
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
@@ -64,14 +62,14 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" TextWrapping="Wrap" Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Info.Title, FallbackValue='Object Name'}">
+            <TextBlock Grid.Column="0" TextWrapping="Wrap" Style="{StaticResource HoverPropertyStyle}" Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{a:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Info.Title, FallbackValue='Object Name'}">
                 <TextBlock.InputBindings>
                     <MouseBinding Command="{Binding CopyNameCommand}" MouseAction="LeftClick" />
                 </TextBlock.InputBindings>
             </TextBlock>
 
-            <StackPanel Visibility="{Binding Info.Subtitle, Converter={s:NotNullToVisibilityConverter}}" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <c:PathIcon IsEnabled="False" Margin="2" Width="16" Height="16" Data="{Binding Info.ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" />
+            <StackPanel Visibility="{Binding Info.Subtitle, Converter={a:NotNullToVisibilityConverter}}" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <a:PathIcon IsEnabled="False" Margin="2" Width="16" Height="16" Data="{Binding Info.ObjectType, Converter={a:CelestialObjectTypeToIconConverter}}" />
                 <TextBlock TextWrapping="Wrap" IsEnabled="False" VerticalAlignment="Top"  HorizontalAlignment="Right" Text="{Binding Info.Subtitle}" />
             </StackPanel>
         </Grid>
@@ -79,13 +77,13 @@
         <TabControl Grid.Row="2" ItemsSource="{Binding Tabs}" SelectedIndex="0">
             <TabControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsTabHeaderVisible, Converter={s:BoolToVisibilityConverter}}" />
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsTabHeaderVisible, Converter={a:BoolToVisibilityConverter}}" />
                 </ItemsPanelTemplate>
             </TabControl.ItemsPanel>
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                    <TextBlock Text="{Binding Header, Converter={a:LocalizedTextConverter}}" />
                 </DataTemplate>
             </TabControl.ItemTemplate>
 
@@ -93,7 +91,7 @@
                 <DataTemplate>
                     <ContentControl Content="{Binding}">
                         <ContentControl.Resources>
-                            
+
                             <!-- General info  -->
                             <DataTemplate DataType="{x:Type vm:ObjectInfoGeneralVM}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True" Margin="0 4">
@@ -105,18 +103,18 @@
                                         </ItemsControl.ItemsPanel>
 
                                         <ItemsControl.Resources>
-                                            <DataTemplate DataType="{x:Type t:InfoElementHeader}">
+                                            <DataTemplate DataType="{x:Type a:InfoElementHeader}">
                                                 <TextBlock FontWeight="Bold" Padding="0 8" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Text}" />
                                             </DataTemplate>
 
-                                            <DataTemplate DataType="{x:Type t:InfoElementProperty}">
+                                            <DataTemplate DataType="{x:Type a:InfoElementProperty}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition SharedSizeGroup="Key" />
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition SharedSizeGroup="Value" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={s:LocalizedTextConverter}}" />
+                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
                                                     <Border Grid.Column="2">
                                                         <TextBlock Style="{StaticResource TextValueStyle}" Text="{Binding StringValue}">
                                                             <TextBlock.InputBindings>
@@ -127,42 +125,42 @@
                                                 </Grid>
                                             </DataTemplate>
 
-                                            <DataTemplate DataType="{x:Type t:InfoElementDateProperty}">
+                                            <DataTemplate DataType="{x:Type a:InfoElementDateProperty}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition SharedSizeGroup="Key" />
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition SharedSizeGroup="Value" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={s:LocalizedTextConverter}}" />
+                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
                                                     <TextBlock Grid.Column="2" Padding="4" VerticalAlignment="Center">
                                                         <Hyperlink Style="{StaticResource HyperlinkStyle}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.JulianDateClickedCommand}" CommandParameter="{Binding Value}"><Run Text="{Binding StringValue, Mode=OneWay}" /></Hyperlink>
                                                     </TextBlock>
                                                 </Grid>
                                             </DataTemplate>
 
-                                            <DataTemplate DataType="{x:Type t:InfoElementLink}">
+                                            <DataTemplate DataType="{x:Type a:InfoElementLink}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition SharedSizeGroup="Key" />
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition SharedSizeGroup="Value" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={s:LocalizedTextConverter}}" />
+                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
                                                     <TextBlock Grid.Column="2" Padding="4" VerticalAlignment="Center">
                                                         <Hyperlink Style="{StaticResource HyperlinkStyle}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.LinkClickedCommand}" CommandParameter="{Binding Uri}"><Run Text="{Binding UriText, Mode=OneWay}" /></Hyperlink>
                                                     </TextBlock>
                                                 </Grid>
                                             </DataTemplate>
 
-                                            <DataTemplate DataType="{x:Type t:InfoElementCommand}">
+                                            <DataTemplate DataType="{x:Type a:InfoElementCommand}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition SharedSizeGroup="Key" />
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition SharedSizeGroup="Value" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={s:LocalizedTextConverter}}" />
+                                                    <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
                                                     <Button Padding="4 0" Margin="2" HorizontalAlignment="Left" Grid.Column="2" Content="{Binding Text}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.PropertyCommandClickedCommand}" CommandParameter="{Binding Command}" />
                                                 </Grid>
                                             </DataTemplate>
@@ -179,56 +177,14 @@
                     </ContentControl>
                 </DataTemplate>
             </TabControl.ContentTemplate>
-
-
-
-                
-
         </TabControl>
                 
-        <!-- 
-        <TabControl 
-            Height="Auto"
-            VerticalAlignment="Stretch"
-            ItemsSource="{Binding Tabs}" 
-            SelectedIndex="0" Grid.Row="2" Margin="-2 0">
-
-            
-            <TabControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Padding="2" Text="{Binding Header}" />
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-
-            
-            <TabControl.ItemContainerStyle>
-                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
-                    <Style.Setters>
-                        <Setter Property="OverridesDefaultStyle" Value="True" />
-                    </Style.Setters>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsHeaderVisible}" Value="false">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TabControl.ItemContainerStyle>
-            
-           
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <ContentControl Content="{Binding Content}" />
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
-        -->
-
         <Separator Grid.Row="3" Height="1" Margin="4" />
         <StackPanel Grid.Row="4"           
                     Margin="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
+            <Button MinWidth="80" Command="{Binding CloseCommand}" Content="{a:Text Close}" />
         </StackPanel>
 
     </Grid>

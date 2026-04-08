@@ -1,6 +1,5 @@
 ﻿using Astrarium.Plugins.Meteors.Controls;
 using Astrarium.Types;
-using System;
 using System.Drawing;
 
 namespace Astrarium.Plugins.Meteors

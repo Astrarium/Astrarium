@@ -1,9 +1,7 @@
-﻿using Astrarium.Types.Themes;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Input;
 
 namespace Astrarium.Types.Controls
 {

@@ -1,27 +1,22 @@
-﻿<c:DisposableUserControl x:Class="Astrarium.Plugins.Notes.Views.NotesControl"
+﻿<a:DisposableUserControl x:Class="Astrarium.Plugins.Notes.Views.NotesControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-             xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <c:DisposableUserControl.Resources>
+             xmlns:a="Astrarium"
+             xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types">
+    <a:DisposableUserControl.Resources>
 
         <ResourceDictionary>
 
-            <c:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
+            <a:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
 
             <ContextMenu x:Key="RowMenu" DataContext="{Binding Source={StaticResource DataContextProxy}, Path=Data}">
 
-                <MenuItem Header="{t:Text Notes.Table.Menu.ViewNote}" Command="{Binding ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                <MenuItem Header="{a:Text Notes.Table.Menu.ViewNote}" Command="{Binding ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
                 <Separator />
-                <MenuItem Header="{t:Text Notes.Table.Menu.SelectDate}" Command="{Binding SelectDateCommand}" CommandParameter="{Binding SelectedNote}" />
+                <MenuItem Header="{a:Text Notes.Table.Menu.SelectDate}" Command="{Binding SelectDateCommand}" CommandParameter="{Binding SelectedNote}" />
                 <Separator />
-                <MenuItem Header="{t:Text Notes.Table.Menu.EditNote}" Command="{Binding EditNoteCommand}" CommandParameter="{Binding SelectedNote}" />
-                <MenuItem Header="{t:Text Notes.Table.Menu.DeleteNote}" Command="{Binding DeleteNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                <MenuItem Header="{a:Text Notes.Table.Menu.EditNote}" Command="{Binding EditNoteCommand}" CommandParameter="{Binding SelectedNote}" />
+                <MenuItem Header="{a:Text Notes.Table.Menu.DeleteNote}" Command="{Binding DeleteNoteCommand}" CommandParameter="{Binding SelectedNote}" />
 
             </ContextMenu>
 
@@ -52,7 +47,7 @@
             </Style>
 
         </ResourceDictionary>
-    </c:DisposableUserControl.Resources>
+    </a:DisposableUserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -66,18 +61,18 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Margin="4 8" Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
+            <Grid Margin="4 8" Visibility="{Binding IsEmpty, Converter={a:InverseBoolToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <c:SearchTextBox Watermark="{t:Text Notes.NotesControl.SearchHint}" Text="{Binding FilterString, Mode=TwoWay, Delay=100, UpdateSourceTrigger=PropertyChanged}" Margin="0 0 8 0" />
-                <Button Padding="8 0" Grid.Column="1" Content="{t:Text Notes.NotesControl.AddNote}" Command="{Binding AddNoteCommand}" />
+                <a:SearchTextBox Watermark="{a:Text Notes.NotesControl.SearchHint}" Text="{Binding FilterString, Mode=TwoWay, Delay=100, UpdateSourceTrigger=PropertyChanged}" Margin="0 0 8 0" />
+                <Button Padding="8 0" Grid.Column="1" Content="{a:Text Notes.NotesControl.AddNote}" Command="{Binding AddNoteCommand}" />
             </Grid>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Vertical" Visibility="{Binding IsEmpty, Converter={s:BoolToVisibilityConverter}}">
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="{t:Text Notes.NotesControl.Empty}" />
-                <Button HorizontalAlignment="Center" Width="Auto" Content="{t:Text Notes.NotesControl.Add}" Margin="8" Padding="8 0" MinWidth="80" Command="{Binding AddNoteCommand}" />
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Vertical" Visibility="{Binding IsEmpty, Converter={a:BoolToVisibilityConverter}}">
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Text="{a:Text Notes.NotesControl.Empty}" />
+                <Button HorizontalAlignment="Center" Width="Auto" Content="{a:Text Notes.NotesControl.Add}" Margin="8" Padding="8 0" MinWidth="80" Command="{Binding AddNoteCommand}" />
             </StackPanel>
 
             <DataGrid 
@@ -107,35 +102,35 @@
                 SelectionUnit="FullRow"
                 ItemsSource="{Binding Notes}"
                 SelectedItem="{Binding SelectedNote}" 
-                Visibility="{Binding IsEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
+                Visibility="{Binding IsEmpty, Converter={a:InverseBoolToVisibilityConverter}}">
                 <DataGrid.InputBindings>
                     <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.ViewNoteCommand}" CommandParameter="{Binding SelectedNote}" />
                 </DataGrid.InputBindings>
 
                 <DataGrid.Columns>
 
-                    <DataGridTemplateColumn Header="{t:Text Notes.Table.Body}" CanUserSort="True" SortMemberPath="." MinWidth="40" Visibility="{Binding Source={StaticResource DataContextProxy}, Path=Data.AllNotes, Converter={s:BoolToVisibilityConverter}}">
+                    <DataGridTemplateColumn Header="{a:Text Notes.Table.Body}" CanUserSort="True" SortMemberPath="." MinWidth="40" Visibility="{Binding Source={StaticResource DataContextProxy}, Path=Data.AllNotes, Converter={a:BoolToVisibilityConverter}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectFullNameConverter}}">
-                                    <Border Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                                        <c:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" />
+                                <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding Body, Converter={a:CelestialObjectFullNameConverter}}">
+                                    <Border Background="Transparent" ToolTip="{Binding Body, Converter={a:CelestialObjectTypeDescriptionConverter}}">
+                                        <a:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding Body, Converter={a:CelestialObjectToIconConverter}}" />
                                     </Border>
-                                    <TextBlock Padding="4 0 0 0" Text="{Binding Body, Converter={s:CelestialObjectNameConverter}}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Padding="4 0 0 0" Text="{Binding Body, Converter={a:CelestialObjectNameConverter}}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="{t:Text Notes.Table.Date}" SortDirection="Descending" CanUserResize="False" Width="125" SortMemberPath="Date">
+                    <DataGridTemplateColumn Header="{a:Text Notes.Table.Date}" SortDirection="Descending" CanUserResize="False" Width="125" SortMemberPath="Date">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                     <TextBlock VerticalAlignment="Center" ToolTip="{t:Text Notes.Table.Menu.SelectDate}">
+                                     <TextBlock VerticalAlignment="Center" ToolTip="{a:Text Notes.Table.Menu.SelectDate}">
                                          <Hyperlink Command="{Binding Data.SelectDateCommand, Source={StaticResource DataContextProxy}}" CommandParameter="{Binding}">                                                 
                                              <Run>
                                                  <Run.Text>
-                                                     <MultiBinding Converter="{s:JulianDayToStringConverter}">
+                                                     <MultiBinding Converter="{a:JulianDayToStringConverter}">
                                                          <Binding Path="Date" />
                                                          <Binding Path="Data.UtcOffset" Source="{StaticResource DataContextProxy}" Mode="OneWay" />
                                                      </MultiBinding>
@@ -148,7 +143,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="{t:Text Notes.Table.Title}" CanUserSort="False" MinWidth="40">
+                    <DataGridTemplateColumn Header="{a:Text Notes.Table.Title}" CanUserSort="False" MinWidth="40">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
@@ -156,7 +151,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="*" Header="{t:Text Notes.Table.Description}" MinWidth="40" CanUserSort="False" >
+                    <DataGridTemplateColumn Width="*" Header="{a:Text Notes.Table.Description}" MinWidth="40" CanUserSort="False" >
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid HorizontalAlignment="Stretch">
@@ -166,20 +161,20 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:InverseBoolToVisibilityConverter}}" Text="{Binding Description, Converter={s:SingleLineTextConverter}}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={s:BoolToVisibilityConverter}}" Text="{Binding Description, Converter={s:MarkdownToPlainTextConverter}}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={a:InverseBoolToVisibilityConverter}}" Text="{Binding Description, Converter={a:SingleLineTextConverter}}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding Markdown, Converter={a:BoolToVisibilityConverter}}" Text="{Binding Description, Converter={a:MarkdownToPlainTextConverter}}" TextTrimming="CharacterEllipsis" />
 
                                     <Button Grid.Column="1" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" 
-                                            Visibility="{Binding IsSelected, Converter={s:BoolToVisibilityConverter},
+                                            Visibility="{Binding IsSelected, Converter={a:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
                                             Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.EditNoteCommand}"
-                                            ToolTip="{t:Text Notes.Table.EditHint}" />
+                                            ToolTip="{a:Text Notes.Table.EditHint}" />
 
                                     <Button Grid.Column="2" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Margin="8 0 0 0"
-                                            Visibility="{Binding IsSelected, Converter={s:BoolToVisibilityConverter},
+                                            Visibility="{Binding IsSelected, Converter={a:BoolToVisibilityConverter},
                                             RelativeSource={RelativeSource FindAncestor, AncestorType=DataGridRow}}"
                                             Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DeleteNoteCommand}"
-                                            ToolTip="{t:Text Notes.Table.DeleteHint}" />
+                                            ToolTip="{a:Text Notes.Table.DeleteHint}" />
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -191,4 +186,4 @@
         </Grid>
     </Grid>
 
-</c:DisposableUserControl>
+</a:DisposableUserControl>

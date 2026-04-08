@@ -1,16 +1,13 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window 
+﻿<Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:a="Astrarium" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:Astrarium.Plugins.FOV" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.EyepieceWindow" 
     mc:Ignorable="d" 
-    Title="{t:Text EyepieceWindow.Title}" 
+    Title="{a:Text EyepieceWindow.Title}" 
     Height="300" 
     Width="300" 
     MinHeight="300" MinWidth="300" 
@@ -25,21 +22,21 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="6">
-            <Label Content="{t:Text EyepieceWindow.Name}" />
+            <Label Content="{a:Text EyepieceWindow.Name}" />
             <TextBox Text="{Binding Eyepiece.Name}" />
 
-            <Label Content="{t:Text EyepieceWindow.FocalLength}" />
-            <c:NumericUpDown Value="{Binding Eyepiece.FocalLength}" DecimalPlaces="1" Minimum="1" Maximum="100" />
+            <Label Content="{a:Text EyepieceWindow.FocalLength}" />
+            <a:NumericUpDown Value="{Binding Eyepiece.FocalLength}" DecimalPlaces="1" Minimum="1" Maximum="100" />
 
-            <Label Content="{t:Text EyepieceWindow.FieldOfView}" />
-            <c:NumericUpDown Value="{Binding Eyepiece.FieldOfView}" DecimalPlaces="0" Minimum="1" Maximum="180" />
+            <Label Content="{a:Text EyepieceWindow.FieldOfView}" />
+            <a:NumericUpDown Value="{Binding Eyepiece.FieldOfView}" DecimalPlaces="0" Minimum="1" Maximum="180" />
 
         </StackPanel>
 
         <Separator Grid.Row="1" Margin="0 4 0 4" />
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" />
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{a:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{a:Text Cancel}" />
         </StackPanel>
     </Grid>
 </Window>

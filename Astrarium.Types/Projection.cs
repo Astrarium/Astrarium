@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using System;
-using System.Linq;
 
 namespace Astrarium.Types
 {

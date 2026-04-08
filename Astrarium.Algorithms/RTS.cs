@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Describes conditions of celestial object visibility:

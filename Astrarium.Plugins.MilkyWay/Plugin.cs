@@ -1,6 +1,5 @@
 ﻿using Astrarium.Plugins.MilkyWay.Controls;
 using Astrarium.Types;
-using System.Drawing;
 
 namespace Astrarium.Plugins.MilkyWay
 {

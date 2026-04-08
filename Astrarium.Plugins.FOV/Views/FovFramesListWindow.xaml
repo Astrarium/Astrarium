@@ -1,16 +1,13 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window 
+﻿<Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:a="Astrarium" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:Astrarium.Plugins.FOV" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.FovFramesListWindow" 
     mc:Ignorable="d" 
-    Title="{t:Text FovFramesListWindow.Title}" 
+    Title="{a:Text FovFramesListWindow.Title}" 
     Height="300" 
     Width="400" 
     MinHeight="300" MinWidth="400" 
@@ -54,39 +51,39 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovFramesListWindow.NoFrames}" IsEnabled="False" Visibility="{Binding IsEmptyList, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{a:Text FovFramesListWindow.NoFrames}" IsEnabled="False" Visibility="{Binding IsEmptyList, Converter={a:BoolToVisibilityConverter}}" />
 
         <DockPanel Grid.Row="0" VerticalAlignment="Stretch">
-            <c:BindableListView 
+            <a:BindableListView 
                 x:Name="List"
                 Style="{StaticResource ListViewStyle}" 
                 MouseDoubleClickCommand="{Binding EditCommand}"
                 VerticalAlignment="Stretch" 
                 ItemsSource="{Binding FovFrames}" 
-                Visibility="{Binding IsEmptyList, Converter={s:InverseBoolToVisibilityConverter}}"
+                Visibility="{Binding IsEmptyList, Converter={a:InverseBoolToVisibilityConverter}}"
                 ScrollViewer.VerticalScrollBarVisibility="Visible">
-                <c:BindableListView.ItemTemplate>
+                <a:BindableListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <CheckBox Margin="0 0 4 0" VerticalAlignment="Center" IsChecked="{Binding Enabled}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.CheckedCommand}" CommandParameter="{Binding}" />
                             <TextBlock VerticalAlignment="Center" Text="{Binding Label}" />
                         </StackPanel>
                     </DataTemplate>
-                </c:BindableListView.ItemTemplate>
-            </c:BindableListView>
+                </a:BindableListView.ItemTemplate>
+            </a:BindableListView>
         </DockPanel>
 
         <Separator Grid.Row="1" Margin="0 4 0 4" />
 
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <Button Content="{StaticResource BtnAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddCommand}" />
-            <Button Content="{StaticResource BtnCopy}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding CopyCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
-            <Button Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
-            <Button Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}"  />
+            <Button Content="{StaticResource BtnCopy}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={a:NotNullToBoolConverter}}" Command="{Binding CopyCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
+            <Button Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={a:NotNullToBoolConverter}}" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
+            <Button Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={a:NotNullToBoolConverter}}" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}"  />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button  MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
+            <Button  MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{a:Text Close}" />
         </StackPanel>
        
     </Grid>

@@ -2,14 +2,12 @@
 using Astrarium.Plugins.Journal.Types;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
-using System.Data.Entity;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows;
 
 namespace Astrarium.Plugins.Journal
 {

@@ -1,6 +1,4 @@
-﻿using Astrarium.Algorithms;
-using System;
-using System.Linq;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;

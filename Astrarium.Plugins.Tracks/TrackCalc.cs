@@ -1,15 +1,5 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
-using System;
-using System.Collections.Generic;
+﻿using Astrarium.Types;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Tracks
 {

@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Astrarium.Types

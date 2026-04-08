@@ -1,19 +1,12 @@
-﻿<c:SettingsSection 
+﻿<a:SettingsSection 
     x:Class="Astrarium.Plugins.Satellites.Controls.SatellitesSettingsSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-    Title="{t:Text Section.Satellites}"
-    Icon="{StaticResource IconSatellite}"
-    mc:Ignorable="d"
-    d:DesignHeight="450" 
-    d:DesignWidth="800">
+    xmlns:a="Astrarium"
+    Title="{a:Text Section.Satellites}"
+    Icon="{StaticResource IconSatellite}">
 
-    <c:SettingsSection.Resources>
+    <a:SettingsSection.Resources>
         <ResourceDictionary>
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
@@ -39,29 +32,29 @@
             </Grid>
 
         </ResourceDictionary>
-    </c:SettingsSection.Resources>
+    </a:SettingsSection.Resources>
 
     <StackPanel Orientation="Vertical" Margin="6">
 
-        <CheckBox Content="{t:Text Settings.Satellites}" IsChecked="{Binding Settings.Satellites}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.Satellites}" IsChecked="{Binding Settings.Satellites}" Margin="2" />
 
         <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.Satellites}">
-            <CheckBox Content="{t:Text Settings.SatellitesLabels}" IsChecked="{Binding Settings.SatellitesLabels}" Margin="2" />
-            <CheckBox Content="{t:Text Settings.SatellitesShowEclipsed}" IsChecked="{Binding Settings.SatellitesShowEclipsed}" Margin="2" />
-            <CheckBox Content="{t:Text Settings.SatellitesShowBelowHorizon}" IsChecked="{Binding Settings.SatellitesShowBelowHorizon}" Margin="2" />
+            <CheckBox Content="{a:Text Settings.SatellitesLabels}" IsChecked="{Binding Settings.SatellitesLabels}" Margin="2" />
+            <CheckBox Content="{a:Text Settings.SatellitesShowEclipsed}" IsChecked="{Binding Settings.SatellitesShowEclipsed}" Margin="2" />
+            <CheckBox Content="{a:Text Settings.SatellitesShowBelowHorizon}" IsChecked="{Binding Settings.SatellitesShowBelowHorizon}" Margin="2" />
             <StackPanel Orientation="Horizontal">
-                <CheckBox Content="{t:Text Settings.SatellitesUseMagFilter}" IsChecked="{Binding Settings.SatellitesUseMagFilter}" Margin="2 2 8 2" />
-                <c:NumericUpDown Value="{Binding Settings.SatellitesMagFilter}" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Width="60" DecimalPlaces="0" Step="1" Minimum="-10" Maximum="20" />
-                <TextBlock Text="{t:Text Settings.SatellitesUseMagFilter.Mag}" VerticalAlignment="Center" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Margin="8 0 0 0" />
+                <CheckBox Content="{a:Text Settings.SatellitesUseMagFilter}" IsChecked="{Binding Settings.SatellitesUseMagFilter}" Margin="2 2 8 2" />
+                <a:NumericUpDown Value="{Binding Settings.SatellitesMagFilter}" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Width="60" DecimalPlaces="0" Step="1" Minimum="-10" Maximum="20" />
+                <TextBlock Text="{a:Text Settings.SatellitesUseMagFilter.Mag}" VerticalAlignment="Center" IsEnabled="{Binding Settings.SatellitesUseMagFilter}" Margin="8 0 0 0" />
             </StackPanel>
-            <CheckBox Content="{t:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2 0 2 2" />
+            <CheckBox Content="{a:Text Settings.SatellitesShowOrbit}" IsChecked="{Binding Settings.SatellitesShowOrbit}" Margin="2 0 2 2" />
 
             <GroupBox 
-                Header="{t:Text Settings.SatellitesOrbitalElementsSources}"
+                Header="{a:Text Settings.SatellitesOrbitalElementsSources}"
                 Margin="2 8 2 2"
                 HorizontalAlignment="Stretch">
                 <StackPanel Margin="0 4 0 0" Orientation="Vertical">
-                    <c:BindableListView 
+                    <a:BindableListView 
                         Margin="0 4 0 4"
                         ItemsSource="{Binding Sources}"
                         SelectedItem="{Binding SelectedSource}"
@@ -73,7 +66,7 @@
                         ScrollViewer.CanContentScroll="False">
 
                         <ListView.Resources>
-                            <Style TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+                            <Style TargetType="{x:Type a:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
                                 <Setter Property="ItemContainerStyle">
                                     <Setter.Value>
                                         <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}" />
@@ -87,7 +80,7 @@
                                 ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                                 <GridView.Columns>
 
-                                    <GridViewColumn Width="100" Header="{t:Text Settings.SatellitesOrbitalElementsSources.Name}">
+                                    <GridViewColumn Width="100" Header="{a:Text Settings.SatellitesOrbitalElementsSources.Name}">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox Margin="0 4" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center" Content="{Binding FileName}" ToolTip="{Binding FileName}" />
@@ -95,7 +88,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="{t:Text Settings.SatellitesOrbitalElementsSources.Url}" Width="180">
+                                    <GridViewColumn Header="{a:Text Settings.SatellitesOrbitalElementsSources.Url}" Width="180">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock ToolTip="{Binding Url}" Text="{Binding Url}" Margin="0 4" />
@@ -103,10 +96,10 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="{t:Text Settings.SatellitesOrbitalElementsSources.LastUpdated}" Width="130">
+                                    <GridViewColumn Header="{a:Text Settings.SatellitesOrbitalElementsSources.LastUpdated}" Width="130">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock  Text="{Binding LastUpdated, Converter={s:DateTimeToStringConverter}}" Margin="0 4" />
+                                                <TextBlock  Text="{Binding LastUpdated, Converter={a:DateTimeToStringConverter}}" Margin="0 4" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -115,9 +108,9 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Margin="-8 0">
-                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonUpdate}" Content="{StaticResource BtnUpdate}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.UpdateSourceCommand}" CommandParameter="{Binding}" />
-                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonEdit}" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}"  Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.EditSourceCommand}" CommandParameter="{Binding}" />
-                                                    <Button ToolTip="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonDelete}" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type c:SettingsSection}}, Path=DataContext.DeleteSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{a:Text Settings.SatellitesOrbitalElementsSources.ButtonUpdate}" Content="{StaticResource BtnUpdate}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type a:SettingsSection}}, Path=DataContext.UpdateSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{a:Text Settings.SatellitesOrbitalElementsSources.ButtonEdit}" Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}"  Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type a:SettingsSection}}, Path=DataContext.EditSourceCommand}" CommandParameter="{Binding}" />
+                                                    <Button ToolTip="{a:Text Settings.SatellitesOrbitalElementsSources.ButtonDelete}" Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type a:SettingsSection}}, Path=DataContext.DeleteSourceCommand}" CommandParameter="{Binding}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -126,17 +119,17 @@
                                 </GridView.Columns>
                             </GridView>
                         </ListView.View>
-                    </c:BindableListView>
+                    </a:BindableListView>
                     <Separator />
 
                     <DockPanel>
                         <StackPanel Orientation="Horizontal" Margin="10" >
-                            <CheckBox IsChecked="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Content="{t:Text Settings.SatellitesAutoUpdateOrbitalElements}" Margin="4 4 4 4" />
-                            <c:NumericUpDown IsEnabled="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.SatellitesAutoUpdateOrbitalElementsPeriod}" Minimum="1" Maximum="365" />
-                            <TextBlock Margin="4" VerticalAlignment="Center" Text="{t:Text Settings.SatellitesAutoUpdateOrbitalElements.Days}" />
+                            <CheckBox IsChecked="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Content="{a:Text Settings.SatellitesAutoUpdateOrbitalElements}" Margin="4 4 4 4" />
+                            <a:NumericUpDown IsEnabled="{Binding Settings.SatellitesAutoUpdateOrbitalElements}" VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.SatellitesAutoUpdateOrbitalElementsPeriod}" Minimum="1" Maximum="365" />
+                            <TextBlock Margin="4" VerticalAlignment="Center" Text="{a:Text Settings.SatellitesAutoUpdateOrbitalElements.Days}" />
                         </StackPanel>
 
-                        <Button Padding="8 0 8 0" Margin="8" Height="26" MinWidth="80" HorizontalAlignment="Right" Content="{t:Text Settings.SatellitesOrbitalElementsSources.ButtonAdd}" Command="{Binding AddSourceCommand}" />
+                        <Button Padding="8 0 8 0" Margin="8" Height="26" MinWidth="80" HorizontalAlignment="Right" Content="{a:Text Settings.SatellitesOrbitalElementsSources.ButtonAdd}" Command="{Binding AddSourceCommand}" />
 
                     </DockPanel>
                     
@@ -152,4 +145,4 @@
 
         
     </StackPanel>
-</c:SettingsSection>
+</a:SettingsSection>

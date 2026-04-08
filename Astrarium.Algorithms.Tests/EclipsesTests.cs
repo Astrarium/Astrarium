@@ -1,5 +1,4 @@
-﻿using Astrarium.Algorithms;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace Astrarium.Algorithms.Tests

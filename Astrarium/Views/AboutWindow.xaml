@@ -1,25 +1,23 @@
 ﻿<Window x:Class="Astrarium.Views.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:a="Astrarium"
         WindowStartupLocation="CenterScreen"        
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         ResizeMode="CanResize" 
-        Title="{t:Text AboutWindow.Title}"
-        s:WindowProperties.MinButtonVisible="Collapsed" 
-        s:WindowProperties.MaxButtonVisible="Collapsed"         
+        Title="{a:Text AboutWindow.Title}"
+        a:WindowProperties.MinButtonVisible="Collapsed" 
+        a:WindowProperties.MaxButtonVisible="Collapsed"         
         Height="600"
         Width="600"
         MinHeight="350"
         MinWidth="500">
     <Window.Resources>
-        <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
+        <a:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
     </Window.Resources>
         <TabControl>
-            <TabItem Header="{t:Text AboutWindow.VersionTab}">
+            <TabItem Header="{a:Text AboutWindow.VersionTab}">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="Auto" Width="500">
                     
@@ -36,7 +34,7 @@
                     <TextBlock Text="{Binding Copyright, FallbackValue=Copyright}" Margin="8"  HorizontalAlignment="Center"/>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="{t:Text AboutWindow.PluginsTab}">
+            <TabItem Header="{a:Text AboutWindow.PluginsTab}">
             <ListView ItemsSource="{Binding Plugins}">
                 <ListView.Resources>
                         <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
@@ -51,16 +49,16 @@
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"  >
                             <GridView.Columns>
-                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Name}" Width="Auto" DisplayMemberBinding="{Binding Name}" />
-                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Description}" Width="Auto" DisplayMemberBinding="{Binding Description}" />
-                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Authors}" Width="Auto" DisplayMemberBinding="{Binding Authors}" />
-                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Version}" Width="Auto" DisplayMemberBinding="{Binding Version}" />
+                                <GridViewColumn Header="{a:Text AboutWindow.Plugins.Name}" Width="Auto" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="{a:Text AboutWindow.Plugins.Description}" Width="Auto" DisplayMemberBinding="{Binding Description}" />
+                                <GridViewColumn Header="{a:Text AboutWindow.Plugins.Authors}" Width="Auto" DisplayMemberBinding="{Binding Authors}" />
+                                <GridViewColumn Header="{a:Text AboutWindow.Plugins.Version}" Width="Auto" DisplayMemberBinding="{Binding Version}" />
                             </GridView.Columns>
                         </GridView>
                     </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem Header="{t:Text AboutWindow.CreditsTab}">
+            <TabItem Header="{a:Text AboutWindow.CreditsTab}">
                 <FlowDocumentScrollViewer 
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch"

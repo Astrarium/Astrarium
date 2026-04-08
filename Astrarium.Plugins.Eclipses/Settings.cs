@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Plugins.Eclipses
+﻿namespace Astrarium.Plugins.Eclipses
 {
     /// <summary>
     /// Holds settings names for the plugin

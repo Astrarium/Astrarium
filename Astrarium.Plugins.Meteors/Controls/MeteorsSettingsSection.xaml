@@ -1,21 +1,14 @@
-﻿<c:SettingsSection 
+﻿<a:SettingsSection 
     x:Class="Astrarium.Plugins.Meteors.Controls.MeteorsSettingsSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:a="Astrarium"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" 
     xmlns:p="clr-namespace:Astrarium.Plugins.Meteors;assembly=Astrarium.Plugins.Meteors"
-    Title="{t:Text Section.Meteors}"
-    Icon="{StaticResource IconMeteor}"
-    mc:Ignorable="d"
-    d:DesignHeight="450" 
-    d:DesignWidth="800">
+    Title="{a:Text Section.Meteors}"
+    Icon="{StaticResource IconMeteor}">
 
-    <c:SettingsSection.Resources>
+    <a:SettingsSection.Resources>
         <ObjectDataProvider x:Key="EnumMeteorActivityClass" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="p:MeteorActivityClass" />
@@ -26,37 +19,37 @@
                 <x:Type TypeName="p:MeteorLabelType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-    </c:SettingsSection.Resources>
+    </a:SettingsSection.Resources>
 
     <StackPanel Orientation="Vertical" Margin="6">
-        <CheckBox Content="{t:Text Settings.Meteors}" IsChecked="{Binding Settings.Meteors}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.Meteors}" IsChecked="{Binding Settings.Meteors}" Margin="2" />
 
         <StackPanel Margin="-2" Orientation="Horizontal" IsEnabled="{Binding Settings.Meteors}">
-            <Label Margin="0" Content="{t:Text Settings.MeteorsActivityClassLimit}" />
+            <Label Margin="0" Content="{a:Text Settings.MeteorsActivityClassLimit}" />
             <ComboBox SelectedValue="{Binding Settings.MeteorsActivityClassLimit}" ItemsSource="{Binding Source={StaticResource EnumMeteorActivityClass}}" MinWidth="80">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                        <TextBlock Text="{Binding Converter={a:EnumValueToEnumDescriptionConverter}}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Label Margin="0" Content="{t:Text Settings.MeteorsActivityClassLimitAndHigher}" />
+            <Label Margin="0" Content="{a:Text Settings.MeteorsActivityClassLimitAndHigher}" />
         </StackPanel>
         
-        <CheckBox Content="{t:Text Settings.MeteorsOnlyActive}" IsChecked="{Binding Settings.MeteorsOnlyActive}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.MeteorsLabels}" IsChecked="{Binding Settings.MeteorsLabels}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.MeteorsOnlyActive}" IsChecked="{Binding Settings.MeteorsOnlyActive}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.MeteorsLabels}" IsChecked="{Binding Settings.MeteorsLabels}" IsEnabled="{Binding Settings.Meteors}" Margin="2" />
 
         <StackPanel IsEnabled="{Binding Settings.Meteors}">
         <StackPanel Margin="-2" Orientation="Horizontal" IsEnabled="{Binding Settings.MeteorsLabels}">
-            <Label Margin="0" Content="{t:Text Settings.MeteorsLabelsType}" />
+            <Label Margin="0" Content="{a:Text Settings.MeteorsLabelsType}" />
                 <ComboBox SelectedValue="{Binding Settings.MeteorsLabelsType}" ItemsSource="{Binding Source={StaticResource EnumMeteorLabelType}}" MinWidth="80">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                            <TextBlock Text="{Binding Converter={a:EnumValueToEnumDescriptionConverter}}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
         </StackPanel>
     </StackPanel>
-</c:SettingsSection>
+</a:SettingsSection>

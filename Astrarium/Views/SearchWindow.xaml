@@ -3,11 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:a="Astrarium"
     mc:Ignorable="d"
-    Title="{t:Text SearchWindow.Title}" 
+    Title="{a:Text SearchWindow.Title}" 
     Width="600" Height="600"
     MinWidth="300" MinHeight="300"
     Style="{StaticResource {x:Type Window}}"
@@ -22,16 +20,16 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-            Text="{t:Text SearchWindow.EmptySearchString}" 
+            Text="{a:Text SearchWindow.EmptySearchString}" 
             IsEnabled="False"
-            Visibility="{Binding EmptySearchString, Converter={s:BoolToVisibilityConverter}}" 
+            Visibility="{Binding EmptySearchString, Converter={a:BoolToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
 
         <TextBlock Grid.Row="0" 
-            Text="{t:Text SearchWindow.NothingFound}" 
+            Text="{a:Text SearchWindow.NothingFound}" 
             IsEnabled="False"
-            Visibility="{Binding NothingFound, Converter={s:BoolToVisibilityConverter}}" 
+            Visibility="{Binding NothingFound, Converter={a:BoolToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
 
@@ -41,7 +39,7 @@
             DisplayMemberPath="Name"
             SelectionMode="Single" 
             SelectedItem="{Binding SelectedItem}"
-            Visibility="{Binding SelectedItem, Converter={s:NotNullToVisibilityConverter}}"
+            Visibility="{Binding SelectedItem, Converter={a:NotNullToVisibilityConverter}}"
             VerticalContentAlignment="Top"
             IsSynchronizedWithCurrentItem="True"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -57,8 +55,8 @@
                                     Padding="{TemplateBinding Padding}"
                                     SnapsToDevicePixels="true">
                                     <StackPanel Orientation="Horizontal">
-                                        <Border Background="Transparent" ToolTip="{Binding Body, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                                            <c:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" />
+                                        <Border Background="Transparent" ToolTip="{Binding Body, Converter={a:CelestialObjectTypeDescriptionConverter}}">
+                                            <a:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding Body, Converter={a:CelestialObjectToIconConverter}}" />
                                         </Border>
                                         <TextBlock Padding="4 0 0 0" Text="{Binding Name}" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -98,8 +96,8 @@
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={s:NotNullToBoolConverter}, Mode=OneWay}" Content="{t:Text Select}" />
-            <Button MinWidth="80" Click="CloseButton_Click" Content="{t:Text Close}" />
+            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={a:NotNullToBoolConverter}, Mode=OneWay}" Content="{a:Text Select}" />
+            <Button MinWidth="80" Click="CloseButton_Click" Content="{a:Text Close}" />
         </StackPanel>
 
     </Grid>

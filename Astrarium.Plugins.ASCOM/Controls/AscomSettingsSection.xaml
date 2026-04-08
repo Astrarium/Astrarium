@@ -1,13 +1,11 @@
-﻿<c:SettingsSection 
+﻿<a:SettingsSection 
     x:Class="Astrarium.Plugins.ASCOM.Controls.AscomSettingsSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    Title="{t:Text Section.Ascom}"
+    xmlns:a="Astrarium"
+    Title="{a:Text Section.Ascom}"
     Icon="M21.9,8.9L20.2,9.9L16.2,3L17.9,2L21.9,8.9M9.8,7.9L12.8,13.1L18.9,9.6L15.9,4.4L9.8,7.9M11.4,12.7L9.4,9.2L5.1,11.7L7.1,15.2L11.4,12.7M2.1,14.6L3.1,16.3L5.7,14.8L4.7,13.1L2.1,14.6M12.1,14L11.8,13.6L7.5,16.1L7.8,16.5C8,16.8 8.3,17.1 8.6,17.3L7,22H9L10.4,17.7H10.5L12,22H14L12.1,16.4C12.6,15.7 12.6,14.8 12.1,14Z"
     mc:Ignorable="d"
     d:DesignHeight="450" 
@@ -15,15 +13,15 @@
 
     <StackPanel Orientation="Vertical" Margin="6 0 6 0">
         <StackPanel Orientation="Horizontal" Margin="-2 2 -2 -2">
-            <Label Content="{t:Text Settings.TelescopePollingPeriod}"/>
-            <c:NumericUpDown Width="60" DecimalPlaces="0" Minimum="0" Maximum="5000" HorizontalAlignment="Left" Value="{Binding Settings.TelescopePollingPeriod}" />
+            <Label Content="{a:Text Settings.TelescopePollingPeriod}"/>
+            <a:NumericUpDown Width="60" DecimalPlaces="0" Minimum="0" Maximum="5000" HorizontalAlignment="Left" Value="{Binding Settings.TelescopePollingPeriod}" />
         </StackPanel>
         
-        <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
 
-        <CheckBox Margin="2" Content="{t:Text Settings.TelescopeControlJoystick}" IsChecked="{Binding JoystickEnabled}" />
-        <Grid Visibility="{Binding Settings.TelescopeControlJoystick, Converter={s:BoolToVisibilityConverter}}">
+        <CheckBox Margin="2" Content="{a:Text Settings.TelescopeControlJoystick}" IsChecked="{Binding JoystickEnabled}" />
+        <Grid Visibility="{Binding Settings.TelescopeControlJoystick, Converter={a:BoolToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -34,8 +32,8 @@
                     <ComboBox.ItemTemplate>
                         <ItemContainerTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="{t:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Connected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:BoolToVisibilityConverter}}" />
-                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="{t:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Disconnected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:InverseBoolToVisibilityConverter}}" />
+                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="{a:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Connected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={a:BoolToVisibilityConverter}}" />
+                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="{a:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Disconnected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={a:InverseBoolToVisibilityConverter}}" />
                                 <TextBlock VerticalAlignment="Center" Margin="4 -1" Text="{Binding Name}" />
                             </StackPanel>
                         </ItemContainerTemplate>
@@ -43,15 +41,15 @@
                 </ComboBox>
                 <TextBlock                    
                     Foreground="{StaticResource BrushControlLightBackground}"
-                    Visibility="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NullToVisibilityConverter}}"
+                    Visibility="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={a:NullToVisibilityConverter}}"
                     IsHitTestVisible="False"
                     VerticalAlignment="Center"
                     Padding="4 0"
-                    Text="{t:Text Settings.TelescopeControlJoystick.Empty}" />
+                    Text="{a:Text Settings.TelescopeControlJoystick.Empty}" />
             </Grid>
 
-            <Button Grid.Column="1" Margin="2 0 0 0" IsEnabled="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NotNullToBoolConverter}}" Content="{t:Text Settings.TelescopeControlJoystick.ButtonCommands}" MinWidth="80" Padding="4 0" HorizontalAlignment="Left" Command="{Binding EditButtonsMappingCommand}" />
+            <Button Grid.Column="1" Margin="2 0 0 0" IsEnabled="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={a:NotNullToBoolConverter}}" Content="{a:Text Settings.TelescopeControlJoystick.ButtonCommands}" MinWidth="80" Padding="4 0" HorizontalAlignment="Left" Command="{Binding EditButtonsMappingCommand}" />
 
         </Grid>
     </StackPanel>
-</c:SettingsSection>
+</a:SettingsSection>

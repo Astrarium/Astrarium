@@ -1,4 +1,3 @@
-using Astrarium.Algorithms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;

@@ -1,8 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
-using System.Device.Location;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 

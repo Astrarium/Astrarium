@@ -1,32 +1,27 @@
-﻿<cc:MouseEventsInterceptableWindow 
+﻿<a:MouseEventsInterceptableWindow 
     x:Class="Astrarium.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:a="clr-namespace:Astrarium"
+    xmlns:a="Astrarium"
+    xmlns:app="clr-namespace:Astrarium"
     xmlns:c="clr-namespace:Astrarium.Controls"
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:cc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    mc:Ignorable="d"
     Style="{StaticResource {x:Type Window}}"
     MinHeight="300" MinWidth="300"
     WindowState="{Binding WindowState, Mode=OneTime}"
     ResizeMode="CanResize"
     WindowStartupLocation="CenterScreen"
-    a:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
-    a:MainWindow.MousePositionConstellation="{Binding MouseConstellation, Mode=OneWayToSource}"
-    a:MainWindow.MouseEquatorialPosition="{Binding MouseEquatorialCoordinates, Mode=OneWayToSource}"
-    a:MainWindow.MouseHorizontalPosition="{Binding MouseHorizontalCoordinates, Mode=OneWayToSource}"
-    a:MainWindow.FPS="{Binding FPS, Mode=OneWayToSource}"        
-    a:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
-    a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
-    a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
-    a:MainWindow.MapZoom="{Binding ZoomCommand}"
-    a:MainWindow.WindowSize="{Binding WindowSize, Mode=TwoWay}"
-    s:WindowProperties.CompactMenu="{Binding MainMenuItems}"        
-    s:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={s:BoolToVisibilityConverter}}"
+    app:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
+    app:MainWindow.MousePositionConstellation="{Binding MouseConstellation, Mode=OneWayToSource}"
+    app:MainWindow.MouseEquatorialPosition="{Binding MouseEquatorialCoordinates, Mode=OneWayToSource}"
+    app:MainWindow.MouseHorizontalPosition="{Binding MouseHorizontalCoordinates, Mode=OneWayToSource}"
+    app:MainWindow.FPS="{Binding FPS, Mode=OneWayToSource}"        
+    app:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
+    app:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
+    app:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
+    app:MainWindow.MapZoom="{Binding ZoomCommand}"
+    app:MainWindow.WindowSize="{Binding WindowSize, Mode=TwoWay}"
+    a:WindowProperties.CompactMenu="{Binding MainMenuItems}"        
+    a:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={a:BoolToVisibilityConverter}}"
     Title="Astrarium" Height="768" Width="1024">
 
     <Grid>
@@ -39,26 +34,26 @@
 
         <!-- MAIN MENU -->
         <DockPanel Grid.Row="0">
-            <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}" Visibility="{Binding IsCompactMenu, Converter={s:InverseBoolToVisibilityConverter}}">
+            <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}" Visibility="{Binding IsCompactMenu, Converter={a:InverseBoolToVisibilityConverter}}">
                 <Menu.ItemContainerStyle>
                     <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                         <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
-                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                        <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
-                        <Setter Property="ToolTip" Value="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" />
+                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
+                        <Setter Property="Header" Value="{Binding Header, Converter={a:LocalizedTextConverter}}" />
+                        <Setter Property="ToolTip" Value="{Binding Tooltip, Converter={a:LocalizedTextConverter}}" />
                         <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                         <Setter Property="Command" Value="{Binding Command}" />
                         <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                         <Setter Property="ItemsSource" Value="{Binding SubItems}" />
-                        <Setter Property="Icon" Value="{Binding IconKey, Converter={s:ImageKeyToImageConverter}}" />
+                        <Setter Property="Icon" Value="{Binding IconKey, Converter={a:ImageKeyToImageConverter}}" />
                     </Style>
                 </Menu.ItemContainerStyle>
             </Menu>
         </DockPanel>
 
         <!-- TOOLBAR -->
-        <DockPanel Grid.Row="1" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}">
+        <DockPanel Grid.Row="1" Visibility="{Binding IsToolbarVisible, Converter={a:BoolToVisibilityConverter}}">
             <ToolBar ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True">
                 <ToolBar.Resources>
 
@@ -67,12 +62,12 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarButtonTemplate">
-                        <Button Padding="0" Margin="1 0" Width="24" Height="24" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
+                        <Button Padding="0" Margin="1 0" Width="24" Height="24" ToolTip="{Binding Tooltip, Converter={a:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
                             <Button.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource ColorControlBackground}" />
                             </Button.BorderBrush>
                             <Button.Content>
-                                <cc:PathIcon Data="{Binding IconData}" Width="18" Height="18" />
+                                <a:PathIcon Data="{Binding IconData}" Width="18" Height="18" />
                             </Button.Content>
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -92,9 +87,9 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                        <ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                        <ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={a:LocalizedTextConverter}}" Command="{Binding Command}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
                             <ToggleButton.Content>
-                                <cc:PathIcon Data="{Binding IconData}" Width="18" Height="18" />
+                                <a:PathIcon Data="{Binding IconData}" Width="18" Height="18" />
                             </ToggleButton.Content>
                         </ToggleButton>
                     </DataTemplate>
@@ -109,10 +104,10 @@
                                         <DataTrigger Binding="{Binding}" Value="{x:Null}">
                                             <Setter Property="ContentTemplate" Value="{StaticResource ToolbarSeparatorTemplate}" />
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarButton}">
+                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type a:ToolbarButton}">
                                             <Setter Property="ContentTemplate" Value="{StaticResource ToolbarButtonTemplate}" />
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarToggleButton}">
+                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type a:ToolbarToggleButton}">
                                             <Setter Property="ContentTemplate" Value="{StaticResource ToolbarToggleButtonTemplate}" />
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -124,30 +119,22 @@
             </ToolBar>
 
             <c:AutoCompleteTextBox 
-                Watermark="{t:Text Toolbar.SearchHint}"
-                EmptyText="{t:Text Toolbar.SearchEmpty}"
+                Watermark="{a:Text Toolbar.SearchHint}"
+                EmptyText="{a:Text Toolbar.SearchEmpty}"
                 DisplayMember="Names[0]"
                 BorderThickness="0"
                 HorizontalAlignment="Right" 
                 IconPlacement="Right"
                 Width="300"
                 Height="24"
-                Margin="4"
-                                                
+                Margin="4"   
                 SelectionCommit="{Binding QuickSearchCommand}"
                 Provider="{Binding SearchProvider}">
                 <c:AutoCompleteTextBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                                </Rectangle.Fill>
-                                <Rectangle.OpacityMask>
-                                    <ImageBrush ImageSource="{Binding Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                            <TextBlock Padding="4 0 0 0" Text="{Binding Converter={s:CelestialObjectFullNameConverter}}" VerticalAlignment="Center"/>
+                            <a:PathIcon Margin="2" Width="16" Height="16" IsEnabled="False"  ToolTip="{Binding Converter={a:CelestialObjectTypeDescriptionConverter}}" Data="{Binding Converter={a:CelestialObjectToIconConverter}}" />
+                            <TextBlock Padding="4 0 0 0" Text="{Binding Converter={a:CelestialObjectFullNameConverter}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DataTemplate>
                 </c:AutoCompleteTextBox.ItemTemplate>
@@ -162,9 +149,9 @@
             AllowsTransparency="True"
             Placement="Center"
             x:Name="popup">
-            <cc:BorderFix Width="Auto" Height="Auto" Style="{StaticResource PopupContentStyle}" BorderThickness="1">
+            <a:BorderFix Width="Auto" Height="Auto" Style="{StaticResource PopupContentStyle}" BorderThickness="1">
                 <TextBlock Padding="6" Name="popupText"></TextBlock>
-            </cc:BorderFix>
+            </a:BorderFix>
         </c:AutoClosePopup>
 
         <!-- MAP -->
@@ -176,8 +163,8 @@
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
-                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                                <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
+                                <Setter Property="Header" Value="{Binding Header, Converter={a:LocalizedTextConverter}}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
                                 <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
@@ -195,19 +182,19 @@
 
 
         <!-- STATUS BAR -->
-        <StatusBar Height="24" Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
-            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MouseConstellation, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />
+        <StatusBar Height="24" Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={a:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
+            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MouseConstellation, FallbackValue='Con'}" ToolTip="{a:Text StatusBar.Constellation}" />
             <Separator />
-            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
+            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{a:Text StatusBar.EquatorialCoordinates}" />
             <Separator />
-            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
+            <TextBlock Width="250" TextAlignment="Center" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{a:Text StatusBar.HorizontalCoordinates}" />
             <Separator />
 
             <Menu>
                 <MenuItem 
                     Width="110"
                     Command="{Binding SetViewAngleCommand}"
-                    ToolTip="{t:Text StatusBar.ViewAngle}">
+                    ToolTip="{a:Text StatusBar.ViewAngle}">
                     <MenuItem.Header>
                         <TextBlock HorizontalAlignment="Center" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" />
                     </MenuItem.Header>
@@ -219,15 +206,15 @@
             <Menu>
                 <MenuItem 
                     ItemsSource="{Binding SelectedObjectsMenuItems}" 
-                    Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
-                    ToolTip="{t:Text StatusBar.SelectedObject}"
+                    Header="{Binding SelectedObject, Converter={a:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
+                    ToolTip="{a:Text StatusBar.SelectedObject}"
                     Command="{Binding SelectedObjectsMenuItemsRootMenuCommand}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                             <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                             <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
-                            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                            <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
+                            <Setter Property="Header" Value="{Binding Header, Converter={a:LocalizedTextConverter}}" />
                             <Setter Property="Command" Value="{Binding Command}" />
                             <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                             <Setter Property="ItemsSource" Value="{Binding SubItems}" />
@@ -238,8 +225,8 @@
 
             <Separator />
 
-            <TextBlock Width="Auto" Text="{Binding FPS, FallbackValue='FPS'}" Visibility="{Binding DisplayFPS, Converter={s:BoolToVisibilityConverter}, Mode=OneTime}" />
-            <Separator Width="Auto" Visibility="{Binding DisplayFPS, Converter={s:BoolToVisibilityConverter}, Mode=OneTime}" />
+            <TextBlock Width="Auto" Text="{Binding FPS, FallbackValue='FPS'}" Visibility="{Binding DisplayFPS, Converter={a:BoolToVisibilityConverter}, Mode=OneTime}" />
+            <Separator Width="Auto" Visibility="{Binding DisplayFPS, Converter={a:BoolToVisibilityConverter}, Mode=OneTime}" />
             
             <!-- Date and Time controls -->
             <StatusBarItem HorizontalAlignment="Right" HorizontalContentAlignment="Right">
@@ -249,15 +236,15 @@
                     <Menu Margin="0 0 20 0" VerticalContentAlignment="Center">
                         <MenuItem 
                             ItemsSource="{Binding FavoriteLocationsMenuItems}" 
-                            Header="{Binding ObserverLocation, Converter={s:GeoLocationNameConverter}, FallbackValue='Observer Location'}"
-                            ToolTip="{t:Text StatusBar.ObserverLocation}">
+                            Header="{Binding ObserverLocation, Converter={a:GeoLocationNameConverter}, FallbackValue='Observer Location'}"
+                            ToolTip="{a:Text StatusBar.ObserverLocation}">
 
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                     <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
-                                    <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                                    <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                                    <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
+                                    <Setter Property="Header" Value="{Binding Header, Converter={a:LocalizedTextConverter}}" />
                                     <Setter Property="Command" Value="{Binding Command}" />
                                     <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                                     <Setter Property="ItemsSource" Value="{Binding SubItems}" />
@@ -274,7 +261,7 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type ToggleButton}">
                                             <Border x:Name="Border">
-                                                <cc:PathIcon Name="LockedIcon" Margin="0 2 0 0" Width="16" Height="16" VerticalAlignment="Center" />
+                                                <a:PathIcon Name="LockedIcon" Margin="0 2 0 0" Width="16" Height="16" VerticalAlignment="Center" />
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsChecked" Value="True">
@@ -295,10 +282,10 @@
                                 </Setter>
                                 <Style.Triggers>
                                     <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="ToolTip" Value="{t:Text StatusBar.TimeSyncOn}" />
+                                        <Setter Property="ToolTip" Value="{a:Text StatusBar.TimeSyncOn}" />
                                     </Trigger>
                                     <Trigger Property="IsChecked" Value="False">
-                                        <Setter Property="ToolTip" Value="{t:Text StatusBar.TimeSyncOff}" />
+                                        <Setter Property="ToolTip" Value="{a:Text StatusBar.TimeSyncOff}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -306,7 +293,7 @@
                     </ToggleButton>
 
                     <!-- Date and Time picker button -->
-                    <Button Width="Auto" Command="{Binding SetDateCommand}" IsEnabled="{Binding TimeSync, Converter={s:InverseBoolConverter}}" ToolTip="{t:Text StatusBar.DatePicker}">
+                    <Button Width="Auto" Command="{Binding SetDateCommand}" IsEnabled="{Binding TimeSync, Converter={a:InverseBoolConverter}}" ToolTip="{a:Text StatusBar.DatePicker}">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                                 <Setter Property="Template">
@@ -331,4 +318,4 @@
             </StatusBarItem>
         </StatusBar>
     </Grid>
-</cc:MouseEventsInterceptableWindow>
+</a:MouseEventsInterceptableWindow>

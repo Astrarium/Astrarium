@@ -1,5 +1,4 @@
 ﻿using Astrarium.Types;
-using System;
 
 namespace Astrarium.Plugins.JupiterMoons
 {

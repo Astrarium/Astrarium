@@ -3,15 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:a="Astrarium"
         xmlns:local="clr-namespace:Astrarium.Plugins.ASCOM" 
         mc:Ignorable="d"
-        Title="{t:Text ButtonsMappingWindow.Title}" 
+        Title="{a:Text ButtonsMappingWindow.Title}" 
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner"
-        s:WindowProperties.MinButtonVisible="Collapsed"
-        s:WindowProperties.MaxButtonVisible="Collapsed"
+        a:WindowProperties.MinButtonVisible="Collapsed"
+        a:WindowProperties.MaxButtonVisible="Collapsed"
         Height="400" Width="400">
 
     <Window.Resources>
@@ -30,7 +29,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="6" IsEnabled="False" Text="{t:Text ButtonsMappingWindow.Hint}" TextWrapping="Wrap" />
+        <TextBlock Margin="6" IsEnabled="False" Text="{a:Text ButtonsMappingWindow.Hint}" TextWrapping="Wrap" />
 
         <DataGrid 
             Grid.Row="1"
@@ -55,11 +54,11 @@
                 </Style>
             </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Button}" IsReadOnly="True">
+                <DataGridTemplateColumn Header="{a:Text ButtonsMappingWindow.Button}" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="{t:Text ButtonsMappingWindow.ButtonPressedHint}" Width="10" Height="10" />
+                                <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="{a:Text ButtonsMappingWindow.ButtonPressedHint}" Width="10" Height="10" />
                                 <TextBlock Text="{Binding Button}" />
                             </StackPanel>
 
@@ -71,13 +70,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Action}">
+                <DataGridTemplateColumn Header="{a:Text ButtonsMappingWindow.Action}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ComboBox Margin="-4 0" VerticalContentAlignment="Center" SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                                        <TextBlock Text="{Binding Converter={a:EnumValueToEnumDescriptionConverter}}"/>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -88,7 +87,7 @@
         </DataGrid>
 
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
-            <Button Command="{Binding CloseCommand}" MinWidth="80" Margin="6 0 6 6" Padding="4 0" Content="{t:Text Close}" />
+            <Button Command="{Binding CloseCommand}" MinWidth="80" Margin="6 0 6 6" Padding="4 0" Content="{a:Text Close}" />
         </StackPanel>
 
     </Grid>

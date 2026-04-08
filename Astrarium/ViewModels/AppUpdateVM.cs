@@ -3,7 +3,6 @@ using Astrarium.Types.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
