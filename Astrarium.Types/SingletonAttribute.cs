@@ -5,7 +5,7 @@ namespace Astrarium.Types
     /// <summary>
     /// Indicates that instance of the class should be a singleton
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SingletonAttribute : Attribute 
     {
         /// <summary>

@@ -101,6 +101,7 @@ namespace Astrarium
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
             kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
+            kernel.Bind<ILandscapesProvider, LandscapesProviderStub>().To<LandscapesProviderStub>().InSingletonScope();
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<IWorkersCollection>().To<WorkersCollection>().InSingletonScope();
             kernel.Bind<ILocationDetector>().To<LocationDetector>();
@@ -126,18 +127,21 @@ namespace Astrarium
                     var singletons = plugin.GetExportedTypes().Where(t => t.IsDefined(typeof(SingletonAttribute), false)).ToArray();
                     foreach (var singletonImpl in singletons)
                     {
-                        var singletonAttr = singletonImpl.GetCustomAttribute<SingletonAttribute>();
-                        if (singletonAttr.InterfaceType != null)
+                        var singletonAttrs = singletonImpl.GetCustomAttributes<SingletonAttribute>();
+                        foreach (var singletonAttr in singletonAttrs)
                         {
-                            if (!singletonAttr.InterfaceType.IsAssignableFrom(singletonImpl))
+                            if (singletonAttr.InterfaceType != null)
                             {
-                                throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
+                                if (!singletonAttr.InterfaceType.IsAssignableFrom(singletonImpl))
+                                {
+                                    throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
+                                }
+                                kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
                             }
-                            kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
-                        }
-                        else
-                        {
-                            kernel.Bind(singletonImpl).ToSelf().InSingletonScope();
+                            else
+                            {
+                                kernel.Rebind(singletonImpl).ToSelf().InSingletonScope();
+                            }
                         }
                     }
 
@@ -267,7 +271,7 @@ namespace Astrarium
 
             progress.Report($"Initializing shell");
 
-            settings.SettingValueChanged += (settingName, value) =>
+            settings.SettingValueChanged += (settingName, value, oldValue) =>
             {
                 if (settingName == "NightMode" || settingName == "AppTheme")
                 {
