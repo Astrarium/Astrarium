@@ -221,7 +221,7 @@ namespace Astrarium
             skyView.MouseDoubleClick += SkyView_MouseDoubleClick;
             map.OnInvalidate += skyView.Invalidate;
 
-            settings.SettingValueChanged += (s, v) => skyView.Invalidate();
+            settings.SettingValueChanged += (s, nv, ov) => skyView.Invalidate();
 
             Host.Child = skyView;
 

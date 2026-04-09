@@ -76,7 +76,7 @@ namespace Astrarium.Plugins.Atmosphere
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             if (settingName == "Ground" || settingName == "Atmosphere")
             {

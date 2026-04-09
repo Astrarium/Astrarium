@@ -142,7 +142,7 @@ namespace Astrarium.Plugins.Tycho2
             this.sky = sky;
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             if (isInitialized && settingName == "Tycho2RootDir")
             {

@@ -137,7 +137,7 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "TelescopePollingPeriod")
             {

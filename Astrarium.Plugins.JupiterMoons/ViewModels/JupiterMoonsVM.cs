@@ -16,6 +16,7 @@ namespace Astrarium.Plugins.JupiterMoons
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
+        private readonly ISettings settings;
         private readonly JupiterMoonsCalculator calculator = null;
         private readonly CelestialObject jupiter = null;
         private readonly CelestialObject[] moons = new CelestialObject[4];
@@ -176,8 +177,10 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             this.sky = sky;
             this.map = map;
+            this.settings = settings;
             this.calculator = new JupiterMoonsCalculator(settings);
-            settings.SettingValueChanged += Settings_SettingValueChanged;
+            
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
 
             jupiter = sky.Search("Planet", "Jupiter");
 
@@ -194,7 +197,7 @@ namespace Astrarium.Plugins.JupiterMoons
             Calculate();
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "Schema")
             {
@@ -518,6 +521,11 @@ namespace Astrarium.Plugins.JupiterMoons
             get => GetValue(nameof(GRSTable), new GRSTableItem[0]);
             set => SetValue(nameof(GRSTable), value);
         }
-    }
 
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
+        }
+    }
 }

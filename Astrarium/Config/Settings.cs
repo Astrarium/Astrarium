@@ -40,7 +40,7 @@ namespace Astrarium.Config
         /// <summary>
         /// Raised when setting is changed
         /// </summary>
-        public event Action<string, object> SettingValueChanged;
+        public event SettingValueChangedDelegate SettingValueChanged;
 
         /// <summary>
         /// Raised when property value is changed
@@ -138,7 +138,7 @@ namespace Astrarium.Config
                 if (!object.Equals(oldValue, value))
                 {
                     SettingsValues[settingName] = value;
-                    SettingValueChanged?.Invoke(settingName, value);
+                    SettingValueChanged?.Invoke(settingName, value, oldValue);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(settingName));
                 }
             }
@@ -207,7 +207,7 @@ namespace Astrarium.Config
             var settingValueChangedInvocationList = SettingValueChanged.GetInvocationList();
             foreach (var item in settingValueChangedInvocationList)
             {
-                Task.Run(() => (item as Action<string, object>).Invoke(settingName, value));
+                Task.Run(() => (item as SettingValueChangedDelegate).Invoke(settingName, value, value));
             }
 
             var propertyChangedInvocationList = PropertyChanged.GetInvocationList();

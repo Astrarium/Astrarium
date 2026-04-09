@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.Horizon
 
             DefineSettingsSection<HorizonSettingsSection, HorizonSettingsViewModel>();
 
-            settings.SettingValueChanged += (settingName, value) =>
+            settings.SettingValueChanged += (settingName, value, oldValue) =>
             {
                  if (settingName == "MeasureAzimuthFromNorth")
                  {

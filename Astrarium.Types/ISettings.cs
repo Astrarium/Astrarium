@@ -58,7 +58,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Raised when setting has been changed
         /// </summary>
-        event Action<string, object> SettingValueChanged;
+        event SettingValueChangedDelegate SettingValueChanged;
 
         /// <summary>
         /// Gets value indicating settings have been modified
@@ -92,4 +92,6 @@ namespace Astrarium.Types
         /// </summary>
         void Define(ICollection<SettingDefinition> definitions);
     }
+
+    public delegate void SettingValueChangedDelegate(string settingName, object newValue, object oldValue);
 }

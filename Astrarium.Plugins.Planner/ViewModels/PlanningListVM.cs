@@ -19,6 +19,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
     {
         #region Dependencies
 
+        private readonly ISettings settings;
         private readonly ISky sky;
         private readonly IMainWindow mainWindow;
         private readonly IRecentPlansManager recentPlansManager;
@@ -222,6 +223,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public PlanningListVM(ISky sky, ISettings settings, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory, ITelescopeManager telescopeManager)
         {
+            this.settings = settings;
             this.planner = planner;
             this.sky = sky;
             this.mainWindow = mainWindow;
@@ -249,7 +251,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private double julianDay;
         private PlanningFilter filter;
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "NightMode")
             {
@@ -448,6 +450,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 FilePath = filePath;
                 recentPlansManager.AddToRecentList(new RecentPlan(filePath, format));
             }
+        }
+
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
         }
     }
 }

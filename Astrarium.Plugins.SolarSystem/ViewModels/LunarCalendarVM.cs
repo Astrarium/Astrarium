@@ -236,7 +236,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             }
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "NightMode")
             {
@@ -433,6 +433,12 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
         private void Print(FrameworkElement calendarControl)
         {
             ViewManager.ShowPrintDialog(calendarControl, SelectedMonth);
+        }
+
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
         }
     }
 
