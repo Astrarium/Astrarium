@@ -45,6 +45,11 @@ namespace Astrarium.Algorithms
         public string Country { get; set; }
 
         /// <summary>
+        /// Optional landscape name
+        /// </summary>
+        public string Landscape { get; set; }
+
+        /// <summary>
         /// Term needed for calculation of parallax effect.
         /// </summary>
         /// <remarks>
@@ -78,20 +83,21 @@ namespace Astrarium.Algorithms
 
         public CrdsGeographical() { }
 
-        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string name = null)
+        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string name = null, string landscape = null)
         {
             Latitude = latitude;
             Longitude = longitude;
             UtcOffset = utcOffset;
             Elevation = elevation;
             Name = name;
+            Landscape = landscape;
         }
 
         public CrdsGeographical(DMS longitude, DMS latitude, double utcOffset = 0, double elevation = 0)
             : this(longitude.ToDecimalAngle(), latitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         public CrdsGeographical(CrdsGeographical other)
-            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.Name) { }
+            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.Name, other.Landscape) { }
 
         public override string ToString()
         {

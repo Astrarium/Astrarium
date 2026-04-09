@@ -585,7 +585,7 @@ namespace Astrarium.ViewModels
             FavoriteLocationsMenuItems.Add(new MenuItem("$StatusBar.EditFavoriteLocations", EditFavoriteLocationsCommand));
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             map.Invalidate();
 
@@ -985,6 +985,10 @@ namespace Astrarium.ViewModels
         private void SetLocation(CrdsGeographical location)
         {
             sky.SetLocation(location);
+            if (location.Landscape != null && location.Landscape != settings.Get<string>("Landscape"))
+            {
+                settings.SetAndSave("Landscape", location.Landscape);
+            }
         }
 
         private void EditFavoriteLocations()

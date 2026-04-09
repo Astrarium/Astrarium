@@ -49,6 +49,14 @@ namespace Astrarium.Types.Themes
         } 
     }
 
+    public class EmptyStringToPlaceholderConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? parameter : value;
+        }
+    }
+
     public class LocaleNameConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -193,6 +201,14 @@ namespace Astrarium.Types.Themes
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
+        }
+    }
+
+    public class NotEmptyStringToBoolConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !string.IsNullOrEmpty(value as string);
         }
     }
 

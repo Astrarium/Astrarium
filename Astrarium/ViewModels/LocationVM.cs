@@ -46,6 +46,11 @@ namespace Astrarium.ViewModels
         private readonly IGeoLocationsManager locationsManager;
 
         /// <summary>
+        /// Landscapes provider instance.
+        /// </summary>
+        private readonly ILandscapesProvider landscapesProvider;
+
+        /// <summary>
         /// Formatter used for casting geo coordinates to string
         /// </summary>
         private readonly IEphemFormatter geoCoordinatesFormatter = new GeoCoordinatesFormatter();
@@ -53,7 +58,7 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Creates new instance of the ViewModel
         /// </summary>
-        public LocationVM(IGeoLocationsManager locationsManager, ILocationDetector locationDetector, ISettings settings)
+        public LocationVM(IGeoLocationsManager locationsManager, ILocationDetector locationDetector, ILandscapesProvider landscapesProvider, ISettings settings)
         {
             this.settings = settings;
             this.settings.SettingValueChanged += OnSettingValueChanged;
@@ -61,6 +66,8 @@ namespace Astrarium.ViewModels
             this.locationDetector = locationDetector;
             this.locationDetector.OnLocationDetected += OnLocationDetected;
             this.locationsManager = locationsManager;
+
+            this.landscapesProvider = landscapesProvider;
 
             IsDarkMode = settings.Get("NightMode");
             MapZoomLevel = 7;
@@ -627,6 +634,34 @@ namespace Astrarium.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets list of available landscapes
+        /// </summary>
+        public IEnumerable<string> Landscapes
+        {
+            get
+            {
+                yield return "";
+                foreach (var landscape in landscapesProvider.GetAvailableLandscapes())
+                {
+                    yield return landscape;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets/sets name of observer location
+        /// </summary>
+        public string Landscape
+        {
+            get => ObserverLocation.Landscape ?? "";
+            set
+            {
+                ObserverLocation.Landscape = value == "" ? null : value;
+                NotifyPropertyChanged(nameof(Landscape));
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -848,7 +883,7 @@ namespace Astrarium.ViewModels
         /// </summary>
         /// <param name="setting">Setting name</param>
         /// <param name="value">Setting value</param>
-        private void OnSettingValueChanged(string setting, object value)
+        private void OnSettingValueChanged(string setting, object value, object oldValue)
         {
             if (setting == "NightMode")
             {

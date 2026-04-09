@@ -285,6 +285,16 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </GroupBox>
+
+                <GroupBox Header="{a:Text LocationWindow.Landscape}" Margin="4">
+                    <ComboBox Margin="4 10 4 10" ItemsSource="{Binding Landscapes}" SelectedItem="{Binding Landscape}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock IsEnabled="{Binding Converter={a:NotEmptyStringToBoolConverter}}" Text="{Binding Converter={a:EmptyStringToPlaceholderConverter}, ConverterParameter={a:Text Landscape.Default}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </GroupBox>
             </StackPanel>
             
 

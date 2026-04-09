@@ -93,7 +93,8 @@ namespace Astrarium.Plugins.Horizon
     }
 
     [Singleton(typeof(ILandscapesManager))]
-    public class LandscapesManager : ILandscapesManager
+    [Singleton(typeof(ILandscapesProvider))]
+    public class LandscapesManager : ILandscapesManager, ILandscapesProvider
     {
         /// <summary>
         /// Base path to default landscapes directory deployed with the application
@@ -162,6 +163,11 @@ namespace Astrarium.Plugins.Horizon
             }
             landscape.Path = file;
             return landscape;
+        }
+
+        public IEnumerable<string> GetAvailableLandscapes()
+        {
+            return Landscapes.Select(x => x.Title);
         }
     }
 }

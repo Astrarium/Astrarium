@@ -8,8 +8,8 @@
     mc:Ignorable="d" 
     Title="{a:Text FavoriteLocationsWindow.Title}" 
     Height="400" 
-    Width="600" 
-    MinHeight="400" MinWidth="600" 
+    Width="800" 
+    MinHeight="400" MinWidth="800" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
 
@@ -61,9 +61,10 @@
                     <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                         <GridView.Columns>
                             <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Name}" Width="200" DisplayMemberBinding="{Binding Path=Name, Mode=OneWay}" />
-                            <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Latitude}" Width="120" DisplayMemberBinding="{Binding Path=Latitude, Converter={a:LatitudeConverter}, Mode=OneWay}" />
-                            <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Longitude}" Width="120" DisplayMemberBinding="{Binding Path=Longitude, Converter={a:LongitudeConverter}, Mode=OneWay}" />
+                            <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Latitude}" Width="130" DisplayMemberBinding="{Binding Path=Latitude, Converter={a:LatitudeConverter}, Mode=OneWay}" />
+                            <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Longitude}" Width="130" DisplayMemberBinding="{Binding Path=Longitude, Converter={a:LongitudeConverter}, Mode=OneWay}" />
                             <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.UtcOffset}" Width="100" DisplayMemberBinding="{Binding Path=UtcOffset, Converter={a:TimeZoneConverter}, Mode=OneWay}" />
+                            <GridViewColumn Header="{a:Text FavoriteLocationsWindow.Location.Landscape}" Width="180" DisplayMemberBinding="{Binding Path=Landscape, Mode=OneWay, Converter={a:EmptyStringToPlaceholderConverter}, ConverterParameter={a:Text Landscape.Default}}" />
                         </GridView.Columns>
                     </GridView>
                 </ListView.View>

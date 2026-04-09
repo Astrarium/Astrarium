@@ -113,14 +113,6 @@ namespace Astrarium.Plugins.Horizon.ViewModels
             {
                 if (value != null)
                 {
-                    string oldLandscapeName = Settings.Get<string>("Landscape");
-                    Landscape oldLandscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == oldLandscapeName);
-
-                    if (oldLandscape != null)
-                    {
-                        GL.RemoveTexture(oldLandscape.Path);
-                    }
-
                     Settings.Set("Landscape", value.Title);
                     NotifyPropertyChanged(nameof(SelectedLandscape));
                 }
