@@ -33,7 +33,6 @@
                 </Grid.ContextMenu>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -42,27 +41,39 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="{Binding DateString}" FontFamily="Lucida Console" FontSize="12" VerticalAlignment="Center" Grid.Column="0" />
-                <TextBlock Text="{Binding TimeString}" FontFamily="Lucida Console"  VerticalAlignment="Center" Margin="4 0" FontSize="12" IsEnabled="False" Grid.Column="1" />
-                <TextBlock Text="{Binding ObservationsCount}" IsEnabled="False" VerticalAlignment="Center" FontSize="10" Margin="16 0 8 1" Grid.Column="3" Visibility="{Binding IsExpanded, Converter={s:InverseBoolToVisibilityConverter}}" />
+
+                <TextBlock Text="{Binding TimeString}" FontFamily="Lucida Console" FontSize="10" VerticalAlignment="Center" Margin="4 0" IsEnabled="False" Grid.Column="2" />
             </Grid>
         </HierarchicalDataTemplate>
 
         <!-- Observation tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type t:Observation}">
-            <StackPanel Orientation="Horizontal" Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
-                <StackPanel.ContextMenu>
+            <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
+                <Grid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Edit observation..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <MenuItem Header="Delete observation" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <Separator />
                         <MenuItem Header="Go to observation target" Command="{Binding PlacementTarget.Tag.GoToCoordinatesCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" />
                     </ContextMenu>
-                </StackPanel.ContextMenu>
-                <Border Background="Transparent" ToolTip="{Binding ObjectType, Converter={a:CelestialObjectTypeDescriptionConverter}}">
+                </Grid.ContextMenu>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Column="0" Background="Transparent" ToolTip="{Binding ObjectType, Converter={a:CelestialObjectTypeDescriptionConverter}}">
                     <a:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding ObjectType, Converter={a:CelestialObjectTypeToIconConverter}}" />
                 </Border>
-                <TextBlock IsEnabled="{Binding IsEnabled}" Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" IsEnabled="{Binding IsEnabled}"  VerticalAlignment="Center"  Margin="4 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" />
+                <TextBlock Grid.Column="3" FontFamily="Lucida Console"  VerticalAlignment="Center" Margin="4 0" FontSize="10" IsEnabled="False" Text="{Binding TimeString}" />
+
+            </Grid>
         </HierarchicalDataTemplate>
 
         <Style x:Key="MenuItemHeader" TargetType="{x:Type MenuItem}">
@@ -176,8 +187,8 @@
 
                 <c:BindableTreeView
                     x:Name="treeView"
-                    Background="{StaticResource BrushWindowBackground}"
-                    BorderBrush="{StaticResource BrushWindowBackground}"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
                     SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                     ItemsSource="{Binding FilteredSessions}"
                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
