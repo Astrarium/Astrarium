@@ -152,12 +152,18 @@ namespace Astrarium
                     }
                     finally
                     {
-                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                        if (viewModel.Loggable)
+                        {
+                            Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                        }
                     }
                 }
                 else
                 {
-                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    if (viewModel.Loggable)
+                    {
+                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    }
                     window.Show();
                     return true;
                 }

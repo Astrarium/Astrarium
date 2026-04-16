@@ -68,5 +68,7 @@ namespace Astrarium.ViewModels
                 settings.SetAndSave(FAVORITE_LOCATIONS_SETTING, FavoriteLocations.ToList());
             }
         }
+
+        public override object Payload => new { FavoriteLocations = FavoriteLocations.Select(x => new { Name = x.Name, Location = x.ToShortString(), Elevation = x.Elevation, UtcOffset = x.UtcOffset.ToString() }) };
     }
 }

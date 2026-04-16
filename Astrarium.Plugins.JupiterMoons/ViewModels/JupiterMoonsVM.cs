@@ -527,5 +527,7 @@ namespace Astrarium.Plugins.JupiterMoons
             settings.SettingValueChanged -= Settings_SettingValueChanged;
             base.Dispose();
         }
+
+        public override object Payload => new { SelectedMonth };
     }
 }

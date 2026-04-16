@@ -27,5 +27,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
         {
             return new Note() { Date = sky.Context.JulianDay, Location = sky.Context.GeoLocation, Markdown = true };
         }
+
+        public override object Payload => new { NotesCount = notesManager.GetAllNotes().Count };
     }
 }

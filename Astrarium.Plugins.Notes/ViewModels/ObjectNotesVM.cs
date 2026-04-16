@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Themes;
 using System.Collections.Generic;
 
 namespace Astrarium.Plugins.Notes.ViewModels
@@ -32,5 +33,11 @@ namespace Astrarium.Plugins.Notes.ViewModels
             ReloadNotes();
             return this;
         }
+
+        public override object Payload => new
+        {
+            Body = body.ToString(),
+            NotesCount = GetNotes().Count
+        };
     }
 }

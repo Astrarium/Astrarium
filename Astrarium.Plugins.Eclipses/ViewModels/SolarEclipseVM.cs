@@ -570,5 +570,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 }
             }
         }
+
+        public override object Payload => new { Date = EclipseDate };
     }
 }
