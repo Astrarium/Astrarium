@@ -484,7 +484,7 @@ namespace Astrarium.Plugins.Journal.OAL
         Unknown,
     }
 
-    [CelestialObjectType("DeepSky.DoubleStar")]
+    [CelestialObjectType("Star")]
     [Serializable]
     [XmlType(TypeName = "findingsDeepSkyDSType", Namespace = OALData.OAL)]
     public class OALFindingsDeepSkyDS : OALFindingsDeepSky

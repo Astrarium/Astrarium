@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:a="Astrarium"
         xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
         xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
         xmlns:t="clr-namespace:Astrarium.Plugins.Journal.Types"
@@ -49,7 +50,6 @@
         <!-- Observation tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type t:Observation}">
             <StackPanel Orientation="Horizontal" Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
-
                 <StackPanel.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Edit observation..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
@@ -58,15 +58,9 @@
                         <MenuItem Header="Go to observation target" Command="{Binding PlacementTarget.Tag.GoToCoordinatesCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>
-
-                <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding ObjectType, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                    <Rectangle.Fill>
-                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                    </Rectangle.Fill>
-                    <Rectangle.OpacityMask>
-                        <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
-                    </Rectangle.OpacityMask>
-                </Rectangle>
+                <Border Background="Transparent" ToolTip="{Binding ObjectType, Converter={a:CelestialObjectTypeDescriptionConverter}}">
+                    <a:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding ObjectType, Converter={a:CelestialObjectTypeToIconConverter}}" />
+                </Border>
                 <TextBlock IsEnabled="{Binding IsEnabled}" Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
             </StackPanel>
         </HierarchicalDataTemplate>
