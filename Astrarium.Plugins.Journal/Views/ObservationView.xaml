@@ -9,6 +9,7 @@
              xmlns:e="clr-namespace:Astrarium.Plugins.Journal.Database.Entities"
              xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+             xmlns:a="Astrarium"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -27,7 +28,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="2" Background="{StaticResource BrushControlDarkBackground}">
+        <DockPanel Grid.Row="0" Margin="2" Style="{StaticResource HeaderPanelStyle}">
             <TextBlock Padding="8" Text="Observation:" FontSize="18" VerticalAlignment="Center"  />
             <TextBlock Padding="8" FontSize="18" Text="{Binding ObjectName}" VerticalAlignment="Center" />
             <TextBlock Padding="8" FontSize="18" Text="{Binding DateString}" VerticalAlignment="Center" />
@@ -40,7 +41,10 @@
         </DockPanel>
 
         <TabControl Grid.Row="1">
-            <TabItem Header="Findings">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="Findings" Margin="4" TextAlignment="Center" VerticalAlignment="Center" />
+                </TabItem.Header>
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -79,7 +83,10 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Target details">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="Target details" Margin="4" TextAlignment="Center" VerticalAlignment="Center" />
+                </TabItem.Header>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -94,8 +101,13 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Equipment">
-
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <a:PathIcon Margin="4 0" Data="M21.9,8.9L20.2,9.9L16.2,3L17.9,2L21.9,8.9M9.8,7.9L12.8,13.1L18.9,9.6L15.9,4.4L9.8,7.9M11.4,12.7L9.4,9.2L5.1,11.7L7.1,15.2L11.4,12.7M2.1,14.6L3.1,16.3L5.7,14.8L4.7,13.1L2.1,14.6M12.1,14L11.8,13.6L7.5,16.1L7.8,16.5C8,16.8 8.3,17.1 8.6,17.3L7,22H9L10.4,17.7H10.5L12,22H14L12.1,16.4C12.6,15.7 12.6,14.8 12.1,14Z" />
+                        <TextBlock Text="Equipment" Margin="4" TextAlignment="Center" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
                 <Grid Grid.IsSharedSizeScope="True" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -116,7 +128,7 @@
                         <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Optics}" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
-                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}"  />
+                                <a:PathIcon Width="12" Height="12"  Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                             </Button>
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
@@ -215,7 +227,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Images" />
+                        <TextBlock Text="Images" Margin="4" TextAlignment="Center" VerticalAlignment="Center" />
                         <TextBlock VerticalAlignment="Center" FontSize="10" Opacity="0.25" Padding="6 0 0 0" Text="{Binding Attachments.Count}" />
                     </StackPanel>
                 </TabItem.Header>

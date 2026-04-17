@@ -120,7 +120,7 @@ namespace Astrarium.Plugins.Journal.Controls
 
         private void _placeholder_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && e.ClickCount > 1)
             {
                 SetEditMode();
             }

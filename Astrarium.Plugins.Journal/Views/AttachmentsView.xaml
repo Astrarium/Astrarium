@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+             xmlns:a="Astrarium"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -24,45 +25,39 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
-        <Grid Grid.Row="0" Background="{StaticResource BrushControlDarkBackground}" Margin="-2 -4 0 0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
 
-            <StackPanel IsEnabled="{Binding Source={x:Reference attachmentsList}, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Grid.Column="0" Margin="0 0 2 0" Orientation="Horizontal">
+        <DockPanel Grid.Row="0" Style="{StaticResource HeaderPanelStyle}" LastChildFill="False" Margin="0 0 2 0">
+            <StackPanel IsEnabled="{Binding Source={x:Reference attachmentsList}, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Margin="0 0 2 0" Orientation="Horizontal">
                 <Button ToolTip="Show" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.OpenImageCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}">
-                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconViewAttachment}" />
+                    <a:PathIcon Data="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z" />
                 </Button>
                 <Button ToolTip="Show in system viewer" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.OpenAttachmentInSystemViewerCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}">
-                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconViewAttachmentExternal}" />
+                    <a:PathIcon Data="M3 4V16H21V4H3M3 2H21C22.1 2 23 2.89 23 4V16C23 16.53 22.79 17.04 22.41 17.41C22.04 17.79 21.53 18 21 18H14V20H16V22H8V20H10V18H3C2.47 18 1.96 17.79 1.59 17.41C1.21 17.04 1 16.53 1 16V4C1 2.89 1.89 2 3 2M10.84 8.93C11.15 8.63 11.57 8.45 12 8.45C12.43 8.46 12.85 8.63 13.16 8.94C13.46 9.24 13.64 9.66 13.64 10.09C13.64 10.53 13.46 10.94 13.16 11.25C12.85 11.56 12.43 11.73 12 11.73C11.57 11.73 11.15 11.55 10.84 11.25C10.54 10.94 10.36 10.53 10.36 10.09C10.36 9.66 10.54 9.24 10.84 8.93M10.07 12C10.58 12.53 11.28 12.82 12 12.82C12.72 12.82 13.42 12.53 13.93 12C14.44 11.5 14.73 10.81 14.73 10.09C14.73 9.37 14.44 8.67 13.93 8.16C13.42 7.65 12.72 7.36 12 7.36C11.28 7.36 10.58 7.65 10.07 8.16C9.56 8.67 9.27 9.37 9.27 10.09C9.27 10.81 9.56 11.5 10.07 12M6 10.09C6.94 7.7 9.27 6 12 6C14.73 6 17.06 7.7 18 10.09C17.06 12.5 14.73 14.18 12 14.18C9.27 14.18 6.94 12.5 6 10.09Z" />
                 </Button>
                 <Button ToolTip="Details" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.ShowAttachmentDetailsCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}">
-                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconAttachmentDetails}" />
+                    <a:PathIcon Data="M22,3H5A2,2 0 0,0 3,5V9H5V5H22V19H5V15H3V19A2,2 0 0,0 5,21H22A2,2 0 0,0 24,19V5A2,2 0 0,0 22,3M7,15V13H0V11H7V9L11,12L7,15M20,13H13V11H20V13M20,9H13V7H20V9M17,17H13V15H17V17Z" />
                 </Button>
-
                 <Button ToolTip="Open file location" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.OpenAttachmentLocationCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}">
-                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconOpenAttachmentLocation}" />
+                    <a:PathIcon Data="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" />
                 </Button>
-
                 <Button ToolTip="Delete" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.DeleteAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}">
-                    <Image Style="{StaticResource ImageStyle}" Margin="2 0" Width="12" Height="12" Source="{StaticResource IconDeleteAttachment}" />
+                    <a:PathIcon Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                 </Button>
             </StackPanel>
 
-            <Slider ToolTip="Thumbnail size" Grid.Column="1" x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" />
+            <Slider ToolTip="Thumbnail size" x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" />
 
-            <Button ToolTip="Create" Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconCreateAttachment}" />
+            <Button ToolTip="Create" DockPanel.Dock="Right" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                <a:PathIcon Data="M14 2H6C4.89 2 4 2.89 4 4V20C4 21.11 4.89 22 6 22H13.81C13.28 21.09 13 20.05 13 19C13 15.69 15.69 13 19 13C19.34 13 19.67 13.03 20 13.08V8L14 2M13 9V3.5L18.5 9H13M23 20H20V23H18V20H15V18H18V15H20V18H23V20Z" />
             </Button>
-        </Grid>
+
+        </DockPanel>
 
         <!-- List of images -->
         <Grid Grid.Row="1">
             <ListView x:Name="attachmentsList" 
                       ItemsSource="{Binding Attachments}" 
+                      ItemContainerStyle="{StaticResource ImageListItemStyle}"
                       SelectionMode="Single" 
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
                       AllowDrop="True"
@@ -74,22 +69,6 @@
                         <WrapPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                        <Style.Setters>
-                            <Setter Property="Margin" Value="4" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="1" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                        </Style.Setters>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource BrushHighlight}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid Background="Black" Tag="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">

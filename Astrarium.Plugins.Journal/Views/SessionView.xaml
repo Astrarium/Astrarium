@@ -27,7 +27,7 @@
         </Grid.RowDefinitions>
 
         <!-- Date and time panel -->
-        <DockPanel Grid.Row="0" Margin="2" Background="{StaticResource BrushControlDarkBackground}">
+        <DockPanel Grid.Row="0" Margin="2" Style="{StaticResource HeaderPanelStyle}">
             <TextBlock Padding="8" Text="Session:" FontSize="18" VerticalAlignment="Center"  />
             <TextBlock Padding="8" FontSize="18" Text="{Binding DateString}" VerticalAlignment="Center" />
             <TextBlock Padding="8" FontSize="18" Text="{Binding TimeString}" VerticalAlignment="Center" />
