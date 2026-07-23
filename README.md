@@ -28,6 +28,6 @@ If you like Astrarium, please consider to make a donation. This is an open sourc
 Thank you :)
 
 * [YooMoney](https://yoomoney.ru/to/410011844668094)
-* [CloudTips](https://pay.cloudtips.ru/p/465ec2c2)
+* [CloudTips](https://pay.cloudtips.ru/p/93e48162)
 * USDT: 0xbaA6a5076857344858921f6Fc271DF2BaD2B6F7F
 * BTC: bc1qu9et9xw9kdc4e9qt30magfcluqq8ys6lzy9ef5
