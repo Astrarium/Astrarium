@@ -4,8 +4,6 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -557,8 +555,8 @@ namespace Astrarium.Plugins.SolarSystem
 
                             if (p < 3)
                             {
-                                string conjType = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1 ? 
-                                    "Inferior" : "Superior";
+                                bool isInferior = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1;
+                                string conjType = isInferior ? "Inferior" : "Superior";
 
                                 var ctx = new SkyContext(jdConj, context.GeoLocation, false);
                                 double sd = solarCalc.Semidiameter(ctx) / 3600;
@@ -568,7 +566,7 @@ namespace Astrarium.Plugins.SolarSystem
                                     ("planetName", GetPlanetName(p)),
                                     ("planetGenitiveName", GetPlanetGenitiveName(p)));
 
-                                if (ad < sd)
+                                if (isInferior && ad < sd)
                                 {
                                     text = $"{text}{Text.Get("PlanetEvents.Conjunctions.Transit")}";
                                 }

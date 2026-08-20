@@ -3,14 +3,11 @@ using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Forms;
-using System.Windows.Markup;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -317,7 +314,6 @@ namespace Astrarium.Plugins.SolarSystem
                     };
 
                     RenderSolarSystemObject(moon, data);
-                    RenderPlanetaryGrid(moon, data);
                 }
             }
         }

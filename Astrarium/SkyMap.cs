@@ -209,7 +209,7 @@ namespace Astrarium
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
-        private void Settings_SettingValueChanged(string name, object value)
+        private void Settings_SettingValueChanged(string name, object value, object oldValue)
         {
             if (name == "AutoLock" && LockedObject == null && Projection != null)
             {
@@ -222,6 +222,80 @@ namespace Astrarium
                     autoLockCoordinates = null;
                     lockCoordinatesShiftAlpha = 0;
                     lockCoordinatesShiftDelta = 0;
+                }
+            }
+
+            // redraw if rendering order changed
+            if (name == "RenderingOrder")
+            {
+                renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
+                Invalidate();
+            }
+
+            if (name == "NightMode")
+            {
+                Invalidate();
+            }
+
+            if (Projection != null)
+            {
+                if (name == "ViewMode")
+                {
+                    Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
+                }
+
+                if (name == "FlipHorizontal")
+                {
+                    Projection.FlipHorizontal = settings.Get("FlipHorizontal");
+                    Invalidate();
+                }
+
+                if (name == "FlipVertical")
+                {
+                    Projection.FlipVertical = settings.Get("FlipVertical");
+                    Invalidate();
+                }
+
+                if (name == "Refraction")
+                {
+                    Projection.UseRefraction = settings.Get("Refraction");
+                    Invalidate();
+                }
+
+                if (name == "RefractionPressure")
+                {
+                    Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
+                    Invalidate();
+                }
+
+                if (name == "RefractionTemperature")
+                {
+                    Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
+                    Invalidate();
+                }
+
+                if (name == "Extinction")
+                {
+                    Projection.UseExtinction = settings.Get("Extinction");
+                    Invalidate();
+                }
+
+                if (name == "ExtinctionCoefficient")
+                {
+                    Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
+                    Invalidate();
+                }
+
+                if (name == "AirmassModel")
+                {
+                    Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
+                    Invalidate();
+                }
+
+                if (name == "LimitMagnitude" || name == "LimitingMagnitude")
+                {
+                    Projection.UserMagLimit = settings.Get("LimitMagnitude", false) ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
+                    Invalidate();
                 }
             }
         }
@@ -327,80 +401,6 @@ namespace Astrarium
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
-
-            settings.SettingValueChanged += (name, value) =>
-            {
-                // redraw if rendering order changed
-                if (name == "RenderingOrder")
-                {
-                    this.renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
-                    Invalidate();
-                }
-
-                if (name == "NightMode")
-                {
-                    Invalidate();
-                }
-
-                if (name == "ViewMode")
-                {
-                    Projection.ViewMode = settings.Get("ViewMode", ProjectionViewType.Horizontal);
-                }
-
-                if (name == "FlipHorizontal")
-                {
-                    Projection.FlipHorizontal = settings.Get("FlipHorizontal");
-                    Invalidate();
-                }
-
-                if (name == "FlipVertical")
-                {
-                    Projection.FlipVertical = settings.Get("FlipVertical");
-                    Invalidate();
-                }
-
-                if (name == "Refraction")
-                {
-                    Projection.UseRefraction = settings.Get("Refraction");
-                    Invalidate();
-                }
-
-                if (name == "RefractionPressure")
-                {
-                    Projection.RefractionPressure = (double)settings.Get("RefractionPressure", 1010m);
-                    Invalidate();
-                }
-
-                if (name == "RefractionTemperature")
-                {
-                    Projection.RefractionTemperature = (double)settings.Get("RefractionTemperature", 10m);
-                    Invalidate();
-                }
-
-                if (name == "Extinction")
-                {
-                    Projection.UseExtinction = settings.Get("Extinction");
-                    Invalidate();
-                }
-
-                if (name == "ExtinctionCoefficient")
-                {
-                    Projection.ExtinctionCoefficient = (double)settings.Get("ExtinctionCoefficient", 0.3m);
-                    Invalidate();
-                }
-
-                if (name == "AirmassModel")
-                {
-                    Projection.AirmassModel = settings.Get("AirmassModel", AirmassModel.Pickering);
-                    Invalidate();
-                }
-
-                if (name == "LimitMagnitude" || name == "LimitingMagnitude") 
-                {
-                    Projection.UserMagLimit = settings.Get("LimitMagnitude", false) ? (float)settings.Get("LimitingMagnitude", 15m) : float.MaxValue;
-                    Invalidate();
-                }
-            };
 
             new Thread(TimeSyncWorker) { IsBackground = true }.Start();
         }

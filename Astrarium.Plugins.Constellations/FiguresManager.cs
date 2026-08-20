@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.Constellations
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
-        private void Settings_SettingValueChanged(string name, object value)
+        private void Settings_SettingValueChanged(string name, object value, object oldValue)
         {
             if (name == "ConstFiguresType")
             {

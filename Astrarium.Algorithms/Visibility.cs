@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Algorithms
 {
@@ -67,11 +65,13 @@ namespace Astrarium.Algorithms
                         eq0 = InterpolateEq(alpha, delta, t);
                         sidTime = InterpolateSiderialTime(theta0, t);
 
-                        double altitude = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Altitude;
+                        var transitHor = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime);
+                        double altitude = transitHor.Altitude;
                         if (double.IsNaN(result.Transit) || result.TransitAltitude < altitude)
                         {
                             result.Transit = t;
                             result.TransitAltitude = altitude;
+                            result.TransitAzimuth = transitHor.Azimuth;
                         }
                     }
                 }

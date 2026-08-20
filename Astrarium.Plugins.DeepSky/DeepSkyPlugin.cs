@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.DeepSky
             // Fonts
             DefineSetting("DeepSkyLabelsFont", new Font("Arial", 9, FontStyle.Italic));
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked")));
 
             DefineSettingsSection<DeepSkySettingsSection, DeepSkySettingsViewModel>();
-
-            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

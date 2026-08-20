@@ -11,6 +11,7 @@ namespace Astrarium.Types
         public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
         public abstract string ObjectType { get; }
         public abstract string ObjectCommonName { get; }
+        public abstract CelestialObject GetBody();
     }
 
     public class CelestialObjectInfo<T> : CelestialObjectInfo where T : CelestialObject
@@ -29,6 +30,8 @@ namespace Astrarium.Types
         /// Collection of body ephemeris for given instant
         /// </summary>
         private IEnumerable<Ephemeris> Ephemeris { get; set; }
+
+        public override CelestialObject GetBody() => Body;
 
         /// <summary>
         /// Gets object type
@@ -89,29 +92,37 @@ namespace Astrarium.Types
 
             if (ep != null)
             {
-                InfoElements.Add(new InfoElementProperty()
-                {
-                    Caption = Text.Get($"{Body.GetType().Name}.{key}"),
-                    Value = ep.Value,
-                    Formatter = ep.Formatter
-                });
+                var value = ep.Value;
+                AddRow(key, value, ep.Formatter);
             }
             else
             {
                 throw new Exception($"Key `{key}` not found.");
             }
-            
+
             return this;
         }
 
         public CelestialObjectInfo<T> AddRow(string key, object value, IEphemFormatter formatter)
         {
-            InfoElements.Add(new InfoElementProperty()
+            formatter = formatter ?? Formatters.GetDefault(key);
+            InfoElementPropertyBase ie;
+
+            if (formatter is ITimeInstantFormatter f && f.HasTimeInstant(value))
             {
-                Caption = Text.Get($"{Body.GetType().Name}.{key}"),
-                Value = value,
-                Formatter = formatter ?? Formatters.GetDefault(key)
-            });
+                ie = new InfoElementDateProperty();
+            }
+            else 
+            {
+                ie = new InfoElementProperty();
+            }
+
+            ie.Caption = Text.Get($"{Body.GetType().Name}.{key}");
+            ie.Value = value;
+            ie.Formatter = formatter;
+
+            InfoElements.Add(ie);
+
             return this;
         }
 
@@ -140,18 +151,22 @@ namespace Astrarium.Types
 
     public abstract class InfoElement { }
 
-    public class InfoElementHeader : InfoElement
-    {
-        public string Text { get; set; }
-    }
-
-    public class InfoElementProperty : InfoElement
+    public abstract class InfoElementPropertyBase : InfoElement
     {
         public IEphemFormatter Formatter { get; set; }
         public string Caption { get; set; }
         public object Value { get; set; }
         public string StringValue { get { return Formatter.Format(Value); } }
     }
+
+    public class InfoElementHeader : InfoElement
+    {
+        public string Text { get; set; }
+    }
+
+    public class InfoElementProperty : InfoElementPropertyBase { }
+    public class InfoElementMultilineProperty : InfoElementPropertyBase { }
+    public class InfoElementDateProperty : InfoElementPropertyBase { }
 
     public class InfoElementLink : InfoElement
     {

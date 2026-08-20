@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Astrarium.Algorithms.Angle;
+﻿using static Astrarium.Algorithms.Angle;
 using static System.Math;
 
 namespace Astrarium.Algorithms

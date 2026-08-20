@@ -1,15 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <DrawingImage x:Key="IconGround">
-        <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
-                <DrawingGroup.Transform>
-                    <ScaleTransform ScaleX="0.25" ScaleY="0.25" />
-                </DrawingGroup.Transform>
-                <GeometryDrawing Brush="White" Geometry="F1 M100,125z M0,0z M73.561,39.288C79.478,39.288 84.275,34.491 84.275,28.574 84.275,22.657 79.478,17.86 73.561,17.86 67.644,17.86 62.847,22.657 62.847,28.574 62.847,34.491 67.643,39.288 73.561,39.288z M71.429,62.857C49.656,62.857 46.156,39.286 22.143,39.286 13.294,39.286 5,43.571 5,43.571L5,84.285C5,90.203,9.797,95,15.714,95L84.285,95C90.203,95,95,90.203,95,84.286L95,56.429C95,56.429,87.877,62.857,71.429,62.857z" />
-            </DrawingGroup>
-        </DrawingImage.Drawing>
-    </DrawingImage>
+    <sys:String x:Key="IconGround">
+        M73.561 39.288c5.917 0 10.714-4.797 10.714-10.714 0-5.917-4.797-10.714-10.714-10.714-5.917 0-10.714 4.797-10.714 10.714s4.796 10.714 10.714 10.714zM71.429 62.857c-21.773 0-25.273-23.571-49.286-23.571C13.294 39.286 5 43.571 5 43.571V84.285C5 90.203 9.797 95 15.714 95H84.285C90.203 95 95 90.203 95 84.286V56.429s-7.123 6.428-23.571 6.428z
+    </sys:String>
 
 </ResourceDictionary>

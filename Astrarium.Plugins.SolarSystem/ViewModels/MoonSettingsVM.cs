@@ -1,9 +1,5 @@
 ﻿using Astrarium.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime;
 
 namespace Astrarium.Plugins.SolarSystem.ViewModels
 {
@@ -11,13 +7,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
     {
         public MoonSettingsVM(ISettings settings) : base(settings)
         {
-            Settings.SettingValueChanged += (s, v) =>
-            {
-                if (s == "MoonTextureQuality")
-                {
-                    NotifyMoonTextureQualityChanged();
-                }
-            };
+            Settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
         public bool IsTextureQualityLow
@@ -59,6 +49,14 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
             }
         }
 
+        private void Settings_SettingValueChanged(string settingName, object newValue, object oldValue)
+        {
+            if (settingName == "MoonTextureQuality")
+            {
+                NotifyMoonTextureQualityChanged();
+            }
+        }
+
         private void NotifyMoonTextureQualityChanged()
         {
             NotifyPropertyChanged(
@@ -66,6 +64,12 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 nameof(IsTextureQualityNormal),
                 nameof(IsTextureQualityHigh)
             );
+        }
+
+        public override void Dispose()
+        {
+            Settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
         }
     }
 }

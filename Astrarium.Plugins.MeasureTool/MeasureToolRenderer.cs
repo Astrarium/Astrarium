@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using System;
 using System.Drawing;
 
 namespace Astrarium.Plugins.MeasureTool

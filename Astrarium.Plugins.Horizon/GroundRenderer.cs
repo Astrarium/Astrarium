@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows;
+using System.Runtime;
 using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.Horizon
@@ -22,6 +22,20 @@ namespace Astrarium.Plugins.Horizon
             this.map = map;
             this.landscapesManager = landscapesManager;
             this.settings = settings;
+
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object newValue , object oldValue)
+        {
+            if (settingName == "Landscape" && oldValue != null)
+            {
+                Landscape oldLandscape = landscapesManager.Landscapes.FirstOrDefault(x => x.Title == oldValue.ToString());
+                if (oldLandscape != null)
+                {
+                    GL.RemoveTexture(oldLandscape.Path);
+                }
+            }
         }
 
         public override RendererOrder Order => RendererOrder.Terrestrial;

@@ -285,7 +285,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (bodyType == "Planet")
             {
-                body = planets.FirstOrDefault(p => p.CommonName == bodyName);
+                body = planets.FirstOrDefault(p => p.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
                 if (bodyName == "Pluto") return pluto;
@@ -294,22 +294,22 @@ namespace Astrarium.Plugins.SolarSystem
             }
             else if (bodyType == "PlanetMoon")
             {
-                body = marsMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = marsMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
-                body = jupiterMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = jupiterMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
-                body = saturnMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = saturnMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
-                body = uranusMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = uranusMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
-                body = neptuneMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = neptuneMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
-                body = genericMoons.FirstOrDefault(m => m.CommonName == bodyName);
+                body = genericMoons.FirstOrDefault(m => m.CommonName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
                 if (body != null) return body;
 
                 return null;

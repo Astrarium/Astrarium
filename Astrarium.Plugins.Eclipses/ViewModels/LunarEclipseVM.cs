@@ -6,9 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -401,5 +398,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 });
             }
         }
+
+        public override object Payload => new { Date = EclipseDate };
     }
 }

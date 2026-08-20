@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Astrarium.Types;
+using Astrarium.ViewModels;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
@@ -6,17 +8,39 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows;
 
-namespace Astrarium
+namespace Astrarium.Workers
 {
-    public interface IAppUpdater
+    public class AppUpdater : IWorker
     {
-        void CheckUpdates(Action<LastRelease> onUpdateFound, Action onUpdateNotFound = null, Action<Exception> onError = null);
-    }
+        private readonly ISettings settings;
 
-    public class AppUpdater : IAppUpdater
-    {
-        public void CheckUpdates(Action<LastRelease> onUpdateFound, Action onUpdateNotFound = null, Action<Exception> onError = null)
+        public AppUpdater(ISettings settings)
+        {
+            this.settings = settings;
+            ViewManager.RegisterMessageHandler("CheckForUpdates", new Command(CheckForUpdates));
+        }
+
+        public void Run()
+        {
+            if (settings.Get("CheckUpdatesOnStart"))
+            {
+                Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    CheckUpdates(OnAppUpdateFound);
+                });
+            }
+        }
+
+        private async void CheckForUpdates()
+        {
+            await Task.Run(() => CheckUpdates(OnAppUpdateFound, OnAppUpdateNotFound, OnAppUpdateError));
+        }
+
+        private void CheckUpdates(Action<LastRelease> onUpdateFound, Action onUpdateNotFound = null, Action<Exception> onError = null)
         {
             try
             {
@@ -77,12 +101,25 @@ namespace Astrarium
         {
             return new string(version.Where(p => char.IsDigit(p) || p == '.').ToArray());
         }
-    }
 
-    public class LastRelease
-    {
-        public Version Version { get; set; }
-        public DateTime PublishDate { get; set; }
-        public string ReleaseNotes { get; set; }
+        private void OnAppUpdateFound(LastRelease lastRelease)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var vm = ViewManager.CreateViewModel<AppUpdateVM>();
+                vm.SetReleaseInfo(lastRelease);
+                ViewManager.ShowDialog(vm);
+            });
+        }
+
+        private void OnAppUpdateNotFound()
+        {
+            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Information", "$AppUpdateWindow.OnAppUpdateNotFound"));
+        }
+
+        private void OnAppUpdateError(Exception ex)
+        {
+            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.OnAppUpdateError")}: {ex.Message}"));
+        }
     }
 }

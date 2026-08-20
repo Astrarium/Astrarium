@@ -3,7 +3,6 @@ using ASCOM.DeviceInterface;
 using Astrarium.Algorithms;
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Astrarium.Types;

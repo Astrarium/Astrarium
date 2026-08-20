@@ -266,6 +266,8 @@ namespace Astrarium
                     ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
                 }
             }
+            var categoryList = new List<string>(categories);
+            ephemerides.Sort((e1, e2) => categoryList.IndexOf(e1.Key) - categoryList.IndexOf(e2.Key));
             return ephemerides;
         }
 

@@ -3,8 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:a="Astrarium"
     xmlns:v="clr-namespace:Astrarium.Views"
     xmlns:c="clr-namespace:Astrarium.Controls"
     mc:Ignorable="d"
@@ -12,8 +11,8 @@
     Style="{StaticResource {x:Type Window}}"
     ResizeMode="NoResize"        
     SizeToContent="Height"
-    s:WindowProperties.MinButtonVisible="Collapsed"
-    s:WindowProperties.MaxButtonVisible="Collapsed"
+    a:WindowProperties.MinButtonVisible="Collapsed"
+    a:WindowProperties.MaxButtonVisible="Collapsed"
     v:ColorPickerWindow.SelectedColor="{Binding SelectedColor, Mode=TwoWay}"
     v:ColorPickerWindow.SliderBorderColor="{DynamicResource ColorControlDarkBackground}"
     v:ColorPickerWindow.SliderThumbsColor="{DynamicResource ColorControlLightBackground}"
@@ -31,7 +30,7 @@
                 HorizontalAlignment="Right"
                 MinWidth="80"           
                 Command="{Binding SelectCommand}"
-                Content="{t:Text Select}">
+                Content="{a:Text Select}">
             </Button>
         </StackPanel>
     </StackPanel>

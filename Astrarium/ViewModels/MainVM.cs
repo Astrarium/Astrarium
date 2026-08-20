@@ -2,6 +2,7 @@
 using Astrarium.Controls;
 using Astrarium.Types;
 using Astrarium.Types.Themes;
+using Astrarium.Workers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,8 +23,6 @@ namespace Astrarium.ViewModels
         private readonly ISettings settings;
         // TODO: make an interface?
         private readonly UIElementsIntegration uiIntegration;
-        private readonly IAppUpdater appUpdater;
-        private readonly IDonationsHelper donations;
 
         public string MapViewAngleString { get; private set; }
         public string DateString { get; private set; }
@@ -34,10 +33,10 @@ namespace Astrarium.ViewModels
         public Command<PointF> MapRightClickCommand { get; private set; }
         public Command SetDateCommand { get; private set; }
         public Command SetViewAngleCommand { get; private set; }
-        public Command SelectLocationCommand { get; private set; }
+        public Command<CrdsGeographical> SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command CenterOnPointCommand { get; private set; }
-        public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
+        public Command GetObjectInfoCommand { get; private set; }
         public Command GetObjectEphemerisCommand { get; private set; }
         public Command CalculatePhenomenaCommand { get; private set; }
         public Command CalculateTodayEventsCommand { get; private set; }
@@ -167,29 +166,14 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, IDonationsHelper donations, IGeoLocationsManager geoLocationsManager, ISettings settings, UIElementsIntegration uiIntegration)
+        public MainVM(ISky sky, ISkyMap map, IWorkersCollection workers, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
             this.map = map;
             this.settings = settings;
             this.uiIntegration = uiIntegration;
-            this.donations = donations;
-            this.appUpdater = appUpdater;
-
-            if (settings.Get("CheckUpdatesOnStart"))
-            {
-                Task.Run(async () =>
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                    appUpdater.CheckUpdates(OnAppUpdateFound);
-                });
-            }
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromSeconds(3));
-                donations.CheckDonates(ctx => OpenDonationDialog(ctx));
-            });
+            
+            workers.RunWorkers();
 
             sky.Calculate();
 
@@ -199,12 +183,12 @@ namespace Astrarium.ViewModels
             MapRightClickCommand = new Command<PointF>(MapRightClick);
             SetDateCommand = new Command(SetDate);
             SetViewAngleCommand = new Command(SetViewAngle);
-            SelectLocationCommand = new Command(SelectLocation);
+            SelectLocationCommand = new Command<CrdsGeographical>(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
             QuickSearchCommand = new Command<CelestialObject>(GoToObject);
             SelectedObjectsMenuItemsRootMenuCommand = new Command(SelectedObjectsMenuItemsRootMenuClicked);
             CenterOnPointCommand = new Command(CenterOnPoint);
-            GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
+            GetObjectInfoCommand = new Command(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
             CalculateTodayEventsCommand = new Command(CalculateTodayEvents);
@@ -219,6 +203,8 @@ namespace Astrarium.ViewModels
             DonateCommand = new Command(OpenDonationDialog);
             ExitAppCommand = new Command(Application.Current.Shutdown);
             SearchProvider = new SearchSuggestionProvider(sky);
+
+            ViewManager.RegisterMessageHandler("SelectLocation", SelectLocationCommand);
 
             sky.Calculated += map.Invalidate;
             sky.TimeSyncChanged += Sky_TimeSyncChanged;
@@ -569,57 +555,6 @@ namespace Astrarium.ViewModels
             ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", sky.Context.GeoLocation.Name)));
         }
 
-        private void OnAppUpdateFound(LastRelease lastRelease)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var vm = ViewManager.CreateViewModel<AppUpdateVM>();
-                vm.SetReleaseInfo(lastRelease);
-                ViewManager.ShowDialog(vm);
-            });
-        }
-
-        private class DonationContext : IDonationContext
-        {
-            public bool Delayed => false;
-            public bool OpenedByUser => true;
-            public bool Stopped => false;
-        }
-
-        private DonationResult OpenDonationDialog(IDonationContext ctx)
-        {
-            return Application.Current.Dispatcher.Invoke(() =>
-            {
-                var vm = ViewManager.CreateViewModel<DonateVM>();
-                vm.OpenedByUser = ctx.OpenedByUser;
-                vm.AlreadyDelayed = ctx.Delayed;
-                ViewManager.ShowDialog(vm);
-                if (vm.Result == DonationResult.Donated)
-                {
-                    try
-                    {
-                        string lang = Text.GetCurrentLocale().TwoLetterISOLanguageName.ToLower();
-                        System.Diagnostics.Process.Start($"https://astrarium.space/{lang}/donate");
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Unable to start browser.");
-                    }
-                }
-                return vm.Result;
-            });
-        }
-
-        private void OnAppUpdateNotFound()
-        {
-            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Information", "$AppUpdateWindow.OnAppUpdateNotFound"));
-        }
-
-        private void OnAppUpdateError(Exception ex)
-        {
-            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.OnAppUpdateError")}: {ex.Message}"));
-        }
-
         private void Map_ContextChanged()
         {
             double jd = map.Projection.Context.JulianDay;
@@ -650,7 +585,7 @@ namespace Astrarium.ViewModels
             FavoriteLocationsMenuItems.Add(new MenuItem("$StatusBar.EditFavoriteLocations", EditFavoriteLocationsCommand));
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             map.Invalidate();
 
@@ -719,6 +654,22 @@ namespace Astrarium.ViewModels
             map.Projection.Fov *= Math.Pow(1.1, -delta / 120);
             map.Invalidate();
         }
+
+        private bool isTimeShifting = false;
+        private void TimeShift(double delta)
+        {
+            if (sky.TimeSync) return;
+            Task.Run(() =>
+            {
+                if (!isTimeShifting)
+                {
+                    isTimeShifting = true;
+                    sky.Context.JulianDay += delta;
+                    sky.Calculate();
+                    isTimeShifting = false;
+                }
+            });
+        }
        
         private IEnumerable<MenuItem> GetMenuItems(IEnumerable<MenuItem> items)
         {
@@ -755,14 +706,12 @@ namespace Astrarium.ViewModels
                 // "A" = [A]dd
                 else if (key == Key.A)
                 {
-                    sky.Context.JulianDay += 5.0 / 24 / 60;
-                    sky.Calculate();
+                    TimeShift(5.0 / 24 / 60);
                 }
                 // "S" = [S]ubtract
                 else if (key == Key.S)
                 {
-                    sky.Context.JulianDay -= 5.0 / 24 / 60;
-                    sky.Calculate();
+                    TimeShift(-5.0 / 24 / 60);
                 }
             }
         }
@@ -771,7 +720,7 @@ namespace Astrarium.ViewModels
         {
             map.SelectedObject = map.FindObject(point);
             map.Invalidate();
-            GetObjectInfo(map.SelectedObject);
+            GetObjectInfo();
         }
 
         private void MapRightClick(PointF point)
@@ -894,18 +843,14 @@ namespace Astrarium.ViewModels
             ViewManager.ShowDialog<AboutVM>();
         }
 
-        private async void CheckForUpdates()
+        private void CheckForUpdates()
         {
-            await Task.Run(() => appUpdater.CheckUpdates(OnAppUpdateFound, OnAppUpdateNotFound, OnAppUpdateError));
+            ViewManager.RaiseMessage("CheckForUpdates");
         }
 
         private void OpenDonationDialog()
         {
-            var result = OpenDonationDialog(new DonationContext());
-            if (result == DonationResult.Donated)
-            {
-                donations.StopChecks();
-            }
+            ViewManager.RaiseMessage("OpenDonationDialog");
         }
 
         private void GoToObject(CelestialObject body)
@@ -1040,6 +985,10 @@ namespace Astrarium.ViewModels
         private void SetLocation(CrdsGeographical location)
         {
             sky.SetLocation(location);
+            if (location.Landscape != null && location.Landscape != settings.Get<string>("Landscape"))
+            {
+                settings.SetAndSave("Landscape", location.Landscape);
+            }
         }
 
         private void EditFavoriteLocations()
@@ -1047,24 +996,17 @@ namespace Astrarium.ViewModels
             ViewManager.ShowDialog<FavoriteLocationsVM>();
         }
 
-        private void GetObjectInfo(CelestialObject body)
+        private void GetObjectInfo()
         {
+            var body = map.SelectedObject;
             if (body != null)
             {
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    var vm = new ObjectInfoVM(info);
-                    foreach (var ext in uiIntegration.ObjectInfoExtensions)
-                    {
-                        var model = ext.ViewModelProvider.DynamicInvoke(sky.Context, body);
-                        if (model != null)
-                        {
-                            var control = Activator.CreateInstance(ext.ViewType) as FrameworkElement;
-                            control.SetValue(FrameworkElement.DataContextProperty, model);
-                            vm.AddExtension(ext.Title, control);
-                        }
-                    }
+                    var vm = ViewManager
+                         .CreateViewModel<ObjectInfoVM>()
+                         .WithObjectInfo(info, uiIntegration.ObjectInfoExtensions);
 
                     if (ViewManager.ShowDialog(vm))
                     {
@@ -1085,9 +1027,13 @@ namespace Astrarium.ViewModels
             ViewManager.ShowViewAngleDialog(map.Projection.Fov, map.Projection.MinFov, map.Projection.MaxFov, applyImmediately: true);
         }
 
-        private void SelectLocation()
+        private void SelectLocation(CrdsGeographical location = null)
         {
-            CrdsGeographical location = ViewManager.ShowLocationDialog(sky.Context.GeoLocation);
+            if (location == null)
+            {
+                location = sky.Context.GeoLocation;
+            }
+            location = ViewManager.ShowLocationDialog(location);
             if (location != null)
             {
                 SetLocation(location);

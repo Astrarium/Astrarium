@@ -5,10 +5,7 @@ using Astrarium.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using WF = System.Windows.Forms;
 using System.Drawing.Printing;
@@ -155,12 +152,18 @@ namespace Astrarium
                     }
                     finally
                     {
-                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                        if (viewModel.Loggable)
+                        {
+                            Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                        }
                     }
                 }
                 else
                 {
-                    Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    if (viewModel.Loggable)
+                    {
+                        Log.Action(window.GetType().FullName, JsonConvert.SerializeObject(viewModel.Payload));
+                    }
                     window.Show();
                     return true;
                 }
@@ -345,6 +348,20 @@ namespace Astrarium
                 document.PrinterSettings = dialog.PrinterSettings;
                 return true;
             } 
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool ShowPrintDialog(System.Windows.Media.Visual visual, string title)
+        {
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                printDialog.PrintVisual(visual, title);
+                return true;
+            }
             else
             {
                 return false;

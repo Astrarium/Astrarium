@@ -1,10 +1,4 @@
-﻿using Astrarium.Plugins.SolarSystem;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Astrarium.Plugins.SolarSystem
+﻿namespace Astrarium.Plugins.SolarSystem
 {
     /// <summary>
     /// Descibes an active region that where observed on the previous solar 

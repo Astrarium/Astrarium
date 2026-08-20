@@ -2,12 +2,7 @@
 using Astrarium.Plugins.Horizon.Controls;
 using Astrarium.Plugins.Horizon.ViewModels;
 using Astrarium.Types;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Horizon
 {
@@ -36,13 +31,13 @@ namespace Astrarium.Plugins.Horizon
             // Fonts
             DefineSetting("CardinalDirectionsFont", new Font("Arial", 14, FontStyle.Bold));
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
 
             DefineSettingsSection<HorizonSettingsSection, HorizonSettingsViewModel>();
 
-            ExportResourceDictionaries("Images.xaml");
-
-            settings.SettingValueChanged += (settingName, value) =>
+            settings.SettingValueChanged += (settingName, value, oldValue) =>
             {
                  if (settingName == "MeasureAzimuthFromNorth")
                  {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Represents a pair of equatorial coordinates.

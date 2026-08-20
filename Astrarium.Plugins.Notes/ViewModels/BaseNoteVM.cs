@@ -1,10 +1,5 @@
 ﻿using Astrarium.Types;
-using Astrarium.Types.Themes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Notes.ViewModels
 {
@@ -21,24 +16,25 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         protected void SelectDate(Note note)
         {
-            if (note.Body != null)
+            if (!sky.Context.GeoLocation.Equals(note.Location))
             {
-                if (!sky.Context.GeoLocation.Equals(note.Location))
+                if (ViewManager.ShowMessageBox("$Warning", "$Notes.NoteWindow.Warning.ChangeLocation", System.Windows.MessageBoxButton.YesNo) != System.Windows.MessageBoxResult.Yes)
                 {
-                    if (ViewManager.ShowMessageBox("$Warning", "Change location?", System.Windows.MessageBoxButton.YesNo) != System.Windows.MessageBoxResult.Yes)
-                    {
-                        return;
-                    }
-
-                    sky.SetLocation(note.Location);
+                    return;
                 }
 
-                sky.SetDate(note.Date);
-                var body = sky.Search(note.Body.Type, note.Body.CommonName);
-                if (body != null)
-                {
-                    map.GoToObject(body, TimeSpan.FromSeconds(1));
-                }
+                sky.SetLocation(note.Location);
+            }
+
+            sky.SetDate(note.Date);
+            var body = sky.Search(note.Body.Type, note.Body.CommonName);
+            if (body != null)
+            {
+                map.GoToObject(body, TimeSpan.FromSeconds(1));
+            }
+            else
+            {
+                ViewManager.ShowMessageBox("$Error", "$Notes.NoteWindow.Error.ObjectNotFound", System.Windows.MessageBoxButton.OK);
             }
         }
     }

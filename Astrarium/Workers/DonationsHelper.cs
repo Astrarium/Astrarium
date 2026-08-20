@@ -1,16 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using Astrarium.Types;
+using Astrarium.ViewModels;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using System.Windows;
 
-namespace Astrarium
+namespace Astrarium.Workers
 {
-    public interface IDonationsHelper
-    {
-        void CheckDonates(Func<IDonationContext, DonationResult> onRequestDonation, Action<Exception> onError = null);
-        void StopChecks();
-    }
-
     public enum DonationResult
     {
         Delayed = 0,
@@ -18,7 +16,7 @@ namespace Astrarium
         Blocked = 2
     }
 
-    public class DonationsHelper : IDonationsHelper
+    public class DonationsHelper : IWorker
     {
         private readonly string settingsDir;
         private readonly string statsFile;
@@ -27,9 +25,20 @@ namespace Astrarium
         {
             settingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium");
             statsFile = Path.Combine(settingsDir, "Stats.json");
+
+            ViewManager.RegisterMessageHandler("OpenDonationDialog", new Command(OpenDonationDialog));
         }
 
-        public void CheckDonates(Func<IDonationContext, DonationResult> onRequestDonation, Action<Exception> onError = null)
+        public void Run()
+        {
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                CheckDonates(ctx => OpenDonationDialog(ctx));
+            });
+        }
+
+        private void CheckDonates(Func<IDonationContext, DonationResult> onRequestDonation, Action<Exception> onError = null)
         {
             EnsureCreated();
   
@@ -87,10 +96,57 @@ namespace Astrarium
             }
         }
 
-        public void StopChecks()
+        private void OpenDonationDialog()
+        {
+            var result = OpenDonationDialog(new DonationContext());
+            if (result == DonationResult.Donated)
+            {
+                StopChecks();
+            }
+        }
+
+        private class DonationContext : IDonationContext
+        {
+            public bool Delayed => false;
+            public bool OpenedByUser => true;
+            public bool Stopped => false;
+        }
+
+        private DonationResult OpenDonationDialog(IDonationContext ctx)
+        {
+            return Application.Current.Dispatcher.Invoke(() =>
+            {
+                var vm = ViewManager.CreateViewModel<DonateVM>();
+                vm.OpenedByUser = ctx.OpenedByUser;
+                vm.AlreadyDelayed = ctx.Delayed;
+                ViewManager.ShowDialog(vm);
+                if (vm.Result == DonationResult.Donated)
+                {
+                    try
+                    {
+                        string lang = Text.GetCurrentLocale().TwoLetterISOLanguageName.ToLower();
+                        System.Diagnostics.Process.Start($"https://astrarium.space/{lang}/donate");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Unable to start browser.");
+                    }
+                }
+                return vm.Result;
+            });
+        }
+
+        private void StopChecks()
         {
             EnsureCreated();
             WriteToFile(new ManualDonationFileInfo());
+        }
+
+        private interface IDonationContext
+        {
+            bool Delayed { get; }
+            bool OpenedByUser { get; }
+            bool Stopped { get; }
         }
 
         private class ManualDonationFileInfo : IDonationContext
@@ -122,12 +178,5 @@ namespace Astrarium
             [JsonIgnore]
             public bool OpenedByUser => false;
         }
-    }
-
-    public interface IDonationContext
-    {
-        bool Delayed { get; }
-        bool OpenedByUser { get; }
-        bool Stopped { get; }
     }
 }

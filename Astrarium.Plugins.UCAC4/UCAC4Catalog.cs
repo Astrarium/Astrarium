@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.UCAC4
 {
@@ -69,7 +67,7 @@ namespace Astrarium.Plugins.UCAC4
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             if (isInitialized && settingName == "UCAC4RootDir")
             {

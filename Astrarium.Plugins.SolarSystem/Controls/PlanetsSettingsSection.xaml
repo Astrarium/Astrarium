@@ -1,43 +1,36 @@
-﻿<c:SettingsSection 
+﻿<a:SettingsSection 
     x:Class="Astrarium.Plugins.SolarSystem.Controls.PlanetsSettingsSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    Title="{t:Text Section.Planets}"
-    Icon="{StaticResource IconPlanet}"
-    mc:Ignorable="d"
-    d:DesignHeight="450" 
-    d:DesignWidth="800">
+    xmlns:a="Astrarium"
+    Title="{a:Text Section.Planets}"
+    Icon="{StaticResource IconPlanet}">
     <StackPanel Orientation="Vertical" Margin="6">
-        <CheckBox Content="{t:Text Settings.Planets}" IsChecked="{Binding Settings.Planets}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.PlanetsDrawAll}" IsChecked="{Binding Settings.PlanetsDrawAll}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.PlanetsLabels}" IsChecked="{Binding Settings.PlanetsLabels}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.PlanetsLabelsMag}" IsChecked="{Binding Settings.PlanetsLabelsMag}" Margin="2">
+        <CheckBox Content="{a:Text Settings.Planets}" IsChecked="{Binding Settings.Planets}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.PlanetsDrawAll}" IsChecked="{Binding Settings.PlanetsDrawAll}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.PlanetsLabels}" IsChecked="{Binding Settings.PlanetsLabels}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.PlanetsLabelsMag}" IsChecked="{Binding Settings.PlanetsLabelsMag}" Margin="2">
             <CheckBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
+                <MultiBinding Converter="{a:BooleanAndConverter}">
                     <Binding Path="Settings.Planets" />
                     <Binding Path="Settings.PlanetsLabels" />
                 </MultiBinding>
             </CheckBox.IsEnabled>
         </CheckBox>
-        <CheckBox Content="{t:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
-        <CheckBox Content="{t:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
-        <CheckBox Content="{t:Text Settings.PlanetMoons}" IsChecked="{Binding Settings.PlanetMoons}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.JupiterMoonsShadowOutline}" IsChecked="{Binding Settings.JupiterMoonsShadowOutline}" Margin="2">
+        <CheckBox Content="{a:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
+        <CheckBox Content="{a:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
+        <CheckBox Content="{a:Text Settings.PlanetMoons}" IsChecked="{Binding Settings.PlanetMoons}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.JupiterMoonsShadowOutline}" IsChecked="{Binding Settings.JupiterMoonsShadowOutline}" Margin="2">
             <CheckBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
+                <MultiBinding Converter="{a:BooleanAndConverter}">
                     <Binding Path="Settings.Planets" />
                     <Binding Path="Settings.PlanetMoons" />
                 </MultiBinding>
             </CheckBox.IsEnabled>
         </CheckBox>
-        <CheckBox Content="{t:Text Settings.GenericMoons}" IsChecked="{Binding Settings.GenericMoons}" Margin="2">
+        <CheckBox Content="{a:Text Settings.GenericMoons}" IsChecked="{Binding Settings.GenericMoons}" Margin="2">
             <CheckBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
+                <MultiBinding Converter="{a:BooleanAndConverter}">
                     <Binding Path="Settings.Planets" />
                     <Binding Path="Settings.PlanetMoons" />
                 </MultiBinding>
@@ -45,12 +38,12 @@
         </CheckBox>
 
 
-        <GroupBox Header="{t:Text Settings.GenericMoonsOrbitalElements}" Margin="0 2">
+        <GroupBox Header="{a:Text Settings.GenericMoonsOrbitalElements}" Margin="0 2">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="0 2 0 0" >
-                    <CheckBox IsChecked="{Binding Settings.GenericMoonsAutoUpdate}" VerticalAlignment="Center" Content="{t:Text Settings.GenericMoonsOrbitalElementsValidity}"  Margin="4 4 4 4" />
-                    <c:NumericUpDown VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.GenericMoonsOrbitalElementsValidity}" Minimum="1" Maximum="365" />
-                    <TextBlock Margin="4" VerticalAlignment="Center" Text="{t:Text Settings.GenericMoonsOrbitalElementsValidity.Days}" />
+                    <CheckBox IsChecked="{Binding Settings.GenericMoonsAutoUpdate}" VerticalAlignment="Center" Content="{a:Text Settings.GenericMoonsOrbitalElementsValidity}"  Margin="4 4 4 4" />
+                    <a:NumericUpDown VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.GenericMoonsOrbitalElementsValidity}" Minimum="1" Maximum="365" />
+                    <TextBlock Margin="4" VerticalAlignment="Center" Text="{a:Text Settings.GenericMoonsOrbitalElementsValidity.Days}" />
                 </StackPanel>
 
                 <Grid>
@@ -59,18 +52,18 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="4"  Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
-                        <TextBlock IsEnabled="False" Text="{t:Text Settings.GenericMoonsOrbitalElements.LastUpdated}" Margin="0 0 4 0" />
+                        <TextBlock IsEnabled="False" Text="{a:Text Settings.GenericMoonsOrbitalElements.LastUpdated}" Margin="0 0 4 0" />
                         <TextBlock IsEnabled="False" Text="{Binding GenericMoonsOrbitalElementsLastUpdated, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue='?'}" />
                     </StackPanel>
                     <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
                         <Button Margin="2" MinWidth="100" Padding="8 0" Visibility="Collapsed" Content="Elements editor" />
-                        <Button Margin="2" MinWidth="100" Padding="8 0" Command="{Binding UpdateGenericMoonsOrbitalElementsCommand}" Content="{t:Text Settings.GenericMoonsOrbitalElements.UpdateNow}" />
+                        <Button Margin="2" MinWidth="100" Padding="8 0" Command="{Binding UpdateGenericMoonsOrbitalElementsCommand}" Content="{a:Text Settings.GenericMoonsOrbitalElements.UpdateNow}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
 
             <GroupBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
+                <MultiBinding Converter="{a:BooleanAndConverter}">
                     <Binding Path="Settings.Planets" />
                     <Binding Path="Settings.PlanetMoons" />
                     <Binding Path="Settings.GenericMoons" />
@@ -79,7 +72,7 @@
             </GroupBox.IsEnabled>
         </GroupBox>
 
-        <GroupBox Header="{t:Text Settings.GRSLongitude}">
+        <GroupBox Header="{a:Text Settings.GRSLongitude}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -93,19 +86,19 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Label Content="{t:Text Settings.GRSLongitude.Epoch}" Grid.Column="0" Grid.Row="0" />
-                <c:DatePicker Name="Epoch" Options="MonthYear" JulianDay="{Binding GRSLongitude.Epoch}" Grid.Column="1" Grid.Row="0" />
+                <Label Content="{a:Text Settings.GRSLongitude.Epoch}" Grid.Column="0" Grid.Row="0" />
+                <a:DatePicker Name="Epoch" Options="MonthYear" JulianDay="{Binding GRSLongitude.Epoch}" Grid.Column="1" Grid.Row="0" />
 
-                <Label Content="{t:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
-                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="Longitude" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding GRSLongitude.Longitude}" />
+                <Label Content="{a:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
+                <a:NumericUpDown Width="50" HorizontalAlignment="Left" Name="Longitude" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding GRSLongitude.Longitude}" />
 
-                <Label Content="{t:Text Settings.GRSLongitude.MonthlyDrift}" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" />
-                <c:NumericUpDown Width="50" HorizontalAlignment="Left" Name="MonthlyDrift" Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding GRSLongitude.MonthlyDrift}" />
+                <Label Content="{a:Text Settings.GRSLongitude.MonthlyDrift}" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" />
+                <a:NumericUpDown Width="50" HorizontalAlignment="Left" Name="MonthlyDrift" Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding GRSLongitude.MonthlyDrift}" />
 
-                <Button Grid.Column="2" Grid.Row="2" Margin="6" MinWidth="100" Padding="8 0" Content="{t:Text Settings.GRSLongitude.Update}" Command="{Binding UpdateGRSLongitudeCommand}" />
+                <Button Grid.Column="2" Grid.Row="2" Margin="6" MinWidth="100" Padding="8 0" Content="{a:Text Settings.GRSLongitude.Update}" Command="{Binding UpdateGRSLongitudeCommand}" />
             </Grid>
             <GroupBox.IsEnabled>
-                <MultiBinding Converter="{s:BooleanAndConverter}">
+                <MultiBinding Converter="{a:BooleanAndConverter}">
                     <Binding Path="Settings.Planets" />
                     <Binding Path="IsGRSSectionEnabled" />
                 </MultiBinding>
@@ -113,4 +106,4 @@
         </GroupBox>
 
     </StackPanel>
-</c:SettingsSection>
+</a:SettingsSection>

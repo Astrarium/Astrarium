@@ -1,0 +1,141 @@
+﻿<a:DisposableUserControl x:Class="Astrarium.Plugins.Simbad.Views.SimbadControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:a="Astrarium">
+    <a:DisposableUserControl.Resources>
+        <ResourceDictionary>
+            <Style x:Key="HoverPropertyStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Style.Setters>
+                    <Setter Property="Padding" Value="4" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="TextValueStyle" TargetType="TextBlock" BasedOn="{StaticResource HoverPropertyStyle}">
+                <Style.Setters>
+                    <Setter Property="FontFamily" Value="Lucida Console" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="Padding" Value="4" />
+                    <Setter Property="HorizontalAlignment" Value="Left" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="TextAlignment" Value="Center" />
+                </Style.Setters>
+            </Style>
+
+            <Style x:Key="HyperlinkStyle" TargetType="Hyperlink" BasedOn="{StaticResource {x:Type Hyperlink}}">
+                <Style.Setters>
+                    <Setter Property="FontFamily" Value="Lucida Console" />
+                    <Setter Property="FontSize" Value="12" />
+                </Style.Setters>
+            </Style>
+
+        </ResourceDictionary>
+    </a:DisposableUserControl.Resources>
+
+    <Grid>
+
+        <!-- No data thumb -->
+        <DockPanel Visibility="{Binding HasErrors, Converter={a:BoolToVisibilityConverter}}" >
+            <TextBlock IsEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Text="{Binding ErrorMessage}" />
+        </DockPanel>
+
+        <!-- Loading thumb -->
+        <DockPanel Visibility="{Binding IsLoading, Converter={a:BoolToVisibilityConverter}}" >
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Width="200" Height="6" Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={a:BoolToVisibilityConverter}}" />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Text="{a:Text Simbad.LoadingText}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Simbad data table -->
+        <ScrollViewer Visibility="{Binding HasData, Converter={a:BoolToVisibilityConverter}}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="table" ItemsSource="{Binding Table}" Grid.IsSharedSizeScope="True">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type a:InfoElementHeader}">
+                        <TextBlock FontWeight="Bold" Padding="0 8" Text="{Binding Text, Converter={a:LocalizedTextConverter}}" />
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type a:InfoElementMultilineProperty}">
+                        <Grid>
+                            <TextBlock 
+                               Text="{Binding StringValue, Mode=OneWay}"
+                               TextWrapping="Wrap"
+                               Margin="0 0 0 4"
+                               HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type a:InfoElementProperty}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Key" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
+                            <Border Grid.Column="2">
+                                <TextBlock Style="{StaticResource TextValueStyle}" Text="{Binding StringValue}">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.PropertyValueClickedCommand}" CommandParameter="{Binding Value}" MouseAction="LeftClick" />
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type a:InfoElementDateProperty}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Key" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
+                            <TextBlock Grid.Column="2" Padding="4" VerticalAlignment="Center">
+                                <Hyperlink Style="{StaticResource HyperlinkStyle}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.JulianDateClickedCommand}" CommandParameter="{Binding Value}"><Run Text="{Binding StringValue, Mode=OneWay}" /></Hyperlink>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type a:InfoElementLink}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Key" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
+                            <TextBlock Grid.Column="2" Padding="4" VerticalAlignment="Center">
+                                <Hyperlink Style="{StaticResource HyperlinkStyle}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.LinkClickedCommand}" CommandParameter="{Binding Uri}"><Run Text="{Binding UriText, Mode=OneWay}" /></Hyperlink>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type a:InfoElementCommand}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Key" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Caption, Converter={a:LocalizedTextConverter}}" />
+                            <Button Padding="4 0" Margin="2" HorizontalAlignment="Left" Grid.Column="2" Content="{Binding Text}" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.PropertyCommandClickedCommand}" CommandParameter="{Binding Command}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+
+</a:DisposableUserControl>

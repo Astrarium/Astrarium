@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Astrarium.Types
 {
@@ -17,24 +11,27 @@ namespace Astrarium.Types
 
     public abstract class ToolbarButtonBase : ToolbarItem
     {
-        public string ImageKey
-        {
-            get => GetValue<string>(nameof(ImageKey), null);
-            set => SetValue(nameof(ImageKey), value);
-        }
+        public string IconData { get; private set; }
 
         public string Tooltip
         {
             get => GetValue<string>(nameof(Tooltip), null);
             set => SetValue(nameof(Tooltip), value);
         }
+
+        public ToolbarButtonBase(string imageKey)
+        {
+            if( Application.Current.Resources.Contains(imageKey))
+            {
+                IconData = Application.Current.Resources[imageKey].ToString();
+            }
+        }
     }
 
     public class ToolbarButton : ToolbarButtonBase
     {
-        public ToolbarButton(string imageKey, string toolTip, Command command = null)
+        public ToolbarButton(string imageKey, string toolTip, Command command = null) : base(imageKey)
         {
-            ImageKey = imageKey;
             Tooltip = toolTip;
             Command = command;
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Tooltip));

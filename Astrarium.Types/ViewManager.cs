@@ -1,15 +1,18 @@
 ﻿using Astrarium.Algorithms;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Astrarium.Types
 {
     public static class ViewManager
     {
         private static IViewManager viewManager;
+        private static readonly Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>();
 
         public static void SetImplementation(IViewManager viewManager)
         {
@@ -125,6 +128,11 @@ namespace Astrarium.Types
             return viewManager.ShowPrintDialog(document);
         }
 
+        public static bool ShowPrintDialog(System.Windows.Media.Visual visual, string title)
+        {
+            return viewManager.ShowPrintDialog(visual, title);
+        }
+
         public static bool ShowPrintPreviewDialog(PrintDocument document)
         {
             return viewManager.ShowPrintPreviewDialog(document);
@@ -178,6 +186,19 @@ namespace Astrarium.Types
         public static void ShowTooltipMessage(PointF mouse, string message)
         {
             viewManager.ShowTooltipMessage(mouse, message);
+        }
+
+        public static void RegisterMessageHandler(string name, ICommand command)
+        {
+            commands[name] = command;
+        }
+
+        public static void RaiseMessage(string name, object parameters = null)
+        {
+            if (commands.ContainsKey(name))
+            {
+                commands[name].Execute(parameters);
+            }
         }
     }
 }

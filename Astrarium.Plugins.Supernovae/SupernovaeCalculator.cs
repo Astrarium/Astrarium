@@ -5,7 +5,6 @@ using System.IO;
 using System.Reflection;
 using System.Linq;
 using System;
-using System.Globalization;
 
 namespace Astrarium.Plugins.Supernovae
 {

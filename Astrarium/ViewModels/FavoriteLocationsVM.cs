@@ -1,11 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.ViewModels
 {
@@ -71,5 +68,7 @@ namespace Astrarium.ViewModels
                 settings.SetAndSave(FAVORITE_LOCATIONS_SETTING, FavoriteLocations.ToList());
             }
         }
+
+        public override object Payload => new { FavoriteLocations = FavoriteLocations.Select(x => new { Name = x.Name, Location = x.ToShortString(), Elevation = x.Elevation, UtcOffset = x.UtcOffset.ToString() }) };
     }
 }

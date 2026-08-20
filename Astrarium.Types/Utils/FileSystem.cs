@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types.Utils
 {
@@ -13,7 +9,10 @@ namespace Astrarium.Types.Utils
         {
             try
             {
-                File.Delete(fullPath);
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -27,7 +26,10 @@ namespace Astrarium.Types.Utils
         {
             try
             {
-                Directory.Delete(fullPath, recursive: true);
+                if (Directory.Exists(fullPath))
+                {
+                    Directory.Delete(fullPath, recursive: true);
+                }
                 return true;
             }
             catch (Exception ex)

@@ -1,14 +1,8 @@
-﻿using Astrarium.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Input;
-using WF = System.Windows.Forms;
 
 namespace Astrarium.Types.Controls
 {

@@ -35,7 +35,7 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         /// <summary>
-        /// Gets helipcentrical coordinates of Earth
+        /// Gets heliocentrical coordinates of Earth
         /// </summary>
         private CrdsHeliocentrical EarthHeliocentrical(SkyContext c)
         {

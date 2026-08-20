@@ -1,8 +1,5 @@
 ﻿using Astrarium.Plugins.Novae.Controls;
 using Astrarium.Types;
-using System;
-using System.IO;
-using System.Reflection;
 
 namespace Astrarium.Plugins.Novae
 {

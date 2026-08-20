@@ -1,12 +1,7 @@
-﻿using Astrarium.Algorithms;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -32,19 +27,6 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             return features;
-
-            //var center = new CrdsGeographical(0, 0);
-            //features = features.OrderByDescending(f => f.Diameter).Where(f => Angle.Separation(f.Coordinates, center) <= 98).ToList();
-            //using (var sw = new StreamWriter("D:\\LunarFeatures.dat"))
-            //{
-            //    foreach (var feature in features)
-            //    {
-            //        sw.WriteLine($"{feature.Name}\t{feature.Diameter}\t{feature.Coordinates.Latitude}\t{feature.Coordinates.Longitude}\t{feature.TypeCode}");
-            //    }
-            //    sw.Flush();
-            //    sw.Close();
-            //}
-            //return features;
         }
     }
 }

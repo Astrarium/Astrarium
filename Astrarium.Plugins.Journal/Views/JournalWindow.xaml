@@ -3,12 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:a="Astrarium"
         xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
         xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
         xmlns:t="clr-namespace:Astrarium.Plugins.Journal.Types"
         xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
-        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:tc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Name="Window"
         Style="{StaticResource {x:Type Window}}" 
@@ -32,7 +31,6 @@
                 </Grid.ContextMenu>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -41,34 +39,39 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="{Binding DateString}" FontFamily="Lucida Console" FontSize="12" VerticalAlignment="Center" Grid.Column="0" />
-                <TextBlock Text="{Binding TimeString}" FontFamily="Lucida Console"  VerticalAlignment="Center" Margin="4 0" FontSize="12" IsEnabled="False" Grid.Column="1" />
-                <TextBlock Text="{Binding ObservationsCount}" IsEnabled="False" VerticalAlignment="Center" FontSize="10" Margin="16 0 8 1" Grid.Column="3" Visibility="{Binding IsExpanded, Converter={s:InverseBoolToVisibilityConverter}}" />
+
+                <TextBlock Text="{Binding TimeString}" FontFamily="Lucida Console" FontSize="10" VerticalAlignment="Center" Margin="4 0" IsEnabled="False" Grid.Column="2" />
             </Grid>
         </HierarchicalDataTemplate>
 
         <!-- Observation tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type t:Observation}">
-            <StackPanel Orientation="Horizontal" Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
-
-                <StackPanel.ContextMenu>
+            <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
+                <Grid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Edit observation..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <MenuItem Header="Delete observation" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <Separator />
                         <MenuItem Header="Go to observation target" Command="{Binding PlacementTarget.Tag.GoToCoordinatesCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" />
                     </ContextMenu>
-                </StackPanel.ContextMenu>
+                </Grid.ContextMenu>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
 
-                <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding ObjectType, Converter={s:CelestialObjectTypeDescriptionConverter}}">
-                    <Rectangle.Fill>
-                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
-                    </Rectangle.Fill>
-                    <Rectangle.OpacityMask>
-                        <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-                <TextBlock IsEnabled="{Binding IsEnabled}" Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
-            </StackPanel>
+                <Border Grid.Column="0" Background="Transparent" ToolTip="{Binding ObjectType, Converter={a:CelestialObjectTypeDescriptionConverter}}">
+                    <a:PathIcon x:Name="Icon" Margin="2" Width="16" Height="16" IsEnabled="False" Data="{Binding ObjectType, Converter={a:CelestialObjectTypeToIconConverter}}" />
+                </Border>
+                <TextBlock Grid.Column="1" IsEnabled="{Binding IsEnabled}"  VerticalAlignment="Center"  Margin="4 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={a:NotNullToBoolConverter}}" />
+                <TextBlock Grid.Column="3" FontFamily="Lucida Console"  VerticalAlignment="Center" Margin="4 0" FontSize="10" IsEnabled="False" Text="{Binding TimeString}" />
+
+            </Grid>
         </HierarchicalDataTemplate>
 
         <Style x:Key="MenuItemHeader" TargetType="{x:Type MenuItem}">
@@ -80,7 +83,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
                         <StackPanel Orientation="Vertical" Height="Auto">
-                            <tc:BorderFix Height="2" Margin="-1" Background="{TemplateBinding BorderBrush}" />
+                            <a:BorderFix Height="2" Margin="-1" Background="{TemplateBinding BorderBrush}" />
                             <TextBlock FontSize="12" Padding="30 4 12 4" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" Background="{TemplateBinding Background}" />
                         </StackPanel>
                     </ControlTemplate>
@@ -95,7 +98,7 @@
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                            <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding Parent.DataContext.CalendarDate, Converter={s:DateToStringConverter}}" IsEnabled="False" />
+                            <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding Parent.DataContext.CalendarDate, Converter={a:DateToStringConverter}}" IsEnabled="False" />
                             <MenuItem Header="Create session..." Command="{Binding Parent.DataContext.CreateSessionCommand}"  />
                         </ContextMenu>
                     </Setter.Value>
@@ -130,12 +133,12 @@
 
     <Grid>
 
-        <StackPanel Margin="20" VerticalAlignment="Center" Orientation="Vertical"  Visibility="{Binding IsLoading, Converter={s:BoolToVisibilityConverter}}">
+        <StackPanel Margin="20" VerticalAlignment="Center" Orientation="Vertical"  Visibility="{Binding IsLoading, Converter={a:BoolToVisibilityConverter}}">
             <TextBlock Margin="10" Text="Please wait. Loading observations..." HorizontalAlignment="Center" />
             <ProgressBar Grid.Column="2" Width="400" Height="6" Background="Transparent" IsIndeterminate="True" />
         </StackPanel>
 
-        <Grid Visibility="{Binding IsLoading, Converter={s:InverseBoolToVisibilityConverter}, FallbackValue=Collapsed}">
+        <Grid Visibility="{Binding IsLoading, Converter={a:InverseBoolToVisibilityConverter}, FallbackValue=Collapsed}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250" MinWidth="250" MaxWidth="600" />
                 <ColumnDefinition Width="Auto" />
@@ -161,29 +164,30 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <tc:SearchTextBox Grid.Column="0" Margin="4" Watermark="Search..." HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" />
+                    <a:SearchTextBox Grid.Column="0" Margin="4" Watermark="Search..." HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" />
 
                     <Button Margin="2 4 2 4" Grid.Column="1" Content="E/C" Width="24" Height="24" HorizontalAlignment="Right" Command="{Binding ExpandCollapseCommand}" />
 
                 </Grid>
 
-                <Calendar 
-                    x:Name="calendar"
-                    Grid.Row="0"
-                    SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedDatesChanged="calendar_SelectedDatesChanged"
-                    GotMouseCapture="calendar_GotMouseCapture"
-                    SelectionMode="SingleDate"
-                    Margin="4"
-                    HorizontalAlignment="Stretch"
-                    IsTodayHighlighted="False"
-                    Tag="{Binding}"
-                    CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
+                <Grid Grid.Row="0">
+                    <Calendar 
+                        x:Name="calendar" 
+                        SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedDatesChanged="calendar_SelectedDatesChanged"
+                        GotMouseCapture="calendar_GotMouseCapture"
+                        SelectionMode="SingleDate"
+                        HorizontalAlignment="Stretch"
+                        IsTodayHighlighted="False"
+                        Tag="{Binding}"
+                        CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
+                </Grid>
+                
 
                 <c:BindableTreeView
                     x:Name="treeView"
-                    Background="{StaticResource BrushWindowBackground}"
-                    BorderBrush="{StaticResource BrushWindowBackground}"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
                     SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                     ItemsSource="{Binding FilteredSessions}"
                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -208,7 +212,7 @@
                 </ContentControl.Resources>
             </ContentControl>
 
-            <StatusBar Grid.Row="1" Grid.ColumnSpan="3" Background="{StaticResource BrushControlDarkBackground}">
+            <StatusBar Grid.Row="1" Grid.ColumnSpan="3">
                 <StatusBarItem>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                         <TextBlock Text="Sessions/Observations: " />

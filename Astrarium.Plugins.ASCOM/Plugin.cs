@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ASCOM
@@ -138,7 +137,7 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "TelescopePollingPeriod")
             {

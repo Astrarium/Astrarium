@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Types;
 using Astrarium.Types.Themes;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,17 @@ namespace Astrarium.Types
         /// <param name="value">Ephemeris value</param>
         /// <returns>String representation of the ephemeris value</returns>
         string Format(object value);
+    }
+
+    /// <summary>
+    /// Marker interface for time/date formatters
+    /// </summary>
+    public interface ITimeInstantFormatter 
+    {
+        /// <summary>
+        /// Should return true if time instant specified
+        /// </summary>
+        bool HasTimeInstant(object value);
     }
 
     /// <summary>
@@ -265,7 +275,7 @@ namespace Astrarium.Types
         }
     }
 
-    public class TimeFormatter : IEphemFormatter
+    public class TimeFormatter : IEphemFormatter, ITimeInstantFormatter
     {
         private bool withSeconds = false;
 
@@ -274,6 +284,12 @@ namespace Astrarium.Types
         public TimeFormatter(bool withSeconds)
         {
             this.withSeconds = withSeconds;
+        }
+
+        public bool HasTimeInstant(object value)
+        {
+            return (value is Date date && !double.IsInfinity(date.Time) && !double.IsNaN(date.Time)) || 
+                   (value is double time && !double.IsInfinity(time) && !double.IsNaN(time));
         }
 
         public string Format(object value)
@@ -394,13 +410,18 @@ namespace Astrarium.Types
         }
     }
 
-    public class DateTimeFormatter : AbstractDateFormatter, IEphemFormatter
+    public class DateTimeFormatter : AbstractDateFormatter, IEphemFormatter, ITimeInstantFormatter
     {
         private bool showSeconds = false;
 
         public DateTimeFormatter(bool showSeconds = false)
         {
             this.showSeconds = showSeconds;
+        }
+
+        public bool HasTimeInstant(object value)
+        {
+            return value is Date || value is DateTime;
         }
 
         public string Format(object value)
@@ -420,8 +441,13 @@ namespace Astrarium.Types
         }
     }
 
-    public class DateFormatter : AbstractDateFormatter, IEphemFormatter
+    public class DateFormatter : AbstractDateFormatter, IEphemFormatter, ITimeInstantFormatter
     {
+        public bool HasTimeInstant(object value)
+        {
+            return value is Date || value is DateTime;
+        }
+
         public string Format(object value)
         {
             if (value is Date d)

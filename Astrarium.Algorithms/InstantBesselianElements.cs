@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Represents set of Besselian elements of solar eclipse,

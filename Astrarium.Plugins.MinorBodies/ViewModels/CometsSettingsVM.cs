@@ -1,26 +1,25 @@
 ﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.MinorBodies.ViewModels
 {
     public class CometsSettingsVM : SettingsViewModel
     {
-        private CometsCalc Calculator;
+        private readonly CometsCalc calculator;
+        private readonly ISettings settings;
+
         public ICommand UpdateElementsCommand { get; private set; }
 
         public CometsSettingsVM(ISettings settings, CometsCalc calculator) : base(settings)
         {
-            Calculator = calculator;
+            this.settings = settings;
+            this.calculator = calculator;
             UpdateElementsCommand = new Command(UpdateElements);
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
-        private void Settings_SettingValueChanged(string name, object value)
+        private void Settings_SettingValueChanged(string name, object value, object oldValue)
         {
             if (name == "CometsDownloadOrbitalElementsTimestamp")
             {
@@ -46,8 +45,14 @@ namespace Astrarium.Plugins.MinorBodies.ViewModels
         private void UpdateElements()
         {
             IsUpdating = true;
-            Calculator.UpdateOrbitalElements(silent: false);
+            calculator.UpdateOrbitalElements(silent: false);
             IsUpdating = false;
+        }
+
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
         }
     }
 }

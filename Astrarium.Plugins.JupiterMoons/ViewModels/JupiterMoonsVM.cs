@@ -3,18 +3,12 @@ using Astrarium.Plugins.JupiterMoons.ImportExport;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Astrarium.Plugins.JupiterMoons
 {
@@ -22,6 +16,7 @@ namespace Astrarium.Plugins.JupiterMoons
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
+        private readonly ISettings settings;
         private readonly JupiterMoonsCalculator calculator = null;
         private readonly CelestialObject jupiter = null;
         private readonly CelestialObject[] moons = new CelestialObject[4];
@@ -182,8 +177,10 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             this.sky = sky;
             this.map = map;
+            this.settings = settings;
             this.calculator = new JupiterMoonsCalculator(settings);
-            settings.SettingValueChanged += Settings_SettingValueChanged;
+            
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
 
             jupiter = sky.Search("Planet", "Jupiter");
 
@@ -200,7 +197,7 @@ namespace Astrarium.Plugins.JupiterMoons
             Calculate();
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "Schema")
             {
@@ -524,6 +521,13 @@ namespace Astrarium.Plugins.JupiterMoons
             get => GetValue(nameof(GRSTable), new GRSTableItem[0]);
             set => SetValue(nameof(GRSTable), value);
         }
-    }
 
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
+        }
+
+        public override object Payload => new { SelectedMonth };
+    }
 }

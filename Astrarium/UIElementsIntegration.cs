@@ -3,13 +3,7 @@ using Astrarium.Config.Controls;
 using Astrarium.Projections;
 using Astrarium.Types;
 using Astrarium.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace Astrarium
 {
@@ -76,6 +70,9 @@ namespace Astrarium
 
             // Time sync on start
             SettingDefinitions.Add(new SettingDefinition("TimeSyncOnStart", false));
+
+            // Checking location on start
+            SettingDefinitions.Add(new SettingDefinition("CheckLocationOnStart", true));
 
             // Auto lock map
             SettingDefinitions.Add(new SettingDefinition("AutoLock", false));

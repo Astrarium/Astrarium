@@ -1,12 +1,6 @@
 ﻿using Astrarium.Plugins.Grids.Controls;
 using Astrarium.Types;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
 
 namespace Astrarium.Plugins.Grids
 {
@@ -30,12 +24,12 @@ namespace Astrarium.Plugins.Grids
             DefineSetting("ColorHorizontalGrid", Color.Green);
             DefineSetting("ColorEquatorialGrid", Color.DarkCyan);
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconHorizontalGrid", "$Settings.HorizontalGrid", new SimpleBinding(settings, "HorizontalGrid", "IsChecked")));
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconEquatorialGrid", "$Settings.EquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked")));
 
             DefineSettingsSection<GridsSettingsSection, SettingsViewModel>();
-
-            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

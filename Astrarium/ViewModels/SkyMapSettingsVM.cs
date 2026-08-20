@@ -1,20 +1,12 @@
 ﻿using Astrarium.Projections;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.ViewModels
 {
-    public class SkyMapSettingsVM : ViewModelBase
+    public class SkyMapSettingsVM : SettingsViewModel
     {
-        /// <summary>
-        /// Settings instance
-        /// </summary>
-        public ISettings Settings { get; private set; }
-
         private readonly ISkyMap map;
 
         public ProjectionVM[] Projections { get; private set; }
@@ -49,10 +41,9 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public SkyMapSettingsVM(ISkyMap map, ISettings settings) 
+        public SkyMapSettingsVM(ISkyMap map, ISettings settings) : base(settings)
         { 
             this.map = map;
-            Settings = settings;
 
             Projections = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(Projection)) && !t.IsAbstract).Select(t => new ProjectionVM(t)).ToArray();

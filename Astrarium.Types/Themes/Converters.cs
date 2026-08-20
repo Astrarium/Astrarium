@@ -24,6 +24,11 @@ namespace Astrarium.Types.Themes
             else if (value is string)
             {
                 string text = (string)value;
+                if (parameter != null && parameter is string prefix)
+                {
+                    text = prefix + text;
+                }
+                
                 return text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             }
             else
@@ -42,6 +47,14 @@ namespace Astrarium.Types.Themes
             else
                 return null;
         } 
+    }
+
+    public class EmptyStringToPlaceholderConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? parameter : value;
+        }
     }
 
     public class LocaleNameConverter : ValueConverterBase
@@ -191,6 +204,23 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class NotEmptyStringToBoolConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !string.IsNullOrEmpty(value as string);
+        }
+    }
+
+    [ValueConversion(typeof(object), typeof(bool))]
+    public class NotNanToBoolConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is double val && !double.IsNaN(val);
+        }
+    }
+
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class NotNullToVisibilityConverter : ValueConverterBase
     {
@@ -289,6 +319,14 @@ namespace Astrarium.Types.Themes
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return parameter;
+        }
+    }
+
+    public class MultiEqualityConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+           return object.Equals(values[0], values[1]);
         }
     }
 
@@ -599,7 +637,7 @@ namespace Astrarium.Types.Themes
 
     public class LongitudeConverter : ValueConverterBase
     {
-        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+        private static IEphemFormatter formatter = Formatters.Longitude;
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -630,6 +668,31 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class MultiValueFormatterConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            
+
+            var formatter = values.FirstOrDefault(x => x is IEphemFormatter) as IEphemFormatter;
+            var value = values.FirstOrDefault(x => !(x is IEphemFormatter));
+
+            if (formatter == DependencyProperty.UnsetValue &&
+                value == DependencyProperty.UnsetValue)
+            {
+                return null;
+            }
+            else if (formatter != null)
+            {
+                return formatter.Format(value);
+            }
+            else
+            {
+                throw new ArgumentException($"Parameter must implement {nameof(IEphemFormatter)} interface.");
+            }
+        }
+    }
+
     public class LogScaleConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -647,7 +710,7 @@ namespace Astrarium.Types.Themes
 
     public class LatitudeConverter : ValueConverterBase
     {
-        private static Formatters.UnsignedAngleFormatter formatter = new Formatters.UnsignedAngleFormatter();
+        private static IEphemFormatter formatter = Formatters.Latitude;
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

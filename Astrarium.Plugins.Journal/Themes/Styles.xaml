@@ -6,11 +6,16 @@
                     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
                     xmlns:q="clr-namespace:Astrarium.Plugins.Journal.Controls"
                     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+                    xmlns:a="Astrarium"
                     mc:Ignorable="d">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key="HeaderPanelStyle" TargetType="{x:Type DockPanel}">
+        <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+    </Style>
 
     <Style x:Key="ImageStyle" TargetType="Image">
         <Style.Setters>
@@ -54,8 +59,16 @@
             <Setter Property="Width" Value="26.5" />
         </Style.Setters>
     </Style>
+
+    <Style x:Key="EditorButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
+    </Style>
     
     <Style TargetType="{x:Type q:MultilineEdit}">
+        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type q:MultilineEdit}">
@@ -76,13 +89,11 @@
                         <Button 
                             Focusable="False"
                             Name="PART_CancelButton"
-                            Background="{StaticResource BrushControlDarkBackground}"
-                            BorderBrush="{StaticResource BrushControlLightBackground}"
-                            BorderThickness="1"
-                            Visibility="{TemplateBinding IsEditMode, Converter={s:BoolToVisibilityConverter}}"
+                            Style="{StaticResource EditorButtonStyle}"
+                            Visibility="{TemplateBinding IsEditMode, Converter={a:BoolToVisibilityConverter}}"
                             Grid.Row="0" Grid.Column="1" Margin="1 0 0 1" Padding="8 0" Width="Auto" Height="24" VerticalAlignment="Bottom" >
                             <StackPanel Orientation="Horizontal">
-                                <Image IsEnabled="False" Height="10" Width="10" Margin="4 0 8 0" Style="{StaticResource ImageStyle}" Source="{StaticResource IconCancel}" />
+                                <a:PathIcon Margin="4 0" Height="10" Width="10" Data="M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22 2 17.5 2 12 6.5 2 12 2M12 4C10.1 4 8.4 4.6 7.1 5.7L18.3 16.9C19.3 15.5 20 13.8 20 12C20 7.6 16.4 4 12 4M16.9 18.3L5.7 7.1C4.6 8.4 4 10.1 4 12C4 16.4 7.6 20 12 20C13.9 20 15.6 19.4 16.9 18.3Z" />
                                 <TextBlock FontSize="10">CANCEL</TextBlock>
                             </StackPanel>
                         </Button>
@@ -90,13 +101,11 @@
                         <Button 
                             Focusable="False"
                             Name="PART_ApplyButton"
-                            Background="{StaticResource BrushControlDarkBackground}"
-                            BorderBrush="{StaticResource BrushControlLightBackground}"
-                            BorderThickness="1"
-                            Visibility="{TemplateBinding IsEditMode, Converter={s:BoolToVisibilityConverter}}"
+                            Style="{StaticResource EditorButtonStyle}"
+                            Visibility="{TemplateBinding IsEditMode, Converter={a:BoolToVisibilityConverter}}"
                             Grid.Row="0" Grid.Column="2" Margin="1 0 0 1" Padding="8 0" Width="Auto" Height="24" VerticalAlignment="Bottom" >
                             <StackPanel Orientation="Horizontal">
-                                <Image IsEnabled="False" Height="10" Width="10" Margin="4 0 8 0" Style="{StaticResource ImageStyle}" Source="{StaticResource IconCheckmark}" />
+                                <a:PathIcon Margin="4 0" Height="10" Width="10" Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
                                 <TextBlock FontSize="10">SAVE</TextBlock>
                             </StackPanel>
                         </Button>
@@ -110,7 +119,7 @@
                             ScrollViewer.VerticalScrollBarVisibility="Visible"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="{TemplateBinding IsEditMode, Converter={s:InverseBoolConverter}}"
-                            Foreground="{StaticResource BrushForeground}"
+                            Foreground="{TemplateBinding Foreground}"
                             Height="Auto"
                             AcceptsReturn="True"
                             VerticalAlignment="Stretch"
@@ -123,15 +132,17 @@
                                 </ContextMenu>
                             </TextBox.ContextMenu>
                         </TextBox>
-                     
+
+                        <Grid></Grid>
                         <TextBlock
                             Name="PART_Placeholder"
                             Padding="4 2"
                             Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Placeholder}"
+                            TextWrapping="WrapWithOverflow"
                             Visibility="{Binding Path=Text, ElementName=PART_Editor, Converter={s:NullOrEmptyToVisibilityConverter}}"
-                            Foreground="{StaticResource BrushControlLightBackground}"
                             VerticalAlignment="Stretch"
                             HorizontalAlignment="Stretch"
+                            Foreground="{TemplateBinding BorderBrush}"
                             Cursor="Hand"
                             Grid.Row="1" Grid.ColumnSpan="2" />
                     </Grid>
@@ -172,5 +183,25 @@
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
+
+    <Style x:Key="ImageListItemStyle" TargetType="ListBoxItem">
+        <Setter Property="BorderBrush" Value="{StaticResource BrushHighlight}"/>
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <a:BorderFix x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                        <ContentPresenter/>
+                    </a:BorderFix>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 </ResourceDictionary>

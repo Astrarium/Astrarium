@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Pair of values: true anomaly "v" and radius-vector "r", representing position on the orbit

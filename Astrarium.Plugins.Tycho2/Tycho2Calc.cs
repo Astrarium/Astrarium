@@ -2,11 +2,9 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Astrarium.Plugins.Tycho2
@@ -144,7 +142,7 @@ namespace Astrarium.Plugins.Tycho2
             this.sky = sky;
         }
 
-        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
             if (isInitialized && settingName == "Tycho2RootDir")
             {
@@ -222,7 +220,7 @@ namespace Astrarium.Plugins.Tycho2
                     properNames = sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
 
                     // Open Tycho2 catalog file
-                    catalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+                    catalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                     IsLoaded = true;
                 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -36,6 +31,28 @@ namespace Astrarium.Types.Controls
         {
             get { return (ICommand)GetValue(LoopDecrementCommandProperty); }
             set { SetValue(LoopDecrementCommandProperty, value); }
+        }
+
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            if (Loop)
+            {
+                if (SelectedIndex == 0 && e.Delta > 0)
+                {
+                    LoopDecrementCommand?.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+
+                if (SelectedIndex == Items.Count - 1 && e.Delta < 0)
+                {
+                    LoopIncrementCommand?.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            base.OnPreviewMouseWheel(e);
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)

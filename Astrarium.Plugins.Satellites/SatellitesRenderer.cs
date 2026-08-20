@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 

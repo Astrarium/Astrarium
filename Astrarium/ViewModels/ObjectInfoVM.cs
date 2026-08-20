@@ -1,56 +1,68 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
-using System.Windows;
 using System.Diagnostics;
-using Astrarium.Views;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
     internal class ObjectInfoVM : ViewModelBase
     {
-        public string Title { get; private set; }
-        public string Subtitle { get; private set; }
-        public string ObjectType { get; private set; }
-        public string ObjectCommonName { get; private set; }
         public double JulianDay { get; private set; }
 
         public ICommand CopyNameCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
+        public ICommand LinkClickedCommand { get; private set; }
+        public ICommand PropertyValueClickedCommand { get; private set; }
+        public ICommand PropertyCommandClickedCommand { get; private set; }
+        public ICommand JulianDateClickedCommand { get; private set; }
+
+        public CelestialObjectInfo Info { get; private set; }
+
+        public string Title { get; private set; }
+        public string Subtitle { get; private set; }
+        public CelestialObject Body { get; private set; }
 
         public IList<ObjectInfoTabViewModel> Tabs { get; private set; } = new List<ObjectInfoTabViewModel>();
 
-        public ObjectInfoVM(CelestialObjectInfo info)
+        public bool IsTabHeaderVisible { get; private set; }
+
+        private ISky sky;
+
+        public ObjectInfoVM(ISky sky)
         {
-            Title = info.Title;
-            Subtitle = info.Subtitle;
-            ObjectType = info.ObjectType;
-            ObjectCommonName = info.ObjectCommonName;
+            this.sky = sky;
 
             CopyNameCommand = new Command(CopyName);
             CloseCommand = new Command(Close);
-
-            var objectInfoView = new ObjectInfoView() { DataContext = info.InfoElements };
-            objectInfoView.LinkClicked += LinkClicked;
-            objectInfoView.JulianDateClicked += JulianDateClicked;
-            objectInfoView.PropertyValueClicked += PropertyValueClicked;
-
-            // add general info tab by default
-            Tabs.Add(new ObjectInfoTabViewModel(Text.Get("ObjectInfoWindow.Tab.Info"), objectInfoView, isHeaderVisible: false));
+            LinkClickedCommand = new Command<Uri>(LinkClicked);
+            PropertyValueClickedCommand = new Command<object>(PropertyValueClicked);
+            JulianDateClickedCommand = new Command<Date>(JulianDateClicked);
+            PropertyCommandClickedCommand = new Command<Action>(PropertyCommandClicked);
         }
 
-        public void AddExtension(string header, FrameworkElement extension)
+        public ObjectInfoVM WithObjectInfo(CelestialObjectInfo info, List<ObjectInfoExtension> extensions)
         {
-            if (header.StartsWith("$")) header = Text.Get(header.Substring(1));
-            Tabs.Add(new ObjectInfoTabViewModel(header, extension));
-            Tabs[0].IsHeaderVisible = true;
-        }
+            Info = info;
 
-        private void JulianDateClicked(double jd)
-        {
-            JulianDay = jd;
-            Close(true);
+            Tabs.Add(new ObjectInfoGeneralVM(Text.Get("ObjectInfoWindow.Tab.Info")));
+
+            foreach (var ext in extensions)
+            {
+                var vm = ext.ViewModelProvider.DynamicInvoke(sky.Context, Info.GetBody());
+                if (vm != null)
+                {
+                    var control = Activator.CreateInstance(ext.ViewType) as FrameworkElement;
+                    control.SetValue(FrameworkElement.DataContextProperty, vm);
+                    Tabs.Add(new ObjectInfoExtensionVM(ext.Title, control));
+                }
+            }
+
+            IsTabHeaderVisible = Tabs.Count > 1;
+
+            return this;
         }
 
         private void LinkClicked(Uri uri)
@@ -69,7 +81,7 @@ namespace Astrarium.ViewModels
         {
             try
             {
-                Clipboard.SetText(value.ToString(), TextDataFormat.UnicodeText);
+                Clipboard.SetText(value.ToString());
             }
             catch (Exception ex)
             {
@@ -77,11 +89,22 @@ namespace Astrarium.ViewModels
             }
         }
 
+        private void JulianDateClicked(Date date)
+        {
+            JulianDay = date.ToJulianEphemerisDay();
+            Close(true);
+        }
+
+        private void PropertyCommandClicked(Action action)
+        {
+            action?.Invoke();
+        }
+
         private void CopyName()
         {
             try
             {
-                Clipboard.SetText(Title, TextDataFormat.UnicodeText);
+                Clipboard.SetText(Info.Title);
             }
             catch (Exception ex)
             {
@@ -89,20 +112,30 @@ namespace Astrarium.ViewModels
             }
         }
 
-        internal class ObjectInfoTabViewModel
+        public override object Payload => new { Body = $"{Info.ObjectType}/{Info.ObjectCommonName}" };
+    }
+
+    public abstract class ObjectInfoTabViewModel
+    {
+        public string Header { get; protected set; }
+        public ObjectInfoTabViewModel(string header)
         {
-            public bool IsHeaderVisible { get; set; }
-            public string Header { get; protected set; }
-            public FrameworkElement Content { get; protected set; }
-
-            public ObjectInfoTabViewModel(string header, FrameworkElement content, bool isHeaderVisible = true)
-            {
-                Header = header;
-                Content = content;
-                IsHeaderVisible = isHeaderVisible;
-            }
+            Header = header;
         }
+    }
 
-        public override object Payload => new { Body = $"{ObjectType}/{ObjectCommonName}" };
+    public class ObjectInfoGeneralVM : ObjectInfoTabViewModel
+    {
+        public ObjectInfoGeneralVM(string header) : base(header) { }
+    }
+
+    public class ObjectInfoExtensionVM : ObjectInfoTabViewModel
+    {
+        public FrameworkElement Control { get; private set; }
+
+        public ObjectInfoExtensionVM(string header, FrameworkElement control) : base(header)
+        {
+            Control = control;
+        }
     }
 }

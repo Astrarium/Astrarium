@@ -1,8 +1,5 @@
 ﻿using Astrarium.Types;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Notes.ViewModels
@@ -30,5 +27,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
         {
             return new Note() { Date = sky.Context.JulianDay, Location = sky.Context.GeoLocation, Markdown = true };
         }
+
+        public override object Payload => new { NotesCount = notesManager.GetAllNotes().Count };
     }
 }

@@ -16,7 +16,7 @@ namespace Astrarium.ViewModels
         public ICommand ResetCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
 
-        public ObservableCollection<SettingsSection> SettingsSections { get; private set; }
+        public ObservableCollection<SettingsSection> Sections { get; private set; }
 
         public SettingsSection SelectedSection
         {
@@ -32,17 +32,21 @@ namespace Astrarium.ViewModels
             ResetCommand = new Command(Reset);
             SaveCommand = new Command(Save);
 
-            SettingsSections = new ObservableCollection<SettingsSection>();
+            Sections = new ObservableCollection<SettingsSection>();
 
             foreach (var section in uiIntegration.SettingSections)
             {
-                var model = ViewManager.CreateViewModel(section.ViewModelType);
-                var control = Activator.CreateInstance(section.ViewType) as SettingsSection;
-                control.SetValue(FrameworkElement.DataContextProperty, model);
-                SettingsSections.Add(control);
+                var control = (SettingsSection)Activator.CreateInstance(section.ViewType);
+                var vm = ViewManager.CreateViewModel(section.ViewModelType) as SettingsViewModel;
+                if (vm == null)
+                {
+                    throw new Exception($"{section.ViewModelType.FullName} should inherit SettingsViewModel");
+                }
+                control.DataContext = vm;
+                Sections.Add(control);
             }
 
-            SelectedSection = SettingsSections.FirstOrDefault();
+            SelectedSection = Sections.FirstOrDefault();
             this.settings.Save("Current");
         }
 
@@ -71,7 +75,7 @@ namespace Astrarium.ViewModels
         public override void Dispose()
         {
             // need to utilizate settings controls
-            SettingsSections.Clear();
+            Sections.Clear();
             base.Dispose();
         }
 

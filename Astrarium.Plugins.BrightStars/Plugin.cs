@@ -17,11 +17,11 @@ namespace Astrarium.Plugins.BrightStars
             DefineSetting("ColorStarsLabels", Color.Silver);
             DefineSetting("StarsLabelsFont", new Font(FontFamily.GenericSerif, 10));
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked")));
 
             DefineSettingsSection<BrightStarsSettingsSection, SettingsViewModel>();
-
-            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

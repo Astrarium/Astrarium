@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Represents orbital elements of minor planet or comet

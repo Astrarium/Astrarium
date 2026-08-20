@@ -1,17 +1,16 @@
 ﻿using Astrarium.Algorithms;
-using Ninject;
 using Astrarium.Config;
 using Astrarium.Types;
 using Astrarium.ViewModels;
+using Astrarium.Workers;
+using Ninject;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Threading;
 
 namespace Astrarium
 {
@@ -98,13 +97,14 @@ namespace Astrarium
         private void ConfigureContainer(IProgress<string> progress)
         {
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
-            kernel.Bind<IAppUpdater>().To<AppUpdater>().InSingletonScope();
-            kernel.Bind<IDonationsHelper>().To<DonationsHelper>().InSingletonScope();
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
-            kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
+            kernel.Bind<IGeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
             kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
+            kernel.Bind<ILandscapesProvider, LandscapesProviderStub>().To<LandscapesProviderStub>().InSingletonScope();
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
+            kernel.Bind<IWorkersCollection>().To<WorkersCollection>().InSingletonScope();
+            kernel.Bind<ILocationDetector>().To<LocationDetector>();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
 
@@ -127,18 +127,21 @@ namespace Astrarium
                     var singletons = plugin.GetExportedTypes().Where(t => t.IsDefined(typeof(SingletonAttribute), false)).ToArray();
                     foreach (var singletonImpl in singletons)
                     {
-                        var singletonAttr = singletonImpl.GetCustomAttribute<SingletonAttribute>();
-                        if (singletonAttr.InterfaceType != null)
+                        var singletonAttrs = singletonImpl.GetCustomAttributes<SingletonAttribute>();
+                        foreach (var singletonAttr in singletonAttrs)
                         {
-                            if (!singletonAttr.InterfaceType.IsAssignableFrom(singletonImpl))
+                            if (singletonAttr.InterfaceType != null)
                             {
-                                throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
+                                if (!singletonAttr.InterfaceType.IsAssignableFrom(singletonImpl))
+                                {
+                                    throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
+                                }
+                                kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
                             }
-                            kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
-                        }
-                        else
-                        {
-                            kernel.Bind(singletonImpl).ToSelf().InSingletonScope();
+                            else
+                            {
+                                kernel.Rebind(singletonImpl).ToSelf().InSingletonScope();
+                            }
                         }
                     }
 
@@ -268,7 +271,7 @@ namespace Astrarium
 
             progress.Report($"Initializing shell");
 
-            settings.SettingValueChanged += (settingName, value) =>
+            settings.SettingValueChanged += (settingName, value, oldValue) =>
             {
                 if (settingName == "NightMode" || settingName == "AppTheme")
                 {
@@ -285,6 +288,20 @@ namespace Astrarium
                 string name = AbstractPlugin.GetName(plugin.GetType());
                 progress.Report($"Initializing plugin {name}");
                 plugin.Initialize();
+            }
+
+            // collect all worker types
+            Type[] workerTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => typeof(IWorker).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                .ToArray();
+
+            var workers = kernel.Get<IWorkersCollection>();
+            foreach (Type workerType in workerTypes)
+            {
+                var worker = kernel.Get(workerType);
+                kernel.Bind(workerType).ToConstant(worker).InSingletonScope();
+                workers.AddWorker((IWorker)worker);
             }
         }
 

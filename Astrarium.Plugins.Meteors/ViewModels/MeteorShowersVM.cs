@@ -1,19 +1,18 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Meteors
 {
     public class MeteorShowersVM : ViewModelBase
     {
-        private ISky Sky { get; set; }
-        private MeteorsCalculator Calculator;
-        private CelestialObject Moon { get; set; }
+        private readonly ISky sky;
+        private readonly ISettings settings;
+        private readonly MeteorsCalculator calc;
+        private readonly CelestialObject moon;
 
         #region Commands
 
@@ -54,7 +53,7 @@ namespace Astrarium.Plugins.Meteors
                 SetValue(nameof(JulianDay), value);
                 if (value > 0)
                 {
-                    var date = Sky.Context.GetDate(value);
+                    var date = sky.Context.GetDate(value);
                     DateString = Text.Get("MeteorShowersView.StatusBar.Date", ("Date", Formatters.Date.Format(date)));
                     var doy = Date.DayOfYear(date) - 1;
                     if (doy >= 0 && doy < MoonPhaseData.Count)
@@ -114,16 +113,17 @@ namespace Astrarium.Plugins.Meteors
         public MeteorShowersVM(MeteorsCalculator calc, ISky sky, ISettings settings)
         {
             Meteors = calc.GetCelestialObjects().OrderBy(x => x.Max).ToArray();
-            Sky = sky;
-            Calculator = calc;
+            this.sky = sky;
+            this.settings = settings;
+            this.calc = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
-            Moon = Sky.Search("Moon");
+            moon = this.sky.Search("Moon");
             IsDarkMode = settings.Get("NightMode");
             settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();
         }
 
-        private void Settings_SettingValueChanged(string settingName, object value)
+        private void Settings_SettingValueChanged(string settingName, object value, object oldValue)
         {
             if (settingName == "Schema")
             {
@@ -155,7 +155,7 @@ namespace Astrarium.Plugins.Meteors
 
         private void ShowMeteorInfo(Meteor m)
         {
-            SkyContext c = new SkyContext(JulianDay, Sky.Context.GeoLocation);
+            SkyContext c = new SkyContext(JulianDay, sky.Context.GeoLocation);
             int year = c.GetDate(c.JulianDay).Year;
             var offset = c.GeoLocation.UtcOffset;
             var jd0 = Date.DeltaT(c.JulianDay) / 86400.0 + Date.JulianDay0(year) - offset / 24;
@@ -163,7 +163,7 @@ namespace Astrarium.Plugins.Meteors
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
             SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
-            var phase = Calculator.LunarPhaseAtMax(cMax);
+            var phase = calc.LunarPhaseAtMax(cMax);
 
             var sb = new StringBuilder();
             sb.AppendLine($"**{Text.Get("MeteorShowersInfoDialog.Names")}**  ");
@@ -199,14 +199,20 @@ namespace Astrarium.Plugins.Meteors
 
         private void Calculate()
         {
-            if (Moon != null)
+            if (moon != null)
             {
                 double from = Date.JulianDay0(Year) + 0.5;
                 double to = from + (Date.IsLeapYear(Year) ? 366 : 365);
-                MoonPhaseData = Sky.GetEphemerides(Moon, from, to, 1, new string[] { "Phase" })
+                MoonPhaseData = sky.GetEphemerides(moon, from, to, 1, new string[] { "Phase" })
                     .Select(e => (float)e[0].GetValue<double>()).ToArray();
                 JulianDay0 = Date.JulianDay0(Year);
             }
+        }
+
+        public override void Dispose()
+        {
+            settings.SettingValueChanged -= Settings_SettingValueChanged;
+            base.Dispose();
         }
     }
 }

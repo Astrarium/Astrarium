@@ -6,7 +6,6 @@ using Astrarium.Types;
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Windows.Controls;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -67,30 +66,38 @@ namespace Astrarium.Plugins.SolarSystem
             DefineSettingsSection<MoonSettingsSection, MoonSettingsVM>();
             DefineSettingsSection<PlanetsSettingsSection, PlanetsSettingsVM>();
 
+            ExportResourceDictionaries("Images.xaml");
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSun", "$Settings.Sun", new SimpleBinding(settings, "Sun", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
-            ExportResourceDictionaries("Images.xaml");
+            ExtendObjectInfo<SolarActivityControl, SolarActivityVM>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
 
-            ExtendObjectInfo<SolarActivityControl, SolarActivityViewModel>("$SolarActivity.ObjectInfoExtension.Title", GetSolarActivityViewModel);
+            var menuLunarCalendar = new MenuItem("$LunarCalendar.MenuTitle", new Command(ShowLunarCalendar));
+            MenuItems.Add(MenuItemPosition.MainMenuTools, menuLunarCalendar);
 
             #endregion UI integration
 
             #region Extending formatters
 
-            Formatters.Default["Appearance.CM"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.P"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.D"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.CM"] = new UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.P"] = new UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.D"] = new UnsignedDoubleFormatter(2, "\u00B0");
 
             #endregion Extending formatters
         }
 
-        private SolarActivityViewModel GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)
+        private void ShowLunarCalendar()
+        {
+            ViewManager.ShowWindow<LunarCalendarVM>();
+        }
+
+        private SolarActivityVM GetSolarActivityViewModel(SkyContext ctx, CelestialObject obj)
         {
             if (obj is Sun)
             {
-                var vm = ViewManager.CreateViewModel<SolarActivityViewModel>();
+                var vm = ViewManager.CreateViewModel<SolarActivityVM>();
                 vm.SetDate(ctx.JulianDay, ctx.GeoLocation.UtcOffset);
                 return vm;
             }

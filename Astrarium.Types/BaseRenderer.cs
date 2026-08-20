@@ -1,8 +1,4 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
-using System.Drawing;
-
-namespace Astrarium.Types
+﻿namespace Astrarium.Types
 {
     /// <summary>
     /// Base class for all renderer classes which implement drawing logic of sky map.

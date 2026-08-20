@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Represents a pair of the local horizontal coordinates.

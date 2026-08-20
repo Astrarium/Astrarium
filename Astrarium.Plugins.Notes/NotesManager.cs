@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Notes
@@ -71,7 +70,7 @@ namespace Astrarium.Plugins.Notes
 
             var note = new Note
             {
-                Body = body,
+                Body = body ?? new DummyCelestialObject(type, name),
                 Location = location,
                 Date = (double)jsonObject["Date"],
                 Title = (string)jsonObject["Title"],
@@ -83,9 +82,8 @@ namespace Astrarium.Plugins.Notes
         }
     }
 
-
     [Singleton]
-    public class NotesManager
+    public class NotesManager 
     {
         private static readonly string NotesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Notes");
 
@@ -164,5 +162,7 @@ namespace Astrarium.Plugins.Notes
             notes.Value.Add(@new);
             Task.Run(() => SaveNotes(notes.Value));
         }
+
+        public bool HasNotesForObject(CelestialObject body) => notes.Value.Any(n => n.Body.Equals(body));
     }
 }

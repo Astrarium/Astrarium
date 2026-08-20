@@ -1,10 +1,6 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
@@ -49,6 +45,6 @@ namespace Astrarium.Plugins.Journal.Types
 
         public string DateString => Formatters.Date.Format(Begin.Date);
 
-        public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";
+        public string TimeString => $"{Begin:HH:mm} — {End:HH:mm}";
     }
 }

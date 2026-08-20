@@ -1,10 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -191,6 +187,7 @@ namespace Astrarium.Types
     /// <typeparam name="TClass">Class that inherits the memoizer.</typeparam>
     public abstract class Memoizer<TClass>
     {
+        private object locker = new object();
         private ConcurrentDictionary<IntPtr, object> resultsCache = new ConcurrentDictionary<IntPtr, object>();
         private ConcurrentDictionary<IntPtr, object>[] argsCache = new ConcurrentDictionary<IntPtr, object>[6];
 
@@ -266,47 +263,53 @@ namespace Astrarium.Types
 
         private R InvokeWithCache<R>(Delegate formula, params object[] args)
         {
-            IntPtr key = formula.Method.MethodHandle.Value;
-
-            bool needInvoke = false;
-            if (resultsCache.ContainsKey(key))
+            lock (locker)
             {
-                for (int i = 1; i < args.Length; i++)
+                IntPtr key = formula.Method.MethodHandle.Value;
+
+                bool needInvoke = false;
+                if (resultsCache.ContainsKey(key))
                 {
-                    if (!argsCache[i - 1].ContainsKey(key) || !argsCache[i - 1][key].Equals(args[i]))
+                    for (int i = 1; i < args.Length; i++)
                     {
-                        needInvoke = true;
-                        break;
+                        if (!argsCache[i - 1].ContainsKey(key) || !argsCache[i - 1][key].Equals(args[i]))
+                        {
+                            needInvoke = true;
+                            break;
+                        }
                     }
                 }
-            }
-            else
-            {
-                needInvoke = true;
-            }
-
-            if (needInvoke)
-            {
-                R result = (R)formula.DynamicInvoke(args);
-                resultsCache[key] = result;
-                for (int i = 1; i < args.Length; i++)
+                else
                 {
-                    argsCache[i - 1][key] = args[i];
+                    needInvoke = true;
                 }
-                return result;
-            }
-            else
-            {
-                return (R)resultsCache[key];
+
+                if (needInvoke)
+                {
+                    R result = (R)formula.DynamicInvoke(args);
+                    resultsCache[key] = result;
+                    for (int i = 1; i < args.Length; i++)
+                    {
+                        argsCache[i - 1][key] = args[i];
+                    }
+                    return result;
+                }
+                else
+                {
+                    return (R)resultsCache[key];
+                }
             }
         }
 
         protected void ClearCache()
         {
-            resultsCache.Clear();
-            for (int i = 0; i < argsCache.Length; i++)
+            lock (locker)
             {
-                argsCache[i].Clear();
+                resultsCache.Clear();
+                for (int i = 0; i < argsCache.Length; i++)
+                {
+                    argsCache[i].Clear();
+                }
             }
         }
     }

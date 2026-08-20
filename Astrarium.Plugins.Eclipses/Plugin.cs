@@ -1,9 +1,5 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Plugins.Eclipses.ViewModels;
+﻿using Astrarium.Plugins.Eclipses.ViewModels;
 using Astrarium.Types;
-using Astrarium.Types.Controls;
-using System.ComponentModel;
-using System.Drawing;
 
 namespace Astrarium.Plugins.Eclipses
 {

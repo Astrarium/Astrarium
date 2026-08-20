@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Types;
 using System;
 using System.Windows;
 using System.Windows.Controls;

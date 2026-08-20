@@ -1,13 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Database.Entities;
-using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {

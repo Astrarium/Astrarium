@@ -3,12 +3,10 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -38,9 +36,19 @@ namespace Astrarium.ViewModels
         private readonly ISettings settings;
 
         /// <summary>
+        /// Location detector instance
+        /// </summary>
+        private readonly ILocationDetector locationDetector;
+
+        /// <summary>
         /// Geo locations manager instance.
         /// </summary>
         private readonly IGeoLocationsManager locationsManager;
+
+        /// <summary>
+        /// Landscapes provider instance.
+        /// </summary>
+        private readonly ILandscapesProvider landscapesProvider;
 
         /// <summary>
         /// Formatter used for casting geo coordinates to string
@@ -50,12 +58,16 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Creates new instance of the ViewModel
         /// </summary>
-        public LocationVM(IGeoLocationsManager locationsManager, ISettings settings)
+        public LocationVM(IGeoLocationsManager locationsManager, ILocationDetector locationDetector, ILandscapesProvider landscapesProvider, ISettings settings)
         {
             this.settings = settings;
             this.settings.SettingValueChanged += OnSettingValueChanged;
 
+            this.locationDetector = locationDetector;
+            this.locationDetector.OnLocationDetected += OnLocationDetected;
             this.locationsManager = locationsManager;
+
+            this.landscapesProvider = landscapesProvider;
 
             IsDarkMode = settings.Get("NightMode");
             MapZoomLevel = 7;
@@ -77,6 +89,11 @@ namespace Astrarium.ViewModels
             SetValue(nameof(TileServer), tileServer ?? TileServers.First());
             SetValue(nameof(OverlayTileServer), overlayServer);
             SetValue(nameof(OverlayOpacity), settings.Get(OVERLAY_OPACITY_SETTING_NAME, 0.5f));
+        }
+
+        private void OnLocationDetected(CrdsGeographical location)
+        {
+            ObserverLocation = location;
         }
 
         public override void OnActivated()
@@ -145,6 +162,11 @@ namespace Astrarium.ViewModels
         /// Executed when user selects "nearest location" position from context menu
         /// </summary>
         public ICommand SelectNearestLocationCommand => new Command(SelectNearestLocation);
+
+        /// <summary>
+        /// Executed when user clicks on "detect location" button
+        /// </summary>
+        public ICommand DetectLocationCommand => new Command(DetectLocation);
 
         #endregion Commands
 
@@ -329,6 +351,11 @@ namespace Astrarium.ViewModels
             get => GetValue<bool>(nameof(IsDarkMode));
             protected set => SetValue(nameof(IsDarkMode), value);
         }
+
+        /// <summary>
+        /// Flag indicating location detection is enabled (Win 10 and above)
+        /// </summary>
+        public bool IsLocationDetectionEnabled => !SearchMode && Environment.OSVersion.Version.Major >= 10;
 
         /// <summary>
         /// Brush to draw location name on the map
@@ -607,6 +634,34 @@ namespace Astrarium.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets list of available landscapes
+        /// </summary>
+        public IEnumerable<string> Landscapes
+        {
+            get
+            {
+                yield return "";
+                foreach (var landscape in landscapesProvider.GetAvailableLandscapes())
+                {
+                    yield return landscape;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets/sets name of observer location
+        /// </summary>
+        public string Landscape
+        {
+            get => ObserverLocation.Landscape ?? "";
+            set
+            {
+                ObserverLocation.Landscape = value == "" ? null : value;
+                NotifyPropertyChanged(nameof(Landscape));
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -624,7 +679,7 @@ namespace Astrarium.ViewModels
             {
                 SetValue(nameof(SearchString), value);
                 bool searchMode = SearchMode;
-                NotifyPropertyChanged(nameof(SearchString), nameof(SearchMode));
+                NotifyPropertyChanged(nameof(SearchString), nameof(SearchMode), nameof(IsLocationDetectionEnabled));
                 if (SearchMode)
                 {
                     if (!searchMode)
@@ -751,6 +806,17 @@ namespace Astrarium.ViewModels
         }
 
         /// <summary>
+        /// Handler for <see cref="DetectLocationCommand"/>
+        /// </summary>
+        private void DetectLocation()
+        {
+            if (IsLocationDetectionEnabled)
+            {
+                locationDetector.Detect();
+            }
+        }
+
+        /// <summary>
         /// Handler for double click on the map
         /// </summary>
         private void OnMouseDoubleClick()
@@ -817,7 +883,7 @@ namespace Astrarium.ViewModels
         /// </summary>
         /// <param name="setting">Setting name</param>
         /// <param name="value">Setting value</param>
-        private void OnSettingValueChanged(string setting, object value)
+        private void OnSettingValueChanged(string setting, object value, object oldValue)
         {
             if (setting == "NightMode")
             {
@@ -938,6 +1004,12 @@ namespace Astrarium.ViewModels
         /// </summary>
         private void Ok()
         {
+            if (string.IsNullOrWhiteSpace(LocationName))
+            {
+                ViewManager.ShowMessageBox("$Warning", "Please specify location name");
+                return;
+            }
+
             Close(true);
         }
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Plugins.UCAC4
+﻿namespace Astrarium.Plugins.UCAC4
 {
     /// <summary>
     /// Represents part of UCAC4 catalog zone, i.e. area of the sky with dimensions 0.2 * 0.25 sq. degrees

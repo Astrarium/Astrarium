@@ -1,5 +1,4 @@
-﻿using Astrarium.Algorithms;
-using Astrarium.Types;
+﻿using Astrarium.Types;
 
 namespace Astrarium.Plugins.Tycho2
 {
