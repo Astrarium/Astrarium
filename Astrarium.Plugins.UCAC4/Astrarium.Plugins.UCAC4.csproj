@@ -6,6 +6,7 @@
 		<UseWpf>true</UseWpf>
 		<Product>UCAC4</Product>
 		<Description>UCAC4 star catalogue contains data for the about 113 millions stars up to +16 magnitude</Description>
+		<PluginType>Optional</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

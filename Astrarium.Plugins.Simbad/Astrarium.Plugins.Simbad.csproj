@@ -5,6 +5,7 @@
 		<UseWpf>true</UseWpf>
 		<Product>Simbad</Product>
 		<Description>Extends celestial objects info with data from Simbad database</Description>
+		<PluginType>Optional</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

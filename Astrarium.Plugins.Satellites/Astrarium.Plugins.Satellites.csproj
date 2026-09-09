@@ -4,7 +4,8 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<UseWpf>true</UseWpf>
 		<Product>Satellites</Product>
-		<Description>Artificial satellites plugin</Description>
+		<Description>Displays position of artificial satellites</Description>
+		<PluginType>Optional</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

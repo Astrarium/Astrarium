@@ -7,6 +7,7 @@
 	<UseWindowsForms>true</UseWindowsForms>
     <Product>Constellations</Product>
     <Description>Constellations borders and labels</Description>
+	<PluginType>Core</PluginType>
     <Authors>Alexander Krutov</Authors>
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>

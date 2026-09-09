@@ -7,6 +7,7 @@
 	<UseWindowsForms>true</UseWindowsForms>
     <Product>Horizon</Product>
     <Description>Horizon line and ground</Description>
+	<PluginType>Core</PluginType>
     <Authors>Alexander Krutov</Authors>
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>

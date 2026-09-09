@@ -7,6 +7,7 @@
 	<UseWindowsForms>true</UseWindowsForms>
     <Product>ASCOM Plugin</Product>
     <Description>Allows to control telescope via ASCOM platform</Description>
+	<PluginType>Optional</PluginType>
     <Authors>Alexander Krutov</Authors>
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>

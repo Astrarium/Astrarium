@@ -24,17 +24,40 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 if "%~1"=="" (
   set /p Version="Enter deployment version: "
 ) else (
-  set Version="%~1"
+  set Version=%~1
 )
 
-rmdir /s /q "Deploy"
+if not defined Version (
+  call :ColorText 0c "ERROR: Version is not specified."
+  echo(
+  goto :eof
+)
 
-dotnet build Astrarium.sln -c Release /p:Deploy=True /p:DeploymentVersion=%Version%
+if exist "Deploy" rmdir /s /q "Deploy"
 
-iscc "/DVERSION=%Version%" Installer/Astrarium.iss
+dotnet build Astrarium.sln -c Release /p:Deploy=True /p:DeploymentVersion=%Version% || (
+  call :ColorText 0c "ERROR: dotnet build failed."
+  echo(
+  goto :eof
+)
+
+@echo off
+powershell -ExecutionPolicy Bypass -File "GeneratePluginData.ps1" || (
+  call :ColorText 0c "ERROR: GeneratePluginData.ps1 failed."
+  echo(
+  goto :eof
+)
+
+iscc "/DVERSION=%Version%" Installer/Astrarium.iss || (
+  call :ColorText 0c "ERROR: Inno Setup compiler failed."
+  echo(
+  goto :eof
+)
 
 @echo off
 for /d %%a in ("Deploy\*") do rd "%%a" /q /s
+
+if exist "Installer\PluginData.iss" del "Installer\PluginData.iss"
 
 echo(
 call :ColorText 0a "DONE."

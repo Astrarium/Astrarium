@@ -6,6 +6,7 @@
     <UseWpf>true</UseWpf>
     <Product>Tycho2</Product>
     <Description>Tycho2 star catalogue contains data for the 2.5 million brightest stars in the sky</Description>
+	<PluginType>Optional</PluginType>
     <Authors>Alexander Krutov</Authors>
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>

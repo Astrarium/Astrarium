@@ -6,6 +6,7 @@
 		<UseWpf>true</UseWpf>
 		<Product>Notes</Product>
 		<Description>Allows to add short text notes for celestial objects</Description>
+		<PluginType>Optional</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

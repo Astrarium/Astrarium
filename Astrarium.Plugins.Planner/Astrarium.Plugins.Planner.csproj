@@ -5,6 +5,7 @@
 		<UseWpf>true</UseWpf>
 		<Product>Planner</Product>
 		<Description>Observation planner</Description>
+		<PluginType>Optional</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

@@ -6,6 +6,7 @@
 		<UseWpf>true</UseWpf>
 		<Product>Observation Log</Product>
 		<Description>Handy tool to log your astronomical observations</Description>
+		<PluginType>Skipped</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
 	</PropertyGroup>

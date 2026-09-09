@@ -5,6 +5,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Product>Atmosphere</Product>
 		<Description>Renders realistic atmosphere</Description>
+		<PluginType>Core</PluginType>
 		<Authors>Alexander Krutov</Authors>
 		<UseWpf>true</UseWpf>
 		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
