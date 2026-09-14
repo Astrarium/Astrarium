@@ -22,28 +22,14 @@ namespace Astrarium.Plugins.Tycho2
         private readonly object locker = new object();
         private bool isRequested = false;
         private int requestHash;
-        private double lastFov;
 
         public Tycho2Renderer(ISkyMap map, ITycho2Catalog tycho2, ISettings settings)
         {
             this.map = map;
-            this.map.FovChanged += Map_FovChanged;
             this.tycho2 = tycho2;
             this.settings = settings;
             // TODO: move to settings
             fontNames = new Font("Arial", 7);
-        }
-
-        private void Map_FovChanged(double fov)
-        {
-            if (fov > lastFov)
-            {
-                lock (locker)
-                {
-                    cache.Clear();
-                }
-            }
-            lastFov = fov;
         }
 
         public override void Render(ISkyMap map)
