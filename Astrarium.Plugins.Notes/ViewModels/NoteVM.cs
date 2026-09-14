@@ -147,7 +147,7 @@ namespace Astrarium.Plugins.Notes.ViewModels
 
         public override object Payload => new {
             JD = note.Date.ToString(),
-            Body = note.Body.ToString(), 
+            Body = note.Body?.ToString(), 
             Location = new { Name = note.Location.Name, Location = note.Location.ToShortString(), Elevation = note.Location.Elevation, UtcOffset = note.Location.UtcOffset.ToString() },
             Title = note.Title,
             Description = note.Description
