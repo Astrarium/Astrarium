@@ -79,7 +79,7 @@ namespace Astrarium.Types
         /// </summary>
         /// <typeparam name="TSectionControl">Type of UI control responsive for displaying settings.</typeparam>
         /// <typeparam name="TViewModel">Type of ViewModel for the UI control.</typeparam>
-        protected void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
+        protected void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : SettingsViewModel
         {
             SettingSections.Add(new SettingSectionDefinition(typeof(TSectionControl), typeof(TViewModel)));
         }
