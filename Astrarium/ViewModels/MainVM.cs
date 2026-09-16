@@ -1040,6 +1040,10 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public override object Payload => new { OS = Environment.OSVersion };
+        public override object Payload => new 
+        {
+            OS = Environment.OSVersion.VersionString,
+            Location = sky.Context.GeoLocation.ToShortString()
+        };
     }
 }
