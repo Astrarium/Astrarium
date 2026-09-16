@@ -80,7 +80,9 @@ namespace Astrarium.Plugins.SolarSystem
         {
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
             var prj = map.Projection;
-            var nightMode = settings.Get("NightMode");
+            bool nightMode = settings.Get("NightMode");
+            bool usePlanetTextures = settings.Get("PlanetsTextures");
+
             brushLabel = new SolidBrush(settings.Get<Color>("ColorSolarSystemLabel").Tint(nightMode));
 
             var bodies = planetsCalc.Planets
@@ -122,11 +124,13 @@ namespace Astrarium.Plugins.SolarSystem
                     double rotAxis = prj.GetAxisRotation(planet.Equatorial, planet.Appearance.P);
                     double rotPhase = prj.GetPhaseRotation(planet.Ecliptical);
                     string label = settings.Get("PlanetsLabelsMag") ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
+                    var color = GetPlanetColor(planet.Number);
 
                     var data = new SphereParameters()
                     {
                         Equatorial = body.Equatorial,
-                        Color = GetPlanetColor(planet.Number),
+                        PointColor = color,
+                        DiskColor = color,
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
@@ -139,8 +143,9 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[planet.Number - 1],
-                        SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
-                        SmoothShadow = planet.Number > Planet.MARS,
+                        SurfaceFeatures = planet.Number == Planet.MARS && usePlanetTextures && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
+                        SmoothShadow = usePlanetTextures && planet.Number > Planet.MARS,
+                        UseTexture = usePlanetTextures,
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Label = label
                     };
@@ -178,7 +183,8 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationPhase = rotPhase,
                         Equatorial = body.Equatorial,
                         DrawLabel = settings.Get("PlanetsLabels") && prj.Fov <= 1,
-                        MaximalPointSize = 3
+                        MaximalPointSize = 3,
+                        UseTexture = usePlanetTextures
                     };
 
                     if (RenderSolarSystemObject(jupiterMoon, data))
@@ -205,7 +211,8 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationZenith = rotZenith,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
-                        DrawLabel = settings.Get("PlanetsLabels")
+                        DrawLabel = settings.Get("PlanetsLabels"),
+                        UseTexture = usePlanetTextures,
                     });
                 }
                 else if (body is UranusMoon uranusMoon)
@@ -214,7 +221,6 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Equatorial = body.Equatorial,
-                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
                 }
@@ -224,7 +230,6 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Equatorial = body.Equatorial,
-                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
                 }
@@ -234,7 +239,6 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Equatorial = body.Equatorial,
-                        MaximalDiskSize = 0,
                         MaximalPointSize = 2,
                     });
                 }
@@ -247,7 +251,8 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(pluto, new SphereParameters()
                     {
                         Equatorial = body.Equatorial,
-                        Color = GetPlanetColor(pluto.Number),
+                        PointColor = GetPlanetColor(pluto.Number),
+                        DiskColor = GetPlanetColor(pluto.Number),
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
@@ -258,6 +263,7 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[pluto.Number - 1],
+                        UseTexture = usePlanetTextures,
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Label = label
                     });
@@ -302,15 +308,17 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 3474,
-                        SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
+                        SurfaceFeatures = settings.Get("MoonTexture") && settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
                         EarthShadowApperance = moon.EarthShadow,
                         EarthShadowCoordinates = moon.EarthShadowCoordinates,
                         DrawLabel = settings.Get("MoonLabel"),
-                        Color = Color.Gray,
+                        PointColor = Color.Gray,
                         DrawEquator = settings.Get("MoonEquator"),
                         DrawPrimeMeridian = settings.Get("MoonPrimeMeridian"),
                         EquatorColor = Color.LightSteelBlue,
-                        PrimeMeridianColor = Color.LightSteelBlue
+                        PrimeMeridianColor = Color.LightSteelBlue,
+                        UseTexture = settings.Get("MoonTexture"),
+                        SmoothShadow = settings.Get("MoonTexture"),
                     };
 
                     RenderSolarSystemObject(moon, data);
@@ -339,7 +347,12 @@ namespace Astrarium.Plugins.SolarSystem
             /// <summary>
             /// Color of the celestial body when it's drawn as a point
             /// </summary>
-            public Color Color { get; set; } = Color.White;
+            public Color PointColor { get; set; } = Color.White;
+
+            /// <summary>
+            /// Color of the celestial body when it's drawn as a disk without texture.
+            /// </summary>
+            public Color DiskColor { get; set; } = Color.DimGray;
 
             /// <summary>
             /// Texture name (path) to be used
@@ -409,6 +422,8 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public bool DrawLabel { get; set; }
 
+            public bool UseTexture { get; set; }
+
             /// <summary>
             /// Body label (name). If not set, body's primary name will be used.
             /// </summary>
@@ -436,7 +451,11 @@ namespace Astrarium.Plugins.SolarSystem
         private bool RenderSolarSystemObject<T>(T body, SphereParameters data) where T : SizeableCelestialObject, IMagnitudeObject
         {
             var prj = map.Projection;
-            var nightMode = settings.Get("NightMode");
+
+            Vec2 p = prj.Project(data.Equatorial);
+            if (p == null) return false;
+
+            bool nightMode = settings.Get("NightMode");
             float starsScalingFactor = (float)settings.Get("StarsScalingFactor", 1m);
             double alt = prj.ToHorizontal(data.Equatorial).Altitude;
 
@@ -449,9 +468,6 @@ namespace Astrarium.Plugins.SolarSystem
             // take into account dimming during twilight
             float starDimming = 1 - map.DaylightFactor;
             size *= starDimming;
-
-            Vec2 p = prj.Project(data.Equatorial);
-            if (p == null) return false;
 
             bool renderResult = false;
 
@@ -468,7 +484,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 GL.PointSize(size * starsScalingFactor);
                 GL.Begin(GL.POINTS);
-                GL.Color3(data.Color.Tint(nightMode));
+                GL.Color3(data.PointColor.Tint(nightMode));
                 GL.Vertex2(p.X, p.Y);
                 GL.End();
             }
@@ -601,13 +617,16 @@ namespace Astrarium.Plugins.SolarSystem
 
                     int texture = 0;
 
-                    if (layer == LAYER_PLANET)
+                    if (data.UseTexture)
                     {
-                        texture = GL.GetTexture(data.TextureName, data.FallbackTextureName, readyCallback: OnBodyTextureReady, permanent: data.FallbackTextureName != null);
-                    }
-                    else if (layer == LAYER_POLAR_CAP)
-                    {
-                        texture = GL.GetTexture(Path.Combine(dataPath, "PolarCap.png"), readyCallback: OnPolarCapTextureReady);
+                        if (layer == LAYER_PLANET)
+                        {
+                            texture = GL.GetTexture(data.TextureName, data.FallbackTextureName, readyCallback: OnBodyTextureReady, permanent: data.FallbackTextureName != null);
+                        }
+                        else if (layer == LAYER_POLAR_CAP)
+                        {
+                            texture = GL.GetTexture(Path.Combine(dataPath, "PolarCap.png"), readyCallback: OnPolarCapTextureReady);
+                        }
                     }
 
                     if (texture > 0)
@@ -617,9 +636,9 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                     else
                     {
-                        float r = data.Color.R / 255f;
-                        float g = data.Color.G / 255f;
-                        float b = data.Color.B / 255f;
+                        float r = data.DiskColor.R / 255f;
+                        float g = data.DiskColor.G / 255f;
+                        float b = data.DiskColor.B / 255f;
                         GL.Disable(GL.TEXTURE_2D);
                         GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });
                         GL.Light(GL.LIGHT0, GL.DIFFUSE, new float[4] { r * 0.25f, g * 0.25f, b * 0.25f, 1f });
@@ -1238,7 +1257,9 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.Projection;
 
             GL.Disable(GL.LIGHTING);
+
             int textureId = GL.GetTexture(Path.Combine(dataPath, "Rings.png"), readyCallback: OnBodyTextureReady);
+
             if (textureId > 0)
             {
                 GL.Enable(GL.TEXTURE_2D);
@@ -1246,9 +1267,9 @@ namespace Astrarium.Plugins.SolarSystem
             }
             else
             {
-                float r = data.Color.R / 255f;
-                float g = data.Color.G / 255f;
-                float b = data.Color.B / 255f;
+                float r = data.DiskColor.R / 255f;
+                float g = data.DiskColor.G / 255f;
+                float b = data.DiskColor.B / 255f;
                 GL.Disable(GL.TEXTURE_2D);
                 GL.Enable(GL.LIGHTING);
                 GL.Light(GL.LIGHT0, GL.AMBIENT, new float[4] { r, g, b, 0.5f });

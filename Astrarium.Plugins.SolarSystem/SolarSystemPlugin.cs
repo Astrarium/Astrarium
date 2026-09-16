@@ -23,6 +23,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             DefineSetting("Planets", true);
             DefineSetting("PlanetsDrawAll", false);
+            DefineSetting("PlanetsTextures", true);
             DefineSetting("PlanetsLabels", true);
             DefineSetting("PlanetsLabelsMag", false);
 
@@ -45,6 +46,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             DefineSetting("Moon", true);
             DefineSetting("MoonLabel", true);
+            DefineSetting("MoonTexture", true);
             DefineSetting("MoonMaxLibrationPoint", false);
             DefineSetting("MoonPrimeMeridian", false);
             DefineSetting("MoonEquator", false);

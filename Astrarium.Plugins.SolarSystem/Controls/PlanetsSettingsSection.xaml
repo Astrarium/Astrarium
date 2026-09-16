@@ -17,8 +17,23 @@
                 </MultiBinding>
             </CheckBox.IsEnabled>
         </CheckBox>
-        <CheckBox Content="{a:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
-        <CheckBox Content="{a:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
+        <CheckBox Content="{a:Text Settings.PlanetsTextures}" IsChecked="{Binding Settings.PlanetsTextures}" Margin="2" IsEnabled="{Binding Settings.Planets}" />
+        <CheckBox Content="{a:Text Settings.PlanetsSurfaceFeatures}" IsChecked="{Binding Settings.PlanetsSurfaceFeatures}" Margin="2">
+            <CheckBox.IsEnabled>
+                <MultiBinding Converter="{a:BooleanAndConverter}">
+                    <Binding Path="Settings.Planets" />
+                    <Binding Path="Settings.PlanetsTextures" />
+                </MultiBinding>
+            </CheckBox.IsEnabled>
+        </CheckBox>
+        <CheckBox Content="{a:Text Settings.PlanetsMartianPolarCaps}" IsChecked="{Binding Settings.PlanetsMartianPolarCaps}" Margin="2">
+            <CheckBox.IsEnabled>
+                <MultiBinding Converter="{a:BooleanAndConverter}">
+                    <Binding Path="Settings.Planets" />
+                    <Binding Path="Settings.PlanetsTextures" />
+                </MultiBinding>
+            </CheckBox.IsEnabled>
+        </CheckBox>
         <CheckBox Content="{a:Text Settings.PlanetMoons}" IsChecked="{Binding Settings.PlanetMoons}" IsEnabled="{Binding Settings.Planets}" Margin="2" />
         <CheckBox Content="{a:Text Settings.JupiterMoonsShadowOutline}" IsChecked="{Binding Settings.JupiterMoonsShadowOutline}" Margin="2">
             <CheckBox.IsEnabled>

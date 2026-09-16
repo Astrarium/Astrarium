@@ -9,15 +9,18 @@
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{a:Text Settings.Moon}" IsChecked="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{a:Text Settings.MoonLabel}" IsChecked="{Binding Settings.MoonLabel}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
-        <CheckBox Content="{a:Text Settings.MoonSurfaceFeatures}" IsChecked="{Binding Settings.MoonSurfaceFeatures}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
-        <GroupBox IsEnabled="{Binding Settings.Moon}" Header="{a:Text Settings.MoonTextureQuality}" Margin="6 0">
-            <StackPanel Orientation="Vertical" Margin="2">
-                <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.Low}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityLow}"/>
-                <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.Normal}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityNormal}"/>
-                <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.High}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityHigh}"/>
-            </StackPanel>
-        </GroupBox>
-        <CheckBox Content="{a:Text Settings.MoonMaxLibrationPoint}" IsChecked="{Binding Settings.MoonMaxLibrationPoint}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.MoonTexture}" IsChecked="{Binding Settings.MoonTexture}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.Moon}">
+            <CheckBox Content="{a:Text Settings.MoonSurfaceFeatures}" IsChecked="{Binding Settings.MoonSurfaceFeatures}" IsEnabled="{Binding Settings.MoonTexture}" Margin="2" />
+            <GroupBox IsEnabled="{Binding Settings.MoonTexture}" Header="{a:Text Settings.MoonTextureQuality}" Margin="2 0">
+                <StackPanel Orientation="Vertical" Margin="2">
+                    <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.Low}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityLow}"/>
+                    <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.Normal}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityNormal}"/>
+                    <RadioButton Margin="2" Content="{a:Text Settings.MoonTextureQuality.High}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityHigh}"/>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <CheckBox Content="{a:Text Settings.MoonMaxLibrationPoint}" IsChecked="{Binding Settings.MoonMaxLibrationPoint}" IsEnabled="{Binding Settings.Moon}" Margin="2 6 2 2" />
         <CheckBox Content="{a:Text Settings.MoonPrimeMeridian}" IsChecked="{Binding Settings.MoonPrimeMeridian}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{a:Text Settings.MoonEquator}" IsChecked="{Binding Settings.MoonEquator}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
         <CheckBox Content="{a:Text Settings.EarthShadowOutline}" IsChecked="{Binding Settings.EarthShadowOutline}" Margin="2" />
