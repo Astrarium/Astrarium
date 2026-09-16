@@ -365,8 +365,7 @@ namespace Astrarium
             }
 
             return results
-                .OrderBy(x => string.IsNullOrEmpty(searchString) ? 0 : x.Names.Where(n => n.ToLower().Contains(searchString.ToLower())).Select(n => n.ToLower().Replace(searchString.ToLower(), "").Length).Min())
-                .ThenBy(x => string.Join(", ", x.Names))
+                .OrderBy(x => string.Join(", ", x.Names))
                 .Take(maxCount)
                 .ToList();
         }
