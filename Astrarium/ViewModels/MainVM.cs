@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Astrarium.ViewModels
 {
@@ -552,7 +553,11 @@ namespace Astrarium.ViewModels
         {
             NotifyPropertyChanged(nameof(ObserverLocation));
             settings.SetAndSave("ObserverLocation", sky.Context.GeoLocation);
-            ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", sky.Context.GeoLocation.Name)));
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ViewManager.ShowPopupMessage(Text.Get("LocationChanged", ("name", sky.Context.GeoLocation.Name)));
+            });
         }
 
         private void Map_ContextChanged()
@@ -592,7 +597,7 @@ namespace Astrarium.ViewModels
             if (settingName == "ObserverLocation" || settingName == "FavoriteLocations")
             {
                 NotifyPropertyChanged(nameof(ObserverLocation));
-                FillLocationsList();
+                Application.Current.Dispatcher.Invoke(FillLocationsList);
             }
             if (settingName == "Projection")
             {

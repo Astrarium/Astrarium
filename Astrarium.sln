@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-9A1E7A4F7556}") = "Astrarium.Plugins.Logger", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-9A1E7A4F7556}") = "Astrarium.Plugins.Simbad", "Astrarium.Plugins.Simbad\Astrarium.Plugins.Simbad.csproj", "{52D18CCC-77DD-4A58-A43C-F15FC23178D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-9A1E7A4F7556}") = "Astrarium.Plugins.RestAPI", "Astrarium.Plugins.RestAPI\Astrarium.Plugins.RestAPI.csproj", "{0EDF7EDE-51F5-4414-9F36-0BE4DC002532}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -199,6 +201,10 @@ Global
 		{52D18CCC-77DD-4A58-A43C-F15FC23178D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52D18CCC-77DD-4A58-A43C-F15FC23178D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52D18CCC-77DD-4A58-A43C-F15FC23178D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDF7EDE-51F5-4414-9F36-0BE4DC002532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDF7EDE-51F5-4414-9F36-0BE4DC002532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDF7EDE-51F5-4414-9F36-0BE4DC002532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDF7EDE-51F5-4414-9F36-0BE4DC002532}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,42 @@
+﻿<a:SettingsSection 
+    x:Class="Astrarium.Plugins.RestAPI.Controls.RestAPISettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="Astrarium"
+    Title="{a:Text Section.RestAPI}"
+    Icon="{StaticResource IconRestAPI}">
+
+    <a:SettingsSection.Resources>
+        <ResourceDictionary>
+            <Style x:Key="LinkStyle" TargetType="Hyperlink">
+                <Setter Property="TextDecorations" Value="None" />
+                <Setter Property="Foreground" Value="{StaticResource BrushHighlight}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="true">
+                        <Setter Property="TextDecorations" Value="Underline" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </a:SettingsSection.Resources>
+
+    <StackPanel Orientation="Vertical" Margin="6">
+        <StackPanel Orientation="Horizontal">
+            <CheckBox Content="{a:Text Settings.RestAPIServerEnabled}" IsChecked="{Binding Settings.RestAPIServerEnabled}" Margin="2 2 6 2" />
+            <a:NumericUpDown Width="80" DecimalPlaces="0" Minimum="1" Maximum="65535" Step="1" Value="{Binding Settings.RestAPIServerPort}" IsEnabled="{Binding Settings.RestAPIServerEnabled, Converter={a:InverseBoolConverter}}" />
+        </StackPanel>
+        
+        <TextBlock Margin="0 10 0 0" MaxWidth="300" HorizontalAlignment="Left" Text="{Binding Server.State, Mode=OneWay}" TextWrapping="Wrap" />
+
+        <TextBlock Margin="0 10 0 0" IsEnabled="{Binding Server.IsStarted}">
+            <Hyperlink Style="{StaticResource LinkStyle}" Command="{Binding OpenSwaggerCommand}">
+                <Run Text="{a:Text RestAPIServerShowSwagger}" />
+            </Hyperlink>
+        </TextBlock>
+        
+    </StackPanel>
+</a:SettingsSection>

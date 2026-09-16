@@ -1,0 +1,580 @@
+﻿openapi: 3.0.3
+
+info:
+  title: Astrarium REST API
+  version: 1.0.0
+
+tags:
+  - name: Map
+    description: Star map operations
+  - name: Calculations
+    description: Astronomical calculations, ephemerides and object info
+
+paths:
+  /api/map/search:
+    get:
+      tags:
+        - Map
+      summary: Search for astronomical objects
+      description: |
+        Searches for objects on the star map by name.
+        Supports partial matching and filter by object types.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            example: Mars
+          description: |
+            Object name to search for (star, planet, galaxy, etc.)
+            Supports partial matching.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            example: 20
+          description: |
+            Maximum number of search results to return.
+            Default is 50.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["Star", "Planet"]
+          description: |
+            Filter objects by types. If not specified, all types are returned.
+            Multiple types can be specified.
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Successful search. Returns a list of found objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CelestialObject'
+                example: [{"name":"HR 6008","type":"Star","names":["Marsic","κ Herculis","7 Herculis","NSV 7471","HD 145001","SAO 101951","FK5 1421","HR 6008"],"coordinates":{"alpha":242.31906329434673,"delta":16.977914971077873}},{"name":"Mars","type":"Planet","names":["Марс"],"coordinates":{"alpha":114.52704912513127,"delta":22.297009654626763}}]
+
+  /api/map/center:
+    get:
+      tags:
+        - Map
+      summary: Get current map center coordinates
+      description: Returns the current equatorial coordinates of the star map center.
+      responses:
+        '200':
+          description: Current map center coordinates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordinates'
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+
+    post:
+      tags:
+        - Map
+      summary: Set map center coordinates
+      description: Sets the equatorial coordinates of the star map center.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordinates'
+      responses:
+        '204':
+          description: Center coordinates successfully updated
+
+  /api/map/location:
+    get:
+      tags:
+        - Map
+      summary: Get current geographic location
+      description: Returns the current geographic location settings of the observer.
+      responses:
+        '200':
+          description: Current geographic location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoLocation'
+    post:
+      tags:
+        - Map
+      summary: Set geographic location
+      description: Sets the geographic location settings of the observer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeoLocation'
+      responses:
+        '204':
+          description: Geographic location successfully updated
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+
+  /api/map/fov:
+    get:
+      tags:
+        - Map
+      summary: Get current map field of view
+      description: Returns the current field of view of the star map in degrees.
+      responses:
+        '200':
+          description: Current field of view in degrees
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+
+    post:
+      tags:
+        - Map
+      summary: Set map field of view
+      description: Sets the field of view of the star map in degrees.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: number
+              format: double
+      responses:
+        '204':
+          description: Field of view successfully updated
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+
+  /api/map/date:
+    get:
+      tags:
+        - Map
+      summary: Get current map date
+      description: Returns the current date of the star map as a Julian date.
+      responses:
+        '200':
+          description: Current Julian date
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+
+    post:
+      tags:
+        - Map
+      summary: Set map date
+      description: Sets the date of the star map as a Julian date.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: number
+              format: double
+      responses:
+        '204':
+          description: Date successfully updated
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+
+  /api/calc/info:
+    get:
+      tags:
+        - Calculations
+      summary: Get object information
+      description: |
+        Returns information about a celestial object for the currently selected
+        geographic location and time.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "Mars"
+          description: |
+            Object name to get info for.
+            Supports partial matching.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Planet"
+          description: Object type. Not required for Sun and Moon.
+      responses:
+        '200':
+          description: Object information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CelestialObjectInfo'
+        '404':
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+
+  /api/calc/ephem:
+    get:
+      tags:
+        - Calculations
+      summary: Get object ephemerides
+      description: |
+        Returns ephemerides of a celestial object for a specified time interval.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "M 31"
+          description: Object name.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "DeepSky.Galaxy"
+          description: Object type.
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 2461299.5
+          description: Start time of the ephemeris interval, as Julian date.
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 2461329.5
+          description: End time of the ephemeris interval, as Julian date.
+        - name: step
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+            example: 1.0
+          description: Ephemeris step in days. Default is 1.
+        - name: ephem
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["Equatorial.Alpha", "Equatorial.Delta"]
+          description: |
+            Ephemeris code. Multiple codes can be specified. Empty list is allowed and means "all supported ephemerides".
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Ephemerides for the specified interval
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ephemerides'
+                example: [{"date":2461299.5,"values":[{"key":"Equatorial.Alpha","value":114.68686291824542},{"key":"Equatorial.Delta","value":22.27656504214836}]},{"date":2461300.5,"ephemerides":[{"key":"Equatorial.Alpha","value":115.33879276565818},{"key":"Equatorial.Delta","value":22.189849510832904}]}]
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+
+  /api/calc/events:
+    get:
+      tags:
+        - Calculations
+      summary: Get astronomical events
+      description: Returns a list of astronomical events for a specified time interval.
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 2461299.5
+          description: Start time of the events interval, as Julian date.
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 2461329.5
+          description: End time of the events interval, as Julian date.
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["MoonEvents.Phases", "PlanetEvents.Oppositions"]
+          description: |
+            Event type(s). Multiple event types can be specified.
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: List of astronomical events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AstronomicalEvent'
+                example: |
+                    [
+                        {
+                        "event": "Луна в фазе первой четверти",
+                        "date": 2461302.3644648315,
+                        "noExactTime": false
+                        },
+                        {
+                        "event": "Нептун в противостоянии с Солнцем",
+                        "date": 2461309.5334338048,
+                        "noExactTime": false
+                        }
+                    ]
+
+components:
+  schemas:
+    Coordinates:
+      type: object
+      description: Equatorial coordinates
+      properties:
+        alpha:
+          type: number
+          format: double
+          description: Right Ascension in degrees
+          minimum: 0
+          maximum: 360
+          example: 10.6847
+        delta:
+          type: number
+          format: double
+          description: Declination in degrees
+          minimum: -90
+          maximum: 90
+          example: 41.2692
+      required:
+        - ra
+        - dec
+
+    CelestialObject:
+      type: object
+      description: Any celestial object
+      properties:
+        name:
+          type: string
+          description: Common object name
+          example: "M 31"
+        type:
+          type: string
+          description: Object type, optionally including common type and subtype, separated by dot
+          example: DeepSky.Galaxy
+        names:
+          type: array
+          description: All known object names
+          items:
+            type: string
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+    CelestialObjectInfo:
+      type: object
+      description: Detailed information about a celestial object for a given location and time
+      properties:
+        name:
+          type: string
+          description: Common object name
+          example: "M 31"
+        type:
+          type: string
+          description: Object type
+          example: "DeepSky.Galaxy"
+        names:
+          type: array
+          description: All known object names
+          items:
+            type: string
+          example: ["Andromeda Galaxy", "M31"]
+        values:
+          type: array
+          description: List of object property values
+          items:
+            $ref: '#/components/schemas/Ephemeris'
+      required:
+        - name
+        - type
+        - names
+        - values
+
+    Ephemerides:
+      type: object
+      description: Ephemerides of a celestial object for a single instant of time
+      properties:
+        date:
+          type: number
+          format: double
+          description: Julian date of the ephemeris point
+          example: 2460000.5
+        values:
+          type: array
+          description: List of ephemeris values
+          items:
+            $ref: '#/components/schemas/Ephemeris'
+      required:
+        - date
+        - values
+
+    Ephemeris:
+      type: object
+      description: A single key-value pair for an object property or ephemeris value
+      properties:
+        key:
+          type: string
+          description: Property or ephemeris code
+          example: "Equatorial.Alpha"
+        value:
+          type: object
+          description: Property or ephemeris value
+          example: 232.123234324
+      required:
+        - key
+        - value
+
+    AstronomicalEvent:
+      type: object
+      description: Astronomical event
+      properties:
+        event:
+          type: string
+          description: Event text
+          example: "Sunrise"
+        date:
+          type: number
+          format: double
+          description: Date and time of the event
+        noExactTime:
+          type: boolean
+          description: Flag indicating there is no exact time for the event, for example, maximum of activity of meteor shower.
+
+    GeoLocation:
+      type: object
+      description: Geographic location of the observer
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees (negative for Southern hemisphere)
+          minimum: -90
+          maximum: 90
+          example: 55.7558
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees (negative for West)
+          minimum: -180
+          maximum: 180
+          example: 37.6173
+        elevation:
+          type: number
+          format: double
+          description: Elevation above sea level in meters
+          minimum: 0
+          example: 156.0
+        name:
+          type: string
+          description: Name of the location
+          example: "Moscow, Russia"
+        offset:
+          type: number
+          format: double
+          description: Time zone offset in hours relative to UTC
+          example: 3.0
+      required:
+        - latitude
+        - longitude
+        - elevation
+        - name
+        - offset
+    
+    Error400:
+      type: object
+      description: Bad request
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+      required:
+        - error
+        - message
+      example: {"error":"ErrorType","message":"Human readable error description."}
+
+    Error404:
+      type: object
+      description: Object not found
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+      required:
+        - error
+        - message
+      example: {"error":"ObjectNotFoundError","message":"Celestial object with name `NAME` not found."}

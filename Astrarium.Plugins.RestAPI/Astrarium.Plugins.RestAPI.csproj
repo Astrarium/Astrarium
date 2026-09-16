@@ -1,0 +1,73 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net451</TargetFrameworks>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<UseWpf>true</UseWpf>
+		<Product>Rest API</Product>
+		<Description>Adds REST API Server capabilities</Description>
+		<PluginType>Optional</PluginType>
+		<Authors>Alexander Krutov</Authors>
+		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.OwinSelfHost" Version="5.3.0" />
+		<PackageReference Include="Microsoft.Owin" Version="4.2.2" />
+		<PackageReference Include="Microsoft.Owin.Hosting" Version="4.2.2" />
+		<PackageReference Include="Microsoft.Owin.StaticFiles" Version="4.2.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="NSwag.MSBuild" Version="13.20.0" PrivateAssets="All" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="SwaggerUI\**" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Text.ini" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="RestAPI.yaml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<TargetPath>SwaggerUI\RestAPI.yaml</TargetPath>
+		</None>
+	</ItemGroup>
+
+	<Target Name="GenerateRestAPI" BeforeTargets="BeforeBuild">
+		<Exec Command="$(NSwagExe) openapi2cscontroller /input:RestAPI.yaml /className:RestAPI /output:RestAPIController.cs /namespace:Astrarium.Plugins.RestAPI /ControllerTarget:AspNet /ControllerBaseClass:System.Web.Http.ApiController /generateOptionalParameters:true" />
+	</Target>
+
+	<PropertyGroup Condition="'$(Deploy)' == 'True'">
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>None</DebugType>
+		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+	</PropertyGroup>
+
+	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+	</Target>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+		<ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Controls\RestAPISettingsSection.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
+	</ItemGroup>
+
+
+
+</Project>
