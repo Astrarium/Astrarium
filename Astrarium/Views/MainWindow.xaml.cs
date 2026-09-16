@@ -382,6 +382,8 @@ namespace Astrarium
                 Left = left;
                 Top = top;
             }
+
+            Host.Focus();
         }
 
         private IntPtr HwndMessageHook(IntPtr wnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
