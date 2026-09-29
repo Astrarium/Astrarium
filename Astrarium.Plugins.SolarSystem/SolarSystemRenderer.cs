@@ -318,7 +318,7 @@ namespace Astrarium.Plugins.SolarSystem
                         EquatorColor = Color.LightSteelBlue,
                         PrimeMeridianColor = Color.LightSteelBlue,
                         UseTexture = settings.Get("MoonTexture"),
-                        SmoothShadow = settings.Get("MoonTexture"),
+                        SmoothShadow = false,
                     };
 
                     RenderSolarSystemObject(moon, data);
