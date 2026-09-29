@@ -199,6 +199,14 @@ namespace Astrarium.Plugins.ASCOM
                         }
 
                         telescope.Tracking = !telescope.Tracking;
+                        if (telescope.Tracking)
+                        {
+                            RaiseOnMessageShow("$Ascom.Messages.TrackingOn");
+                        }
+                        else
+                        {
+                            RaiseOnMessageShow("$Ascom.Messages.TrackingOff");
+                        }
                     }
                     if (!telescope.CanSetTracking)
                     {
@@ -405,7 +413,10 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && telescope.Connected)
                     {
-                        Task.Run(() => telescope.SetupDialog());
+                        Task.Run(() =>
+                        {
+                            telescope.SetupDialog();
+                        });
                     }
                     else
                     {
