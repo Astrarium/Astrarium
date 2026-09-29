@@ -610,36 +610,39 @@ namespace Astrarium.ViewModels
 
         private void Map_SelectedObjectChanged(CelestialObject body)
         {
-            SelectedObject = body;
-
-            if (body != null)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                if (!SelectedObjectsMenuItems.Any())
+                SelectedObject = body;
+
+                if (body != null)
                 {
-                    SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));                
-                    SelectedObjectsMenuItems.Add(null);
+                    if (!SelectedObjectsMenuItems.Any())
+                    {
+                        SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));
+                        SelectedObjectsMenuItems.Add(null);
 
 
-                    SelectedObjectsMenuItems.Add(null);
-                    SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.SearchObject", SearchObjectCommand));
+                        SelectedObjectsMenuItems.Add(null);
+                        SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.SearchObject", SearchObjectCommand));
+                    }
+
+                    var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => body.Equals(i?.CommandParameter));
+                    if (existingItem != null)
+                    {
+                        SelectedObjectsMenuItems.Remove(existingItem);
+                    }
+
+                    SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
+
+                    // 10 items of history + "clear all" + "search" + 2 separators
+                    if (SelectedObjectsMenuItems.Count > 14)
+                    {
+                        SelectedObjectsMenuItems.RemoveAt(12);
+                    }
                 }
 
-                var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => body.Equals(i?.CommandParameter));
-                if (existingItem != null)
-                {
-                    SelectedObjectsMenuItems.Remove(existingItem);
-                }
-
-                SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
-
-                // 10 items of history + "clear all" + "search" + 2 separators
-                if (SelectedObjectsMenuItems.Count > 14)
-                {
-                    SelectedObjectsMenuItems.RemoveAt(12);
-                }
-            }
-
-            NotifyPropertyChanged(nameof(SelectedObject));
+                NotifyPropertyChanged(nameof(SelectedObject));
+            });
         }
 
         private void Map_LockedObjectChanged(CelestialObject obj)

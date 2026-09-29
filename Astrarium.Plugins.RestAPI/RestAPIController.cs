@@ -41,9 +41,55 @@ namespace Astrarium.Plugins.RestAPI
         /// <param name="type">Filter objects by types. If not specified, all types are returned.
         /// <br/>Multiple types can be specified.</param>
 
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
+
         /// <returns>Successful search. Returns a list of found objects.</returns>
 
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CelestialObject>> SearchAsync(string name, int limit, System.Collections.Generic.IEnumerable<string> type = null);
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CelestialObject>> SearchAsync(string name, int limit, System.Collections.Generic.IEnumerable<string> type = null, string epoch = null);
+
+        /// <summary>
+        /// Get selected object, if available.
+        /// </summary>
+
+        /// <remarks>
+        /// Returns current selected object, if available.
+        /// </remarks>
+
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
+
+        /// <returns>Current selected object</returns>
+
+        System.Threading.Tasks.Task<CelestialObject> SelectedObjectGETAsync(string epoch = null);
+
+        /// <summary>
+        /// Select celestial object
+        /// </summary>
+
+        /// <remarks>
+        /// Selects the celestial object.
+        /// </remarks>
+
+        /// <returns>Object successfully selected</returns>
+
+        System.Threading.Tasks.Task SelectedObjectPOSTAsync(CelestialObject body);
 
         /// <summary>
         /// Get current map center coordinates
@@ -53,9 +99,20 @@ namespace Astrarium.Plugins.RestAPI
         /// Returns the current equatorial coordinates of the star map center.
         /// </remarks>
 
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
+
         /// <returns>Current map center coordinates</returns>
 
-        System.Threading.Tasks.Task<Coordinates> CenterGETAsync();
+        System.Threading.Tasks.Task<Coordinates> CenterGETAsync(string epoch = null);
 
         /// <summary>
         /// Set map center coordinates
@@ -65,9 +122,20 @@ namespace Astrarium.Plugins.RestAPI
         /// Sets the equatorial coordinates of the star map center.
         /// </remarks>
 
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
+
         /// <returns>Center coordinates successfully updated</returns>
 
-        System.Threading.Tasks.Task CenterPOSTAsync(Coordinates body);
+        System.Threading.Tasks.Task CenterPOSTAsync(Coordinates body, string epoch = null);
 
         /// <summary>
         /// Get current geographic location
@@ -227,12 +295,60 @@ namespace Astrarium.Plugins.RestAPI
         /// <br/>Default is 50.</param>
         /// <param name="type">Filter objects by types. If not specified, all types are returned.
         /// <br/>Multiple types can be specified.</param>
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
         /// <returns>Successful search. Returns a list of found objects.</returns>
         [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/search")]
-        public System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CelestialObject>> Search([System.Web.Http.FromUri] string name, [System.Web.Http.FromUri] int? limit = null, [System.Web.Http.FromUri] System.Collections.Generic.IEnumerable<string> type = null)
+        public System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CelestialObject>> Search([System.Web.Http.FromUri] string name, [System.Web.Http.FromUri] int? limit = null, [System.Web.Http.FromUri] System.Collections.Generic.IEnumerable<string> type = null, [FromHeader] string epoch = null)
         {
 
-            return _implementation.SearchAsync(name, limit ?? 50, type);
+            return _implementation.SearchAsync(name, limit ?? 50, type, epoch);
+        }
+
+        /// <summary>
+        /// Get selected object, if available.
+        /// </summary>
+        /// <remarks>
+        /// Returns current selected object, if available.
+        /// </remarks>
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <returns>Current selected object</returns>
+        [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/selected-object")]
+        public System.Threading.Tasks.Task<CelestialObject> SelectedObjectGET([FromHeader] string epoch = null)
+        {
+
+            return _implementation.SelectedObjectGETAsync(epoch);
+        }
+
+        /// <summary>
+        /// Select celestial object
+        /// </summary>
+        /// <remarks>
+        /// Selects the celestial object.
+        /// </remarks>
+        /// <returns>Object successfully selected</returns>
+        [System.Web.Http.HttpPost, System.Web.Http.Route("api/map/selected-object")]
+        public System.Threading.Tasks.Task SelectedObjectPOST([System.Web.Http.FromBody] CelestialObject body)
+        {
+
+            return _implementation.SelectedObjectPOSTAsync(body);
         }
 
         /// <summary>
@@ -241,12 +357,22 @@ namespace Astrarium.Plugins.RestAPI
         /// <remarks>
         /// Returns the current equatorial coordinates of the star map center.
         /// </remarks>
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
         /// <returns>Current map center coordinates</returns>
         [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/center")]
-        public System.Threading.Tasks.Task<Coordinates> CenterGET()
+        public System.Threading.Tasks.Task<Coordinates> CenterGET([FromHeader] string epoch = null)
         {
 
-            return _implementation.CenterGETAsync();
+            return _implementation.CenterGETAsync(epoch);
         }
 
         /// <summary>
@@ -255,12 +381,22 @@ namespace Astrarium.Plugins.RestAPI
         /// <remarks>
         /// Sets the equatorial coordinates of the star map center.
         /// </remarks>
+        /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
+        /// <br/>- J2050
+        /// <br/>- J2000
+        /// <br/>- J1975
+        /// <br/>- J1950
+        /// <br/>- J1900
+        /// <br/>- B1950
+        /// <br/>- B1900
+        /// <br/>- B1875
+        /// <br/>- any numeric value representing valid Julian Date</param>
         /// <returns>Center coordinates successfully updated</returns>
         [System.Web.Http.HttpPost, System.Web.Http.Route("api/map/center")]
-        public System.Threading.Tasks.Task CenterPOST([System.Web.Http.FromBody] Coordinates body)
+        public System.Threading.Tasks.Task CenterPOST([System.Web.Http.FromBody] Coordinates body, [FromHeader] string epoch = null)
         {
 
-            return _implementation.CenterPOSTAsync(body);
+            return _implementation.CenterPOSTAsync(body, epoch);
         }
 
         /// <summary>
@@ -404,6 +540,59 @@ namespace Astrarium.Plugins.RestAPI
 
     }
 
+    public class FromHeaderAttribute : System.Web.Http.ParameterBindingAttribute
+    {
+        public string Name { get; set; }
+
+        public override System.Web.Http.Controllers.HttpParameterBinding GetBinding(System.Web.Http.Controllers.HttpParameterDescriptor parameter)
+        {
+            return new FromHeaderBinding(parameter, Name ?? parameter.ParameterName);
+        }
+    }
+
+    public class FromHeaderBinding : System.Web.Http.Controllers.HttpParameterBinding
+    {
+        private readonly string _name;
+
+        public FromHeaderBinding(System.Web.Http.Controllers.HttpParameterDescriptor parameter, string headerName)
+            : base(parameter)
+        {
+            if (string.IsNullOrEmpty(headerName)) throw new System.ArgumentNullException("headerName");
+            _name = headerName;
+        }
+
+        public override System.Threading.Tasks.Task ExecuteBindingAsync(System.Web.Http.Metadata.ModelMetadataProvider metadataProvider, System.Web.Http.Controllers.HttpActionContext actionContext, System.Threading.CancellationToken cancellationToken)
+        {
+            System.Collections.Generic.IEnumerable<string> values;
+            var isBound = false;
+            if (actionContext.Request.Headers.TryGetValues(_name, out values))
+            {
+                string tempVal = null;
+                foreach (var value in values)
+                {
+                    if (value != null)
+                    {
+                        tempVal = value;
+                        break;
+                    }
+                }
+                if (tempVal != null)
+                {
+                    var actionValue = System.Convert.ChangeType(tempVal, Descriptor.ParameterType);
+                    actionContext.ActionArguments[Descriptor.ParameterName] = actionValue;
+                    isBound = true;
+                }
+            }
+            if (!isBound && Descriptor.IsOptional)
+            {
+                actionContext.ActionArguments[Descriptor.ParameterName] = Descriptor.DefaultValue;
+            }
+            var taskSource = new System.Threading.Tasks.TaskCompletionSource<object>();
+            taskSource.SetResult(null);
+            return taskSource.Task;
+        }
+    }
+
     /// <summary>
     /// Equatorial coordinates
     /// </summary>
@@ -413,14 +602,14 @@ namespace Astrarium.Plugins.RestAPI
         /// <summary>
         /// Right Ascension in degrees
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("alpha", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("alpha", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Range(0D, 360D)]
         public double Alpha { get; set; }
 
         /// <summary>
         /// Declination in degrees
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("delta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("delta", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Range(-90D, 90D)]
         public double Delta { get; set; }
 

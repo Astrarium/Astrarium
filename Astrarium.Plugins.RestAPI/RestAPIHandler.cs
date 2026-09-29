@@ -2,11 +2,9 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Astrarium.Plugins.RestAPI
 {
@@ -22,7 +20,7 @@ namespace Astrarium.Plugins.RestAPI
             this.map = map;
         }
 
-        Task<ICollection<CelestialObject>> IRestAPIController.SearchAsync(string searchString, int limit, IEnumerable<string> types)
+        Task<ICollection<CelestialObject>> IRestAPIController.SearchAsync(string searchString, int limit, IEnumerable<string> types, string epoch = null)
         {
             return Task.Run<ICollection<CelestialObject>>(() =>
             {
@@ -35,17 +33,45 @@ namespace Astrarium.Plugins.RestAPI
                     Type = x.Type,
                     Name = x.CommonName,
                     Names = x.Names.ToList(),
-                    Coordinates = ToDto(x.Equatorial)
+                    Coordinates = ToDto(ToTargetEpoch(x.Equatorial, epoch))
                 }).ToArray();
             });
         }
 
-        Task<Coordinates> IRestAPIController.CenterGETAsync()
+        Task<CelestialObject> IRestAPIController.SelectedObjectGETAsync(string epoch = null)
         {
-            return Task.FromResult(ToDto(map.Projection.CenterEquatorial));
+            var body = map.SelectedObject;
+            return Task.FromResult(body != null ? new CelestialObject()
+            {
+                Type = body.Type,
+                Name = body.CommonName,
+                Names = body.Names.ToList(),
+                Coordinates = ToDto(ToTargetEpoch(body.Equatorial, epoch))
+            } : null);
         }
 
-        Task IRestAPIController.CenterPOSTAsync(Coordinates eq)
+        Task IRestAPIController.SelectedObjectPOSTAsync(CelestialObject body)
+        {
+            return Task.Run(() => 
+            {
+                var found = SearchCelestialObject(body.Name, body.Type);
+                if (found != null)
+                {
+                    map.SelectedObject = found;
+                }
+                else
+                {
+                    throw new ObjectNotFoundError(body.Name, body.Type);
+                }
+            });
+        }
+
+        Task<Coordinates> IRestAPIController.CenterGETAsync(string epoch = null)
+        {
+            return Task.FromResult(ToDto(ToTargetEpoch(map.Projection.WithoutRefraction(map.Projection.CenterEquatorial), epoch)));
+        }
+
+        Task IRestAPIController.CenterPOSTAsync(Coordinates eq, string epoch = null)
         {
             if (eq.Alpha < 0 || eq.Alpha >= 360)
             {
@@ -57,7 +83,7 @@ namespace Astrarium.Plugins.RestAPI
                 throw new ParameterValueIsOutOfRangeError("Declination (delta) should be in range from -90 to +90 degrees.");
             }
 
-            return Task.Run(() => map.GoToPoint(FromDto(eq), TimeSpan.Zero));
+            return Task.Run(() => map.GoToPoint(ToCurrentEpoch(FromDto(eq), epoch), TimeSpan.Zero));
         }
 
         Task<GeoLocation> IRestAPIController.LocationGETAsync()
@@ -224,6 +250,48 @@ namespace Astrarium.Plugins.RestAPI
 
         #region Helpers
 
+        private CrdsEquatorial ToTargetEpoch(CrdsEquatorial eq, string epoch)
+        {
+            if (epoch == null)
+            {
+                return eq;
+            }
+            else
+            {
+                double jd = 0;
+                if (!epochs.TryGetValue(epoch, out jd) && !double.TryParse(epoch, NumberStyles.Number, CultureInfo.InvariantCulture, out jd))
+                {
+                    throw new UnknownParameterValueError("Invalid epoch");
+                }
+
+                CheckDate(jd, "Epoch date");
+
+                var els = Precession.ElementsFK5(sky.Context.JulianDay, jd);
+                return Precession.GetEquatorialCoordinates(eq, els);
+            }
+        }
+
+        private CrdsEquatorial ToCurrentEpoch(CrdsEquatorial eq, string epoch)
+        {
+            if (epoch == null)
+            {
+                return eq;
+            }
+            else
+            {
+                double jd = 0;
+                if (!epochs.TryGetValue(epoch, out jd) && !double.TryParse(epoch, NumberStyles.Number, CultureInfo.InvariantCulture, out jd))
+                {
+                    throw new UnknownParameterValueError("Invalid epoch");
+                }
+
+                CheckDate(jd, "Epoch date");
+
+                var els = Precession.ElementsFK5(jd, sky.Context.JulianDay);
+                return Precession.GetEquatorialCoordinates(eq, els);
+            }
+        }
+
         private Coordinates ToDto(CrdsEquatorial eq)
         {
             return new Coordinates()
@@ -308,5 +376,21 @@ namespace Astrarium.Plugins.RestAPI
         }
 
         #endregion Helpers
+
+        #region Epochs
+
+        private readonly Dictionary<string, double> epochs = new Dictionary<string, double>()
+        {
+            ["B1875"] = Date.EPOCH_B1875,
+            ["B1900"] = Date.EPOCH_B1900,
+            ["B1950"] = Date.EPOCH_B1950,
+            ["J1900"] = Date.EPOCH_J1900,
+            ["J1950"] = Date.EPOCH_J1950,
+            ["J1975"] = Date.EPOCH_J1975,
+            ["J2000"] = Date.EPOCH_J2000,
+            ["J2050"] = Date.EPOCH_J2050
+        };
+
+        #endregion
     }
 }

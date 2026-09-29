@@ -54,6 +54,7 @@ paths:
             Multiple types can be specified.
           style: form
           explode: true
+        - $ref: '#/components/parameters/EpochHeader'
       responses:
         '200':
           description: Successful search. Returns a list of found objects.
@@ -65,12 +66,50 @@ paths:
                   $ref: '#/components/schemas/CelestialObject'
                 example: [{"name":"HR 6008","type":"Star","names":["Marsic","κ Herculis","7 Herculis","NSV 7471","HD 145001","SAO 101951","FK5 1421","HR 6008"],"coordinates":{"alpha":242.31906329434673,"delta":16.977914971077873}},{"name":"Mars","type":"Planet","names":["Марс"],"coordinates":{"alpha":114.52704912513127,"delta":22.297009654626763}}]
 
+  /api/map/selected-object:
+    get:
+      tags:
+        - Map
+      summary: Get selected object, if available.
+      description: Returns current selected object, if available.
+      parameters:
+        - $ref: '#/components/parameters/EpochHeader'
+      responses:
+        '200':
+          description: Current selected object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CelestialObject'
+        '400':
+          description: Some error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+    post:
+      tags:
+        - Map
+      summary: Select celestial object
+      description: Selects the celestial object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CelestialObject'
+      responses:
+        '204':
+          description: Object successfully selected
+
   /api/map/center:
     get:
       tags:
         - Map
       summary: Get current map center coordinates
       description: Returns the current equatorial coordinates of the star map center.
+      parameters:
+        - $ref: '#/components/parameters/EpochHeader'
       responses:
         '200':
           description: Current map center coordinates
@@ -84,12 +123,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error400'
-
     post:
       tags:
         - Map
       summary: Set map center coordinates
       description: Sets the equatorial coordinates of the star map center.
+      parameters:
+        - $ref: '#/components/parameters/EpochHeader'
       requestBody:
         required: true
         content:
@@ -148,7 +188,6 @@ paths:
               schema:
                 type: number
                 format: double
-
     post:
       tags:
         - Map
@@ -185,7 +224,6 @@ paths:
               schema:
                 type: number
                 format: double
-
     post:
       tags:
         - Map
@@ -314,7 +352,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Ephemerides'
-                example: [{"date":2461299.5,"values":[{"key":"Equatorial.Alpha","value":114.68686291824542},{"key":"Equatorial.Delta","value":22.27656504214836}]},{"date":2461300.5,"ephemerides":[{"key":"Equatorial.Alpha","value":115.33879276565818},{"key":"Equatorial.Delta","value":22.189849510832904}]}]
+                example: [{"date":2461299.5,"values":[{"key":"Equatorial.Alpha","value":114.68686291824542},{"key":"Equatorial.Delta","value":22.27656504214836}]},{"date":2461300.5,"values":[{"key":"Equatorial.Alpha","value":115.33879276565818},{"key":"Equatorial.Delta","value":22.189849510832904}]}]
         '400':
           description: Some error occured
           content:
@@ -373,20 +411,42 @@ paths:
                 items:
                   $ref: '#/components/schemas/AstronomicalEvent'
                 example: |
-                    [
-                        {
-                        "event": "Луна в фазе первой четверти",
-                        "date": 2461302.3644648315,
-                        "noExactTime": false
-                        },
-                        {
-                        "event": "Нептун в противостоянии с Солнцем",
-                        "date": 2461309.5334338048,
-                        "noExactTime": false
-                        }
-                    ]
+                  [
+                      {
+                      "event": "Луна в фазе первой четверти",
+                      "date": 2461302.3644648315,
+                      "noExactTime": false
+                      },
+                      {
+                      "event": "Нептун в противостоянии с Солнцем",
+                      "date": 2461309.5334338048,
+                      "noExactTime": false
+                      }
+                  ]
 
 components:
+  parameters:
+    EpochHeader:
+      name: epoch
+      in: header
+      description: |
+        Optional epoch of equatorial coordinates. Allowed values are
+          - J2050
+          - J2000
+          - J1975
+          - J1950
+          - J1900
+          - B1950
+          - B1900
+          - B1875
+          - any numeric value representing valid Julian Date
+
+        If not specified, current epoch of date is used.
+      required: false
+      schema:
+        type: string
+      example: J2000
+
   schemas:
     Coordinates:
       type: object
@@ -407,8 +467,8 @@ components:
           maximum: 90
           example: 41.2692
       required:
-        - ra
-        - dec
+        - alpha
+        - delta
 
     CelestialObject:
       type: object
@@ -548,7 +608,7 @@ components:
         - elevation
         - name
         - offset
-    
+
     Error400:
       type: object
       description: Bad request
