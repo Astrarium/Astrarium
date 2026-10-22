@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private readonly ISettings settings;
         private readonly ISky sky;
-        private readonly IMainWindow mainWindow;
+        private readonly ISkyMap map;
         private readonly IRecentPlansManager recentPlansManager;
         private readonly IObservationPlanner planner;
         private readonly IPlanManagerFactory readWriterFactory;
@@ -221,12 +221,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
             private set => SetValue(nameof(IsDarkMode), value);
         }
 
-        public PlanningListVM(ISky sky, ISettings settings, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory, ITelescopeManager telescopeManager)
+        public PlanningListVM(ISky sky, ISkyMap map, ISettings settings, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory, ITelescopeManager telescopeManager)
         {
             this.settings = settings;
             this.planner = planner;
             this.sky = sky;
-            this.mainWindow = mainWindow;
+            this.map = map;
             this.recentPlansManager = recentPlansManager;
             this.readWriterFactory = readWriterFactory;
             this.telescopeManager = telescopeManager;
@@ -324,25 +324,31 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
-        private void ShowObject(CelestialObject body)
-        {
-            if (!mainWindow.CenterOnObject(body))
-            {
-                ShowObjectNotFoundDialog();
-            }
-        }
-
-        private void SlewTelescope(CelestialObject celestialObject)
+        private CelestialObject SearchAndGoToObject(CelestialObject celestialObject)
         {
             CelestialObject body = sky.Search(celestialObject.Type, celestialObject.CommonName);
             if (body != null)
             {
-                mainWindow.CenterOnObject(body);
-                telescopeManager.SlewToCoordinates(body.Equatorial);
+                map.GoToObject(body, TimeSpan.FromSeconds(1));
             }
             else
             {
                 ShowObjectNotFoundDialog();
+            }
+            return body;
+        }
+
+        private void ShowObject(CelestialObject celestialObject)
+        {
+            SearchAndGoToObject(celestialObject);
+        }
+
+        private void SlewTelescope(CelestialObject celestialObject)
+        {
+            var body = SearchAndGoToObject(celestialObject);
+            if (body != null) 
+            { 
+                telescopeManager.SlewToCoordinates(body.Equatorial);
             }
         }
 

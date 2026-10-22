@@ -26,7 +26,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private ISky sky;
-        private IMainWindow mainWindow;
+        private ISkyMap map;
         private IOALImporter importer;
         private ITargetDetailsFactory targetDetailsFactory;
         private IDatabaseManager dbManager;
@@ -81,10 +81,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Commands
 
-        public JournalVM(ISky sky, IMainWindow mainWindow, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
+        public JournalVM(ISky sky, ISkyMap map, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
         {
             this.sky = sky;
-            this.mainWindow = mainWindow;
+            this.map = map;
             this.importer = importer;
             this.targetDetailsFactory = targetDetailsFactory;
             this.dbManager = dbManager;
@@ -945,20 +945,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (details.RA != null && details.Dec != null)
             {
                 var eq = new CrdsEquatorial(details.RA.Value, details.Dec.Value);
-                mainWindow.CenterOnPoint(eq, 1);
-                mainWindow.Focus();
+
+                map.GoToPoint(map.Projection.WithRefraction(eq), TimeSpan.FromSeconds(1), 1);
             }
             else if (body != null)
             {
-                if (mainWindow.CenterOnObject(body))
-                {
-                    mainWindow.Focus();
-                }
-                else
-                {
-                    // TODO: localization
-                    ViewManager.ShowMessageBox("$Error", "Unable to resolve the observation target.");
-                }
+                map.GoToObject(body, TimeSpan.FromSeconds(1));
             }
         }
 

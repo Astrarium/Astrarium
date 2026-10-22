@@ -102,7 +102,6 @@ namespace Astrarium
             kernel.Bind<IGeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
             kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
             kernel.Bind<ILandscapesProvider, LandscapesProviderStub>().To<LandscapesProviderStub>().InSingletonScope();
-            kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<IWorkersCollection>().To<WorkersCollection>().InSingletonScope();
             kernel.Bind<ILocationDetector>().To<LocationDetector>();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();

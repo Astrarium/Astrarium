@@ -12,12 +12,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
-    public class MainVM : ViewModelBase, IMainWindow
+    public class MainVM : ViewModelBase
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
