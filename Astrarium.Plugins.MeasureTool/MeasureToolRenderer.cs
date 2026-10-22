@@ -105,7 +105,7 @@ namespace Astrarium.Plugins.MeasureTool
 
                 // draw text with angle separation value
                 double angle = Angle.Separation(mouse, MeasureOrigin);
-                GL.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, map.MouseScreenCoordinates);
+                GL.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, map.MouseScreenCoordinates + new Vec2(20, 20));
             }
         }
     }
