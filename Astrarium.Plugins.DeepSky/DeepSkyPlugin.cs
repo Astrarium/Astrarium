@@ -27,7 +27,7 @@ namespace Astrarium.Plugins.DeepSky
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", settings, "DeepSky"));
 
             DefineSettingsSection<DeepSkySettingsSection, DeepSkySettingsViewModel>();
         }

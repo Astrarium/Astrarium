@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.Horizon
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconGround", "$Settings.Ground", settings, "Ground"));
 
             DefineSettingsSection<HorizonSettingsSection, HorizonSettingsViewModel>();
 

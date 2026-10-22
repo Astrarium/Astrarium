@@ -13,7 +13,7 @@ namespace Astrarium.Plugins.MilkyWay
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMilkyWay", "$Settings.MilkyWay", new SimpleBinding(settings, "MilkyWay", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMilkyWay", "$Settings.MilkyWay", settings, "MilkyWay"));
         }
     }
 }

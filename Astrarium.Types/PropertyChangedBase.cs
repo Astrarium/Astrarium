@@ -24,17 +24,18 @@ namespace Astrarium.Types
             }
         }
 
-        private List<SimpleBinding> bindings = new List<SimpleBinding>();
-        public void AddBinding(SimpleBinding binding)
+        
+
+        public IBinding AddBinding(INotifyPropertyChanged source, string sourcePropertyName, string targetPropertyName)
         {
+            var binding = new Binding(source, sourcePropertyName, targetPropertyName);
             bindings.Add(binding);
             binding.Source.PropertyChanged += SourcePropertyChangedHandler;
+            return binding;
         }
 
-        public SimpleBinding FindBinding(string targetPropertyName)
-        {
-            return bindings.FirstOrDefault(b => b.TargetPropertyName == targetPropertyName);
-        }
+        private Dictionary<string, object> backingFields = new Dictionary<string, object>();
+        private List<Binding> bindings = new List<Binding>();
 
         private void SourcePropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
@@ -45,7 +46,7 @@ namespace Astrarium.Types
             }
         }
 
-        private Dictionary<string, object> backingFields = new Dictionary<string, object>();
+        
         protected T GetValue<T>(string propertyName, T defaultValue = default(T))
         {
             var binding = bindings.FirstOrDefault(b => b.TargetPropertyName == propertyName);
@@ -82,5 +83,87 @@ namespace Astrarium.Types
             }
             bindings.Clear();
         }
+
+        #region IBinding interface
+
+        public interface IBinding
+        {
+            IBinding WithSourceToTargetConverter<T>(Func<T, object> converter);
+            IBinding WithTargetToSourceConverter<T>(Func<T, object> converter);
+
+            IBinding WithConverter<TSource, TTarget>(
+                Func<TSource, TTarget> sourceToTarget,
+                Func<TTarget, TSource> targetToSource);
+        }
+
+        #endregion IBinding interface
+
+        #region IBinding implementation
+
+        private class Binding : IBinding
+        {
+            public INotifyPropertyChanged Source { get; private set; }
+            public string SourcePropertyName { get; private set; }
+            public string TargetPropertyName { get; private set; }
+            private Func<object, object> SourceToTargetConverter { get; set; }
+            private Func<object, object> TargetToSourceConverter { get; set; }
+
+            public Binding(INotifyPropertyChanged source, string sourcePropertyName, string targetPropertyName)
+            {
+                Source = source;
+                SourcePropertyName = sourcePropertyName;
+                TargetPropertyName = targetPropertyName;
+            }
+
+            public T GetValue<T>()
+            {
+                object value;
+                // TODO: use dynamic here?
+                if (Source is ISettings settings)
+                    value = settings.Get<object>(SourcePropertyName);
+                else
+                    value = Source.GetType().GetProperty(SourcePropertyName).GetValue(Source);
+
+                if (SourceToTargetConverter != null)
+                    return (T)SourceToTargetConverter(value);
+                else
+                    return (T)value;
+            }
+
+            public void SetValue(object value)
+            {
+                object converted = value;
+                if (TargetToSourceConverter != null)
+                {
+                    converted = TargetToSourceConverter(value);
+                }
+
+                if (Source is ISettings settings)
+                    settings.Set(SourcePropertyName, converted);
+                else
+                    Source.GetType().GetProperty(SourcePropertyName).SetValue(Source, converted);
+            }
+
+            IBinding IBinding.WithSourceToTargetConverter<T>(Func<T, object> converter)
+            {
+                SourceToTargetConverter = x => converter((T)x);
+                return this;
+            }
+
+            IBinding IBinding.WithTargetToSourceConverter<T>(Func<T, object> converter)
+            {
+                TargetToSourceConverter = x => converter((T)x);
+                return this;
+            }
+
+            IBinding IBinding.WithConverter<TSource, TTarget>(Func<TSource, TTarget> sourceToTarget, Func<TTarget, TSource> targetToSource)
+            {
+                SourceToTargetConverter = x => sourceToTarget((TSource)x);
+                TargetToSourceConverter = x => targetToSource((TTarget)x);
+                return this;
+            }
+        }
+
+        #endregion IBinding implementation
     }
 }

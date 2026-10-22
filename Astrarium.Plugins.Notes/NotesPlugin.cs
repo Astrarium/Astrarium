@@ -19,14 +19,12 @@ namespace Astrarium.Plugins.Notes
             ExtendObjectInfo<NotesControl, ObjectNotesVM>("$Notes.ObjectInfo.Title", CreateObjectNotesViewModel);
 
             var mnuNotes = new MenuItem("$Notes.ContextMenu");
-            var mnuNotesBinding = new SimpleBinding(map, nameof(ISkyMap.SelectedObject), nameof(MenuItem.IsEnabled));
-            mnuNotesBinding.SourceToTargetConverter = (object s) => s != null;
-            mnuNotes.AddBinding(mnuNotesBinding);
+            mnuNotes.AddBinding(map, nameof(ISkyMap.SelectedObject), nameof(MenuItem.IsEnabled))
+                .WithSourceToTargetConverter<object>(s => s != null);
 
             var mnuAddObjectNote = new MenuItem("$Notes.ContextMenu.AddNote", new Command(AddObjectNote));
             var mnuObjectNotes = new MenuItem("$Notes.ContextMenu.ObjectNotes", new Command(ShowObjectNotes));
-            var mnuObjectNotesBinding = new SimpleBinding(this, nameof(HasSelectedObjectNotes), nameof(MenuItem.IsEnabled));
-            mnuObjectNotes.AddBinding(mnuObjectNotesBinding);
+            mnuObjectNotes.AddBinding(this, nameof(HasSelectedObjectNotes), nameof(MenuItem.IsEnabled));
 
             mnuNotes.SubItems.Add(mnuAddObjectNote);
             mnuNotes.SubItems.Add(mnuObjectNotes);

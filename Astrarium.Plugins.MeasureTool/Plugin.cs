@@ -29,7 +29,7 @@ namespace Astrarium.Plugins.MeasureTool
                 Command = new Command(SwitchMeasureTool),
                 HotKey = new KeyGesture(Key.M, ModifierKeys.Control, "Ctrl+M")
             };
-            menuItem.AddBinding(new SimpleBinding(renderer, nameof(renderer.IsMeasureToolOn), "IsChecked"));
+            menuItem.AddBinding(renderer, nameof(renderer.IsMeasureToolOn), nameof(MenuItem.IsChecked));
 
             MenuItems.Add(MenuItemPosition.ContextMenu, menuItem);
         }

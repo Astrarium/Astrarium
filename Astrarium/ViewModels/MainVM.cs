@@ -12,8 +12,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace Astrarium.ViewModels
 {
@@ -37,7 +37,7 @@ namespace Astrarium.ViewModels
         public Command<CrdsGeographical> SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command CenterOnPointCommand { get; private set; }
-        public Command GetObjectInfoCommand { get; private set; }
+        public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command GetObjectEphemerisCommand { get; private set; }
         public Command CalculatePhenomenaCommand { get; private set; }
         public Command CalculateTodayEventsCommand { get; private set; }
@@ -55,6 +55,11 @@ namespace Astrarium.ViewModels
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
         public Command SelectedObjectsMenuItemsRootMenuCommand { get; private set; }
+
+        private MenuItem menuInfo;
+
+        private ObservableCollection<MenuItem> objectsListMenuItems = new ObservableCollection<MenuItem>();
+        private ObservableCollection<MenuItem> contextMenuItems = new ObservableCollection<MenuItem>();
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -173,7 +178,7 @@ namespace Astrarium.ViewModels
             this.map = map;
             this.settings = settings;
             this.uiIntegration = uiIntegration;
-            
+
             workers.RunWorkers();
 
             sky.Calculate();
@@ -189,7 +194,7 @@ namespace Astrarium.ViewModels
             QuickSearchCommand = new Command<CelestialObject>(GoToObject);
             SelectedObjectsMenuItemsRootMenuCommand = new Command(SelectedObjectsMenuItemsRootMenuClicked);
             CenterOnPointCommand = new Command(CenterOnPoint);
-            GetObjectInfoCommand = new Command(GetObjectInfo);
+            GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
             CalculateTodayEventsCommand = new Command(CalculateTodayEvents);
@@ -216,26 +221,14 @@ namespace Astrarium.ViewModels
             map.ContextChanged += Map_ContextChanged;
             settings.SettingValueChanged += Settings_SettingValueChanged;
 
-            AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
-            AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(IsCompactMenu)));
-            AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(IsStatusBarVisible)));
+            AddBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible));
+            AddBinding(settings, "IsCompactMenu", nameof(IsCompactMenu));
+            AddBinding(settings, "IsStatusBarVisible", nameof(IsStatusBarVisible));
 
             Map_ContextChanged();
             Map_ViewAngleChanged(map.Projection.Fov);
             Map_SelectedObjectChanged(map.SelectedObject);
             FillLocationsList();
-
-            var bindingViewModeHorizontal = new SimpleBinding(settings, "ViewMode", "IsChecked")
-            {
-                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Horizontal,
-                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial
-            };
-
-            var bindingViewModeEquatorial = new SimpleBinding(settings, "ViewMode", "IsChecked")
-            {
-                SourceToTargetConverter = (s) => (ProjectionViewType)s == ProjectionViewType.Equatorial,
-                TargetToSourceConverter = (t) => (bool)t ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal
-            };
 
             // Toolbar initialization
 
@@ -244,23 +237,42 @@ namespace Astrarium.ViewModels
 
             var changeViewModeCommand = new Command<ProjectionViewType>(mode => settings.SetAndSave("ViewMode", mode));
 
-            var btnViewModeEquatorial = new ToolbarButton("IconModeEquatorial", "$Settings.ViewMode.Equatorial") { IsCheckable = true };
-            btnViewModeEquatorial.Command = changeViewModeCommand;
-            btnViewModeEquatorial.CommandParameter = ProjectionViewType.Equatorial;
-            btnViewModeEquatorial.AddBinding(bindingViewModeEquatorial);
+            var btnViewModeEquatorial = new ToolbarButton("IconModeEquatorial", "$Settings.ViewMode.Equatorial")
+            {
+                Command = changeViewModeCommand,
+                CommandParameter = ProjectionViewType.Equatorial,
+                IsCheckable = true
+            };
+            btnViewModeEquatorial
+                .AddBinding(settings, "ViewMode", nameof(ToolbarButton.IsChecked))
+                .WithConverter<ProjectionViewType, bool>(
+                    settingValue => settingValue == ProjectionViewType.Equatorial,
+                    isChecked => isChecked ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal);
 
-            var btnViewModeHorizontal = new ToolbarButton("IconModeHorizontal", "$Settings.ViewMode.Horizontal") { IsCheckable = true }; ;
-            btnViewModeHorizontal.Command = changeViewModeCommand;
-            btnViewModeHorizontal.CommandParameter = ProjectionViewType.Horizontal;
-            btnViewModeHorizontal.AddBinding(bindingViewModeHorizontal);
+            var btnViewModeHorizontal = new ToolbarButton("IconModeHorizontal", "$Settings.ViewMode.Horizontal")
+            {
+                Command = changeViewModeCommand,
+                CommandParameter = ProjectionViewType.Horizontal,
+                IsCheckable = true
+            };
+            btnViewModeHorizontal
+                .AddBinding(settings, "ViewMode", nameof(ToolbarButton.IsChecked))
+                .WithSourceToTargetConverter<ProjectionViewType>(s => s == ProjectionViewType.Horizontal)
+                .WithTargetToSourceConverter<bool>(t => t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial);
 
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconNightMode", "$Settings.NightMode", new SimpleBinding(settings, "NightMode", "IsChecked")));
+            var toggleNightMode = new ToolbarToggleButton("IconNightMode", "$Settings.NightMode", settings, "NightMode");
+            var toggleFlipHorizontal = new ToolbarToggleButton("IconFlipHorizontal", "$Settings.FlipHorizontal", settings, "FlipHorizontal");
+            var toggleFlipVertical = new ToolbarToggleButton("IconFlipVertical", "$Settings.FlipVertical", settings, "FlipVertical");
+            var toggleMagLimit = new ToolbarToggleButton("IconLimitMagnitude", "$Settings.LimitMagnitude", settings, "LimitMagnitude");
+            var toggleAutoLock = new ToolbarToggleButton("IconAutoLock", "$Settings.AutoLock", settings, "AutoLock");
+
+            uiIntegration.ToolbarButtons.Add("View", toggleNightMode);
             uiIntegration.ToolbarButtons.Add("View", btnViewModeHorizontal);
             uiIntegration.ToolbarButtons.Add("View", btnViewModeEquatorial);
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipHorizontal", "$Settings.FlipHorizontal", new SimpleBinding(settings, "FlipHorizontal", "IsChecked")));
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconFlipVertical", "$Settings.FlipVertical", new SimpleBinding(settings, "FlipVertical", "IsChecked")));
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconLimitMagnitude", "$Settings.LimitMagnitude", new SimpleBinding(settings, "LimitMagnitude", "IsChecked")));
-            uiIntegration.ToolbarButtons.Add("View", new ToolbarToggleButton("IconAutoLock", "$Settings.AutoLock", new SimpleBinding(settings, "AutoLock", "IsChecked")));
+            uiIntegration.ToolbarButtons.Add("View", toggleFlipHorizontal);
+            uiIntegration.ToolbarButtons.Add("View", toggleFlipVertical);
+            uiIntegration.ToolbarButtons.Add("View", toggleMagLimit);
+            uiIntegration.ToolbarButtons.Add("View", toggleAutoLock);
 
             foreach (var group in uiIntegration.ToolbarButtons.Groups.OrderBy(g => groups.IndexOf(g)))
             {
@@ -281,29 +293,42 @@ namespace Astrarium.ViewModels
                 SubItems = new ObservableCollection<MenuItem>()
             };
 
-            var menuFlipHorizontal = new MenuItem("$Menu.MapTransform.Mirror") { IsCheckable = true };
-            menuFlipHorizontal.Command = new Command(() => {
-                menuFlipHorizontal.IsChecked = !menuFlipHorizontal.IsChecked;
-                settings.SetAndSave("FlipHorizontal", menuFlipHorizontal.IsChecked);
-            });
-            menuFlipHorizontal.AddBinding(new SimpleBinding(settings, "FlipHorizontal", nameof(MenuItem.IsChecked)));
-
-            var menuFlipVertical = new MenuItem("$Menu.MapTransform.Invert") { IsCheckable = true };
-            menuFlipVertical.Command = new Command(() => {
-                menuFlipVertical.IsChecked = !menuFlipVertical.IsChecked;
-                settings.SetAndSave("FlipVertical", menuFlipVertical.IsChecked);
-            });
-            menuFlipVertical.AddBinding(new SimpleBinding(settings, "FlipVertical", nameof(MenuItem.IsChecked)));
+            var flipHorizontalCommand = new Command(() => settings.SetAndSave("FlipHorizontal", !settings.Get("FlipHorizontal")));
+            var menuFlipHorizontal = new MenuItem("$Menu.MapTransform.Mirror") 
+            {
+                Command = flipHorizontalCommand,
+                IsCheckable = true 
+            };
+            menuFlipHorizontal.AddBinding(settings, "FlipHorizontal", nameof(MenuItem.IsChecked));
             
-            var menuMountModeHorizontal = new MenuItem("$Menu.MapMountMode.Horizontal") { IsCheckable = true, IsChecked = true };
-            menuMountModeHorizontal.AddBinding(bindingViewModeHorizontal);
-            menuMountModeHorizontal.Command = changeViewModeCommand;
-            menuMountModeHorizontal.CommandParameter = ProjectionViewType.Horizontal;
+            var flipVerticalCommand = new Command(() => settings.SetAndSave("FlipVertical", !settings.Get("FlipVertical")));
+            var menuFlipVertical = new MenuItem("$Menu.MapTransform.Invert") 
+            {
+                Command = flipVerticalCommand,
+                IsCheckable = true 
+            };
+            menuFlipVertical.AddBinding(settings, "FlipVertical", nameof(MenuItem.IsChecked));
 
-            var menuMountModeEquatorial = new MenuItem("$Menu.MapMountMode.Equatorial") { IsCheckable = true };
-            menuMountModeEquatorial.AddBinding(bindingViewModeEquatorial);
-            menuMountModeEquatorial.Command = changeViewModeCommand;
-            menuMountModeEquatorial.CommandParameter = ProjectionViewType.Equatorial;
+            var menuMountModeHorizontal = new MenuItem("$Menu.MapMountMode.Horizontal")
+            {
+                Command = changeViewModeCommand,
+                CommandParameter = ProjectionViewType.Horizontal,
+                IsCheckable = true,
+            };
+            menuMountModeHorizontal
+                .AddBinding(settings, "ViewMode", nameof(MenuItem.IsChecked))
+                .WithSourceToTargetConverter<ProjectionViewType>(s => s == ProjectionViewType.Horizontal)
+                .WithTargetToSourceConverter<bool>(t => t ? ProjectionViewType.Horizontal : ProjectionViewType.Equatorial);
+              
+            var menuMountModeEquatorial = new MenuItem("$Menu.MapMountMode.Equatorial") 
+            {
+                Command = changeViewModeCommand,
+                CommandParameter = ProjectionViewType.Equatorial,
+                IsCheckable = true 
+            };
+            menuMountModeEquatorial.AddBinding(settings, "ViewMode", nameof(MenuItem.IsChecked))
+                .WithSourceToTargetConverter<ProjectionViewType>(s => s == ProjectionViewType.Equatorial)
+                .WithTargetToSourceConverter<bool>(t => t ? ProjectionViewType.Equatorial : ProjectionViewType.Horizontal);
 
             var menuMapMountMode = new MenuItem("$Menu.MapMountMode")
             {
@@ -320,11 +345,14 @@ namespace Astrarium.ViewModels
             for (int i = 0; i < projections.Length; i++)
             {
                 var projection = projections[i];
-                var projectionMenuItem = new MenuItem($"$Projection.{projection}");
-                projectionMenuItem.Command = new Command(() => settings.SetAndSave("Projection", projection));
-                var binding = new SimpleBinding(settings, "Projection", nameof(MenuItem.IsChecked));
-                binding.SourceToTargetConverter = x => settings.Get<string>("Projection") == projection;
-                projectionMenuItem.AddBinding(binding);
+                var projectionMenuItem = new MenuItem($"$Projection.{projection}")
+                {
+                    Command = new Command(() => settings.SetAndSave("Projection", projection))
+                };
+
+                projectionMenuItem.AddBinding(settings, "Projection", nameof(MenuItem.IsChecked))
+                    .WithSourceToTargetConverter<string>(x => settings.Get<string>("Projection") == projection);
+
                 projectionMenuItems.Add(projectionMenuItem);
             }
 
@@ -346,7 +374,7 @@ namespace Astrarium.ViewModels
                 menuNightMode.IsChecked = !menuNightMode.IsChecked;
                 settings.SetAndSave("NightMode", menuNightMode.IsChecked);
             });
-            menuNightMode.AddBinding(new SimpleBinding(settings, "NightMode", nameof(MenuItem.IsChecked)));
+            menuNightMode.AddBinding(settings, "NightMode", nameof(MenuItem.IsChecked));
 
             menuMap.SubItems.Add(menuMapProjection);
             menuMap.SubItems.Add(menuMapTransform);
@@ -362,27 +390,12 @@ namespace Astrarium.ViewModels
                     var menuGroup = new MenuItem($"$Menu.{group}");
                     foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
                     {
-                        var binding = button.FindBinding(nameof(ToolbarToggleButton.IsChecked));
-                        if (binding != null)
-                        {
-                            var menuItem = new MenuItem(button.Tooltip);
-                            menuItem.Command = new Command(() => {
-                                menuItem.IsChecked = !menuItem.IsChecked;
-                                if (binding.Source == settings)
-                                {
-                                    settings.SetAndSave(binding.SourcePropertyName, menuItem.IsChecked);
-                                }
-                            });
-                            menuItem.AddBinding(new SimpleBinding(binding.Source, binding.SourcePropertyName, nameof(MenuItem.IsChecked)));
-                            menuGroup.SubItems.Add(menuItem);
-                        }
-
-                        button.Command = new Command(() => {
-                            if (binding.Source == settings)
-                            {
-                                settings.SetAndSave(binding.SourcePropertyName, button.IsChecked);
-                            }
+                        var menuItem = new MenuItem(button.Tooltip);
+                        menuItem.Command = new Command(() => {
+                            menuItem.IsChecked = !menuItem.IsChecked;
                         });
+                        menuItem.AddBinding(button, nameof(ToolbarToggleButton.IsChecked), nameof(MenuItem.IsChecked));
+                        menuGroup.SubItems.Add(menuItem);
                     }
                     menuMap.SubItems.Add(menuGroup);
                 }
@@ -405,7 +418,7 @@ namespace Astrarium.ViewModels
                 menuCompact.IsChecked = !menuCompact.IsChecked;
                 settings.SetAndSave("IsCompactMenu", menuCompact.IsChecked);
             });
-            menuCompact.AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(MenuItem.IsChecked)));
+            menuCompact.AddBinding(settings, "IsCompactMenu", nameof(MenuItem.IsChecked));
             menuView.SubItems.Add(menuCompact);
 
             var menuToolbar = new MenuItem("$Menu.Toolbar");
@@ -413,7 +426,7 @@ namespace Astrarium.ViewModels
                 menuToolbar.IsChecked = !menuToolbar.IsChecked;
                 settings.SetAndSave("IsToolbarVisible", menuToolbar.IsChecked);
             });
-            menuToolbar.AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(MenuItem.IsChecked)));
+            menuToolbar.AddBinding(settings, "IsToolbarVisible", nameof(MenuItem.IsChecked));
             menuView.SubItems.Add(menuToolbar);
 
             var menuStatusbar = new MenuItem("$Menu.StatusBar");
@@ -421,14 +434,14 @@ namespace Astrarium.ViewModels
                 menuStatusbar.IsChecked = !menuStatusbar.IsChecked;
                 settings.SetAndSave("IsStatusBarVisible", menuStatusbar.IsChecked);
             });
-            menuStatusbar.AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(MenuItem.IsChecked)));
+            menuStatusbar.AddBinding(settings, "IsStatusBarVisible", nameof(MenuItem.IsChecked));
             menuView.SubItems.Add(menuStatusbar);
 
             menuView.SubItems.Add(null);
 
             var menuFullScreen = new MenuItem("$Menu.FullScreen");
             menuFullScreen.Command = new Command(() => menuFullScreen.IsChecked = !menuFullScreen.IsChecked);
-            menuFullScreen.AddBinding(new SimpleBinding(this, nameof(FullScreen), nameof(MenuItem.IsChecked)));
+            menuFullScreen.AddBinding(this, nameof(FullScreen), nameof(MenuItem.IsChecked));
             menuFullScreen.HotKey = new KeyGesture(Key.F12, ModifierKeys.None, "F12");
             menuView.SubItems.Add(menuFullScreen);
 
@@ -475,11 +488,10 @@ namespace Astrarium.ViewModels
                                 menuItem.IsChecked = true;
                                 settings.SetAndSave("Language", loc.Name);
                             });
-                            menuItem.AddBinding(new SimpleBinding(settings, "Language", nameof(MenuItem.IsChecked))
-                            {
-                                SourceToTargetConverter = (lang) => (string)lang == loc.Name,
-                                TargetToSourceConverter = (isChecked) => (bool)isChecked ? loc.Name : settings.Get<string>("Language"),
-                            });
+                            menuItem.AddBinding(settings, "Language", nameof(MenuItem.IsChecked))
+                            .WithConverter<string, bool>(
+                                (lang) => lang == loc.Name,
+                                (isChecked) => isChecked ? loc.Name : settings.Get<string>("Language"));
                             return menuItem;
                         }))
                     },
@@ -493,50 +505,41 @@ namespace Astrarium.ViewModels
 
             // Context menu initialization
 
-            var menuInfo = new MenuItem("$ContextMenu.Info", GetObjectInfoCommand) { HotKey = new KeyGesture(Key.I, ModifierKeys.Control) };
-            menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
-            menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
-            {
-                SourceToTargetConverter = (o) => map.SelectedObject != null
-            });
+            menuInfo = new MenuItem("$ContextMenu.Info", GetObjectInfoCommand) { HotKey = new KeyGesture(Key.I, ModifierKeys.Control) };
+            menuInfo.AddBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter));
 
-            ContextMenuItems.Add(menuInfo);
-
-            ContextMenuItems.Add(null);
-
-            ContextMenuItems.Add(new MenuItem("$ContextMenu.Center", CenterOnPointCommand));
-            ContextMenuItems.Add(new MenuItem("$ContextMenu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") });
-
-            ContextMenuItems.Add(null);
+            contextMenuItems.Add(menuInfo);
+            contextMenuItems.Add(null);
+            contextMenuItems.Add(new MenuItem("$ContextMenu.Center", CenterOnPointCommand));
+            contextMenuItems.Add(new MenuItem("$ContextMenu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") });
+            contextMenuItems.Add(null);
 
             var menuEphemerides = new MenuItem("$ContextMenu.Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") };
-            menuEphemerides.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
-            {
-                SourceToTargetConverter = (o) => map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any()
-            });
+            menuEphemerides.AddBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
+                .WithSourceToTargetConverter<object>((o) => map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any());
 
-            ContextMenuItems.Add(menuEphemerides);
+            contextMenuItems.Add(menuEphemerides);
 
             // dynamic menu items from plugins
             foreach (var configItem in uiIntegration.MenuItems[MenuItemPosition.ContextMenu])
             {
-                ContextMenuItems.Add(configItem);
+                contextMenuItems.Add(configItem);
             }
 
-            ContextMenuItems.Add(null);
+            contextMenuItems.Add(null);
 
             var menuLock = new MenuItem("", LockOnObjectCommand);
-            menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.Header))
-            {
-                SourceToTargetConverter = (o) => map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? Text.Get("ContextMenu.Lock") : Text.Get("ContextMenu.Unlock")) : Text.Get("ContextMenu.Lock")
-            });
-            menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
-            {
-                SourceToTargetConverter = (o) => map.LockedObject != null || map.SelectedObject != null
-            });
-            menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
+            menuLock
+                .AddBinding(map, nameof(map.SelectedObject), nameof(MenuItem.Header))
+                .WithSourceToTargetConverter<object>(_ => map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? Text.Get("ContextMenu.Lock") : Text.Get("ContextMenu.Unlock")) : Text.Get("ContextMenu.Lock"));
 
-            ContextMenuItems.Add(menuLock);
+            menuLock
+                .AddBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
+                .WithSourceToTargetConverter<object>(_ => map.LockedObject != null || map.SelectedObject != null);
+
+            menuLock.AddBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter));
+
+            contextMenuItems.Add(menuLock);
 
             if (settings.Get("TimeSyncOnStart"))
             {
@@ -692,7 +695,7 @@ namespace Astrarium.ViewModels
 
         private void MapKeyDown(KeyEventArgs args)
         {
-            var item = GetMenuItems(MainMenuItems.Concat(ContextMenuItems)).FirstOrDefault(i => i.HotKey != null && i.HotKey.Matches(null, args));
+            var item = GetMenuItems(MainMenuItems.Concat(contextMenuItems)).FirstOrDefault(i => i.HotKey != null && i.HotKey.Matches(null, args));
             if (item != null)
             {
                 item.Command.Execute(item.CommandParameter);
@@ -726,15 +729,37 @@ namespace Astrarium.ViewModels
 
         private void MapDoubleClick(PointF point)
         {
-            map.SelectedObject = map.FindObject(point);
-            map.Invalidate();
-            GetObjectInfo();
+            GetObjectInfo(map.FindObject(point));
         }
 
         private void MapRightClick(PointF point)
         {
-            map.SelectedObject = map.FindObject(point);
-            map.Invalidate();
+            var objects = map.FindObjects(point);
+
+            menuInfo.SubItems.Clear();
+            menuInfo.IsEnabled = objects.Any();
+
+            if (objects.Count() > 1)
+            {
+                foreach (var body in objects)
+                {
+                    menuInfo.SubItems.Add(new MenuItem(body.Names.First())
+                    {
+                        Command = GetObjectInfoCommand,
+                        CommandParameter = body,
+                        IconKey = $"Icon{body.Type.Split('.').First()}"
+                    });
+                }
+
+                ContextMenuItems = contextMenuItems;
+            }
+            else
+            {
+
+                ContextMenuItems = contextMenuItems;
+                map.SelectedObject = objects.FirstOrDefault();
+                map.Invalidate();
+            }
         }
 
         private async void GetObjectEphemeris()
@@ -1004,9 +1029,11 @@ namespace Astrarium.ViewModels
             ViewManager.ShowDialog<FavoriteLocationsVM>();
         }
 
-        private void GetObjectInfo()
+        private void GetObjectInfo(CelestialObject body)
         {
-            var body = map.SelectedObject;
+            map.SelectedObject = body;
+            map.Invalidate();
+
             if (body != null)
             {
                 var info = sky.GetInfo(body);

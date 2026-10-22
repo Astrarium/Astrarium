@@ -35,8 +35,8 @@ namespace Astrarium.Plugins.Planner
 
             MenuItem plannerMenu = new MenuItem("$Planner.Menu.Planner");
             MenuItem recentPlansMenu = new MenuItem("$Planner.Menu.RecentPlans");
-            recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(RecentPlansMenuItems), nameof(MenuItem.SubItems)));
-            recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(HasRecentPlans), nameof(MenuItem.IsEnabled)));
+            recentPlansMenu.AddBinding(this, nameof(RecentPlansMenuItems), nameof(MenuItem.SubItems));
+            recentPlansMenu.AddBinding(this, nameof(HasRecentPlans), nameof(MenuItem.IsEnabled));
             plannerMenu.SubItems = new ObservableCollection<MenuItem>(new[] {
                 new MenuItem("$Planner.Menu.CreateNewPlan", new Command<PlanImportData>(CreateNewPlan), null),
                 new MenuItem("$Planner.Menu.OpenPlan", new Command(OpenPlan)),
@@ -49,8 +49,8 @@ namespace Astrarium.Plugins.Planner
             /* Context menu */
 
             MenuItem contextMenu = new MenuItem("$Planner.ContextMenu.AddToObservationPlan");
-            contextMenu.AddBinding(new SimpleBinding(this, nameof(IsPlannerConstextMenuEnabled), nameof(MenuItem.IsEnabled)));
-            contextMenu.AddBinding(new SimpleBinding(this, nameof(ActivePlansMenuItems), nameof(MenuItem.SubItems)));
+            contextMenu.AddBinding(this, nameof(IsPlannerConstextMenuEnabled), nameof(MenuItem.IsEnabled));
+            contextMenu.AddBinding(this, nameof(ActivePlansMenuItems), nameof(MenuItem.SubItems));
             MenuItems.Add(MenuItemPosition.ContextMenu, contextMenu);
         }
 

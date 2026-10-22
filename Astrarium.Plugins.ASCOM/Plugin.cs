@@ -34,35 +34,35 @@ namespace Astrarium.Plugins.ASCOM
             DefineSetting("ASCOMTelescopeId", "", isPermanent: true);
 
             var menuConnectTelescope = new MenuItem("$Menu.ConnectToTelescope", new Command(ConnectTelescope));
-            menuConnectTelescope.AddBinding(new SimpleBinding(this, nameof(IsConnectTelescopeVisible), nameof(MenuItem.IsVisible)));
+            menuConnectTelescope.AddBinding(this, nameof(IsConnectTelescopeVisible), nameof(MenuItem.IsVisible));
 
             var menuDisconnectTelescope = new MenuItem("$Menu.DisconnectTelescope", new Command(DisconnectTelescope));
-            menuDisconnectTelescope.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsVisible)));
-            menuDisconnectTelescope.AddBinding(new SimpleBinding(this, nameof(DisconnectTitle), nameof(MenuItem.Header)));
+            menuDisconnectTelescope.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsVisible));
+            menuDisconnectTelescope.AddBinding(this, nameof(DisconnectTitle), nameof(MenuItem.Header));
 
             var menuFindCurrentPoint = new MenuItem("$Menu.FindCurrentPoint", new Command(FindCurrentPoint));
-            menuFindCurrentPoint.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuFindCurrentPoint.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             var menuAbortSlew = new MenuItem("$Menu.AbortSlew", new Command(AbortSlew));
-            menuAbortSlew.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsSlewing), nameof(MenuItem.IsEnabled)));
+            menuAbortSlew.AddBinding(ascom, nameof(ascom.IsSlewing), nameof(MenuItem.IsEnabled));
 
             var menuFindHome = new MenuItem("$Menu.Home", new Command(FindHome));
-            menuFindHome.AddBinding(new SimpleBinding(ascom, nameof(ascom.AtHome), nameof(MenuItem.IsChecked)));
-            menuFindHome.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuFindHome.AddBinding(ascom, nameof(ascom.AtHome), nameof(MenuItem.IsChecked));
+            menuFindHome.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             var menuPark = new MenuItem("$Menu.Park", new Command(ParkOrUnpark));
-            menuPark.AddBinding(new SimpleBinding(ascom, nameof(ascom.AtPark), nameof(MenuItem.IsChecked)));
-            menuPark.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuPark.AddBinding(ascom, nameof(ascom.AtPark), nameof(MenuItem.IsChecked));
+            menuPark.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             var menuTrack = new MenuItem("$Menu.Track", new Command(SwitchTracking));
-            menuTrack.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsTracking), nameof(MenuItem.IsChecked)));
-            menuTrack.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuTrack.AddBinding(ascom, nameof(ascom.IsTracking), nameof(MenuItem.IsChecked));
+            menuTrack.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             var menuSetup = new MenuItem("$Menu.Setup", new Command(ShowSetupDialog));
-            menuSetup.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuSetup.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             var menuInfo = new MenuItem("$Menu.AscomInformation", new Command(ShowInfo));
-            menuInfo.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+            menuInfo.AddBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled));
 
             menuAscom.SubItems.Add(menuConnectTelescope);
             menuAscom.SubItems.Add(menuDisconnectTelescope);
@@ -80,13 +80,13 @@ namespace Astrarium.Plugins.ASCOM
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuAscom);
 
             var contextMenuAscom = new MenuItem("$ContextMenu.Telescope");
-            contextMenuAscom.AddBinding(new SimpleBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled)));
+            contextMenuAscom.AddBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled));
 
             var contextMenuSyncTo = new MenuItem("$ContextMenu.Telescope.Sync", new Command(SyncToPosition));
-            contextMenuSyncTo.AddBinding(new SimpleBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled)));
+            contextMenuSyncTo.AddBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled));
 
             var contextMenuSlewTo = new MenuItem("$ContextMenu.Telescope.Slew", new Command(SlewToPosition));
-            contextMenuSlewTo.AddBinding(new SimpleBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled)));
+            contextMenuSlewTo.AddBinding(this, nameof(IsContextMenuEnabled), nameof(MenuItem.IsEnabled));
 
             contextMenuAscom.SubItems.Add(contextMenuSyncTo);
             contextMenuAscom.SubItems.Add(contextMenuSlewTo);

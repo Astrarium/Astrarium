@@ -31,9 +31,9 @@ namespace Astrarium.Plugins.Atmosphere
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconAtmosphere", "$Settings.Atmosphere", new SimpleBinding(settings, "Atmosphere", "IsChecked")));
-            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconRefraction", "$Settings.Refraction", new SimpleBinding(settings, "Refraction", "IsChecked")));
-            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconExtinction", "$Settings.Extinction", new SimpleBinding(settings, "Extinction", "IsChecked")));
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconAtmosphere", "$Settings.Atmosphere", settings, "Atmosphere"));
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconRefraction", "$Settings.Refraction", settings, "Refraction"));
+            ToolbarItems.Add("Ground", new ToolbarToggleButton("IconExtinction", "$Settings.Extinction", settings, "Extinction"));
         }
     }
 }

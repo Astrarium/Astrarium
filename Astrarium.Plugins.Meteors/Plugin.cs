@@ -23,7 +23,7 @@ namespace Astrarium.Plugins.Meteors
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMeteor", "$Settings.Meteors", new SimpleBinding(settings, "Meteors", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMeteor", "$Settings.Meteors", settings, "Meteors"));
 
             DefineSettingsSection<MeteorsSettingsSection, SettingsViewModel>();
         }

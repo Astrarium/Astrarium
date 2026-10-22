@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
@@ -64,9 +65,11 @@ namespace Astrarium.Types
 
     public class ToolbarToggleButton : ToolbarButton
     {
-        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding checkedBinding) : base(imageKey, toolTip, null)
+        public ToolbarToggleButton(string imageKey, string toolTip) : base(imageKey, toolTip, null) { }
+
+        public ToolbarToggleButton(string imageKey, string toolTip, INotifyPropertyChanged bindingSource, string sourcePropertyName) : base(imageKey, toolTip, null) 
         {
-            AddBinding(checkedBinding);
+            AddBinding(bindingSource, sourcePropertyName, nameof(IsChecked));
         }
     }
 }

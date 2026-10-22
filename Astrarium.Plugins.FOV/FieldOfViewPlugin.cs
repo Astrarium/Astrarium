@@ -23,12 +23,12 @@ namespace Astrarium.Plugins.FOV
             DefineSetting("FovFrames", new List<FovFrame>(), isPermanent: true);
 
             MenuItem fovMenu = new MenuItem("$FovPlugin.Menu.FOV");
-            fovMenu.AddBinding(new SimpleBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems)));
+            fovMenu.AddBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems));
             MenuItems.Add(MenuItemPosition.MainMenuTools, fovMenu);
 
             MenuItem scaleToFOVMenu = new MenuItem("$FovPlugin.ContextMenu.ScaleToFOV");
-            scaleToFOVMenu.AddBinding(new SimpleBinding(this, nameof(FrameContextMenuItems), nameof(MenuItem.SubItems)));
-            scaleToFOVMenu.AddBinding(new SimpleBinding(this, nameof(IsContextMenuVisible), nameof(MenuItem.IsVisible)));
+            scaleToFOVMenu.AddBinding(this, nameof(FrameContextMenuItems), nameof(MenuItem.SubItems));
+            scaleToFOVMenu.AddBinding(this, nameof(IsContextMenuVisible), nameof(MenuItem.IsVisible));
             MenuItems.Add(MenuItemPosition.ContextMenu, scaleToFOVMenu);
         }
 

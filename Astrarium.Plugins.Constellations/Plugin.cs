@@ -31,10 +31,10 @@ namespace Astrarium.Plugins.Constellations
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", new SimpleBinding(settings, "ConstLines", "IsChecked")));
-            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstBorders", "$Settings.ConstBorders", new SimpleBinding(settings, "ConstBorders", "IsChecked")));
-            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLabels", "$Settings.ConstLabels", new SimpleBinding(settings, "ConstLabels", "IsChecked")));
-            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstFigures", "$Settings.ConstFigures", new SimpleBinding(settings, "ConstFigures", "IsChecked")));
+            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", settings, "ConstLines"));
+            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstBorders", "$Settings.ConstBorders", settings, "ConstBorders"));
+            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLabels", "$Settings.ConstLabels", settings, "ConstLabels"));
+            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstFigures", "$Settings.ConstFigures", settings, "ConstFigures"));
 
             DefineSettingsSection<ConstellationsSettingsSection, ConstellationsSettingsVM>();
         }

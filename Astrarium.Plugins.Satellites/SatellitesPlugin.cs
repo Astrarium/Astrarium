@@ -50,7 +50,7 @@ namespace Astrarium.Plugins.Satellites
             DefineSettingsSection<SatellitesSettingsSection, SatellitesSettingsVM>();
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSatellite", "$Settings.Satellites", new SimpleBinding(settings, "Satellites", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSatellite", "$Settings.Satellites", settings, "Satellites"));
 
             updater.OrbitalElementsUpdated += Updater_OrbitalElementsUpdated;
         }

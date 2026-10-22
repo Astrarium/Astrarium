@@ -19,7 +19,7 @@ namespace Astrarium.Plugins.BrightStars
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", settings, "Stars"));
 
             DefineSettingsSection<BrightStarsSettingsSection, SettingsViewModel>();
         }

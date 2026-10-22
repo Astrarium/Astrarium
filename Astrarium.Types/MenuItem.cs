@@ -12,12 +12,15 @@ namespace Astrarium.Types
 
         public MenuItem(string title, ICommand command) : this(title, command, null) { }
 
-        public MenuItem(string title, ICommand command, object commandParameter)
+        public MenuItem(string title, ICommand command, object commandParameter) : this(title, command, commandParameter, false) { }
+
+        public MenuItem(string title, ICommand command, object commandParameter, bool isCheckable)
         {
             this.Header = title;
             this.Command = command;
             this.CommandParameter = commandParameter;
             this.SubItems = new ObservableCollection<MenuItem>();
+            this.IsCheckable = isCheckable;
             Text.LocaleChanged += HandleLocaleChanged;
         }
 

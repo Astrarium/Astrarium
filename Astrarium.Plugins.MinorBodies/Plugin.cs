@@ -45,8 +45,8 @@ namespace Astrarium.Plugins.MinorBodies
 
             ExportResourceDictionaries("Images.xaml");
 
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconAsteroid", "$Settings.Asteroids", new SimpleBinding(settings, "Asteroids", "IsChecked")));
-            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconComet", "$Settings.Comets", new SimpleBinding(settings, "Comets", "IsChecked")));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconAsteroid", "$Settings.Asteroids",settings, "Asteroids"));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconComet", "$Settings.Comets", settings, "Comets"));
         }
     }
 }
