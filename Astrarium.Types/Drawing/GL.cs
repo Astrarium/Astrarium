@@ -220,17 +220,7 @@ namespace Astrarium.Types
             if (pen.DashStyle != DashStyle.Solid)
             {
                 Enable(LINE_STIPPLE);
-                switch (pen.DashStyle)
-                {
-                    case DashStyle.Dash:
-                        LineStipple(3, 0xAAAA);
-                        break;
-                    case DashStyle.Dot:
-                        LineStipple(1, 0xAAAA);
-                        break;
-                    default:
-                        break;
-                }
+                SetDashStyle(pen.DashStyle);
             }
 
             LineWidth(pen.Width);
@@ -315,17 +305,7 @@ namespace Astrarium.Types
             if (pen.DashStyle != DashStyle.Solid)
             {
                 Enable(LINE_STIPPLE);
-                switch (pen.DashStyle)
-                {
-                    case DashStyle.Dash:
-                        LineStipple(3, 0xAAAA);
-                        break;
-                    case DashStyle.Dot:
-                        LineStipple(1, 0xAAAA);
-                        break;
-                    default:
-                        break;
-                }
+                SetDashStyle(pen.DashStyle);
             }
 
             Begin(LINE_STRIP);
@@ -379,6 +359,24 @@ namespace Astrarium.Types
         {
             glFlush();
             textureManager.Cleanup();
+        }
+
+        private static void SetDashStyle(DashStyle style)
+        {
+            switch (style)
+            {
+                case DashStyle.Dash:
+                    LineStipple(1, 0x00FF);
+                    break;
+                case DashStyle.Dot:
+                    LineStipple(1, 0xAAAA);
+                    break;
+                case DashStyle.DashDot:
+                    LineStipple(1, 0xFF4F);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
