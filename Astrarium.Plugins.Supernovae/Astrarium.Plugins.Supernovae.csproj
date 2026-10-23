@@ -16,10 +16,6 @@
 		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
 	</PropertyGroup>
 
-	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
-	</Target>
-
 	<ItemGroup>
 		<None Remove="Text.ini" />
 	</ItemGroup>
@@ -37,10 +33,6 @@
 			<Private>false</Private>
 			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 		</ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

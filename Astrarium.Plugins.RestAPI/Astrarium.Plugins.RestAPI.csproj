@@ -17,7 +17,6 @@
 		<PackageReference Include="Microsoft.Owin" Version="4.2.2" />
 		<PackageReference Include="Microsoft.Owin.Hosting" Version="4.2.2" />
 		<PackageReference Include="Microsoft.Owin.StaticFiles" Version="4.2.2" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NSwag.MSBuild" Version="13.20.0" PrivateAssets="All" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
 	</ItemGroup>
@@ -46,10 +45,6 @@
 		<DebugType>None</DebugType>
 		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
 	</PropertyGroup>
-
-	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
-	</Target>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">

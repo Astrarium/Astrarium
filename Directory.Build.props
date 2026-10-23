@@ -9,4 +9,11 @@
 		<InformationalVersion>$(DeploymentVersion)</InformationalVersion>
 		<Copyright>© Alexander Krutov, 2018-$([System.DateTime]::Now.ToString('yyyy'))</Copyright>
   </PropertyGroup>
+
+  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+	<Delete Files="$(OutputPath)Newtonsoft.Json.dll" />
+	<Delete Files="$(OutputPath)System.ValueTuple.dll" />
+    <ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+  </Target>
+
 </Project>

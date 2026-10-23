@@ -17,10 +17,6 @@
 		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
 	</PropertyGroup>
 
-	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
-	</Target>
-
 	<ItemGroup>
 	  <None Remove="Text.ini" />
 	</ItemGroup>
@@ -42,7 +38,6 @@
 
 	<ItemGroup>
 	  <PackageReference Include="EntityFramework" Version="6.4.4" />
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	  <PackageReference Include="SQLite.CodeFirst" Version="1.7.0.34" />
 	  <PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
 	  <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.116" />

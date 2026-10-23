@@ -22,10 +22,6 @@
 		<PackageReference Include="LoggerExtensions" Version="1.0.1" />
 	</ItemGroup>
 
-	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
-	</Target>
-
 	<ItemGroup>
 		<ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
 			<Private>false</Private>

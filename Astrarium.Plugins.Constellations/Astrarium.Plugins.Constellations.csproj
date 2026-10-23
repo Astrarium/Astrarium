@@ -18,16 +18,9 @@
     <OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
   </PropertyGroup>
 
-  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-    <ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
-  </Target>
   <ItemGroup>
     <None Remove="Text.ini" />
     <EmbeddedResource Include="Text.ini" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
