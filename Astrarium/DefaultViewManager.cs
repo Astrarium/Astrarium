@@ -61,8 +61,6 @@ namespace Astrarium
                 viewType = ResolveVVMBindings(typeof(TViewModel));
             }
 
-            bool needDisposeModel = false;
-
             // Handle single-instance window case
 
             if (flags.HasFlag(ViewFlags.SingleInstance) && viewType != null)
@@ -70,13 +68,6 @@ namespace Astrarium
                 var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.GetType() == viewType);
                 if (window != null)
                 {
-                    if (viewModel == null)
-                    {
-                        needDisposeModel = true;
-                        viewModel = CreateViewModel<TViewModel>();
-                    }
-
-                    window.DataContext = viewModel;
                     window.InvalidateVisual();
                     window.Activate();
                     if (window.WindowState == WindowState.Minimized)
@@ -88,9 +79,10 @@ namespace Astrarium
                 }
             }
 
+            bool autoDisposeModel = false;
             if (viewModel == null)
             {
-                needDisposeModel = true;
+                autoDisposeModel = true;
                 viewModel = CreateViewModel<TViewModel>();
             }
          
@@ -134,7 +126,7 @@ namespace Astrarium
                     viewModel.Closing -= viewModelClosingHandler;
                     window.Activated -= activatedEventHandler;
 
-                    if (needDisposeModel)
+                    if (autoDisposeModel)
                     {
                         viewModel.Dispose();
                     }
@@ -406,7 +398,7 @@ namespace Astrarium
             var vm = CreateViewModel<ViewAngleVM>().WithDefaults(viewAngle, min, max, applyImmediately);
             if (applyImmediately)
             {
-                ShowWindow(vm, flags: ViewFlags.TopMost);
+                ShowWindow(vm, flags: ViewFlags.TopMost | ViewFlags.SingleInstance);
                 return null;
             }
             else

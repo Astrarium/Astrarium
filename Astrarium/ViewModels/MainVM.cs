@@ -23,6 +23,8 @@ namespace Astrarium.ViewModels
         private readonly ISettings settings;
         // TODO: make an interface?
         private readonly UIElementsIntegration uiIntegration;
+        private MenuItem menuInfo;
+        private ObservableCollection<MenuItem> contextMenuItems = new ObservableCollection<MenuItem>();
 
         public string MapViewAngleString { get; private set; }
         public string DateString { get; private set; }
@@ -54,11 +56,6 @@ namespace Astrarium.ViewModels
         public Command ExitAppCommand { get; private set; }
         public Command<CelestialObject> QuickSearchCommand { get; private set; }
         public Command SelectedObjectsMenuItemsRootMenuCommand { get; private set; }
-
-        private MenuItem menuInfo;
-
-        private ObservableCollection<MenuItem> objectsListMenuItems = new ObservableCollection<MenuItem>();
-        private ObservableCollection<MenuItem> contextMenuItems = new ObservableCollection<MenuItem>();
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -634,7 +631,7 @@ namespace Astrarium.ViewModels
                         SelectedObjectsMenuItems.Remove(existingItem);
                     }
 
-                    SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
+                    SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body) {  IconKey = $"Icon{body.Type.Split('.').First()}" });
 
                     // 10 items of history + "clear all" + "search" + 2 separators
                     if (SelectedObjectsMenuItems.Count > 14)
@@ -735,6 +732,9 @@ namespace Astrarium.ViewModels
         {
             var objects = map.FindObjects(point);
 
+            map.SelectedObject = null;
+            map.Invalidate();
+
             menuInfo.SubItems.Clear();
             menuInfo.IsEnabled = objects.Any();
 
@@ -746,7 +746,8 @@ namespace Astrarium.ViewModels
                     {
                         Command = GetObjectInfoCommand,
                         CommandParameter = body,
-                        IconKey = $"Icon{body.Type.Split('.').First()}"
+                        IconKey = $"Icon{body.Type.Split('.').First()}",
+                        HotKey = new KeyGesture(Key.N, ModifierKeys.Alt)
                     });
                 }
 
@@ -754,7 +755,6 @@ namespace Astrarium.ViewModels
             }
             else
             {
-
                 ContextMenuItems = contextMenuItems;
                 map.SelectedObject = objects.FirstOrDefault();
                 map.Invalidate();

@@ -2228,7 +2228,17 @@
     <ControlTemplate x:Key="{x:Static MenuItem.TopLevelHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
         <c:BorderFix x:Name="Border" Background="{TemplateBinding Background}" VerticalAlignment="Center">
             <Grid>
-                <ContentPresenter x:Name="ContentPresenter" Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <c:PathIcon Grid.Column="0" x:Name="Icon" Data="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon, Mode=OneWay}" Margin="4 0 2 0" Height="14" Width="14" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False" />
+                    <ContentPresenter Grid.Column="1"  x:Name="ContentPresenter" Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True" />
+
+                </Grid>
+
                 <Popup x:Name="Popup"
                      Placement="Bottom"
                      IsOpen="{TemplateBinding IsSubmenuOpen}"
@@ -2244,6 +2254,9 @@
             </Grid>
         </c:BorderFix>
         <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <Trigger Property="IsSubmenuOpen" Value="True">
                 <Setter TargetName="SubmenuBorder" Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
                 <Setter TargetName="StackPanel" Property="Background" Value="{StaticResource BrushWindowBackground}" />
@@ -2290,7 +2303,7 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
                     <ColumnDefinition Width="13" />
                 </Grid.ColumnDefinitions>
-                <Image x:Name="Icon" Source="{TemplateBinding Icon}" Margin="0 0 10 0" Height="20" Width="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <c:PathIcon x:Name="Icon" Data="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon, Mode=OneWay}" Margin="10 0 10 0" Height="16" Width="16" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False" />
                 <Path x:Name="CheckMark"  
                         Visibility="Hidden"
                         Data="{StaticResource Checkmark}" 
@@ -2353,7 +2366,7 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
                     <ColumnDefinition Width="32" />
                 </Grid.ColumnDefinitions>
-                <Image x:Name="Icon" Source="{TemplateBinding Icon}" Margin="0 0 11 0" Height="20" Width="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <c:PathIcon x:Name="Icon" Data="{Binding Icon}" Margin="10 0 10 0" Height="16" Width="16" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False" />
                 <ContentPresenter x:Name="HeaderHost" Margin="1 0 0 0" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
                 <Path Grid.Column="3" x:Name="Arrow" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" Margin="12,0,0,3" />
                 <Popup 

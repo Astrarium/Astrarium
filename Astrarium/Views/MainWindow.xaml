@@ -170,6 +170,7 @@
                     <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened" StaysOpen="True">
                         <ContextMenu.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="Icon" Value="{Binding IconKey, Converter={a:ImageKeyToImageConverter}}" />
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
@@ -215,11 +216,14 @@
             <Menu>
                 <MenuItem 
                     ItemsSource="{Binding SelectedObjectsMenuItems}" 
+                    Icon="{Binding SelectedObject, Converter={a:CelestialObjectToIconConverter}}"
                     Header="{Binding SelectedObject, Converter={a:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
                     ToolTip="{a:Text StatusBar.SelectedObject}"
                     Command="{Binding SelectedObjectsMenuItemsRootMenuCommand}">
+                                        
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                            <Setter Property="Icon" Value="{Binding IconKey, Converter={a:ImageKeyToImageConverter}}" />
                             <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                             <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                             <Setter Property="Visibility" Value="{Binding IsVisible, Converter={a:BoolToVisibilityConverter}}" />
@@ -244,6 +248,7 @@
                     <!-- Observer location -->
                     <Menu Margin="0 0 20 0" VerticalContentAlignment="Center">
                         <MenuItem 
+                            Icon="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7Zm0 9.5A2.5 2.5 0 0014.5 9 2.5 2.5 0 0012 6.5 2.5 2.5 0 009.5 9 2.5 2.5 0 0012 11.5"
                             ItemsSource="{Binding FavoriteLocationsMenuItems}" 
                             Header="{Binding ObserverLocation, Converter={a:GeoLocationNameConverter}, FallbackValue='Observer Location'}"
                             ToolTip="{a:Text StatusBar.ObserverLocation}">
