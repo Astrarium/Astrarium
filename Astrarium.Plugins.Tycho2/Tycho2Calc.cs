@@ -301,14 +301,6 @@ namespace Astrarium.Plugins.Tycho2
         }
 
         /// <summary>
-        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
-        /// </summary>
-        private PrecessionalElements CalcPrecessionalElements(SkyContext context)
-        {
-            return Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-        }
-
-        /// <summary>
         /// Gets equatorial coordinates of a star for current epoch
         /// </summary>
         private CrdsEquatorial Equatorial(SkyContext context, Tycho2Star star)
@@ -324,13 +316,13 @@ namespace Astrarium.Plugins.Tycho2
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, context.PrecessionElements);
 
             // Nutation effect
-            var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
+            //var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
 
             // Aberration effect
-            var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+            //var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
 
             // Apparent coordinates of the star
-            eq += eqN + eqA;
+            //eq += eqN + eqA;
 
             return eq;
         }
@@ -492,7 +484,7 @@ namespace Astrarium.Plugins.Tycho2
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
             star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
-            star.Equatorial = Equatorial(context, star);
+            star.Equatorial = Equatorial(context, star).RoundToSecondsOfArc();
             return star;
         }
 

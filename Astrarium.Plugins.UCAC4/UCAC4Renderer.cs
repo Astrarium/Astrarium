@@ -4,26 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.UCAC4
 {
-    public class UCAC4Renderer : BaseRenderer
+    public class UCAC4Renderer : CelestialObjectRenderer<UCAC4Star>
     {
         private Font fontNames;
         private readonly UCAC4Catalog catalog;
         private readonly ISettings settings;
-        private readonly ISkyMap map;
-        private readonly List<UCAC4Star> cache = new List<UCAC4Star>();
-        private readonly object locker = new object();
-        private bool isRequested = false;
-        private int requestHash;
 
         public override RendererOrder Order => RendererOrder.Stars;
 
-        public UCAC4Renderer(ISkyMap map, UCAC4Catalog catalog, ISettings settings)
+        public UCAC4Renderer(ISkyMap map, UCAC4Catalog catalog, ISettings settings) : base(map)
         {
-            this.map = map;
             this.catalog = catalog;
             this.settings = settings;
             // TODO: move to settings
@@ -50,6 +43,9 @@ namespace Astrarium.Plugins.UCAC4
                 bool isLabels = settings.Get("StarsLabels") && fov < 1 / 60d;
                 Brush brushNames = new SolidBrush(settings.Get<Color>("ColorStarsLabels").Tint(nightMode));
                 float starsScalingFactor = (float)settings.Get<decimal>("StarsScalingFactor", 1);
+                bool useMagFilter = settings.Get("UCAC4UseMagLimit", true);
+                float magFilter = (float)settings.Get("UCAC4MagLimit", 6.5m);
+                bool hideUnknownMag = settings.Get("UCAC4HideUnknownMag");
 
                 GL.Enable(GL.POINT_SMOOTH);
                 GL.Enable(GL.BLEND);
@@ -59,21 +55,36 @@ namespace Astrarium.Plugins.UCAC4
                 CrdsEquatorial eqCenter = prj.WithoutRefraction(prj.CenterEquatorial);
                 CrdsEquatorial eqCenter0 = Precession.GetEquatorialCoordinates(eqCenter, catalog.PrecessionElements0);
 
-                Func<float, bool> FilterByStarSize = (mag) =>
+                Func<float, bool> filterByStarSize = (mag) =>
                 {
+                    if (mag == 20.0f && hideUnknownMag)
+                        return false;
+
+                    if (mag == 20.0f && !hideUnknownMag)
+                        return magLimit >= 15;
+
                     if (mag > magLimit)
+                        return false;
+
+                    if (useMagFilter && mag < magFilter)
                         return false;
 
                     float size = prj.GetPointSize(mag) * starDimming;
                     return size >= minStarSize;
                 };
 
-                var stars = GetStars(prj.Context, eqCenter0, fov, FilterByStarSize);
+                var stars = GetCelestialObjectsWithCache(prj.Context, eqCenter0, fov, filterByStarSize);
 
                 foreach (var star in stars)
                 {
                     double alt = prj.ToHorizontal(star.Equatorial).Altitude;
                     float size = prj.GetPointSize(star.Magnitude, altitude: alt) * starDimming;
+
+                    if (star.Magnitude == 20.0f && magLimit > 15)
+                    {
+                        size = 1;
+                    }
+
                     if (size < minStarSize) continue;
 
                     var p = prj.Project(star.Equatorial);
@@ -82,7 +93,7 @@ namespace Astrarium.Plugins.UCAC4
                     {
                         float sz = size * starsScalingFactor;
                         GL.PointSize(sz);
-                        GL.Color3(GetColor(star.SpectralClass).Tint(nightMode));
+                        GL.Color3(GetStarColor(star.SpectralClass).Tint(nightMode));
 
                         GL.Begin(GL.POINTS);
                         GL.Vertex2(p.X, p.Y);
@@ -99,74 +110,21 @@ namespace Astrarium.Plugins.UCAC4
             }
         }
 
-        private List<UCAC4Star> GetStars(SkyContext context, CrdsEquatorial eq0, double angle, Func<float, bool> magFilter)
+        protected override IEnumerable<UCAC4Star> GetCelestialObjectsWithoutCache(SkyContext context, CrdsEquatorial eq0, double angle, Func<float, bool> magFilter)
         {
-            _ = Task.Run(() =>
-            {
-                int hash = $"{eq0.Alpha}{eq0.Delta}{angle}{map.Projection.MagLimit}".GetHashCode();
-                if (!isRequested && hash != requestHash)
-                {
-                    requestHash = hash;
-                    isRequested = true;
-                    var stars = catalog.GetStars(context, eq0, angle, magFilter).ToList();
-
-                    lock (locker)
-                    {
-                        cache.Clear();
-                        cache.AddRange(stars);
-                        map.Invalidate();
-                    }
-
-                    isRequested = false;
-                }
-            });
-
-            lock (locker)
-            {
-                return new List<UCAC4Star>(cache);
-            }
+            return catalog.GetStars(context, eq0, angle, magFilter);
         }
 
-        private Color GetColor(char spClass)
+        protected override Color GetStarColor(char spClass)
         {
-            Color starColor;
             if (settings.Get("StarsColors"))
             {
-                switch (spClass)
-                {
-                    case 'O':
-                    case 'W':
-                        starColor = Color.LightBlue;
-                        break;
-                    case 'B':
-                        starColor = Color.LightCyan;
-                        break;
-                    case 'A':
-                        starColor = Color.White;
-                        break;
-                    case 'F':
-                        starColor = Color.LightYellow;
-                        break;
-                    case 'G':
-                        starColor = Color.Yellow;
-                        break;
-                    case 'K':
-                        starColor = Color.Orange;
-                        break;
-                    case 'M':
-                        starColor = Color.OrangeRed;
-                        break;
-                    default:
-                        starColor = Color.White;
-                        break;
-                }
+                return base.GetStarColor(spClass);
             }
             else
             {
-                starColor = Color.White;
+                return Color.White;
             }
-
-            return starColor;
         }
     }
 }

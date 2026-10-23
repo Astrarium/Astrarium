@@ -11,7 +11,8 @@
         <StackPanel Orientation="Vertical" IsEnabled="{Binding Settings.UCAC4}">
             <TextBlock Margin="2 8 2 2" Text="{a:Text Settings.UCAC4.RootDir.Title}" />
             <a:FilePathPicker Caption="{a:Text Settings.UCAC4.RootDir.DialogCaption}" Mode="Directory" SelectedPath="{Binding Settings.UCAC4RootDir}" Validator="{Binding ValidateCatalogPath}" />
-
+            <CheckBox Content="{a:Text Settings.UCAC4.UCAC4InMemoryIndex}" IsChecked="{Binding Settings.UCAC4InMemoryIndex}" Margin="2" />
+            
             <StackPanel Orientation="Vertical" Visibility="{Binding Catalog.IsLoaded, Converter={a:InverseBoolToVisibilityConverter}}">
                 <TextBlock Margin="2 8 2 2" TextWrapping="Wrap" Text="{a:Text Settings.UCAC4.NotFound}" />
                 <StackPanel Orientation="Horizontal">
@@ -25,6 +26,16 @@
                 <Run Text="{Binding Catalog.ZonesCount, Mode=OneWay}" />
                 <Run Text="{a:Text Settings.UCAC4.LoadedZonesFrom900}" />
             </TextBlock>
+
+            <Separator Margin="0 8" />
+
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox IsChecked="{Binding Settings.UCAC4UseMagLimit}" Content="{a:Text Settings.UCAC4.UCAC4UseMagLimit}" VerticalAlignment="Center" Margin="0 0 8 0" />
+                    <a:NumericUpDown Minimum="0" Maximum="18" Step="0.1" Width="60" Value="{Binding Settings.UCAC4MagLimit}" />
+                </StackPanel>
+                <CheckBox IsChecked="{Binding Settings.UCAC4HideUnknownMag}" Content="{a:Text Settings.UCAC4.UCAC4HideUnknownMag}" />
+            </StackPanel>
 
         </StackPanel>
         

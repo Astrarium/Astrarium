@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 
 namespace Astrarium.Plugins.UCAC4
 {

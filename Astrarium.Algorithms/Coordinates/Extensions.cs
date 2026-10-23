@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Astrarium.Algorithms
 {
@@ -373,6 +374,18 @@ namespace Astrarium.Algorithms
             double a = Math.Sin(deltaPhi / 2) * Math.Sin(deltaPhi / 2) + Math.Cos(phi1) * Math.Cos(phi2) * Math.Sin(deltaLambda / 2) * Math.Sin(deltaLambda / 2);
             double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
             return R * c;
+        }
+
+        /// <summary>
+        /// Rounds equatorial coordinates to seconds of arc
+        /// </summary>
+        /// <param name="eq">Initial equatorial coodinates</param>
+        /// <returns>Equatorial coordinates rounded to seconds of arc</returns>
+        public static CrdsEquatorial RoundToSecondsOfArc(this CrdsEquatorial eq)
+        {
+            return new CrdsEquatorial(
+                Math.Floor(eq.Alpha * 3600.0 + 0.5) / 3600.0,
+                Math.Sign(eq.Delta) * Math.Floor(Math.Abs(eq.Delta) * 3600.0 + 0.5) / 3600.0);
         }
     }
 }

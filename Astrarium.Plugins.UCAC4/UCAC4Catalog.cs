@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.UCAC4
         /// <summary>
         /// Flag indicating the catalog data has been found and loaded
         /// </summary>
-        public bool IsLoaded 
+        public bool IsLoaded
         {
             get => GetValue<bool>(nameof(IsLoaded));
             private set
@@ -69,7 +69,7 @@ namespace Astrarium.Plugins.UCAC4
 
         private void Settings_SettingValueChanged(string settingName, object settingValue, object oldValue)
         {
-            if (isInitialized && settingName == "UCAC4RootDir")
+            if (isInitialized && (settingName == "UCAC4RootDir" || settingName == "UCAC4InMemoryIndex"))
             {
                 Initialize();
             }
@@ -126,8 +126,19 @@ namespace Astrarium.Plugins.UCAC4
             return true;
         }
 
+        private MemoryStream indexMemoryStream = null;
+
         public override void Initialize()
         {
+            if (indexMemoryStream != null && indexMemoryStream.CanRead)
+            {
+                indexMemoryStream.Close();
+                indexMemoryStream.Dispose();
+                GC.Collect();
+            }
+
+            bool inMemoryIndex = settings.Get("UCAC4InMemoryIndex", false); 
+
             try
             {
                 string rootDir = settings.Get<string>("UCAC4RootDir", null);
@@ -139,7 +150,20 @@ namespace Astrarium.Plugins.UCAC4
 
                     try
                     {
-                        indexReader = new BinaryReader(File.Open(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                        if (inMemoryIndex)
+                        {
+                            using (var fs = File.Open(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            {
+                                indexMemoryStream = new MemoryStream((int)fs.Length);
+                                fs.CopyTo(indexMemoryStream);
+                                indexMemoryStream.Position = 0;
+                                indexReader = new BinaryReader(indexMemoryStream);
+                            }
+                        }
+                        else
+                        {
+                            indexReader = new BinaryReader(File.Open(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -405,7 +429,7 @@ namespace Astrarium.Plugins.UCAC4
         private UCAC4Star ReadStar(SkyContext context, byte[] starsData, int offset, int zn, int starIndex, Func<float, bool> magFilter)
         {
             float mag = BitConverter.ToInt16(starsData, 8 + offset) / 1000.0f;
-            
+
             if (magFilter(mag))
             {
                 float bmag = BitConverter.ToInt16(starsData, 46 + offset) / 1000.0f;
@@ -421,9 +445,9 @@ namespace Astrarium.Plugins.UCAC4
                     RunningNumber = (uint)(starIndex + 1),
                     Magnitude = mag,
                     SpectralClass = SpectralClass(bmag, vmag),
-                    Equatorial = Equatorial(context, posData),
+                    Equatorial = Equatorial(context, posData).RoundToSecondsOfArc(),
                     ProperName = properNames.ContainsKey(catName) ? properNames[catName] : null
-                };
+                };;
             }
             else
             {
@@ -551,13 +575,13 @@ namespace Astrarium.Plugins.UCAC4
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, context.PrecessionElements);
 
             // Nutation effect
-            var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
+            //var eqN = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
 
             // Aberration effect
-            var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+            //var eqA = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
 
             // Apparent coordinates of the star
-            eq += eqN + eqA;
+            //eq += eqN + eqA;
 
             return eq;
         }
@@ -673,14 +697,22 @@ namespace Astrarium.Plugins.UCAC4
                     {
                         for (int i = 0; i < Math.Min(maxCount, starsInBin); i++)
                         {
-                            stars.Add(ReadStarAtPosition(context, zone, i + 1));
+                            var star = ReadStarAtPosition(context, zone, i + 1);
+                            if (star != null)
+                            {
+                                stars.Add(star);
+                            }
                         }
                     }
                     else if (number <= starsInBin)
                     {
                         if (number > 0)
                         {
-                            stars.Add(ReadStarAtPosition(context, zone, (int)number.Value));
+                            var star = ReadStarAtPosition(context, zone, (int)number.Value);
+                            if (star != null)
+                            {
+                                stars.Add(star);
+                            }
                         }
 
                         for (int i = 0; i < maxCount - 1; i++)
@@ -693,7 +725,11 @@ namespace Astrarium.Plugins.UCAC4
                             {
                                 if (n > 0)
                                 {
-                                    stars.Add(ReadStarAtPosition(context, zone, (int)n));
+                                    var star = ReadStarAtPosition(context, zone, (int)n);
+                                    if (star != null)
+                                    {
+                                        stars.Add(star);
+                                    }
                                 }
                             }
                             else
