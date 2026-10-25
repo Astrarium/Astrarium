@@ -292,6 +292,11 @@ namespace Astrarium.Plugins.Hipparcos
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
+                .Select(s =>
+                {
+                    s.Equatorial = Equatorial(context, (s as Star).Index);
+                    return s;
+                })
                 .ToList();
         }
 
