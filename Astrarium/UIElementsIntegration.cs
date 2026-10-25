@@ -77,6 +77,9 @@ namespace Astrarium
             // Auto lock map
             SettingDefinitions.Add(new SettingDefinition("AutoLock", false));
 
+            // Scaling factor
+            SettingDefinitions.Add(new SettingDefinition("StarsScalingFactor", 1m));
+
             // Limiting magnitude
             SettingDefinitions.Add(new SettingDefinition("LimitMagnitude", false));
             SettingDefinitions.Add(new SettingDefinition("LimitingMagnitude", 15m));

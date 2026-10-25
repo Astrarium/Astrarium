@@ -112,6 +112,19 @@ namespace Astrarium.Types
         }
 
         /// <summary>
+        /// Invalidates cache
+        /// </summary>
+        protected void InvalidateCache()
+        {
+            lock (locker)
+            {
+                hash.Clear();
+                cache = Enumerable.Empty<T>();
+            }
+            map.Invalidate();
+        }
+
+        /// <summary>
         /// Gets star color by its spectral class.
         /// </summary>
         /// <param name="spClass">Spectral class</param>
@@ -168,6 +181,16 @@ namespace Astrarium.Types
             /// Current magnitude limit
             /// </summary>
             private float magLimit;
+
+            /// <summary>
+            /// Clears the hash
+            /// </summary>
+            public void Clear()
+            {
+                center = null;
+                fov = 0;
+                magLimit = 0;
+            }
 
             /// <summary>
             /// Returns true if hash has significant difference with provided params

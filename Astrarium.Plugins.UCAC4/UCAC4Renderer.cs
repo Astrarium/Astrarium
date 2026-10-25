@@ -12,15 +12,27 @@ namespace Astrarium.Plugins.UCAC4
         private Font fontNames;
         private readonly UCAC4Catalog catalog;
         private readonly ISettings settings;
+        private readonly ISkyMap map;
 
         public override RendererOrder Order => RendererOrder.Stars;
 
         public UCAC4Renderer(ISkyMap map, UCAC4Catalog catalog, ISettings settings) : base(map)
         {
+            this.map = map;
             this.catalog = catalog;
             this.settings = settings;
             // TODO: move to settings
             fontNames = new Font("Arial", 7);
+
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object newValue, object oldValue)
+        {
+            if (settingName.StartsWith("UCAC4"))
+            {
+                InvalidateCache();
+            }
         }
 
         public override void Render(ISkyMap map)
