@@ -159,8 +159,8 @@ namespace Astrarium.Plugins.Constellations
                 {
                     line = sr.ReadLine();
                     chunks = line.Split(',');
-                    from = Convert.ToInt32(chunks[0]) - 1;
-                    to = Convert.ToInt32(chunks[1]) - 1;
+                    from = Convert.ToInt32(chunks[0]);
+                    to = Convert.ToInt32(chunks[1]);
 
                     lines.Add(new Tuple<int, int>(from, to));
                 }

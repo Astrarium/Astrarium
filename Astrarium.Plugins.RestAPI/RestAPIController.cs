@@ -42,15 +42,17 @@ namespace Astrarium.Plugins.RestAPI
         /// <br/>Multiple types can be specified.</param>
 
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
 
         /// <returns>Successful search. Returns a list of found objects.</returns>
 
@@ -65,15 +67,17 @@ namespace Astrarium.Plugins.RestAPI
         /// </remarks>
 
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
 
         /// <returns>Current selected object</returns>
 
@@ -100,15 +104,17 @@ namespace Astrarium.Plugins.RestAPI
         /// </remarks>
 
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
 
         /// <returns>Current map center coordinates</returns>
 
@@ -123,15 +129,17 @@ namespace Astrarium.Plugins.RestAPI
         /// </remarks>
 
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
 
         /// <returns>Center coordinates successfully updated</returns>
 
@@ -296,15 +304,17 @@ namespace Astrarium.Plugins.RestAPI
         /// <param name="type">Filter objects by types. If not specified, all types are returned.
         /// <br/>Multiple types can be specified.</param>
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
         /// <returns>Successful search. Returns a list of found objects.</returns>
         [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/search")]
         public System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CelestialObject>> Search([System.Web.Http.FromUri] string name, [System.Web.Http.FromUri] int? limit = null, [System.Web.Http.FromUri] System.Collections.Generic.IEnumerable<string> type = null, [FromHeader] string epoch = null)
@@ -320,15 +330,17 @@ namespace Astrarium.Plugins.RestAPI
         /// Returns current selected object, if available.
         /// </remarks>
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
         /// <returns>Current selected object</returns>
         [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/selected-object")]
         public System.Threading.Tasks.Task<CelestialObject> SelectedObjectGET([FromHeader] string epoch = null)
@@ -358,15 +370,17 @@ namespace Astrarium.Plugins.RestAPI
         /// Returns the current equatorial coordinates of the star map center.
         /// </remarks>
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
         /// <returns>Current map center coordinates</returns>
         [System.Web.Http.HttpGet, System.Web.Http.Route("api/map/center")]
         public System.Threading.Tasks.Task<Coordinates> CenterGET([FromHeader] string epoch = null)
@@ -382,15 +396,17 @@ namespace Astrarium.Plugins.RestAPI
         /// Sets the equatorial coordinates of the star map center.
         /// </remarks>
         /// <param name="epoch">Optional epoch of equatorial coordinates. Allowed values are
-        /// <br/>- J2050
-        /// <br/>- J2000
-        /// <br/>- J1975
-        /// <br/>- J1950
-        /// <br/>- J1900
-        /// <br/>- B1950
-        /// <br/>- B1900
-        /// <br/>- B1875
-        /// <br/>- any numeric value representing valid Julian Date</param>
+        /// <br/>  - J2050
+        /// <br/>  - J2000
+        /// <br/>  - J1975
+        /// <br/>  - J1950
+        /// <br/>  - J1900
+        /// <br/>  - B1950
+        /// <br/>  - B1900
+        /// <br/>  - B1875
+        /// <br/>  - any numeric value representing valid Julian Date
+        /// <br/>
+        /// <br/>If not specified, current epoch of date is used.</param>
         /// <returns>Center coordinates successfully updated</returns>
         [System.Web.Http.HttpPost, System.Web.Http.Route("api/map/center")]
         public System.Threading.Tasks.Task CenterPOST([System.Web.Http.FromBody] Coordinates body, [FromHeader] string epoch = null)

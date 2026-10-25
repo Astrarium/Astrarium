@@ -90,7 +90,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ninject" Version="3.3.6" />
   </ItemGroup>
       
@@ -110,11 +109,11 @@
 	  <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
 	  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 	</ProjectReference>
-    <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj">
+	<ProjectReference Include="..\Astrarium.Plugins.Hipparcos\Astrarium.Plugins.Hipparcos.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+	</ProjectReference>	  
     <ProjectReference Include="..\Astrarium.Plugins.Constellations\Astrarium.Plugins.Constellations.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <Private>false</Private>

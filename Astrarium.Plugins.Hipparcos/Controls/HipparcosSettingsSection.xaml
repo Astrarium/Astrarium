@@ -1,5 +1,5 @@
 ﻿<a:SettingsSection 
-    x:Class="Astrarium.Plugins.BrightStars.Controls.BrightStarsSettingsSection"
+    x:Class="Astrarium.Plugins.Hipparcos.Controls.HipparcosSettingsSection"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -23,5 +23,9 @@
             </CheckBox.IsEnabled>
         </CheckBox>
         <CheckBox Content="{a:Text Settings.StarsColors}" IsChecked="{Binding Settings.StarsColors}" IsEnabled="{Binding Settings.Stars}" Margin="2" />
+
+        <CheckBox Content="{a:Text Settings.StarsMarkMultiples}" IsChecked="{Binding Settings.StarsMarkMultiples}" IsEnabled="{Binding Settings.Stars}" Margin="2" />
+        <CheckBox Content="{a:Text Settings.StarsMarkVariables}" IsChecked="{Binding Settings.StarsMarkVariables}" IsEnabled="{Binding Settings.Stars}" Margin="2" />
+
     </StackPanel>
 </a:SettingsSection>

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Astrarium.Plugins.BrightStars
+namespace Astrarium.Plugins.Hipparcos
 {
     public interface IStarsReader
     {
-        StarDetails GetStarDetails(ushort hrNumber);
         Dictionary<string, string> ReadAlphabet();
         ICollection<Star> ReadStars();
+        ICollection<Region> ReadIndex();
     }
 }
